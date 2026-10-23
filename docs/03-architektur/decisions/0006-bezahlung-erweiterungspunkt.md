@@ -1,6 +1,6 @@
 # ADR-0006: Bezahlung als späteres Modul hinter einem PaymentPort
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
 - **Datum:** 2026-10-20
 - **Bezug:** REQ-ARCH-001/002, EPIC-09, QS-5
 
@@ -34,6 +34,9 @@ stateDiagram-v2
     Refunded --> [*]
     Failed --> [*]
 ```
+
+## Verteilung der Domain Events (Nachtrag nach Architektur-Review A-23)
+Domain Events (`DealAgreed`, `DealCompleted`, `DealCancelled`) werden per pg-boss **publish/subscribe** verteilt: Jeder Konsument hat eine eigene Queue und erhält eine Kopie. So kommt das Modul `payments` später additiv als weiterer Abonnent hinzu, ohne Änderung in `messaging` (QS-5). Umsetzung: Backlog B-40.
 
 ## Konsequenzen
 - (+) Das MVP enthält keinen toten Code für Zahlungen, nur fachlich sinnvolle Vorleistungen (Deal).

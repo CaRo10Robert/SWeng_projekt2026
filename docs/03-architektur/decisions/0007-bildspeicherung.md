@@ -1,6 +1,7 @@
 # ADR-0007: Bilder auf einem Docker-Volume hinter einem StoragePort
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
+- **Teilweise präzisiert durch:** [ADR-0011](0011-mvp-umsetzung.md) Nr. 5 (HEIC → REQ-LST-012, R2); Umsetzung: `StoragePort` mit `put/get/delete/deletePrefix/listOlderThan`, Auslieferung `GET /api/v1/media/{id}/{size}`, drei Größen (sm, md, lg)
 - **Datum:** 2026-10-20 (überarbeitet für ADR-0010)
 - **Bezug:** REQ-LST-003, REQ-SEC-007
 

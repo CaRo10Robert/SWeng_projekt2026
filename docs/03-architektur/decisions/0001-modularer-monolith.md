@@ -1,6 +1,6 @@
 # ADR-0001: Modularer Monolith statt Microservices
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
 - **Datum:** 2026-10-20
 - **Entscheider:** Projektteam (Review durch Betreuer/in)
 

@@ -1,6 +1,6 @@
 # ADR-0012: C4-Modell als Notation der Architektur, als Mermaid-C4-Diagramme
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
 - **Datum:** 2026-10-23
 - **Bezug:** Guideline Kap. 02 (Documenting architecture), Kap. 12 (Docs-as-Code); architektur.md §3, §5, §7
 
@@ -12,7 +12,7 @@ Die Architekturdokumentation folgt arc42. Bisher waren Kontext-, Container- und 
 |---|---|---|
 | **A: Mermaid-C4 (`C4Context`, `C4Container`, `C4Component`, `C4Deployment`) im Markdown** | Wird von GitHub und VS Code direkt gerendert; Diagramm steht neben dem Text; im Pull Request diffbar; mit mermaid-cli in CI prüfbar | C4-Unterstützung in Mermaid ist als experimentell gekennzeichnet; Layout nur begrenzt steuerbar |
 | B: Structurizr DSL (ein Modell, mehrere Sichten) | Ein Modell für alle Ebenen, konsistente Elemente | Kein Rendering auf GitHub; zusätzliches Werkzeug (Structurizr Lite/CLI) für Prüfer/innen |
-| C: PlantUML mit C4-PlantUML | Ausgereifte Bibliothek, gutes Layout | Kein natives Rendering auf GitHub; Abhängigkeit zur PlantUML-Standardbibliothek im Netz |
+| C: PlantUML mit C4-PlantUML | Ausgereifte Bibliothek, gutes Layout | Kein natives Rendering auf GitHub; Projektregel: PlantUML nur für UML-Use-Case-Diagramme (CLAUDE.md). C4-PlantUML selbst wäre offline nutzbar |
 | D: Weiter Flussdiagramme im C4-Stil | Kein Aufwand | Elementtypen nicht formal, Ebenen leicht vermischt |
 
 ## Entscheidung
@@ -22,7 +22,7 @@ Die Architekturdokumentation folgt arc42. Bisher waren Kontext-, Container- und 
 3. Zu jedem Diagramm gehört eine Elementtabelle (Name, Technologie, Verantwortung, Anforderungen bzw. ADR).
 4. Dichte Komponentensichten werden in mehrere Diagramme derselben Ebene geteilt und mit Boundaries („Schicht“) gegliedert, damit Linien nicht durch Elemente laufen.
 5. Laufzeitsichten bleiben UML-Sequenzdiagramme (C4 schreibt dafür keine Notation vor); sie verwenden die Element-Namen aus den C4-Sichten.
-6. Alle Mermaid-Diagramme werden mit `node scripts/check-diagrams.mjs` gerendert; ein Syntaxfehler lässt den Lauf fehlschlagen (Guideline Kap. 12).
+6. Alle Mermaid-Diagramme werden mit `node scripts/check-diagrams.mjs` gerendert; ein Syntaxfehler lässt den Lauf fehlschlagen (Guideline Kap. 12). Lokal vor jedem Commit an der Doku; in CI, sobald die Pipeline eingerichtet ist (B-07).
 
 ## Konsequenzen
 - (+) Prüfbare, auf GitHub lesbare C4-Sichten ohne zusätzliche Werkzeuge für Leser.

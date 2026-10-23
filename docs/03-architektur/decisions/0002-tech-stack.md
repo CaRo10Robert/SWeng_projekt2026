@@ -1,6 +1,7 @@
 # ADR-0002: Tech-Stack (TypeScript durchgängig, schlank für das Docker-Beispiel)
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
+- **Teilweise präzisiert durch:** [ADR-0011](0011-mvp-umsetzung.md) Nr. 1 (SQL ohne ORM statt Drizzle), Nr. 3 (E-Mail-Templates ohne MJML), Nr. 6 (keine eigene UI-Bibliothek)
 - **Datum:** 2026-10-20 (überarbeitet für ADR-0010)
 
 ## Kontext

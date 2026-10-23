@@ -34,8 +34,8 @@ Folgen für andere Entscheidungen (die ADRs sind noch *Proposed* und wurden dire
 - **Jede wegfallende Infrastruktur steckt hinter einem Port.** Ein späterer Produktivbetrieb tauscht Adapter aus, nicht Fachlogik.
 
 ## Konsequenzen
-- (+) `docker compose up` startet alles in < 1 Minute, ohne externe Konten oder Schlüssel. Das System läuft offline.
+- (+) Nach dem Image-Build startet `docker compose up` bis zum Login mit Demo-Konto in ≤ 3 min, ohne externe Konten oder Schlüssel (REQ-OPS-003, QS-9). Das System läuft offline.
 - (+) Alle Use Cases inkl. Registrierung mit `@studmail.hwg-lu.de` sind vorführbar, die Verifikationsmail erscheint in Mailpit.
 - (−) Verfügbarkeits-SLOs, RTO/RPO, Monitoring-Alarme und SPF/DKIM sind für das Beispiel **nicht anwendbar** und werden explizit als N/A markiert (Guideline: N/A nicht stillschweigend weglassen).
 - (−) Skalierungsaspekte (mehrere Instanzen) werden nur konzeptionell gezeigt, nicht betrieben.
-- **Offene Bestätigung (Q-11):** Ist „ein Docker-Container“ wörtlich gemeint (dann Option C mit dokumentierter Guideline-Ausnahme) oder als „ein Docker-Setup“?
+- **Q-11 beantwortet** ([ADR-0011](0011-mvp-umsetzung.md), [Entscheidungslog](../../02-anforderungen/05-entscheidungen.md)): ein Docker-Setup mit drei Diensten (Option B).

@@ -1,6 +1,6 @@
 # ADR-0004: Chat über WebSocket, PostgreSQL als Quelle der Wahrheit, Fan-out hinter einem Port
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
 - **Datum:** 2026-10-20 (überarbeitet für ADR-0010)
 - **Bezug:** REQ-CHAT-*, REQ-PERF-002, QS-4
 

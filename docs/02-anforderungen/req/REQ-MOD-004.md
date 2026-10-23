@@ -6,14 +6,14 @@ class: functional
 status: approved
 owner: team-vertrauen
 risk: medium
-release: R1
+release: R2
 moscow: S
 kano: basis
 epic: EPIC-06
 source: BG-1
 use_cases: [UC-30]
 depends_on: [REQ-MOD-001]
-version: 1.2
+version: 1.3
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-MOD-004]
@@ -51,3 +51,4 @@ Mehrfachmeldungen desselben Mitglieds zählen einmal; Systemmeldungen (Wortfilte
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: Status nach Review |
+| 1.3 | 2026-10-23 | Sprintplanung nach Architektur-Review: Ausblenden für Nachrichten und Profile in R2 verschoben (Backlog B-15); für Anzeigen bereits umgesetzt |
