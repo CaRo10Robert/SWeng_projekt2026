@@ -1,0 +1,63 @@
+# CampusMarkt HWG LU – lokales Docker-Beispiel (ADR-0010)
+#   docker compose up --build   → App http://localhost:8080, E-Mails http://localhost:8025
+#   docker compose down -v      → alle Daten löschen
+name: campusmarkt
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: campusmarkt:local
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      APP_MODE: all
+      DATABASE_URL: postgres://campusmarkt:campusmarkt@db:5432/campusmarkt
+      PUBLIC_URL: http://localhost:${APP_PORT:-8080}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: CampusMarkt HWG LU <no-reply@campusmarkt.local>
+      SEED_DEMO: ${SEED_DEMO:-true}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - uploads:/data/uploads
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    stop_grace_period: 30s
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: campusmarkt
+      POSTGRES_PASSWORD: campusmarkt
+      POSTGRES_DB: campusmarkt
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campusmarkt -d campusmarkt"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:

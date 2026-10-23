@@ -1,0 +1,22 @@
+{
+  "name": "campusmarkt",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CampusMarkt HWG LU – Tausch- und Verkaufsplattform (MVP, Docker-Beispiel)",
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint:deps": "pnpm --filter @campusmarkt/server lint:deps",
+    "openapi": "pnpm --filter @campusmarkt/server openapi"
+  },
+  "devDependencies": {
+    "turbo": "2.11.10",
+    "typescript": "5.9.3"
+  }
+}
