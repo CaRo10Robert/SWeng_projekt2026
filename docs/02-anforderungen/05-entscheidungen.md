@@ -1,0 +1,29 @@
+---
+id: DECISION-LOG
+type: decision-log
+status: in-review
+owner: product-owner
+version: 1.0
+created: 2026-10-23
+last_updated: 2026-10-23
+---
+
+# Entscheidungslog (fachliche Fragen)
+
+Fachliche Entscheidungen, die keine Architekturentscheidung (ADR) sind. Architekturrelevante Entscheidungen verweisen auf ihr ADR. Status: **vorläufig** = vom Team getroffen, damit die Arbeit weitergehen kann; Bestätigung durch den genannten Entscheider steht aus. **bestätigt** = vom Entscheider bestätigt.
+
+| ID | Frage | Entscheidung | Begründung | Entscheider | Status | Wirkt auf |
+|---|---|---|---|---|---|---|
+| Q-1 | Was dürfen Gäste sehen? | Nichts außer Start- und Anmeldeseite. Die Vorschau (REQ-LST-009, Could) zeigt Titel und Preis **ohne Bild**. | Bilder bleiben ausschließlich Mitgliedern vorbehalten (REQ-SEC-007), kein Widerspruch zwischen beiden Anforderungen. | Product Owner | vorläufig | REQ-LST-009, REQ-SEC-007 |
+| Q-2 | Funktionspostfächer und `+`-Adressen | Funktionspostfächer sind zugelassen, wenn ihre Domain auf der Whitelist steht. `+`-Suffixe bleiben erlaubt und werden nur für die Eindeutigkeit entfernt. Mails gehen an die **eingegebene** Adresse; bei der Kontaktfreigabe wird ebenfalls die eingegebene Adresse gezeigt. Klärung mit dem RZ, ob Plus-Adressierung zugestellt wird, in Spike S-01. | Ablehnen würde legitime Adressen ausschließen; die Eindeutigkeit verhindert Mehrfachkonten. | Product Owner mit RZ | vorläufig | REQ-AUTH-001, REQ-CHAT-010 |
+| Q-4 | Eskalationsweg bei Verdacht auf Straftat | Außerhalb des Systems; im Docker-Beispiel N/A → EPIC-12. | Kein Echtbetrieb. | Product Owner mit Hochschule | vorläufig | UC-32 |
+| Q-7 | Aufbewahrungsfrist Chats | 12 Monate nach der letzten Nachricht der Konversation. | Ausreichend für Rückfragen und Moderation; Datenminimierung. | Product Owner mit DSB | vorläufig | REQ-PRIV-003 |
+| Q-11 | „Ein Docker-Container“ wörtlich? | Nein: ein selbst gebautes Image plus `db` und `mailpit` in einem Compose-Setup. | ADR-0010 (Accepted), ADR-0011. | Auftraggeber | vorläufig | REQ-ARCH-005 |
+| Q-12 | Was heißt „Anmeldung über die Hochschulkennung“ (Fallstudie FS-C3)? | **Option C:** Im Docker-Beispiel ist die verifizierte Hochschuladresse die Kennung; die Anmeldung ist hinter einer Schnittstelle gekapselt, sodass ein SSO-Verfahren der Hochschule ohne Umbau ergänzt werden kann. Das ist eine **dokumentierte Abweichung** von FS-C3. | Offline-Vorgabe (ADR-0010); echtes SSO braucht das Rechenzentrum. | Product Owner + Dozent/in | vorläufig, **mit Dozent/in abzustimmen** | REQ-AUTH-009, C-03, [ADR-0013](../03-architektur/decisions/0013-anmeldung-identity-provider-port.md) |
+| Q-13 | Was passiert mit unbestätigten Konten? | Unbestätigte Konten werden **7 Tage** nach der Registrierung gelöscht. Innerhalb dieser Frist kann der Link erneut angefordert werden; danach ist eine neue Registrierung möglich. | 24 h (UC-01 alt) ist zu knapp, wenn Mails verzögert ankommen; unbegrenztes Aufbewahren widerspricht der Datenminimierung. | Product Owner | vorläufig | REQ-AUTH-002, REQ-PRIV-003, UC-01 |
+| Q-14 | Re-Verifikation, HEIC, Profilbild in R1? | Alle drei in **R2**. HEIC und Profilbild werden als eigene Anforderungen abgespalten (REQ-LST-012, REQ-ACC-004), damit REQ-LST-003 und REQ-ACC-001 als Must vollständig prüfbar sind. Die Re-Verifikationsmail gehört zu REQ-AUTH-007. | Teamkapazität; der Kern von R1 ist ohne sie vollständig. | Product Owner | vorläufig | REQ-AUTH-007, REQ-LST-003, REQ-LST-012, REQ-ACC-001, REQ-ACC-004, REQ-NOTI-001 |
+| Q-15 | Befristete Sperren und Widerspruch im System? | Nein. R1 kennt nur die dauerhafte Sperre; Aufhebung und Widerspruch laufen außerhalb des Systems per E-Mail an die Moderation. | Seltene Fälle; ein eigener Ablauf lohnt im Beispiel nicht. | Product Owner | vorläufig | REQ-MOD-002, REQ-MOD-003, UC-32, UC-33 |
+| Q-16 | Malware-Prüfung von Uploads? | Won't in R1. Schutz durch Formatprüfung und Neukodierung der Bilder (REQ-SEC-007); ein Virenscanner wäre ein vierter Dienst (Konflikt mit REQ-ARCH-005). | Neu kodierte Bilder enthalten keine ausführbaren Inhalte. | Product Owner + architecture-lead | vorläufig | UC-10, REQ-SEC-007 |
+| Q-17 | Deal-Kern als eigene Anforderung? | Ja: REQ-CHAT-011 „Reservierung und Abgabe für eine Person“ (Must, inkl. Ereignisse für spätere Bezahlung). REQ-CHAT-009 bleibt der Preisvorschlag (Could). | Must darf nicht an Could hängen (Guideline, MoSCoW-Governance). | Product Owner + architecture-lead | vorläufig | REQ-CHAT-009, REQ-CHAT-011, REQ-ARCH-001, REQ-LST-007 |
+| Q-18 | Rate-Limit-Schlüssel und Campus-NAT | Anmeldung: 5 Fehlversuche je (Konto, IP) in 15 min → Wartezeit, **keine** Kontosperre. Registrierung: 3 je Adresse und Stunde **und** 30 je IP und Stunde (statt 5 je IP). | Verhindert Aussperren fremder Konten; viele Studierende teilen sich im Campus-WLAN eine öffentliche IP. | security-lead | vorläufig | REQ-SEC-005, UC-01, UC-02 |
+| Q-19 | Auslieferung über eine Container-Registry? | Optional. Abgabe als Quellcode mit lokalem Build (`docker compose up --build`); zusätzlich kann ein `docker save`-Archiv beigelegt werden. | Offline-Vorgabe, keine externen Konten (C-06). | Auftraggeber | vorläufig | REQ-OPS-004 |

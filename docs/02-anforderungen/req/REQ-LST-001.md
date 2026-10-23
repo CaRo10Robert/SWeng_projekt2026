@@ -8,12 +8,13 @@ owner: team-marktplatz
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: basis
 epic: EPIC-02
 source: BG-2
 use_cases: [UC-10]
 depends_on: [REQ-LST-002, REQ-LST-003, REQ-LST-004, REQ-SEC-011]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-LST-001, MAN-LST-001]
@@ -26,6 +27,8 @@ Als Mitglied möchte ich ein **Angebot oder Gesuch** mit Titel, Beschreibung, Ka
 
 ## Begründung
 Eine niedrige Einstiegshürde ist das wichtigste Mittel gegen fehlende kritische Masse (BG-2). Die Anzeige ist das zentrale Objekt des Marktplatzes.
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar).
 
 ## Akzeptanzkriterien
 ```gherkin
@@ -79,3 +82,4 @@ I: Bilder separat (REQ-LST-003) · N: Feldumfang verhandelbar · V: Kernnutzen �
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien und Feldgrenzen ergänzt |
+| 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |

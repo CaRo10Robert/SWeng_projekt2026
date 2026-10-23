@@ -101,10 +101,12 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 4a | [Nachweiskatalog](docs/02-anforderungen/nachweise.md) | Tests, manuelle Prüfungen und Kontrollen je Anforderung | Reference |
 | 5 | [Product Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, Backlog mit Kano, Risiko, Story Points, WSJF; Sprint-Plan | Reference |
 | 5a | [Vorgehen](docs/02-anforderungen/04-vorgehen.md) | Scrum, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management | Explanation |
+| 5b | [Entscheidungslog](docs/02-anforderungen/05-entscheidungen.md) | Fachliche Entscheidungen Q-1 … Q-19 (vorläufig, zu bestätigen) | Reference |
 | 6 | [Architekturdokumentation (arc42)](docs/03-architektur/architektur.md) | Kontext, C4-Container und -Komponenten, Laufzeitsicht, Verteilung, Konzepte | Explanation |
 | 7 | [Architekturentscheidungen (ADRs)](docs/03-architektur/decisions/) | Eine Datei pro Entscheidung | Explanation |
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
-| 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | Anforderung → Umsetzung → Nachweis, offene Punkte | Reference |
+| 8a | [Requirements-Review v0.2](docs/04-review/review-v0.2-anforderungen.md) | 32 Befunde zu den Anforderungen und ihre Behebung | – |
+| 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | abgelöst durch den generierten Katalog-Index | – |
 
 ## Änderungshistorie
 

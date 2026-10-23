@@ -3,18 +3,19 @@ id: REQ-ACC-002
 title: Konto löschen mit Karenzzeit
 type: user-story
 class: functional
-status: in-review
+status: approved
 owner: team-produkt
 risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-07
 source: DSGVO Art. 17, BG-4
 use_cases: [UC-05]
 depends_on: [REQ-PRIV-003]
-version: 2.0
+version: 3.0
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-ACC-002, AT-ACC-002-2]
@@ -45,7 +46,8 @@ Szenario: Endgültige Löschung
   Angenommen die Löschung wurde vor mehr als 14 Tagen beantragt
   Wenn der tägliche Löschlauf ausgeführt wird
   Dann sind Profil, Anzeigen, Bilder, Merkliste und Blockierungen gelöscht
-  Und in fremden Konversationen erscheine ich als "Ehemaliges Mitglied" ohne Nachrichtentexte
+  Und meine eigenen Nachrichtentexte sind gelöscht
+  Und die Konversationen bleiben für mein Gegenüber erhalten, mit dessen eigenen Nachrichten und mir als "Ehemaliges Mitglied"
   Und ich erhalte eine Löschbestätigung
 ```
 
@@ -62,7 +64,7 @@ I: unabhängig · N: Karenzdauer verhandelbar · V: Rechtspflicht · E: mittel �
 ## Nachweis
 - `AT-ACC-002`: Smoke-Test – Löschung beantragen, Anmeldung bricht ab.
 - `AT-ACC-002-2`: Integrationstest – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen.
-- Hinweis: Die Umsetzung löscht bisher ganze Konversationen inklusive der Nachrichten des Gegenübers; Sollverhalten ist die Anonymisierung (UC-05). Daher Status `in-review`.
+- `AT-ACC-002-2` ist neu; ebenso die Anpassung der Umsetzung: Sie löscht bisher ganze Konversationen inklusive der Nachrichten des Gegenübers. Soll ist das Löschen nur der eigenen Nachrichtentexte (UC-05, REQ-PRIV-003). Die Korrektur steht im Backlog; bis dahin bleibt der Status `approved`.
 
 
 ## Änderungshistorie
@@ -70,3 +72,4 @@ I: unabhängig · N: Karenzdauer verhandelbar · V: Rechtspflicht · E: mittel �
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Sollverhalten für fremde Konversationen präzisiert (Anonymisierung statt Löschung, UC-05) |
+| 3.0 | 2026-10-23 | Review v0.2: R-13 (nur eigene Nachrichtentexte löschen, Gegenüber behält Konversation), R-15, R-16 |

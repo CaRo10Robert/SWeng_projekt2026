@@ -12,7 +12,7 @@ kano: n/a
 epic: EPIC-02
 source: Abuse-Schutz
 use_cases: [UC-10]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-LST-011]
@@ -35,10 +35,11 @@ Schutz vor Spam und gewerblicher Nutzung; Privatpersonen am Campus erreichen das
 | 29, zwei gleichzeitige Anlagen | genau eine erfolgreich |
 
 ## Nachweis
-- `AT-LST-011`: API-Test – 31. Anzeige wird abgelehnt, auch bei gleichzeitigen Anfragen (neu zu schreiben).
+- `AT-LST-011`: API-Test – 31. Anzeige wird abgelehnt, auch bei gleichzeitigen Anfragen (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, gezählte Status und Nebenläufigkeit präzisiert |
+| 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |

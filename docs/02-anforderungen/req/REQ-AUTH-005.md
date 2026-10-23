@@ -8,12 +8,13 @@ owner: team-identity
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: basis
 epic: EPIC-01
 source: BG-1
 use_cases: [UC-02]
 depends_on: [REQ-AUTH-002]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-AUTH-005, AT-AUTH-005-2]
@@ -48,7 +49,7 @@ Szenario: Abmelden
 ## Fehler- und Missbrauchsfälle
 | Fall | Verhalten |
 |---|---|
-| Brute Force | 5 Fehlversuche / 15 min pro Konto und IP (REQ-SEC-005) |
+| Brute Force | 5 Fehlversuche je (Adresse, IP) in 15 min, danach Wartezeit statt Kontosperre (REQ-SEC-005) |
 | Unbestätigtes Konto, korrektes Passwort | „Bitte bestätige zuerst deine E-Mail-Adresse“ |
 | Gesperrtes Konto, korrektes Passwort | „Dieses Konto ist gesperrt“ |
 | Löschung beantragt | Anmeldung bricht die Löschung ab (REQ-ACC-002) |
@@ -65,3 +66,4 @@ I: ja · N: Sitzungsdauer verhandelbar · V: Zugang · E: klein · S: ja · T: a
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien ergänzt |
+| 1.2 | 2026-10-23 | Review v0.2: R-25 Rate-Limit-Schlüssel nach Q-18; R-15 moscow_reason |

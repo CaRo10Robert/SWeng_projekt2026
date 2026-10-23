@@ -8,12 +8,13 @@ owner: team-marktplatz
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-03
 source: BG-1
 use_cases: [UC-13, UC-31, UC-33]
 depends_on: [REQ-MOD-005]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SRCH-006]
@@ -26,6 +27,8 @@ Anzeigen **dürfen nicht** in Suchergebnissen und auf der Merkliste erscheinen, 
 
 ## Begründung
 Blockieren und Sperren müssen wirksam sein, sonst verlieren Mitglieder das Vertrauen (BG-1).
+
+**Must-Begründung:** Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
 
 ## Akzeptanzkriterien
 | Beziehung zwischen Suchendem S und Anbieter A | Anzeige von A sichtbar für S |
@@ -44,10 +47,11 @@ Blockieren und Sperren müssen wirksam sein, sonst verlieren Mitglieder das Vert
 | Blockierter versucht Kontakt | abgelehnt (REQ-CHAT-001) |
 
 ## Nachweis
-- `AT-SRCH-006`: API-Test – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus (neu zu schreiben).
+- `AT-SRCH-006`: API-Test – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle, Merkliste und Ausblendung eingeschlossen |
+| 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |

@@ -3,17 +3,19 @@ id: REQ-PERF-004
 title: Zeit bis zum Versand der Bestätigungsmail
 type: quality
 class: quality
-status: in-review
+status: approved
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: basis
 epic: EPIC-01
 source: BG-2
 use_cases: [UC-01]
 depends_on: [REQ-NOTI-005]
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-PERF-004]
@@ -45,3 +47,4 @@ Die Registrierung ist die erste kritische Nutzerreise; eine verspätete Mail kos
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-15 |

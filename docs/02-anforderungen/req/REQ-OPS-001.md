@@ -6,12 +6,14 @@ class: quality
 status: implemented
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: M
+moscow_reason: [3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 05
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-OPS-001, AT-OPS-001-2]
@@ -44,3 +46,4 @@ Getrennte Liveness/Readiness verhindern Neustartschleifen; geordnetes Herunterfa
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-15 |

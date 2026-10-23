@@ -9,12 +9,13 @@ risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-06
 source: DSA Art. 16, BG-4
 use_cases: [UC-30]
 depends_on: [REQ-MOD-002]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-MOD-001, AT-MOD-001-2]
@@ -24,7 +25,9 @@ verification: [AT-MOD-001, AT-MOD-001-2]
 ## Anforderung
 Als Mitglied möchte ich Anzeigen, Chatnachrichten und Profile unter Angabe eines Grundes melden, damit regelwidrige oder rechtswidrige Inhalte geprüft und entfernt werden.
 
-Zulässige Gründe: verbotener Artikel, Betrug, Belästigung, Spam, falsche Kategorie, Sonstiges; optional Freitext bis 1.000 Zeichen.
+Zulässige Gründe (abschließend): verbotener Artikel, Betrug, Belästigung, Spam, falsche Kategorie, Sonstiges; optional Freitext bis 1.000 Zeichen. Der Grund „Inhaltsprüfung“ (Wortfilter, REQ-LST-010) wird ausschließlich vom System gesetzt.
+
+Die Eingangsbestätigung erfolgt in der Oberfläche; eine E-Mail an Meldende wird erst mit der Entscheidung versendet (REQ-MOD-003).
 
 ## Begründung
 Melde- und Abhilfeverfahren nach DSA Art. 16; schützt die Vertrauensbasis der Community (BG-1, BG-4).
@@ -34,13 +37,17 @@ Melde- und Abhilfeverfahren nach DSA Art. 16; schützt die Vertrauensbasis der C
 Szenario: Anzeige melden
   Angenommen ich bin als Ben angemeldet und sehe die Anzeige "Fahrrad 28 Zoll" von Sara
   Wenn ich sie mit dem Grund "Betrug" melde
-  Dann erhalte ich eine Eingangsbestätigung
-  Und in der Moderations-Queue erscheint ein offener Fall zu dieser Anzeige
+  Dann sehe ich in der Oberfläche die Eingangsbestätigung "Danke, wir prüfen die Meldung"
+  Und spätestens 10 Sekunden später erscheint in der Moderations-Queue ein offener Fall zu dieser Anzeige
 
 Szenario: Nachricht melden
   Angenommen ich bin Teilnehmer einer Konversation
   Wenn ich eine Nachricht meines Gegenübers melde
   Dann erscheint ein offener Fall vom Typ "Nachricht"
+
+Szenario: Profil melden
+  Wenn ich das Profil eines anderen Mitglieds mit dem Grund "Belästigung" melde
+  Dann erscheint ein offener Fall vom Typ "Profil"
 
 Szenario: Doppelte Meldung
   Angenommen ich habe die Anzeige bereits gemeldet
@@ -70,3 +77,4 @@ I: ohne Moderationsoberfläche testbar · N: Gründe verhandelbar · V: Rechtspf
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: R-08 (Eingangsbestätigung in der Oberfläche, Gründe abschließend, Profil-Szenario), R-15, R-16, R-24 |

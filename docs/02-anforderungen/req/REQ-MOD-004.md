@@ -3,7 +3,7 @@ id: REQ-MOD-004
 title: Vorläufiges Ausblenden ab drei Meldungen
 type: business-rule
 class: functional
-status: in-review
+status: approved
 owner: team-vertrauen
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-06
 source: BG-1
 use_cases: [UC-30]
 depends_on: [REQ-MOD-001]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-MOD-004]
@@ -50,3 +50,4 @@ Mehrfachmeldungen desselben Mitglieds zählen einmal; Systemmeldungen (Wortfilte
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: Status nach Review |

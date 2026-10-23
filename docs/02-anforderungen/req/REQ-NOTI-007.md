@@ -8,11 +8,12 @@ owner: team-kommunikation
 risk: low
 release: R1
 moscow: M
+moscow_reason: [3]
 kano: n/a
 epic: EPIC-05
 source: ADR-0005, ADR-0010, Twelve-Factor
 use_cases: [UC-23]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-NOTI-007]
@@ -26,6 +27,8 @@ Der Mailserver (Host, Port, Verschlüsselung, Zugangsdaten, Absender) **muss** a
 ## Begründung
 Ein späterer Echtbetrieb tauscht nur die Konfiguration, nicht den Code (BG-5).
 
+**Must-Begründung:** Kriterium 3 (Betreibbarkeit des Beispiels).
+
 ## Akzeptanzkriterien
 | Konfiguration | Ergebnis |
 |---|---|
@@ -34,10 +37,11 @@ Ein späterer Echtbetrieb tauscht nur die Konfiguration, nicht den Code (BG-5).
 | Zugangsdaten | stehen nicht im Image und nicht im Repository |
 
 ## Nachweis
-- `AT-NOTI-007`: Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu zu schreiben).
+- `AT-NOTI-007`: Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
+| 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |

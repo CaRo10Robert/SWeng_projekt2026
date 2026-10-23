@@ -3,7 +3,7 @@ id: UC-MODEL
 type: requirements
 status: in-review
 owner: team-produkt
-version: 1.0
+version: 1.1
 created: 2026-10-20
 last_updated: 2026-10-23
 ---
@@ -235,8 +235,8 @@ UC53 --> PSP
 | UC-03 | Passwort zurücksetzen | Gast | Must | casual |
 | UC-04 | Profil verwalten | Mitglied | Must | casual |
 | UC-05 | Konto löschen | Mitglied | Must (DSGVO) | [§4.6](#46-uc-05-konto-löschen) |
-| UC-06 | Daten exportieren | Mitglied | Should (DSGVO, manuell möglich) | casual |
-| UC-07 | Mitgliedschaft re-verifizieren | Zeitgeber | Should | [§4.7](#47-uc-07-mitgliedschaft-re-verifizieren) |
+| UC-06 | Daten exportieren | Mitglied | Should (DSGVO) | casual |
+| UC-07 | Mitgliedschaft re-verifizieren | Zeitgeber | Should (R2, Q-14) | [§4.7](#47-uc-07-mitgliedschaft-re-verifizieren) |
 | UC-10 | Anzeige erstellen | Mitglied | Must | [§4.2](#42-uc-10-anzeige-erstellen) |
 | UC-11 | Anzeige verwalten | Mitglied | Must | casual |
 | UC-12 | Anzeige als reserviert / abgegeben markieren | Mitglied | Must | casual |
@@ -248,9 +248,9 @@ UC53 --> PSP
 | UC-20 | Anbieter kontaktieren | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
 | UC-21 | Nachrichten austauschen | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
 | UC-22 | Nutzer bewerten | Mitglied | Could | casual |
-| UC-25 | Kontaktdaten freigeben | Mitglied | Must (Fallstudie FS-C1) | [§4.8](#48-uc-25-kontaktdaten-freigeben) |
-| UC-23 | Benachrichtigungen erhalten | E-Mail-System (sekundär) | Must | casual |
+| UC-23 | Benachrichtigungen erhalten | Mitglied (sekundär: E-Mail-System) | Must | casual |
 | UC-24 | Benachrichtigungseinstellungen ändern | Mitglied | Should | casual |
+| UC-25 | Kontaktdaten freigeben | Mitglied | Must (Fallstudie FS-C1) | [§4.8](#48-uc-25-kontaktdaten-freigeben) |
 | UC-30 | Inhalt / Nutzer melden | Mitglied | Must (DSA) | [§4.5](#45-uc-30--uc-32-melden-und-moderieren) |
 | UC-31 | Nutzer blockieren | Mitglied | Should | casual |
 | UC-32 | Meldungen bearbeiten | Moderator | Must (DSA) | [§4.5](#45-uc-30--uc-32-melden-und-moderieren) |
@@ -272,10 +272,10 @@ UC53 --> PSP
 | **Primärakteur** | Gast |
 | **Sekundärakteure** | E-Mail-System |
 | **Stakeholder & Interessen** | *Gast:* schnell und unkompliziert. *Community:* nur echte Hochschulangehörige. *Betreiber:* DSGVO-konforme Einwilligungen |
-| **Vorbedingung** | Gast hat keine aktive Sitzung. Die E-Mail-Adresse ist noch keinem aktiven Konto zugeordnet |
+| **Vorbedingung** | Gast hat keine aktive Sitzung (Adressen, die bereits registriert sind, behandelt Erweiterung 2b) |
 | **Auslöser** | Gast wählt „Registrieren“ |
 | **Nachbedingung (Erfolg)** | Konto im Status `aktiv`, E-Mail verifiziert, Rolle `Mitglied`, Typ `Studierende` oder `Beschäftigte` aus der Domain abgeleitet, Zustimmung zu AGB und Datenschutz mit Zeitstempel und Version gespeichert |
-| **Nachbedingung (Fehlschlag)** | Kein aktives Konto. Ein unverifiziertes Konto wird nach 24 h gelöscht |
+| **Nachbedingung (Fehlschlag)** | Kein aktives Konto. Ein unbestätigtes Konto wird 7 Tage nach der Registrierung gelöscht (Q-13, REQ-AUTH-002, REQ-PRIV-003) |
 
 **Hauptszenario**
 1. Gast gibt E-Mail-Adresse, Anzeigenamen und Passwort ein und bestätigt AGB und Datenschutzhinweis.
@@ -292,8 +292,9 @@ UC53 --> PSP
 - 2b. *Adresse ist bereits einem aktiven Konto zugeordnet:* weiter mit Schritt 6. Das System sendet stattdessen eine E-Mail „Du hast bereits ein Konto – Passwort vergessen?“.
 - 3a. *Passwort zu schwach oder in bekannter Leak-Liste:* System nennt den Grund. Zurück zu Schritt 1.
 - 5a. *E-Mail-System nicht erreichbar:* Der Versandauftrag bleibt in der Outbox und wird mit Backoff erneut versucht (REQ-NOTI-005). Der Gast sieht trotzdem Schritt 6.
-- 7a. *Token abgelaufen (> 24 h) oder bereits verwendet:* System bietet „Link erneut senden“ an (Rate-Limit: 3 pro Stunde).
-- \*a. *Mehr als 5 Registrierungsversuche pro IP und Stunde:* System verlangt eine Wartezeit (REQ-SEC-005).
+- 7a. *Link abgelaufen (> 24 h):* System bietet „Link erneut senden“ an (höchstens 3 pro Stunde und Adresse); möglich, solange das unbestätigte Konto existiert (7 Tage).
+- 7b. *Link bereits verwendet:* System leitet zur Anmeldung weiter.
+- \*a. *Mehr als 3 Registrierungsversuche je Adresse oder mehr als 30 je IP und Stunde:* System verlangt eine Wartezeit (REQ-SEC-005, Q-18).
 
 **Sonderanforderungen:** REQ-AUTH-001…004, REQ-SEC-003, REQ-SEC-005, REQ-PRIV-001.
 **Offene Punkte:** Q-2 (Beschäftigte mit Funktionspostfächern, z. B. `asta@hwg-lu.de`?).
@@ -313,7 +314,9 @@ flowchart TD
     F1 --> G[Neutrale Meldung:<br/>„Bitte E-Mail bestätigen“]
     F2 --> G
     G --> H{Link innerhalb<br/>24 h geöffnet?}
-    H -- nein --> X[Unverifiziertes Konto<br/>wird gelöscht] --> Z([Ende])
+    H -- nein --> R{Link innerhalb von<br/>7 Tagen neu angefordert?}
+    R -- ja --> G
+    R -- nein --> X[Unbestätigtes Konto<br/>wird gelöscht] --> Z([Ende])
     H -- ja --> I[Konto aktiv<br/>Nutzer angemeldet] --> Z
 ```
 
@@ -334,17 +337,16 @@ flowchart TD
 2. Mitglied wählt den Anzeigentyp: **Angebot** oder **Gesuch**.
 3. Mitglied wählt die Kategorie.
 4. Mitglied gibt Titel und Beschreibung ein und wählt den **Preistyp**: Festpreis · Verhandlungsbasis (VB) · zu verschenken · Tausch (mit optionalem Freitext „Suche im Tausch“).
-5. Mitglied lädt 0–8 Bilder hoch (*include* „Bilder hochladen“). Das System entfernt die EXIF-Metadaten und erzeugt Vorschaubilder.
+5. Mitglied lädt 0–8 Bilder hoch (*include* „Bilder hochladen“; JPEG, PNG, WebP). Das System entfernt Metadaten wie Standortangaben und erzeugt Vorschaubilder.
 6. Mitglied wählt einen oder mehrere **Übergabeorte** (Campus-Standorte) und optional den Zustand.
 7. System validiert die Eingaben (Pflichtfelder, Längen, Preisbereich, Wortfilter für verbotene Artikel).
-8. Mitglied sieht eine Vorschau und veröffentlicht.
-9. System setzt die Anzeige auf `aktiv`, indexiert sie für die Suche und informiert passende Suchaufträge (UC-16, asynchron).
+8. Mitglied veröffentlicht.
+9. System setzt die Anzeige auf `aktiv` und macht sie in der Suche auffindbar (≤ 10 s).
 
 **Erweiterungen**
-- 5a. *Datei kein Bild, über 10 MB oder Malware-Verdacht:* Ablehnung mit Hinweis.
-- 7a. *Wortfilter schlägt an (z. B. Waffen, Medikamente):* Anzeige geht in den Status `in Prüfung` und wird in die Moderationsqueue gestellt. Das Mitglied wird informiert.
+- 5a. *Datei kein unterstütztes Bild oder über 10 MB:* Ablehnung mit Hinweis. HEIC folgt in R2 (REQ-LST-012); ein Malware-Scan ist Won't (Q-16), Bilder werden stattdessen neu kodiert.
+- 7a. *Inhaltsprüfung schlägt an (z. B. Waffen, Medikamente):* Anzeige geht in den Status `in Prüfung` und wird in die Moderations-Queue gestellt. Das Mitglied wird informiert.
 - 7b. *Mitglied hat bereits 30 aktive Anzeigen:* Hinweis auf das Limit (Spam-Schutz).
-- 8a. *Mitglied speichert als Entwurf:* Status `Entwurf`, nicht sichtbar.
 
 ---
 
@@ -360,12 +362,12 @@ flowchart TD
 
 **Hauptszenario**
 1. Mitglied gibt einen Suchbegriff ein (optional).
-2. Mitglied setzt Filter: Kategorie, Angebot/Gesuch, Preistyp, Preis von/bis, Übergabeort, Zustand, Studiengang (bei Büchern).
+2. Mitglied setzt Filter: Kategorie, Angebot/Gesuch, Preistyp, Preis von/bis, Übergabeort, Zustand, und wählt die Sortierung (neueste, Preis auf-/absteigend, mit Suchbegriff auch Relevanz) (REQ-SRCH-002).
 3. System liefert eine paginierte Trefferliste (Standard: neueste zuerst; alternativ Preis auf- oder absteigend), p95 < 500 ms (REQ-PERF-001).
 4. Mitglied öffnet eine Anzeige (UC-14).
 
 **Erweiterungen**
-- 3a. *Keine Treffer:* System schlägt vor, den Suchauftrag zu speichern (UC-16) oder ein Gesuch aufzugeben (UC-10).
+- 3a. *Keine Treffer:* System schlägt vor, ein Gesuch aufzugeben (UC-10). Suchaufträge (UC-16) folgen später (Could).
 - 3b. *Suchindex nicht verfügbar:* Fallback auf eine einfache Titelsuche, mit Hinweis auf eingeschränkte Ergebnisse (degradierter Modus).
 
 ---
@@ -433,7 +435,7 @@ sequenceDiagram
 **Hauptszenario**
 1. Mitglied wählt „Melden“ an einer Anzeige, einer Nachricht oder einem Profil.
 2. Mitglied wählt einen Grund (verbotener Artikel, Betrug, Belästigung, Spam, Sonstiges) und ergänzt optional eine Begründung.
-3. System bestätigt den Eingang (Eingangsbestätigung per E-Mail) und stellt die Meldung in die Moderationsqueue.
+3. System bestätigt den Eingang in der Oberfläche und stellt die Meldung in die Moderations-Queue (sichtbar ≤ 10 s).
 4. Moderator öffnet die Meldung und sieht den gemeldeten Inhalt mit Kontext.
 5. Moderator entscheidet: *keine Maßnahme* · *Inhalt entfernen* (UC-34) · *Nutzer verwarnen oder sperren* (UC-33).
 6. System protokolliert die Entscheidung (Audit-Log) und informiert beide Seiten mit Begründung und Hinweis auf den Widerspruch (DSA Art. 17).
@@ -450,8 +452,8 @@ stateDiagram-v2
     VorlaeufigAusgeblendet --> InBearbeitung
     InBearbeitung --> Abgewiesen : kein Verstoß
     InBearbeitung --> MassnahmeErgriffen : Entfernen / Sperren
-    MassnahmeErgriffen --> Widerspruch : Betroffener widerspricht
-    Abgewiesen --> Widerspruch : Melder widerspricht
+    MassnahmeErgriffen --> Widerspruch : Betroffener widerspricht (per E-Mail, außerhalb des Systems)
+    Abgewiesen --> Widerspruch : Melder widerspricht (per E-Mail, außerhalb des Systems)
     Widerspruch --> InBearbeitung : anderer Moderator
     Abgewiesen --> [*]
     MassnahmeErgriffen --> [*]
@@ -506,7 +508,7 @@ stateDiagram-v2
 
 **Erweiterungen**
 - 3a. *Kein Klick innerhalb von 30 Tagen:* System schränkt das Konto ein und informiert per E-Mail; ein späterer Klick hebt die Einschränkung auf.
-- 3b. *Adresse nicht mehr zustellbar:* wie 3a.
+- 3b. *Adresse nicht mehr zustellbar:* wie 3a. Nur im Echtbetrieb erkennbar (Bounce-Verarbeitung, EPIC-12).
 
 **Sonderanforderungen:** REQ-AUTH-007, REQ-NOTI-001.
 
@@ -527,12 +529,14 @@ stateDiagram-v2
 1. Teilnehmer A wählt „Kontaktdaten teilen“ und bestätigt den Hinweis, dass die Adresse erst nach Zustimmung beider sichtbar wird.
 2. System speichert die Zustimmung von A und zeigt B „A möchte Kontaktdaten austauschen“.
 3. B stimmt zu.
-4. System speichert die Zustimmung von B, zeigt beiden die Adresse des anderen und schreibt eine Systemnachricht in den Verlauf.
+4. System speichert die Zustimmung von B, zeigt beiden die bei der Registrierung eingegebene Adresse des anderen als Angabe zur Konversation (nie als Nachrichtentext) und schreibt eine Systemnachricht ohne Adressen in den Verlauf.
 
 **Erweiterungen**
-- 3a. *B stimmt nicht zu:* Es wird nichts angezeigt; A kann seine Zustimmung zurückziehen.
+- 2a. *A zieht die Zustimmung zurück, bevor B zustimmt:* Die Anfrage verschwindet bei B.
+- 3a. *B lehnt ab:* A sieht „B möchte keine Kontaktdaten austauschen“; eine erneute Anfrage ist frühestens nach 24 h und höchstens dreimal je Teilnehmer und Konversation möglich.
 - \*a. *Ein Teilnehmer widerruft:* Die Adressen werden für beide wieder ausgeblendet.
-- \*b. *Blockierung oder Sperre:* Freigabe nicht möglich bzw. Adressen werden ausgeblendet.
+- \*b. *Blockierung, Sperre oder Löschung eines Kontos:* Freigabe nicht möglich bzw. Adressen werden ausgeblendet.
+- \*c. *Anzeige abgegeben oder gelöscht:* Die Freigabe bleibt in der bestehenden Konversation möglich.
 
 **Sonderanforderungen:** REQ-CHAT-010, REQ-PRIV-002, REQ-CHAT-001, REQ-SEC-006.
 
@@ -540,20 +544,20 @@ stateDiagram-v2
 
 | ID | Kurzbeschreibung |
 |---|---|
-| UC-02 | Anmeldung mit E-Mail und Passwort. Sitzung per sicherem Cookie. Nach 5 Fehlversuchen greifen eine progressive Verzögerung bzw. eine Sperre von 15 Minuten. Abmelden beendet die Sitzung serverseitig |
+| UC-02 | Anmeldung mit Hochschuladresse und Passwort (Anmeldeverfahren austauschbar, ADR-0013). Nach 5 Fehlversuchen derselben Kombination aus Konto und IP in 15 Minuten muss gewartet werden; das Konto wird nicht gesperrt (REQ-SEC-005, Q-18). Abmelden beendet die Sitzung serverseitig |
 | UC-03 | Gast gibt E-Mail ein. Unabhängig von der Existenz erscheint eine neutrale Meldung. Der Link ist 1 h gültig und einmalig. Nach dem Zurücksetzen werden alle Sitzungen beendet |
-| UC-04 | Anzeigename, optional Profilbild, Studiengang (optional), bevorzugte Übergabeorte. Die E-Mail-Adresse ist **nicht** öffentlich sichtbar (Ausnahme: beidseitige Freigabe, UC-25) |
-| UC-06 | Export aller personenbezogenen Daten als JSON (Profil, Anzeigen, Nachrichten, Bewertungen) per Download-Link per E-Mail |
+| UC-04 | Anzeigename, Studiengang (optional), Profilbild (R2, REQ-ACC-004), bevorzugte Übergabeorte. Die E-Mail-Adresse ist **nicht** öffentlich sichtbar (Ausnahme: beidseitige Freigabe, UC-25) |
+| UC-06 | Export aller personenbezogenen Daten als JSON-Datei zum sofortigen Download (Profil, Einwilligungen, Anzeigen, eigene Nachrichten, Merkliste, Meldungen, Blockierungen, Kontaktfreigaben) (REQ-ACC-003) |
 | UC-11 | Bearbeiten (Änderungshistorie für die Moderation), pausieren, reaktivieren, verlängern, löschen |
-| UC-12 | Status `reserviert` (optional mit Konversation verknüpft) und `abgegeben`. Abgegebene Anzeigen verschwinden nach 7 Tagen aus der Suche |
-| UC-14 | Detailansicht mit Bildern, Beschreibung, Übergabeorten, Profil-Kurzinfo (Name, Mitglied seit, Bewertungen) sowie den Aktionen Merken, Nachricht, Teilen-Link und Melden |
+| UC-12 | Status `reserviert` (direkt oder im Chat für eine bestimmte Person, REQ-CHAT-011) und `abgegeben`. Abgegebene Anzeigen verschwinden sofort aus der Suche und werden nach 30 Tagen gelöscht; Reservierungen fallen nach 30 Tagen auf `aktiv` zurück (Zustandsmodell Ü-10, Ü-13, Ü-17) |
+| UC-14 | Detailansicht mit Bildern, Beschreibung, Preis, Zustand, Übergabeorten, Profil-Kurzinfo (Anzeigename, Studierende/Beschäftigte, Mitglied seit) sowie den Aktionen Merken, Nachricht, Melden, Blockieren (REQ-LST-001, REQ-SRCH-004, REQ-CHAT-001, REQ-MOD-001). Bewertungen und Teilen-Link folgen später (Could) |
 | UC-15 | Anzeige zur Merkliste hinzufügen oder entfernen. Optional Hinweis bei Preisänderung |
 | UC-16 | Suche mit Filtern speichern. Täglicher E-Mail-Digest mit neuen Treffern (max. 10 Suchaufträge pro Mitglied) |
-| UC-17 | 7 Tage vor Ablauf eine Erinnerungs-E-Mail. Nach 60 Tagen Status `abgelaufen`. Verlängerung mit einem Klick. Nach 90 Tagen im Status `abgelaufen` wird die Anzeige gelöscht |
+| UC-17 | 7 Tage vor Ablauf eine Erinnerungs-E-Mail mit Link zur Anzeige; dort genügt eine Aktion zum Verlängern. Nach 60 Tagen (pausiert: 90 Tage) Status `abgelaufen`. Nach 90 Tagen im Status `abgelaufen` wird die Anzeige gelöscht (REQ-LST-008) |
 | UC-22 | Nach Status `abgegeben` können beide Konversationsteilnehmer einander einmal bewerten (👍/👎 + max. 280 Zeichen) |
-| UC-23 | Transaktionale E-Mails: Verifikation, Passwort, neue Nachricht, Ablauf, Suchauftrag, Moderationsentscheidung, Re-Verifikation |
-| UC-24 | Opt-out pro Kategorie (Nachrichten, Suchaufträge, Erinnerungen). Sicherheitsrelevante Mails sind nicht abwählbar |
-| UC-31 | Blockierter Nutzer kann keine Nachrichten senden. Seine Anzeigen werden für den Blockierenden ausgeblendet |
-| UC-33 | Verwarnung, temporäre oder dauerhafte Sperre, mit Begründung. Die Sperre gilt für die **E-Mail-Adresse**, damit sich der Nutzer nicht erneut registrieren kann |
+| UC-23 | Transaktionale E-Mails: Verifikation, „Konto existiert“, Passwort, neue Nachricht (ohne Inhalt), Ablauf-Erinnerung, Moderationsentscheidung, Löschbestätigung (REQ-NOTI-001); Suchauftrag und Re-Verifikation folgen mit UC-16 bzw. UC-07 |
+| UC-24 | Opt-out pro Kategorie (Nachrichten, Erinnerungen; Suchaufträge ab UC-16). Sicherheitsrelevante Mails sind nicht abwählbar |
+| UC-31 | Nach dem Blockieren können beide einander keine Nachrichten mehr senden und sehen die Anzeigen des anderen nicht mehr in der Suche (gegenseitig, REQ-MOD-005, REQ-SRCH-006) |
+| UC-33 | Verwarnung oder dauerhafte Sperre, mit Begründung. Die Sperre gilt für die **E-Mail-Adresse**, damit sich der Nutzer nicht erneut registrieren kann. Befristete Sperren, Aufhebung und Widerspruch laufen außerhalb des Systems per E-Mail (Q-15) |
 | UC-40 | Domain hinzufügen, deaktivieren und dem Nutzertyp zuordnen (`studmail.` → Studierende). MVP: per Konfiguration bzw. Datenbank-Seed |
 | UC-42 | Rollen Mitglied, Moderator und Administrator vergeben bzw. entziehen. Wird protokolliert |

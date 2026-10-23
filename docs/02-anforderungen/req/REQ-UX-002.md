@@ -3,15 +3,16 @@ id: REQ-UX-002
 title: Deutsche Oberfläche, übersetzbar vorbereitet
 type: quality
 class: quality
-status: in-review
+status: approved
 owner: team-produkt
 risk: low
+reviewers: [qa-lead]
 release: R1
-moscow: M
+moscow: S
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [MAN-UX-002]
@@ -24,13 +25,15 @@ Die Oberfläche muss vollständig auf Deutsch vorliegen; alle Texte müssen ohne
 ## Begründung
 Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende brauchen perspektivisch Englisch.
 
+**MoSCoW:** Should statt Must (Review v0.2, R-15): Die deutsche Oberfläche ist vorhanden; die Übersetzbarkeit erfüllt keines der Must-Kriterien 1–4 (kein Release-Blocker für R1).
+
 ## Qualitätsmerkmal, Metrik, Messverfahren
 | Feld | Festlegung |
 |---|---|
 | Qualitätsmerkmal (ISO 25010) | Maintainability → Modifiability; Flexibility → Adaptability |
 | Metrik | Anzahl der für Nutzer sichtbaren Texte, die nicht aus einer Sprachressource stammen |
-| Akzeptanzkriterium | **0** fest im Code verdrahtete Texte in Komponenten; Datums- und Zahlenformate über die Locale |
-| Messverfahren | Code-Review mit Suche nach Textliteralen in JSX; Stichprobe mit Pseudo-Locale |
+| Akzeptanzkriterium | (1) **100 %** der sichtbaren Texte auf Deutsch; (2) **0** sichtbare Texte, die nicht aus einer Sprachressource stammen; Datums- und Zahlenformate folgen der eingestellten Sprache |
+| Messverfahren | (1) Durchsicht aller Routen; (2) Code-Review mit Suche nach Textliteralen in den Oberflächenkomponenten (JSX) und Stichprobe mit einer Pseudo-Sprache |
 | Messkontext | Web-Oberfläche und E-Mail-Vorlagen |
 | Verhalten bei Verfehlung | Technische Schuld im Backlog, kein Release-Blocker für R1 |
 
@@ -44,3 +47,4 @@ Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende br
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Metrik und Messverfahren ergänzt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should), R-22 |

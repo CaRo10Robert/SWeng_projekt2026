@@ -8,12 +8,13 @@ owner: team-kommunikation
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: leistung
 epic: EPIC-05
 source: BG-3, DSGVO Art. 5 (Datenminimierung)
 use_cases: [UC-21, UC-23]
 depends_on: [REQ-NOTI-001]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-NOTI-002]
@@ -27,6 +28,8 @@ Benachrichtigungen über neue Chatnachrichten **müssen** gebündelt werden: hö
 ## Begründung
 Ohne Benachrichtigung bleiben Anfragen unbeantwortet (BG-3); zu viele Mails werden als Spam empfunden. Chatinhalte sind vertraulich und gehören nicht in E-Mails.
 
+**Must-Begründung:** Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
+
 ## Akzeptanzkriterien
 | Situation | E-Mail |
 |---|---|
@@ -38,13 +41,23 @@ Ohne Benachrichtigung bleiben Anfragen unbeantwortet (BG-3); zu viele Mails werd
 | Empfänger hat „Neue Nachrichten“ abbestellt | keine (REQ-NOTI-003) |
 | Systemnachricht (z. B. Reservierung) | keine |
 
-Inhalt der E-Mail: Betreff „Neue Nachricht zu „<Anzeigentitel>““, Link zur Konversation, kein Nachrichtentext, kein Absendername außer dem Anzeigennamen.
+Inhalt der E-Mail: Betreff „Neue Nachricht zu ‚<Anzeigentitel>‘“, Link zur Konversation. Die E-Mail enthält **keinen** Nachrichtentext und **keinen** Namen des Absenders (auch nicht dessen Anzeigenamen), nur den Titel der Anzeige.
+
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Prüfung des Bündelungszeitpunkts läuft doppelt oder wird wiederholt | höchstens eine E-Mail je Konversation und Empfänger innerhalb von 15 min (idempotent) |
+| Mailserver nicht erreichbar | Zustellung wird nachgeholt (REQ-NOTI-005), keine zusätzliche E-Mail |
+| Empfänger gesperrt oder Konto gelöscht | keine E-Mail |
+| Absender wurde zwischenzeitlich blockiert | keine E-Mail |
+| Massenhafte Nachrichten (Spam) | erzeugen höchstens eine E-Mail je 15 min; Sendebegrenzung REQ-CHAT-007 |
 
 ## Nachweis
-- `AT-NOTI-002`: Szenario-Test mit verkürzter Wartezeit – Bündelung, Lesen vor Versand, kein Inhalt in der Mail (neu zu schreiben).
+- `AT-NOTI-002`: Szenario-Test mit verkürzter Wartezeit – Bündelung, Lesen vor Versand, kein Inhalt in der Mail (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
+| 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-31 Inhalt eindeutig (kein Absendername, Anzeigentitel), Anführungszeichen; Must-Begründung |

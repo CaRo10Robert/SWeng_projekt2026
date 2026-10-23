@@ -8,12 +8,13 @@ owner: team-identity
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1, 3]
 kano: basis
 epic: EPIC-01
 source: BG-2
 use_cases: [UC-03]
 depends_on: [REQ-NOTI-001]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-AUTH-006]
@@ -66,3 +67,4 @@ I: ja · N: Gültigkeitsdauer · V: Zugang wiederherstellen · E: klein · S: ja
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien ergänzt |
+| 1.2 | 2026-10-23 | Review v0.2: R-15 moscow_reason (ohne Reset kein selbstständiger Zugang → nicht betreibbar) |

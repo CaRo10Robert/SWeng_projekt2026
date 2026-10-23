@@ -1,58 +1,61 @@
 ---
 id: REQ-SEC-004
-title: Sichere Sitzungen und CSRF-Schutz
+title: Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen
 type: security
-class: quality
+class: constraint
 status: implemented
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-01
-source: OWASP ASVS V3, ADR-0003, ADR-0011
-use_cases: [UC-02]
-version: 2.0
+source: ASVS
+version: 3.0
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3]
 ---
 
-# REQ-SEC-004 Sichere Sitzungen und CSRF-Schutz
+# REQ-SEC-004 Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen
 
 ## Anforderung
 Sitzungen müssen
-1. für Skripte im Browser unlesbar, nur über sichere Verbindungen übertragbar (konfigurierbare Ausnahme für `http://localhost`) und nicht bei seitenübergreifenden Anfragen mitgesendet werden,
+1. für Skripte im Browser **unlesbar** sein, **nur über sichere Verbindungen** übertragen werden (konfigurierbare Ausnahme für die lokale Vorführung auf `http://localhost`) und **nicht bei seitenübergreifenden Anfragen** fremder Websites mitgesendet werden,
 2. serverseitig widerrufbar sein (Abmelden, Passwort-Reset, Sperre, Rollenwechsel, Löschantrag),
-3. vor Cross-Site Request Forgery geschützt sein: zustandsändernde Anfragen von fremden Websites werden abgelehnt.
+3. vor fremdgesteuerten Anfragen (Cross-Site Request Forgery) geschützt sein: zustandsändernde Anfragen, die von fremden Websites ausgelöst werden, werden abgelehnt.
 
-Die technische Umsetzung (Cookie-Attribute, Schutzverfahren) steht in ADR-0003 und ADR-0011.
+Wie das technisch erreicht wird (Cookie-Attribute, Schutzverfahren), steht in ADR-0003 und ADR-0011.
 
 ## Begründung
 Gestohlene oder fremdgesteuerte Sitzungen erlauben Zugriff auf private Chats und Anzeigen.
 
 ## Akzeptanzkriterien
-| Prüfung | Erwartung |
+| Prüfung (von außen beobachtbar) | Erwartung |
 |---|---|
-| Sitzungscookie | Attribute `HttpOnly`, `Secure`, `SameSite=Lax` |
-| Zustandsändernde Anfrage ohne Schutzmerkmal oder mit fremdem Origin | 403 `csrf` |
-| Anfrage mit Sitzung nach Abmelden / Reset / Sperre | wie nicht angemeldet (401) |
-| Sitzungs-Token | nur als Hash gespeichert, ≥ 256 Bit Zufall |
+| Skript im Browser liest nach dem Login alle für die Seite lesbaren Cookies | die Sitzungskennung ist nicht darunter |
+| Antwort beim Login | die Sitzungskennung ist nur für sichere Verbindungen und nur für Anfragen derselben Website freigegeben (Ausnahme laut Konfiguration dokumentiert) |
+| Zustandsändernde Anfrage, wie sie eine fremde Website auslösen kann (ohne Schutzmerkmal oder mit fremdem Ursprung) | abgelehnt (403) |
+| Anfrage mit der alten Sitzung nach Abmelden, Passwort-Reset oder Sperre | wie nicht angemeldet (401) |
+| Sitzungskennung | nicht vorhersagbar (≥ 256 Bit Zufall); serverseitig nur als nicht umkehrbarer Prüfwert gespeichert |
 
 ## Fehler- und Missbrauchsfälle
 | Fall | Verhalten |
 |---|---|
-| Safari auf `http://localhost` verweigert `Secure`-Cookies | Ausnahme per Konfiguration, dokumentiert im README |
-| WebSocket von fremdem Origin | Verbindung abgelehnt |
+| Safari auf `http://localhost` verweigert Sitzungen für nur sichere Verbindungen | Ausnahme per Konfiguration, dokumentiert im README |
+| WebSocket-Verbindung von fremdem Ursprung | Verbindung abgelehnt |
+| Gestohlene Sitzungskennung | Widerruf durch Abmelden, Passwort-Reset oder Sperre wirkt sofort |
 
 ## Nachweis
-- `AT-SEC-004`: Smoke-Test – zustandsändernde Anfrage ohne Schutzheader liefert 403 `csrf`.
-- `AT-SEC-004-2`: neu zu schreiben – Attribute des Sitzungscookies nach dem Login.
-- `AT-SEC-004-3`: neu zu schreiben – Sitzung ist nach Abmelden und nach Passwort-Reset ungültig.
+- `AT-SEC-004`: Smoke-Test – zustandsändernde Anfrage ohne Schutzmerkmal liefert 403 `csrf`.
+- `AT-SEC-004-2`: (neu) Freigabe der Sitzungskennung nach dem Login prüfen: für Skripte unlesbar, nur sichere Verbindungen, nur gleiche Website.
+- `AT-SEC-004-3`: (neu) Sitzung ist nach Abmelden und nach Passwort-Reset ungültig.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Lösungsneutral formuliert (Technik in ADR), Widerrufsfälle und Prüftabelle ergänzt |
+| 3.0 | 2026-10-23 | Review v0.2: R-03 `class: constraint`; R-22 Akzeptanzkriterien ohne Cookie-Attribute, von außen beobachtbar; R-15 moscow_reason |

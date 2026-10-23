@@ -6,12 +6,14 @@ class: quality
 status: implemented
 owner: team-produkt
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-UX-001, AT-UX-001-2]
@@ -28,9 +30,9 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 | Feld | Festlegung |
 |---|---|
 | Qualitätsmerkmal (ISO 25010) | Flexibility → Adaptability; Interaction Capability → Operability |
-| Metrik | (1) horizontaler Überlauf der Seite (`scrollWidth > innerWidth`) je Route; (2) Erfüllung der Installierbarkeitskriterien (Manifest, Service Worker, Icon) |
+| Metrik | (1) horizontaler Überlauf der Seite je Route; (2) Erfüllung der Installierbarkeitskriterien des Browsers |
 | Akzeptanzkriterium | (1) **kein** horizontaler Überlauf auf allen Routen bei 360 px; alle Kernabläufe bei 360 px abschließbar; (2) Installierbarkeit erfüllt |
-| Messverfahren | E2E-Test im Mobil-Viewport 360 × 780; Prüfung des Manifests und Service-Worker-Registrierung |
+| Messverfahren | E2E-Test im Mobil-Viewport 360 × 780: Vergleich der Dokumentbreite mit der Fensterbreite (`scrollWidth > innerWidth`) je Route; Prüfung der Installierbarkeitskriterien (Web-App-Manifest, registrierter Service Worker, Icon) |
 | Messkontext | Docker-Beispiel, Chromium/Edge mit Mobil-Emulation |
 | Verhalten bei Verfehlung | Fehler gilt als Release-Blocker für die betroffene Route |
 
@@ -44,3 +46,4 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Metrik und Messverfahren ergänzt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15, R-16 |

@@ -3,7 +3,7 @@ id: REQ-SRCH-005
 title: Suchaufträge mit täglicher E-Mail
 type: user-story
 class: functional
-status: in-review
+status: approved
 owner: team-marktplatz
 risk: low
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-03
 source: Wettbewerbsanalyse
 use_cases: [UC-16]
 depends_on: [REQ-SRCH-002, REQ-NOTI-003]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SRCH-005]
@@ -51,10 +51,11 @@ Die E-Mail ist abbestellbar (REQ-NOTI-003) und erfordert eine gesonderte Einwill
 I: setzt Filter voraus · N: Takt verhandelbar · V: verpasst keine Angebote · E: mittel · S: ein Sprint · T: Szenario-Test mit Zeitsteuerung.
 
 ## Nachweis
-- `AT-SRCH-005`: Szenario-Test des täglichen Digests (neu zu schreiben). Noch nicht umgesetzt (⬜).
+- `AT-SRCH-005`: Szenario-Test des täglichen Digests (neu). Noch nicht umgesetzt (⬜).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: Status in-review → approved nach Review |

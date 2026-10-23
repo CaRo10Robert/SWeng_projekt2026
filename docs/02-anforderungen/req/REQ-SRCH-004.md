@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-03
 source: Wettbewerbsanalyse
 use_cases: [UC-15]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SRCH-004]
@@ -50,10 +50,11 @@ Merken ist idempotent (zweimal merken = einmal gemerkt).
 I: unabhängig · N: Benachrichtigung bei Preisänderung (UC-15 optional) nicht Teil dieser Story · V: Wiederkehr · E/S: klein · T: automatisierbar.
 
 ## Nachweis
-- `AT-SRCH-004`: API-Test – merken, Liste, entfernen, eigene Anzeige abgelehnt (neu zu schreiben).
+- `AT-SRCH-004`: API-Test – merken, Liste, entfernen, eigene Anzeige abgelehnt (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |

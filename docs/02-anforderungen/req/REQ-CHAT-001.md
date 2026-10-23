@@ -9,12 +9,13 @@ risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [1, 2]
 kano: basis
 epic: EPIC-04
 source: BG-3, FS-C1
 use_cases: [UC-20]
 depends_on: [REQ-PRIV-002]
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4]
@@ -23,12 +24,14 @@ verification: [AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4]
 # REQ-CHAT-001 Anbieter über anzeigenbezogenen Chat kontaktieren
 
 ## Anforderung
-Als Interessent möchte ich den Anbieter über einen Chat zu seiner Anzeige kontaktieren, ohne dass E-Mail-Adressen oder andere Kontaktdaten offengelegt werden, damit ich die Übergabe vereinbaren kann, ohne meine Daten preiszugeben.
+Als Interessent möchte ich den Anbieter über einen Chat zu seiner Anzeige kontaktieren, ohne dass E-Mail-Adressen oder andere Kontaktdaten offengelegt werden (einzige Ausnahme: beidseitige Freigabe nach REQ-CHAT-010), damit ich die Übergabe vereinbaren kann, ohne meine Daten preiszugeben.
 
 Kontaktdaten werden ausschließlich nach **beidseitiger Freigabe** gemäß REQ-CHAT-010 sichtbar.
 
 ## Begründung
 Der Chat ermöglicht Abschlüsse (BG-3); der Schutz der Kontaktdaten ist Constraint FS-C1 der Fallstudie.
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar); Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
 
 ## Akzeptanzkriterien
 ```gherkin
@@ -70,12 +73,13 @@ I: Echtzeit separat (REQ-CHAT-003) · N: Darstellung verhandelbar · V: Kernnutz
 
 ## Nachweis
 - `AT-CHAT-001`: Smoke-Test – Konversation starten, Anbieter erhält die Nachricht.
-- `AT-CHAT-001-2`: API-Test – Antworten zu Konversation und Nachrichten enthalten keine E-Mail-Adressen (neu zu schreiben).
-- `AT-CHAT-001-3`: API-Test – Kontakt zur eigenen Anzeige wird abgelehnt (neu zu schreiben).
-- `AT-CHAT-001-4`: API-Test – Kontakt bei Blockierung wird mit „Kontakt nicht möglich“ abgelehnt (neu zu schreiben).
+- `AT-CHAT-001-2`: API-Test – Antworten zu Konversation und Nachrichten enthalten keine E-Mail-Adressen (neu).
+- `AT-CHAT-001-3`: API-Test – Kontakt zur eigenen Anzeige wird abgelehnt (neu).
+- `AT-CHAT-001-4`: API-Test – Kontakt bei Blockierung wird mit „Kontakt nicht möglich“ abgelehnt (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog mit GWT |
 | 2.0 | 2026-10-23 | Ausnahme für beidseitige Kontaktfreigabe (REQ-CHAT-010, Fallstudie FS-C1); Szenario „Anzeige nicht verfügbar“ |
+| 2.1 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |

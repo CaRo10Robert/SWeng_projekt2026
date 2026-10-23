@@ -8,11 +8,12 @@ owner: team-kommunikation
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: basis
 epic: EPIC-04
 source: Use-Case-Modell UC-20
 use_cases: [UC-20]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-CHAT-002]
@@ -24,7 +25,9 @@ verification: [AT-CHAT-002]
 Es **muss** genau eine Konversation pro Paar (Anzeige, Interessent) existieren. Der Anbieter ist durch die Anzeige festgelegt; Anbieter und Interessent sind verschiedene Personen.
 
 ## Begründung
-Ein einheitlicher Verlauf pro Interessent verhindert verstreute Absprachen und ist Grundlage für den Deal (REQ-CHAT-009).
+Ein einheitlicher Verlauf pro Interessent verhindert verstreute Absprachen und ist Grundlage für den Deal (REQ-CHAT-011).
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar).
 
 ## Akzeptanzkriterien
 | Situation | Ergebnis |
@@ -34,7 +37,7 @@ Ein einheitlicher Verlauf pro Interessent verhindert verstreute Absprachen und i
 | Anderer Interessent zur selben Anzeige | eigene, getrennte Konversation |
 | Anbieter = Interessent | abgelehnt |
 
-Die Eindeutigkeit wird auf Datenebene erzwungen, nicht nur in der Oberfläche.
+Die Eindeutigkeit gilt unabhängig vom genutzten Zugang (Oberfläche, Schnittstelle, mehrere Fenster), also auch bei gleichzeitigen Anfragen.
 
 ## Fehler- und Missbrauchsfälle
 | Fall | Verhalten |
@@ -42,10 +45,11 @@ Die Eindeutigkeit wird auf Datenebene erzwungen, nicht nur in der Oberfläche.
 | Wettlauf zweier gleichzeitiger Starts | beide erhalten dieselbe Konversation |
 
 ## Nachweis
-- `AT-CHAT-002`: API-Test – zweimaliger (auch paralleler) Start liefert dieselbe Konversations-ID (neu zu schreiben; Grundlage: Smoke-Test „Konversation starten“).
+- `AT-CHAT-002`: API-Test – zweimaliger (auch paralleler) Start liefert dieselbe Konversations-ID (neu; Grundlage: Smoke-Test „Konversation starten“).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
+| 1.2 | 2026-10-23 | Review v0.2: R-22 lösungsneutral („Datenebene“ entfernt), Deal-Verweis auf REQ-CHAT-011, Must-Begründung |

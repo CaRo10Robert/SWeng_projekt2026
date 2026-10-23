@@ -3,7 +3,7 @@ id: REQ-NOTI-006
 title: Web-Push-Benachrichtigungen
 type: user-story
 class: functional
-status: in-review
+status: approved
 owner: team-kommunikation
 risk: low
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-05
 source: Wettbewerbsanalyse
 use_cases: [UC-23]
 depends_on: [REQ-UX-001, REQ-NOTI-003]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-NOTI-006]
@@ -44,10 +44,11 @@ Szenario: Push statt Mail
 I: setzt PWA voraus · N: Ereignisse verhandelbar · V: schnellere Antwort · E: mittel · S: ein Sprint · T: E2E mit Browser-Mock.
 
 ## Nachweis
-- `AT-NOTI-006`: E2E-Test mit simuliertem Push-Dienst (neu zu schreiben). Noch nicht umgesetzt (⬜); offline nur eingeschränkt vorführbar.
+- `AT-NOTI-006`: E2E-Test mit simuliertem Push-Dienst (neu). Noch nicht umgesetzt (⬜); offline nur eingeschränkt vorführbar.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: Status in-review → approved nach Review |

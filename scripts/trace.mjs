@@ -14,6 +14,8 @@
  *  4. Jede Nachweis-ID ist im Nachweiskatalog (nachweise.md) definiert
  *  5. Status „verified“ ⇒ Nachweise vorhanden; automatisierte Nachweise (AT-…) kommen in Testquellen vor
  *  6. Jede in Tests markierte AT-ID ist im Katalog; jede in Doku/Code erwähnte REQ-ID existiert
+ *  7. Must hat moscow_reason; Klasse passt zum Typ; interne Markdown-Links und Anker sind gültig
+ *  8. Kano/Risiko im Backlog stimmen mit dem Front Matter überein; offene R1-Must stehen im Backlog
  */
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -34,6 +36,21 @@ const ENUMS = {
   kano: ['basis', 'leistung', 'begeisterung', 'n/a'],
 };
 const REQUIRED = ['id', 'title', 'type', 'class', 'status', 'owner', 'risk', 'release', 'moscow', 'kano', 'epic', 'source', 'version', 'created', 'last_updated'];
+/** Zulässige Klassen je Typ (Review v0.2, R-17). */
+const CLASS_BY_TYPE = {
+  'user-story': ['functional', 'constraint'],
+  'business-rule': ['domain', 'functional', 'constraint'],
+  data: ['domain', 'functional'],
+  api: ['functional', 'constraint'],
+  quality: ['quality'],
+  security: ['constraint', 'quality'],
+  privacy: ['constraint', 'quality', 'functional'],
+  architecture: ['constraint'],
+  operational: ['quality', 'constraint'],
+  discovery: ['functional', 'constraint'],
+};
+const BACKLOG = join(ROOT, 'docs/02-anforderungen/03-backlog.md');
+const RISK_DE = { niedrig: 'low', mittel: 'medium', hoch: 'high' };
 /** Zuordnung Lebenszyklus (Guideline) → Stufenmodell der Vorlesung (Folie 26). */
 const STAGE = {
   draft: 'Platzhalter', 'in-review': 'Konkretisiert', approved: 'Konkretisiert (bereit)', implemented: 'Umsetzung',
@@ -90,6 +107,14 @@ for (const file of files) {
   if (fm.id !== file.replace(/\.md$/, '')) err(file, `id ${fm.id} passt nicht zum Dateinamen`);
   if (reqs.has(fm.id)) err(file, `doppelte ID ${fm.id}`);
   if (fm.risk === 'high' && !(Array.isArray(fm.reviewers) && fm.reviewers.length)) err(file, 'hohes Risiko ohne reviewers');
+  if (fm.class === 'quality' && fm.risk === 'high' && Array.isArray(fm.reviewers) && !fm.reviewers.includes('qa-lead')) {
+    err(file, 'Qualitätsanforderung mit hohem Risiko ohne Reviewer qa-lead');
+  }
+  if (fm.moscow === 'M' && !fm.moscow_reason) err(file, 'Must ohne moscow_reason (Guideline-Kriterium 1–4)');
+  for (const r of [fm.moscow_reason ?? []].flat()) if (!['1', '2', '3', '4'].includes(String(r))) err(file, `moscow_reason ${r} ungültig`);
+  if (fm.type && fm.class && CLASS_BY_TYPE[fm.type] && !CLASS_BY_TYPE[fm.type].includes(fm.class)) {
+    err(file, `Klasse ${fm.class} passt nicht zu Typ ${fm.type} (erlaubt: ${CLASS_BY_TYPE[fm.type].join(', ')})`);
+  }
   if (!new RegExp(`^# ${fm.id} `, 'm').test(text)) err(file, 'Überschrift „# <ID> <Titel>“ fehlt');
   if (fm.type === 'user-story' && !/^## Akzeptanzkriterien/m.test(text)) err(file, 'User Story ohne Akzeptanzkriterien');
   if (fm.class === 'quality' && !/^## Qualitätsmerkmal, Metrik, Messverfahren/m.test(text)) err(file, 'Qualitätsanforderung ohne Merkmal/Metrik/Messverfahren');
@@ -145,6 +170,62 @@ for (const f of referenceFiles) {
   for (const m of text.matchAll(/\bREQ-([A-Z0-9]+)-(\d{3})\b/g)) {
     const id = `REQ-${m[1]}-${m[2]}`;
     if (!reqs.has(id)) err(relative(ROOT, f), `erwähnt unbekannte Anforderung ${id}`);
+  }
+}
+
+// ------------------------------------------------------------------ Interne Markdown-Links (Guideline Kap. 01/12)
+const slug = (h) => h.trim().toLowerCase().replace(/<[^>]+>/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s/g, '-');
+const mdFiles = walk(join(ROOT, 'docs')).concat(join(ROOT, 'README.md')).filter((f) => f.endsWith('.md'));
+const anchors = new Map();
+const anchorsOf = (f) => {
+  if (!anchors.has(f)) {
+    let text = '';
+    try { text = readFileSync(f, 'utf8'); } catch { /* fehlt */ }
+    const set = new Set();
+    const counts = new Map();
+    for (const m of text.matchAll(/^#{1,6}\s+(.+)$/gm)) {
+      const base = slug(m[1]);
+      const n = counts.get(base) ?? 0;
+      counts.set(base, n + 1);
+      set.add(n ? `${base}-${n}` : base);
+    }
+    anchors.set(f, set);
+  }
+  return anchors.get(f);
+};
+for (const f of mdFiles) {
+  const text = readFileSync(f, 'utf8').replace(/```[\s\S]*?```/g, '');
+  for (const m of text.matchAll(/\]\(([^)\s]+)\)/g)) {
+    const target = m[1];
+    if (/^(https?:|mailto:)/.test(target)) continue;
+    const [path, anchor] = target.split('#');
+    const resolved = path ? join(f, '..', decodeURIComponent(path)) : f;
+    let exists = true;
+    try { statSync(resolved); } catch { exists = false; }
+    const rel = relative(ROOT, f).split(sep).join('/');
+    if (!exists) { err(rel, `toter Link ${target}`); continue; }
+    if (anchor && resolved.endsWith('.md') && !anchorsOf(resolved).has(decodeURIComponent(anchor))) {
+      err(rel, `Link ${target}: Anker #${anchor} existiert nicht`);
+    }
+  }
+}
+
+// ------------------------------------------------------------------ Backlog ↔ Front Matter (R-18, R-20)
+const backlogText = (() => { try { return readFileSync(BACKLOG, 'utf8'); } catch { return ''; } })();
+const backlogIds = new Set([...backlogText.matchAll(/\bREQ-[A-Z0-9]+-\d{3}\b/g)].map((m) => m[0]));
+for (const row of backlogText.split('\n').filter((l) => /^\|\s*(B|S)-\d+/.test(l))) {
+  const cells = row.split('|').map((c) => c.trim());
+  const first = cells[4]?.match(/REQ-[A-Z0-9]+-\d{3}/)?.[0];
+  const r = first && reqs.get(first);
+  if (!r) continue;
+  const kano = cells[5];
+  const risk = RISK_DE[cells[6]];
+  if (kano && kano !== '–' && kano !== r.kano) err('03-backlog.md', `${cells[1]}: Kano „${kano}“ ≠ ${first} (${r.kano})`);
+  if (risk && risk !== r.risk) err('03-backlog.md', `${cells[1]}: Risiko „${cells[6]}“ ≠ ${first} (${r.risk})`);
+}
+for (const r of reqs.values()) {
+  if (r.release === 'R1' && r.moscow === 'M' && !['verified', 'operational'].includes(r.status) && !backlogIds.has(r.id)) {
+    warnings.push(`${r.file}: R1-Must noch nicht verifiziert, aber in keinem Backlog-Eintrag`);
   }
 }
 

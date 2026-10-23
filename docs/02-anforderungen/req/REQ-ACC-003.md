@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-07
 source: DSGVO Art. 15, 20
 use_cases: [UC-06]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-ACC-003]
@@ -53,3 +53,4 @@ I · N: Format verhandelbar · V: Rechtspflicht · E: klein · S · T: automatis
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei; Export als direkter Download (statt Mail-Link aus UC-06) festgelegt |
+| 1.2 | 2026-10-23 | Review v0.2: keine inhaltliche Änderung |

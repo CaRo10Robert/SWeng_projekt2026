@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-05
 source: DSGVO Art. 21, UWG § 7
 use_cases: [UC-24]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-NOTI-003]
@@ -50,10 +50,11 @@ Szenario: Sicherheitsmail
 I: unabhängig · N: Kategorien verhandelbar · V: Kontrolle · E/S: klein · T: automatisierbar.
 
 ## Nachweis
-- `AT-NOTI-003`: Szenario-Test – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmail trotzdem (neu zu schreiben).
+- `AT-NOTI-003`: Szenario-Test – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmail trotzdem (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Kategorien und Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |

@@ -9,20 +9,23 @@ risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-06
 source: DSA Art. 16/17, BG-4
 use_cases: [UC-32, UC-33, UC-34]
 depends_on: [REQ-MOD-001, REQ-SEC-006]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
-verification: [AT-MOD-002, AT-MOD-002-2]
+verification: [AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3]
 ---
 
 # REQ-MOD-002 Moderations-Queue bearbeiten
 ## Anforderung
-Als Moderator möchte ich offene Meldungen mit ihrem Kontext in einer Queue sehen und je Fall eine der Entscheidungen *keine Maßnahme*, *Inhalt entfernen*, *verwarnen* oder *sperren* mit Begründung treffen, damit Verstöße zeitnah und nachvollziehbar behandelt werden.
+Als Moderator möchte ich offene Meldungen mit ihrem Kontext in einer Queue sehen und je Fall eine der Entscheidungen *keine Maßnahme*, *Inhalt entfernen*, *verwarnen* oder *sperren* mit Begründung treffen, damit Verstöße nachvollziehbar behandelt werden.
+
+Ein gemeldeter Fall ist **spätestens 10 Sekunden** nach der Meldung in der Queue sichtbar. Die Sperre ist in R1 immer **dauerhaft**; befristete Sperren, die Aufhebung einer Sperre und Widersprüche (DSA Art. 20) laufen außerhalb des Systems per E-Mail an die Moderation (Entscheidungslog Q-15).
 
 ## Begründung
 Ohne Bearbeitung laufen Meldungen ins Leere; DSA Art. 16/17 verlangt eine begründete Entscheidung.
@@ -45,6 +48,11 @@ Szenario: Sperren
   Dann kann sich das betroffene Mitglied nicht mehr anmelden
   Und seine Anzeigen sind nicht mehr sichtbar
   Und die Adresse kann nicht erneut registriert werden (REQ-AUTH-008)
+
+Szenario: Fall erscheint in der Queue
+  Angenommen ein Mitglied meldet eine Nachricht
+  Wenn ich als Moderator die Queue öffne
+  Dann ist der Fall spätestens 10 Sekunden nach der Meldung mit gemeldetem Kontext sichtbar
 ```
 
 | Entscheidung | Anzeige | Nachricht | Profil |
@@ -61,6 +69,7 @@ Szenario: Sperren
 | Fall wurde parallel bereits entschieden | 409, keine zweite Entscheidung |
 | Moderator ist selbst betroffen | Entscheidung abgelehnt |
 | Begründung fehlt oder kürzer als 5 Zeichen | Validierungsfehler |
+| Widerspruch gegen eine Entscheidung | außerhalb des Systems per E-Mail; ein anderer Moderator entscheidet neu als neuer Fall (Q-15) |
 
 ## INVEST
 I: setzt REQ-MOD-001 voraus · N: Darstellung verhandelbar · V: Rechtspflicht · E: mittel · S: ein Sprint · T: Entscheidungstabelle automatisierbar.
@@ -68,6 +77,7 @@ I: setzt REQ-MOD-001 voraus · N: Darstellung verhandelbar · V: Rechtspflicht �
 ## Nachweis
 - `AT-MOD-002`: Smoke-Test – Moderator sieht Seed-Meldung und Wortfilter-Fall und entscheidet „entfernen“ (bestehend: „Moderations-Queue …“, „Moderationsentscheidung“).
 - `AT-MOD-002-2`: Smoke-Test – Mitglied erhält 403 auf die Queue (bestehend: „Mitglied hat keinen Zugriff auf Moderation“).
+- `AT-MOD-002-3`: Smoke-Test – eine über die API erstellte Meldung ist innerhalb von 10 s in der Queue (neu).
 
 
 ## Änderungshistorie
@@ -75,3 +85,4 @@ I: setzt REQ-MOD-001 voraus · N: Darstellung verhandelbar · V: Rechtspflicht �
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: R-08 (nur dauerhafte Sperre, Widerspruch per E-Mail, „zeitnah“ → ≤ 10 s), R-15, R-16 |

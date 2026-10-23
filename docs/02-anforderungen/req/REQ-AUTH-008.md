@@ -8,12 +8,13 @@ owner: team-identity
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-01
 source: DSA Art. 23 (Missbrauch)
 use_cases: [UC-01, UC-33]
 depends_on: [REQ-MOD-002]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-AUTH-008]
@@ -43,7 +44,7 @@ Die Antwort ist neutral, damit sich die Sperre nicht von außen abfragen lässt 
 | Fall | Verhalten |
 |---|---|
 | Groß-/Kleinschreibung, `+`-Alias | über kanonische Adresse erkannt |
-| Sperre wird aufgehoben (EPIC-08) | Adresse wird freigegeben, protokolliert |
+| Sperre soll aufgehoben werden | in R1 keine Funktion: Widerspruch per E-Mail an die Moderation, Freigabe durch einen Admin außerhalb der Oberfläche, Eintrag im Audit-Log (Q-15) |
 
 ## Nachweis
 - `AT-AUTH-008`: neu zu schreiben – Konto per Moderationsentscheidung sperren, Neuregistrierung mit `+`-Alias legt kein Konto an und versendet keine Mail.
@@ -53,3 +54,4 @@ Die Antwort ist neutral, damit sich die Sperre nicht von außen abfragen lässt 
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Szenario und neutrale Antwort präzisiert |
+| 1.2 | 2026-10-23 | Review v0.2: R-08 Aufhebung der Sperre nach Q-15; R-15 moscow_reason |

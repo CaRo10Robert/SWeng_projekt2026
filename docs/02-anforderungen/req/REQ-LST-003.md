@@ -1,19 +1,20 @@
 ---
 id: REQ-LST-003
 title: Bilder hochladen, Metadaten entfernen, Vorschaubilder
-type: privacy
+type: data
 class: functional
-status: in-review
+status: implemented
 owner: team-marktplatz
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1, 2]
 kano: leistung
 epic: EPIC-02
 source: BG-1, DSGVO Art. 25
 use_cases: [UC-10]
 depends_on: [REQ-SEC-007]
-version: 2.0
+version: 3.0
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-LST-003, AT-LST-003-2, AT-LST-003-3]
@@ -22,10 +23,12 @@ verification: [AT-LST-003, AT-LST-003-2, AT-LST-003-3]
 # REQ-LST-003 Bilder hochladen, Metadaten entfernen, Vorschaubilder
 
 ## Anforderung
-Das System muss pro Anzeige **bis zu 8 Bilder** in den Formaten JPEG, PNG, WebP und HEIC mit je **höchstens 10 MB** annehmen. Vor der Veröffentlichung müssen alle eingebetteten Metadaten (EXIF, insbesondere GPS-Position und Gerätedaten) entfernt sein. Für jedes Bild stellt das System eine kleine, eine mittlere und eine große Ansicht bereit. Bis zur Fertigstellung zeigt die Oberfläche einen Platzhalter.
+Das System muss pro Anzeige **bis zu 8 Bilder** in den Formaten JPEG, PNG und WebP mit je **höchstens 10 MB** annehmen. Vor der Veröffentlichung müssen alle eingebetteten Metadaten (EXIF, insbesondere GPS-Position und Gerätedaten) entfernt sein. Für jedes Bild stellt das System eine kleine, eine mittlere und eine große Ansicht bereit. Bis zur Fertigstellung zeigt die Oberfläche einen Platzhalter.
 
 ## Begründung
-Bilder sind entscheidend für den Verkaufserfolg. GPS-Daten in Handyfotos verraten den Wohnort (Privacy by Design). HEIC ist das Standardformat von iPhones.
+Bilder sind entscheidend für den Verkaufserfolg. GPS-Daten in Handyfotos verraten den Wohnort (Privacy by Design). Das iPhone-Format HEIC ist als eigene Anforderung REQ-LST-012 (Could, R2) abgespalten (Entscheidung Q-14).
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar); Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
 
 ## Akzeptanzkriterien
 ```gherkin
@@ -37,6 +40,10 @@ Szenario: Foto mit Standortdaten
 Szenario: Zu viele oder zu große Dateien
   Wenn ich 9 Bilder oder ein Bild über 10 MB hochlade
   Dann wird der Upload mit einer verständlichen Meldung abgelehnt
+
+Szenario: HEIC-Foto
+  Wenn ich ein Foto im Format HEIC hochlade
+  Dann wird es mit dem Hinweis abgelehnt, es als JPEG zu speichern
 
 Szenario: Keine Bilddatei
   Wenn ich eine Datei hochlade, deren Inhalt kein Bild ist (unabhängig von Endung und angegebenem Typ)
@@ -59,12 +66,13 @@ Szenario: Keine Bilddatei
 ## Nachweis
 - `AT-LST-003`: Smoke-Test – Upload, Verarbeitung, Auslieferung als Bild in allen Ansichten.
 - `AT-LST-003-2`: Unit- und Smoke-Test – Formaterkennung am Inhalt, Ablehnung mit 415.
-- `AT-LST-003-3`: Test mit GPS-EXIF-Foto, ausgelieferte Bilder ohne Metadaten (neu zu schreiben).
+- `AT-LST-003-3`: Test mit GPS-EXIF-Foto, ausgelieferte Bilder ohne Metadaten (neu).
 
-**Abweichung:** HEIC wird im MVP mit einer Meldung abgelehnt (ADR-0011 #5). Deshalb Status `in-review`. Technische Umsetzung (Neukodierung) siehe ADR-0007.
+HEIC-Fotos werden mit einer verständlichen Meldung abgelehnt (ADR-0011 #5); ihre Annahme regelt REQ-LST-012. Technische Umsetzung (Neukodierung) siehe ADR-0007.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Lösungsneutral formuliert, Ansichtsgrößen festgelegt, Akzeptanzkriterien |
+| 3.0 | 2026-10-23 | Review v0.2: R-09/R-21 HEIC nach REQ-LST-012 abgespalten (Q-14), damit vollständig umgesetzt; R-17 Typ `data`; Must-Begründung |

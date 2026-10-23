@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-04
 source: Wettbewerbsanalyse
 use_cases: [UC-21]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-CHAT-005]
@@ -52,3 +52,4 @@ I: unabhängig · N: Darstellung verhandelbar · V: Übersicht · E/S: klein · 
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |

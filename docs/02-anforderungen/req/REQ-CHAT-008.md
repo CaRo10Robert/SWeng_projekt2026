@@ -3,7 +3,7 @@ id: REQ-CHAT-008
 title: Bilder im Chat senden
 type: user-story
 class: functional
-status: in-review
+status: approved
 owner: team-kommunikation
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-04
 source: Wettbewerbsanalyse
 use_cases: [UC-21]
 depends_on: [REQ-LST-003]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-CHAT-008]
@@ -50,10 +50,11 @@ Szenario: Fremder Zugriff
 I: setzt Bildverarbeitung voraus · N: Anzahl pro Nachricht verhandelbar · V: weniger Fehlkäufe · E: mittel · S: ein Sprint · T: automatisierbar.
 
 ## Nachweis
-- `AT-CHAT-008`: API-Test Bild senden und Zugriffsschutz (neu zu schreiben). Noch nicht umgesetzt (⬜).
+- `AT-CHAT-008`: API-Test Bild senden und Zugriffsschutz (neu). Noch nicht umgesetzt (⬜).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
+| 1.2 | 2026-10-23 | Review v0.2: Status in-review → approved nach Review |

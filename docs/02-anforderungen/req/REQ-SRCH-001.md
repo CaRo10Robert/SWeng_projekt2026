@@ -8,12 +8,13 @@ owner: team-marktplatz
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [1]
 kano: leistung
 epic: EPIC-03
 source: BG-2
 use_cases: [UC-13]
 depends_on: [REQ-PERF-001]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SRCH-001, AT-SRCH-001-2]
@@ -26,6 +27,8 @@ Als Mitglied möchte ich per Freitext in Titel und Beschreibung suchen, wobei de
 
 ## Begründung
 Suchen ist eine kritische Nutzerreise. Ohne Toleranz finden Mitglieder vorhandene Angebote nicht und weichen auf andere Kanäle aus (BG-2).
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar).
 
 ## Akzeptanzkriterien
 ```gherkin
@@ -70,3 +73,4 @@ I: unabhängig von Filtern (REQ-SRCH-002) · N: Toleranzgrad verhandelbar · V: 
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien inkl. Degradation |
+| 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |

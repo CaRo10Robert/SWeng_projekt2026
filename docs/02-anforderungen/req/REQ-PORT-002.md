@@ -3,15 +3,17 @@ id: REQ-PORT-002
 title: Lauffähig auf x86- und ARM-Rechnern
 type: quality
 class: quality
-status: in-review
+status: approved
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: M
+moscow_reason: [3, 4]
 kano: n/a
 epic: EPIC-00
 source: Risiko R-6
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [CTRL-CI-MULTIARCH]
@@ -43,3 +45,4 @@ Prüfer/innen nutzen unterschiedliche Rechner (Risiko R-6).
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-15 |

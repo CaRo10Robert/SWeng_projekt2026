@@ -3,15 +3,16 @@ id: REQ-AVAIL-002
 title: Wiederherstellungsziele der Datenhaltung
 type: operational
 class: quality
-status: in-review
+status: approved
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: W
 kano: n/a
 epic: EPIC-12
 source: Guideline Kap. 01
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [MAN-AVAIL-002]
@@ -45,3 +46,4 @@ Guideline Kap. 01: RTO und RPO sind für zustandsbehaftete Dienste Pflicht; im P
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Messverfahren ergänzt; als N/A für das Beispiel markiert |
+| 2.1 | 2026-10-23 | Review v0.2: Status nach Review |

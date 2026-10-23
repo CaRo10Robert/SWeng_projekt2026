@@ -3,15 +3,16 @@ id: REQ-AVAIL-001
 title: Verfügbarkeit der kritischen Funktionen
 type: quality
 class: quality
-status: in-review
+status: approved
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: W
 kano: basis
 epic: EPIC-12
 source: BG-6
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-AVAIL-001]
@@ -45,3 +46,4 @@ Ohne Echtbetrieb gibt es keine Felddaten; die Anforderung bleibt für EPIC-12 er
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt; Projektkriterium festgelegt |
+| 2.1 | 2026-10-23 | Review v0.2: Status nach Review |

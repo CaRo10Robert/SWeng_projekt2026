@@ -3,15 +3,17 @@ id: REQ-OPS-002
 title: Beobachtbarkeit ohne personenbezogene Daten
 type: operational
 class: quality
-status: in-review
+status: approved
 owner: team-plattform
 risk: medium
+reviewers: [qa-lead]
 release: R1
 moscow: M
+moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 11, REQ-PRIV-002
-version: 2.0
+version: 2.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-OPS-002, MAN-OPS-002]
@@ -29,15 +31,15 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 |---|---|
 | Qualitätsmerkmal (ISO 25010) | Maintainability → Analysability; Security → Confidentiality |
 | Metrik | (1) Anteil der Anfragen mit Korrelations-ID im Protokoll und Antwortheader; (2) Fundstellen von E-Mail-Adressen, Passwörtern, Tokens oder Cookies in den Protokollen |
-| Akzeptanzkriterium | (1) **100 %**; (2) **0** Fundstellen nach einem vollständigen Smoke-Test; Metrikendpunkt liefert Request-Latenzen, Job-Durchsatz und WebSocket-Verbindungen |
-| Messverfahren | Smoke-Test, danach Durchsuchen der Container-Protokolle nach Adressmustern und Testpasswort |
+| Akzeptanzkriterium | (1) **100 %**; (2) **0** Fundstellen nach einem vollständigen Smoke-Test; (3) Metriken zu Antwortzeiten, verarbeiteten Hintergrundaufgaben und offenen Echtzeitverbindungen sind abrufbar |
+| Messverfahren | Smoke-Test, danach Durchsuchen der Container-Protokolle nach Adressmustern und Testpasswort; Abruf des Metrikendpunkts (`/metrics`, Prometheus-Format) mit Prüfung auf Request-Latenzen, Job-Durchsatz und WebSocket-Verbindungen |
 | Messkontext | Docker-Beispiel, Protokollstufe `info` |
 | Verhalten bei Verfehlung | Release-Blocker bei personenbezogenen Daten im Protokoll |
 
 ## Nachweis
-- `AT-OPS-002`: Smoke-Test `/metrics` (bestehend) plus Protokollsuche nach personenbezogenen Daten (neu zu schreiben).
+- `AT-OPS-002`: Smoke-Test `/metrics` (bestehend) plus Protokollsuche nach personenbezogenen Daten (Protokollsuche neu).
 - `MAN-OPS-002`: Review der Protokollfelder.
-- Umsetzungsstand 🟡: OpenTelemetry noch nicht zuschaltbar.
+- Umsetzungsstand 🟡: verteiltes Tracing (z. B. OpenTelemetry) noch nicht zuschaltbar; Backlog.
 
 
 ## Änderungshistorie
@@ -45,3 +47,4 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
+| 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15 |

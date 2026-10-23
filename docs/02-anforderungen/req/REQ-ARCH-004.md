@@ -2,7 +2,7 @@
 id: REQ-ARCH-004
 title: Mandantenfähigkeit vorbereitet
 type: architecture
-class: domain
+class: constraint
 status: implemented
 owner: team-plattform
 risk: low
@@ -11,7 +11,7 @@ moscow: S
 kano: n/a
 epic: EPIC-10
 source: EPIC-10
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [MAN-ARCH-004]
@@ -39,3 +39,4 @@ Spätere Öffnung für weitere Hochschulen ohne Datenmigration (EPIC-10).
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: R-17 (class constraint) |

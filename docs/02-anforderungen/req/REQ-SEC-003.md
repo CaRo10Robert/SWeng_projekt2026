@@ -8,11 +8,13 @@ owner: team-plattform
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
+review_due: 2027-04-23
 epic: EPIC-01
 source: NIST SP 800-63B
 use_cases: [UC-01, UC-03]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SEC-003]
@@ -37,6 +39,14 @@ Länge und Leak-Abgleich wirken nach NIST besser als Kompositionsregeln; die Off
 
 Die Leak-Liste ist ohne neues Image austauschbar.
 
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Leak-Liste ist veraltet | Datei ist austauschbar; Aktualisierung zum `review_due` |
+| Passwort enthält die eigene Adresse in anderer Schreibweise | Vergleich ohne Groß-/Kleinschreibung |
+| Extrem lange Eingabe | > 256 Zeichen abgelehnt |
+| Leak-Liste nicht lesbar | Prüfung auf Länge und Adresse bleibt aktiv, Warnung im Log |
+
 ## Nachweis
 - `AT-SEC-003`: Unit-Test der Tabelle (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „Passwortrichtlinie“).
 
@@ -45,3 +55,4 @@ Die Leak-Liste ist ohne neues Image austauschbar.
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
+| 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-16 review_due; R-15 moscow_reason |

@@ -9,11 +9,12 @@ risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [1, 2]
 kano: basis
 epic: EPIC-01
 source: BG-1
 use_cases: [UC-01]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-AUTH-001, AT-AUTH-001-2]
@@ -37,9 +38,11 @@ Normalisierung vor der Prüfung: Leerzeichen trimmen, Domain in Kleinbuchstaben.
 | 3 | `max@mail.hwg-lu.de` | nein (Subdomain ≠ Eintrag) | – | ❌ ablehnen |
 | 4 | `max@hwg-lu.de.evil.com` | nein | – | ❌ ablehnen |
 | 5 | `max@uni-mannheim.de` | nein | – | ❌ ablehnen (Backlog EPIC-10) |
-| 6 | `max+test@studmail.hwg-lu.de` | ja | ja | ✅ zulassen, Eindeutigkeit auf `max@studmail.hwg-lu.de` |
+| 6 | `max+test@studmail.hwg-lu.de` | ja | ja | ✅ zulassen; Eindeutigkeit über die kanonische Adresse `max@studmail.hwg-lu.de`; Mails und Kontaktfreigabe nutzen die **eingegebene** Adresse (Q-2) |
 | 7 | beliebige Adresse einer Domain mit Status `deaktiviert` | ja | nein | ❌ ablehnen |
 | 8 | syntaktisch ungültige Adresse (kein/mehrere `@`, leerer lokaler Teil) | – | – | ❌ ablehnen als „ungültiges Format“ |
+
+Funktionspostfächer (z. B. einer Fachschaft) sind zugelassen, wenn ihre Domain auf der Whitelist steht (Q-2). Ob die Mailserver der Hochschule Plus-Adressierung zustellen, klärt Spike S-01 mit dem Rechenzentrum.
 
 Ablehnungen nennen den Grund („Registrierung nur mit einer E-Mail-Adresse der HWG LU möglich“); sie verraten nichts über bestehende Konten (REQ-AUTH-004).
 
@@ -60,3 +63,4 @@ Ablehnungen nennen den Grund („Registrierung nur mit einer E-Mail-Adresse der 
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Zeile 8 (Formatfehler) aus der Umsetzung ergänzt |
+| 1.2 | 2026-10-23 | Review v0.2: R-27 Zeile 6 und Funktionspostfächer nach Q-2; R-15 moscow_reason |

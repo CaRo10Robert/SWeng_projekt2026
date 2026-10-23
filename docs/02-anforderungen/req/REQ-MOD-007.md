@@ -9,11 +9,12 @@ risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-06
 source: REQ-SEC-006
 use_cases: [UC-42]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-MOD-007, AT-MOD-007-2]
@@ -59,3 +60,4 @@ I: unabhängig · N · V: verteilte Verantwortung · E: klein · S · T: automat
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: R-15, R-16 |

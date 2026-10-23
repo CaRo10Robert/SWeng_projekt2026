@@ -8,12 +8,13 @@ owner: team-marktplatz
 risk: medium
 release: R1
 moscow: M
+moscow_reason: [2]
 kano: basis
 epic: EPIC-06
 source: BG-4, DSA, Hochschulordnung
 use_cases: [UC-10, UC-11, UC-32]
 depends_on: [REQ-MOD-002]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-LST-010, AT-LST-010-2]
@@ -22,10 +23,12 @@ verification: [AT-LST-010, AT-LST-010-2]
 # REQ-LST-010 Verbotene Inhalte vor Veröffentlichung in die Moderation
 
 ## Anforderung
-Das System muss Anzeigen, deren Titel oder Beschreibung Begriffe aus der **Verbotsliste** enthalten (z. B. Waffen, Drogen, verschreibungspflichtige Medikamente, Prüfungslösungen, gefälschte Ausweise), **vor** der Veröffentlichung in die Moderation leiten. Das gilt bei Neuanlage und bei Bearbeitung. Die Verbotsliste ist pflegbare Konfiguration.
+Das System muss Anzeigen, deren Titel oder Beschreibung Begriffe aus der **Verbotsliste** enthalten (z. B. Waffen, Drogen, verschreibungspflichtige Medikamente, Prüfungslösungen, gefälschte Ausweise), **vor** der Veröffentlichung in die Moderation leiten. Das gilt bei Neuanlage und bei Bearbeitung: Eine aktive Anzeige wechselt bei einem Treffer nach „in Prüfung“ ([Zustandsmodell Anzeige](../02-anforderungen.md#4-zustandsmodell-anzeige-normativ)). Die Verbotsliste ist pflegbare Konfiguration.
 
 ## Begründung
 Schutz vor rechtswidrigen und hochschulschädlichen Angeboten (BG-4); reduziert die Moderationslast gegenüber nachträglicher Entfernung.
+
+**Must-Begründung:** Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
 
 ## Akzeptanzkriterien
 | Text | Treffer | Ergebnis |
@@ -58,3 +61,4 @@ Szenario: Anzeige in Prüfung
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle, Bearbeitung eingeschlossen |
+| 1.2 | 2026-10-23 | Review v0.2: R-05 Übergang aktiv → in Prüfung bei Bearbeitung mit Verweis auf §4; Must-Begründung; „Moderations-Queue“ |

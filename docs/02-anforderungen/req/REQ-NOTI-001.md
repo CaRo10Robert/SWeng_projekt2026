@@ -3,17 +3,19 @@ id: REQ-NOTI-001
 title: Transaktionale E-Mails
 type: user-story
 class: functional
-status: in-review
+status: implemented
 owner: team-kommunikation
 risk: high
 reviewers: [product-owner, security-lead]
 release: R1
 moscow: M
+moscow_reason: [1, 2]
 kano: basis
 epic: EPIC-05
 source: BG-1, DSA Art. 17, DSGVO Art. 17
 use_cases: [UC-23]
-version: 1.1
+depends_on: [REQ-AUTH-002, REQ-AUTH-004, REQ-AUTH-006, REQ-NOTI-002, REQ-LST-008, REQ-MOD-003, REQ-ACC-002, REQ-NOTI-005]
+version: 2.0
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-NOTI-001, AT-NOTI-001-2]
@@ -34,13 +36,14 @@ Das System **muss** folgende E-Mails versenden:
 | Neue Nachricht | ungelesene Nachricht (REQ-NOTI-002) | ja |
 | Ablauf-Erinnerung | 7 Tage vor Ablauf (REQ-LST-008) | ja |
 | Moderationsentscheidung | Entscheidung zu Meldung (REQ-MOD-003) | nein |
-| Re-Verifikation | alle 12 Monate (REQ-AUTH-007) | nein |
 | Löschung angekündigt / abgeschlossen | Kontolöschung (REQ-ACC-002) | nein |
 
-Alle E-Mails sind auf Deutsch, enthalten einen Link zur Plattform und keine Chatinhalte.
+Alle E-Mails sind auf Deutsch, enthalten einen Link zur Plattform und keine Chatinhalte. Die Re-Verifikationsmail gehört zu REQ-AUTH-007 (R2, Entscheidung Q-14); die Kontaktfreigabe (REQ-CHAT-010) hat keine eigene Mailart.
 
 ## Begründung
 Ohne Verifikationsmail ist keine Registrierung möglich (BG-1). Moderations- und Löschmitteilungen sind rechtlich gefordert.
+
+**Must-Begründung:** Kriterium 1 (Release-Ziel nicht ohne sie erreichbar); Kriterium 2 (Sicherheits-, Datenschutz- oder Rechtsrisiko bei Fehlen).
 
 ## Akzeptanzkriterien
 ```gherkin
@@ -65,12 +68,11 @@ I: Versandzuverlässigkeit separat (REQ-NOTI-005) · N: Texte verhandelbar · V:
 
 ## Nachweis
 - `AT-NOTI-001`: Smoke-Test – Verifikationsmail erscheint in Mailpit.
-- `AT-NOTI-001-2`: Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu zu schreiben).
-
-**Teilweise umgesetzt (🟡):** Re-Verifikationsmail fehlt (hängt an REQ-AUTH-007).
+- `AT-NOTI-001-2`: Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Tabelle der Mailarten mit Abbestellbarkeit |
+| 2.0 | 2026-10-23 | Review v0.2: R-15/R-21 Re-Verifikationsmail nach REQ-AUTH-007 (R2) verschoben, damit vollständig umgesetzt; `depends_on` gefüllt; Must-Begründung |

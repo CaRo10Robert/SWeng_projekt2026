@@ -12,7 +12,7 @@ kano: begeisterung
 epic: EPIC-02
 source: Personas, Wettbewerbsanalyse
 use_cases: [UC-10]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-LST-005]
@@ -44,14 +44,13 @@ Szenario: Andere Kategorie
   Dann werden Studiengang, Modul und ISBN nicht abgefragt
 ```
 
-## INVEST
-I: unabhängig · N: Attributliste verhandelbar · V: bessere Auffindbarkeit · E/S: klein · T: automatisierbar.
 
 ## Nachweis
-- `AT-LST-005`: API-Test – Attribute werden gespeichert und ausgeliefert, ungültige ISBN → 422 (neu zu schreiben).
+- `AT-LST-005`: API-Test – Attribute werden gespeichert und ausgeliefert, ungültige ISBN → 422 (neu).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Formate und Szenarien |
+| 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |

@@ -3,7 +3,7 @@ id: CASE-GAP
 type: analysis
 status: in-review
 owner: team-produkt
-version: 1.0
+version: 1.1
 created: 2026-10-23
 last_updated: 2026-10-23
 source: "MWI131 Software Engineering, Kap. 2 „Requirements und iterative Entwicklung“ (P. Weber, 2026)"
@@ -61,12 +61,12 @@ Legende Status: ✅ bereits erfüllt · 🟡 teilweise erfüllt · ❌ fehlt · 
 |---|---|---|---|---|
 | A-1 | FS-C1 Kontaktdaten erst nach beidseitiger Zustimmung | Kontaktdaten werden **nie** gezeigt, Kommunikation nur im Chat (REQ-CHAT-001, REQ-PRIV-002) | ⚠️ | **Übernommen.** Neue Anforderung REQ-CHAT-010 und Use Case UC-25 „Kontaktdaten freigeben“: Beide Teilnehmer einer Konversation stimmen zu, erst dann sieht jeder die Hochschul-E-Mail-Adresse des anderen. Zustimmung ist widerrufbar. REQ-PRIV-002 und REQ-CHAT-001 werden angepasst (Version 2). |
 | A-2 | FS-C2 Tastaturbedienbarkeit | WCAG 2.2 AA als Must (REQ-A11Y-001), aber ohne Metrik und ohne Test | 🟡 | **Übernommen.** Neue Anforderung REQ-A11Y-002 mit Metrik: Kernabläufe (Anmelden, Suchen, Anzeige erstellen inkl. Bild, Nachricht senden, Melden, Kontaktfreigabe) automatisiert **nur per Tastatur** durchlaufbar; axe-core: 0 Verstöße der Stufen `serious`/`critical` auf den Kernseiten. |
-| A-3 | FS-C3 Anmeldung über die Hochschulkennung | Anmeldung mit verifizierter **Hochschul-E-Mail-Adresse** und eigenem Passwort (ADR-0003). SSO über Shibboleth/DFN-AAI im Backlog (INST-04, OPS-08) | ⚠️ | **Offene Entscheidung Q-12** (siehe §3). Bis zur Klärung gilt: Die Hochschulkennung wird durch die verifizierte Hochschuladresse repräsentiert (REQ-AUTH-001/002). Die Anmeldung wird hinter einem Port gekapselt, damit SSO ohne Umbau nachrüstbar ist (neue Anforderung REQ-AUTH-009). |
+| A-3 | FS-C3 Anmeldung über die Hochschulkennung | Anmeldung mit verifizierter **Hochschul-E-Mail-Adresse** und eigenem Passwort (ADR-0003). SSO über Shibboleth/DFN-AAI im Backlog (INST-04, OPS-08) | ⚠️ | **Dokumentierte Abweichung** nach vorläufiger Entscheidung Q-12 (Option C, [Entscheidungslog](05-entscheidungen.md), ADR-0013): Die Hochschulkennung wird durch die verifizierte Hochschuladresse repräsentiert; die Anmeldung ist austauschbar gekapselt (REQ-AUTH-009, Must). **Mit Dozent/in abzustimmen** (Spike S-01). |
 | A-4 | FS-C4 Angebote nur von verifizierten Nutzern | Implizit erfüllt (nur verifizierte Konten können sich anmelden), aber nicht als prüfbare Anforderung formuliert | 🟡 | **Übernommen.** Neue Anforderung REQ-SEC-011 mit Abuse Cases (unverifiziert, gesperrt, Löschung beantragt, abgelaufene Sitzung) und automatisiertem Test. |
 | A-5 | FS-C5 Constraints messbar und nachvollziehbar | Constraints verstreut, ohne durchgängige Kette bis zum Test | 🟡 | **Übernommen.** Constraint-Tabelle mit Operationalisierung und Prüfverfahren in [02-anforderungen.md §3](02-anforderungen.md#3-constraints-und-ihre-operationalisierung). Nachweis-IDs (`AT-…`) verknüpfen Anforderung und Test, ein Skript prüft die Kette automatisch. |
 | A-6 | FS-M1 Vorgehensmodell mit Rollen und Artefakten | Sprint-Plan im Backlog, aber Rollen, Events und Artefakte nicht beschrieben | ❌ | **Übernommen.** [04-vorgehen.md](04-vorgehen.md): Scrum mit Tailoring für das Studienprojekt. |
 | A-7 | FS-M2 Domänenanforderungen als eigene Klasse | Nur funktional/nichtfunktional | 🟡 | **Übernommen.** Feld `class: functional | quality | domain | constraint` im Front Matter. Domänenanforderungen sind z. B. Whitelist, Campus-Standorte, Nutzertypen. |
-| A-8 | FS-M3 Merkmal, Metrik, Akzeptanzkriterium, Messverfahren | SLI/SLO-Tabelle vorhanden, für Sicherheit, Usability und Wartbarkeit fehlen Metrik und Messverfahren oft | 🟡 | **Übernommen.** Jede Qualitätsanforderung hat die Abschnitte Qualitätsmerkmal (ISO 25010), Metrik, Akzeptanzkriterium und Messverfahren und -kontext. |
+| A-8 | FS-M3 Merkmal, Metrik, Akzeptanzkriterium, Messverfahren | SLI/SLO-Tabelle vorhanden, für Sicherheit, Usability und Wartbarkeit fehlen Metrik und Messverfahren oft | 🟡 | **Übernommen.** Jede Anforderung der Klasse `quality` hat die Abschnitte Qualitätsmerkmal (ISO 25010), Metrik, Akzeptanzkriterium und Messverfahren und -kontext; `trace.mjs` erzwingt das. Sicherheitskontrollen ohne Metrik sind als `constraint` mit Prüfkriterien geführt (Review v0.2, R-03). |
 | A-9 | FS-M4 Kano-Kategorien | Fehlen | ❌ | **Übernommen.** Feld `kano` im Front Matter und Spalte im Backlog. Constraints sind als „Basis“ eingestuft, wenn ihr Fehlen Vertrauen zerstört. |
 | A-10 | FS-M5 Keine Lösungsideen in der Spezifikation | Mehrere Anforderungen schreiben Technik vor (z. B. „transaktional eingereihter Job“, „signierte URLs“) | ⚠️ | **Übernommen.** Technik wandert in ADRs. Ausnahmen sind ausdrücklich als Constraint markiert, wenn die Technik selbst die Anforderung ist (z. B. Argon2id als Sicherheitskontrolle nach Guideline). |
 | A-11 | FS-M7 Validierung | Review v0.1 vorhanden, aber ohne festgelegte Kriterien | 🟡 | **Übernommen.** Requirements-Review mit Checkliste (IEEE 29148 / Guideline-Qualitätscheckliste, INVEST) in [docs/04-review/review-v0.2-anforderungen.md](../04-review/review-v0.2-anforderungen.md). |
@@ -92,7 +92,11 @@ Legende Status: ✅ bereits erfüllt · 🟡 teilweise erfüllt · ❌ fehlt · 
 
 **Bis zur Entscheidung durch Dozent/in bzw. Product Owner gilt Option C** (REQ-AUTH-009, Status `draft`). Die Entscheidung wird als ADR festgehalten.
 
-## 4. Quellen der Anforderungen (FS-M6)
+## 4. Stand nach dem Requirements-Review v0.2
+
+Das [Requirements-Review v0.2](../04-review/review-v0.2-anforderungen.md) hat 32 Befunde ergeben (2 kritisch, 9 hoch); die Behebung ist dort je Befund dokumentiert. Offene fachliche Fragen wurden im [Entscheidungslog](05-entscheidungen.md) vorläufig entschieden (Q-1 … Q-19) und sind vom Product Owner bzw. Dozent/in zu bestätigen.
+
+## 5. Quellen der Anforderungen (FS-M6)
 
 | Quelle | Beispiele im Projekt |
 |---|---|

@@ -3,7 +3,7 @@ id: PROCESS
 type: process
 status: in-review
 owner: team-produkt
-version: 1.0
+version: 1.1
 created: 2026-10-23
 last_updated: 2026-10-23
 ---
@@ -35,7 +35,18 @@ flowchart LR
 | Product Owner (`product-owner`) | ein Teammitglied, Abstimmung mit Dozent/in als Auftraggeber | Produktnutzen, Priorisierung, Freigabe von Anforderungen, Entscheidung über Change Requests |
 | Scrum Master | ein Teammitglied, rotierend pro Sprint | Einhaltung der Regeln, Beseitigen von Blockern, Moderation der Events |
 | Developers | gesamtes Team | Architektur, UX, Entwicklung, Test, Dokumentation |
-| Zusatzrollen (Hüte) | `security-lead`, `architecture-lead`, `qa-lead` | Pflicht-Reviewer für Anforderungen mit hohem Risiko (Guideline Kap. 01) und für ADRs |
+| Zusatzrollen (Hüte) | `security-lead`, `architecture-lead`, `qa-lead` | Pflicht-Reviewer für Anforderungen mit hohem Risiko (Guideline Kap. 01) und für ADRs: Sicherheit, Datenschutz, Identität → `security-lead`; Architektur, Betrieb → `architecture-lead`; Barrierefreiheit, UX, alle Qualitätsanforderungen → `qa-lead` (Guideline: QA legt die Verifikationsmethode fest) |
+
+**Owner im Front Matter.** Das Feld `owner` nennt das verantwortliche Teilteam. Jedes Teilteam hat eine benannte Person als Ansprechpartner; die Zuordnung pflegt das Team zu Projektbeginn in dieser Tabelle (Review v0.1 D-3):
+
+| Owner | Verantwortungsbereich | Ansprechperson |
+|---|---|---|
+| `team-identity` | Registrierung, Anmeldung, Rollen | *(bei Teambildung eintragen)* |
+| `team-marktplatz` | Anzeigen, Suche | *(bei Teambildung eintragen)* |
+| `team-kommunikation` | Chat, Kontaktfreigabe, E-Mail | *(bei Teambildung eintragen)* |
+| `team-vertrauen` | Meldungen, Moderation | *(bei Teambildung eintragen)* |
+| `team-produkt` | Konto, Datenschutz, Barrierefreiheit, Anforderungsprozess | Product Owner |
+| `team-plattform` | Architektur, Betrieb, Sicherheit der Plattform, CI | *(bei Teambildung eintragen)* |
 
 ### Events und Artefakte
 
@@ -125,6 +136,8 @@ Weighted Shortest Job First: **WSJF = Cost of Delay / Job Size**, mit
 - Nutzerwert wird aus der Kano-Kategorie abgeleitet: Basis = 8, Leistung = 5, Begeisterung = 3, nicht kundenwirksam = 1 (Anpassung im Refinement möglich).
 - Zeitkritikalität: Abgabetermin, Abhängigkeiten anderer Einträge, Vorführbarkeit im Review.
 - Risikoreduktion: senkt ein Sicherheits-, Rechts- oder Technikrisiko oder ermöglicht weitere Einträge.
+- **Reihenfolge:** Abhängigkeiten gehen vor WSJF. Spikes werden mit fester Timebox **vor** dem abhängigen Eintrag eingeplant und erhalten keinen WSJF-Wert (sie liefern eine Entscheidung, keinen Nutzerwert).
+- **Must-Begründung:** Jede Must-Anforderung nennt im Front Matter `moscow_reason` das zutreffende Kriterium der Guideline (1 Release-Ziel, 2 Sicherheits-/Datenschutz-/Rechtsrisiko, 3 Betreibbarkeit, 4 Verpflichtung); `trace.mjs` prüft das.
 - MoSCoW legt den Release-Umfang fest; WSJF legt die Reihenfolge **innerhalb** dieses Umfangs fest. Constraints (Sicherheit, Recht) werden nicht wegen geringen sichtbaren Werts abgewertet (Guideline Kap. 01, MoSCoW-Governance).
 
 ## 6. Nachverfolgbarkeit
@@ -158,7 +171,8 @@ Der Status im Front Matter folgt der Guideline; die Zuordnung zum Stufenmodell d
 1. **Anforderung** (`req/REQ-….md`) nennt ihre Nachweise in `verification`.
 2. **Test** trägt die Nachweis-ID im Namen, z. B. `check('[AT-CHAT-010] …')`.
 3. **Commit** nennt die Anforderung im Footer: `Refs: REQ-CHAT-010` (Conventional Commits). Damit führt `git log --grep REQ-CHAT-010` bzw. `git blame` vom Code zurück zur Anforderung.
-4. **`node scripts/trace.mjs`** prüft die Kette (IDs eindeutig, Verweise gültig, Nachweise vorhanden, verifizierte Anforderungen haben markierte Tests) und erzeugt den Index mit aggregierten Ständen (`--write`, z. B. „R1-Must verifiziert: x %“). In CI läuft das Skript bei jedem Pull Request.
+4. **Verifikationsziel:** ≥ 40 % der R1-Must nach Sprint 1, ≥ 70 % nach Sprint 3, 100 % vor der Abgabe (Kennzahl „R1-Must verifiziert“ aus dem Index).
+5. **`node scripts/trace.mjs`** prüft die Kette (IDs eindeutig, Verweise und Markdown-Links gültig, Must begründet, Typ und Klasse passend, Nachweise vorhanden, verifizierte Anforderungen haben markierte Tests, Kano/Risiko im Backlog stimmen mit den Anforderungen überein, offene R1-Must stehen im Backlog) und erzeugt den Index mit aggregierten Ständen (`--write`, z. B. „R1-Must verifiziert: x %“). In CI läuft das Skript bei jedem Pull Request.
 
 ## 7. Change-Management
 

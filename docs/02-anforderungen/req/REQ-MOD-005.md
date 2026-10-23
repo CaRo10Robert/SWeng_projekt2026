@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-06
 source: BG-1
 use_cases: [UC-31]
-version: 1.1
+version: 1.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-MOD-005]
@@ -21,6 +21,8 @@ verification: [AT-MOD-005]
 # REQ-MOD-005 Mitglieder blockieren
 ## Anforderung
 Als Mitglied möchte ich andere Mitglieder blockieren und wieder entsperren, damit ich keine Nachrichten mehr von ihnen erhalte und ihre Anzeigen nicht mehr sehe.
+
+Die Blockierung wirkt **gegenseitig**: Keine der beiden Personen kann der anderen schreiben, und beide sehen die Anzeigen der jeweils anderen nicht (konsistent zu REQ-SRCH-006). Die blockierte Person wird nicht benachrichtigt.
 
 ## Begründung
 Selbstschutz vor Belästigung ohne Moderationsaufwand.
@@ -57,3 +59,4 @@ I: unabhängig · N: Umfang der Ausblendung verhandelbar · V: Schutz · E: klei
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
+| 1.2 | 2026-10-23 | Review v0.2: R-08 (gegenseitige Blockierung ausdrücklich) |
