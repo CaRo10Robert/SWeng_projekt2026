@@ -27,8 +27,14 @@ export function useConversations() {
   });
 }
 
-export const useConversation = (id: string) =>
-  useQuery({ queryKey: ['conversation', id], queryFn: () => api<ConversationSummary>(`/conversations/${id}`) });
+export function useConversation(id: string) {
+  const refetchInterval = usePollInterval();
+  return useQuery({
+    queryKey: ['conversation', id],
+    queryFn: () => api<ConversationSummary>(`/conversations/${id}`),
+    refetchInterval,
+  });
+}
 
 export function useMessages(id: string) {
   const qc = useQueryClient();
@@ -113,6 +119,11 @@ export function useContactAction(conversationId: string) {
       void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
       void qc.invalidateQueries({ queryKey: ['conversations'] });
       void qc.invalidateQueries({ queryKey: ['messages', conversationId] });
+    },
+    // Zustand hat sich zwischenzeitlich geändert (z. B. Gegenüber hat abgelehnt): aktuellen Stand nachladen
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
+      void qc.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
 }

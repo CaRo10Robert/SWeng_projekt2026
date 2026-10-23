@@ -72,6 +72,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-CHAT-010` | automatisiert | REQ-CHAT-010 | Smoke-Test – einseitige Zustimmung gibt nichts preis, beidseitige Zustimmung zeigt die Adresse, Systemnachricht ohne Adresse, Widerruf blendet sie aus (neu). |
 | `AT-CHAT-010-2` | automatisiert | REQ-CHAT-010 | Smoke-Test – fremder Nutzer erhält „nicht gefunden“ (neu). |
 | `AT-CHAT-010-3` | automatisiert | REQ-CHAT-010 | Smoke-Test – Ablehnen, Sperrfrist für erneute Anfragen und Höchstzahl je Konversation (neu). |
+| `AT-CHAT-010-4` | automatisiert | REQ-CHAT-010 | Smoke-Test – Zurückziehen vor Zustimmung entfernt die offene Anfrage; Blockierung blendet ausgetauschte Adressen für beide aus, neue Zustimmung ergibt „Kontakt nicht möglich“ (neu, Code-Review CR-14). |
 | `AT-CHAT-011` | automatisiert | REQ-CHAT-011 | Smoke-Test – der Anbieter reserviert aus der Konversation, Deal ist „vereinbart“, Anzeige „reserviert“. |
 | `AT-CHAT-011-2` | automatisiert | REQ-CHAT-011 | Smoke-Test – der Interessent darf den Deal nicht steuern. |
 | `AT-DEMO-001` | automatisiert | REQ-DEMO-001 | Smoke-Test – Login mit Demo-Konto, Suche liefert Anzeigen, Queue ≥ 2 Fälle (bestehend: „Moderations-Queue enthält Seed-Meldung und Wortfilter-Fall“). |

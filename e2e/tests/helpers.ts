@@ -128,3 +128,9 @@ export async function createListing(s: Session, title: string) {
     locationIds: [meta.locations[0]!.id],
   });
 }
+
+export type Conversation = { id: string; listing: { status: string } };
+
+/** Konversation mit noch vorhandener Anzeige, damit die geprüfte Seite der gemeinte Kernablauf ist. */
+export const liveConversation = (conversations: Conversation[]) =>
+  conversations.find((c) => c.listing.status !== 'removed' && c.listing.status !== 'deleted') ?? conversations[0]!;

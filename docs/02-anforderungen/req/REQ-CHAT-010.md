@@ -15,10 +15,10 @@ epic: EPIC-04
 source: FS-C1
 use_cases: [UC-25]
 depends_on: [REQ-CHAT-001, REQ-PRIV-002]
-version: 2.1
+version: 2.2
 created: 2026-10-23
-last_updated: 2026-10-23
-verification: [AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3]
+last_updated: 2026-10-24
+verification: [AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3, AT-CHAT-010-4]
 ---
 
 # REQ-CHAT-010 Kontaktdaten erst nach beidseitiger Zustimmung freigeben
@@ -90,7 +90,9 @@ Szenario: Anzeige abgegeben oder gelöscht
 |---|---|
 | Nicht-Teilnehmer ruft die Freigabe auf | nicht gefunden, keine Existenzpreisgabe (REQ-SEC-006) |
 | Doppelte Zustimmung (Wiederholung) | idempotent, keine zweite Systemnachricht |
-| Wiederholte Anfragen nach Ablehnung oder Widerruf (Bedrängen) | erneute Anfrage frühestens **24 h** nach Ablehnung bzw. Widerruf, höchstens **3 Anfragen je Teilnehmer und Konversation**; danach Hinweis „nicht mehr möglich“ |
+| Wiederholte Anfragen nach Ablehnung oder Widerruf (Bedrängen) | erneute Anfrage frühestens **24 h** nach Ablehnung bzw. Widerruf, höchstens **3 Anfragen je Teilnehmer und Konversation**; danach Hinweis „nicht mehr möglich“. Nach eigenem Widerruf gilt die Sperrfrist auch dann, wenn das Gegenüber seine Zustimmung nicht zurückgezogen hat; erneutes Zustimmen zählt dann als Anfrage |
+| Schnelles Wechseln zwischen Zustimmen und Widerrufen | durch die Sperrfrist ausgeschlossen; zusätzlich technische Obergrenze von 20 Kontaktaktionen je Nutzer und Stunde |
+| Blockierung wird wieder aufgehoben | frühere Zustimmungen gelten wieder, jede Seite kann sie jederzeit widerrufen (Entscheidung Q-21, vorläufig) |
 | Konto des Gegenübers gesperrt oder gelöscht | Adresse wird nicht mehr angezeigt |
 | Blockierung nach erfolgter Freigabe | Adresse wird für beide ausgeblendet |
 | Massenhaftes Abgreifen von Adressen | nur in bestehenden Konversationen möglich, die das Gegenüber zulässt; Konversationsanlage ist begrenzt (REQ-CHAT-007) |
@@ -103,6 +105,7 @@ I: unabhängig von Deal und Bewertung · N: Umfang der Kontaktdaten und Grenzen 
 - `AT-CHAT-010`: Smoke-Test – einseitige Zustimmung gibt nichts preis, beidseitige Zustimmung zeigt die Adresse, Systemnachricht ohne Adresse, Widerruf blendet sie aus (neu).
 - `AT-CHAT-010-2`: Smoke-Test – fremder Nutzer erhält „nicht gefunden“ (neu).
 - `AT-CHAT-010-3`: Smoke-Test – Ablehnen, Sperrfrist für erneute Anfragen und Höchstzahl je Konversation (neu).
+- `AT-CHAT-010-4`: Smoke-Test – Zurückziehen vor Zustimmung entfernt die offene Anfrage; Blockierung blendet ausgetauschte Adressen für beide aus, neue Zustimmung ergibt „Kontakt nicht möglich“ (neu, Code-Review CR-14).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -110,3 +113,4 @@ I: unabhängig von Deal und Bewertung · N: Umfang der Kontaktdaten und Grenzen 
 | 1.0 | 2026-10-23 | Erstfassung aus Fallstudie FS-C1 (Abgleich A-1) |
 | 2.0 | 2026-10-23 | Review v0.2: R-10 Ablehnen, Zurückziehen, Sperre/Löschung, abgegebene Anzeige, Schutz vor wiederholten Anfragen, gezeigte Adresse (Q-2), nie als Nachrichtentext, Export und Löschung, Benachrichtigung, Grenzen des Widerrufs; INVEST lösungsneutral; Must-Begründung |
 | 2.1 | 2026-10-23 | Umgesetzt (Schritt 6): Tabelle messaging.contact_consent, POST /conversations/:id/contact, ContactShare in der SPA; Nachweise AT-CHAT-010/-2/-3 im Smoke-Test, Tastaturablauf in AT-A11Y-002; Status → implemented |
+| 2.2 | 2026-10-24 | Code-Review v1.1: CR-02 Sperrfrist nach eigenem Widerruf auch bei weiter bestehender Zustimmung des Gegenübers, Obergrenze für Kontaktaktionen; CR-09 Aufheben der Blockierung (Q-21); CR-14 Nachweis AT-CHAT-010-4 |

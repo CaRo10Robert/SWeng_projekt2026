@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { apiSession, DEMO, keyboardLogin } from './helpers';
+import { apiSession, DEMO, keyboardLogin, liveConversation, type Conversation } from './helpers';
 
 test('[AT-UX-001] Kein horizontales Scrollen bei 360 px Breite', async ({ browser, request, baseURL }) => {
   const lea = await apiSession(request, baseURL!, DEMO.lea);
   const listingId = (await lea.call<{ items: { id: string }[] }>('GET', '/listings?q=Statistik')).items[0]!.id;
-  const conversationId = (await lea.call<{ id: string }[]>('GET', '/conversations'))[0]!.id;
+  const conversationId = liveConversation(await lea.call<Conversation[]>('GET', '/conversations')).id;
 
-  const page = await (await browser.newContext({ viewport: { width: 360, height: 780 }, locale: 'de-DE' })).newPage();
+  const context = await browser.newContext({ viewport: { width: 360, height: 780 }, locale: 'de-DE' });
+  const page = await context.newPage();
   await keyboardLogin(page, DEMO.lea);
   const overflow: string[] = [];
   for (const path of ['/', `/listings/${listingId}`, '/listings/new', `/messages/${conversationId}`]) {
@@ -14,6 +15,7 @@ test('[AT-UX-001] Kein horizontales Scrollen bei 360 px Breite', async ({ browse
     await page.waitForLoadState('networkidle');
     if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) overflow.push(path);
   }
+  await context.close();
   expect(overflow).toEqual([]);
 });
 
@@ -36,6 +38,8 @@ test('[AT-PRIV-006] Keine Anfragen an fremde Hosts und nur das Sitzungs-Cookie',
     await page.goto(path);
     await page.waitForLoadState('networkidle');
   }
+  const cookies = (await context.cookies()).map((c) => c.name);
+  await context.close();
   expect([...foreign]).toEqual([]);
-  expect((await context.cookies()).map((c) => c.name)).toEqual(['cm_session']);
+  expect(cookies).toEqual(['cm_session']);
 });

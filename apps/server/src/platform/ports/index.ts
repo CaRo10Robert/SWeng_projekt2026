@@ -109,8 +109,6 @@ export interface RateLimitResult {
 export interface RateLimitStore {
   /** Zählt einen Treffer für `key` im festen Zeitfenster und prüft gegen `limit`. */
   hit(key: string, limit: number, windowSeconds: number): Promise<RateLimitResult>;
-  /** Zählerstand ohne Erhöhung (z. B. Login-Fehlversuche). */
-  peek(key: string, windowSeconds: number): Promise<number>;
   reset(key: string): Promise<void>;
   /** Löscht abgelaufene Zähler; Schlüssel können IP-Hashes enthalten (REQ-PRIV-002: max. 7 Tage). */
   purge(olderThanSeconds: number): Promise<number>;

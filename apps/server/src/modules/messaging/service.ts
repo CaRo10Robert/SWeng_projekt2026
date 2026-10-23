@@ -5,6 +5,7 @@ import type { AuthContext } from '../../platform/http/auth.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import {
+  CONTACT_ACTION_RATE,
   contactView,
   decideContactAction,
   MESSAGE_RATE,
@@ -74,6 +75,7 @@ const toDeal = (d: DealRow): Deal => ({
 const NOT_POSSIBLE = () => new AppError(403, 'contact_not_possible', 'Kontakt nicht möglich.');
 
 interface ContactRowDb {
+  conversation_id: string;
   user_id: string;
   state: ContactRow['state'];
   request_count: number;
@@ -154,39 +156,76 @@ export function createMessagingService(deps: ModuleDeps) {
     return dto;
   }
 
-  async function dealFor(conversationId: string) {
-    return db.one<DealRow>(sql`
-      SELECT * FROM messaging.deal WHERE conversation_id = ${conversationId}
-      ORDER BY (status = 'agreed') DESC, created_at DESC LIMIT 1`);
+  /** Neueste Deals mehrerer Konversationen in einer Abfrage, offene zuerst. */
+  async function dealsFor(conversationIds: string[]): Promise<Map<string, DealRow>> {
+    if (conversationIds.length === 0) return new Map();
+    const rows = await db.query<DealRow>(sql`
+      SELECT DISTINCT ON (conversation_id) * FROM messaging.deal WHERE conversation_id = ANY(${conversationIds}::uuid[])
+      ORDER BY conversation_id, (status = 'agreed') DESC, created_at DESC`);
+    return new Map(rows.map((d) => [d.conversation_id, d]));
   }
 
-  /** Kontaktfreigabe: Zustände beider Teilnehmer, Blockierung und Kontostatus (REQ-CHAT-010). */
-  async function contactContext(conversationId: string, me: string, counterpartId: string, tx?: Tx): Promise<ContactContext> {
+  /** Zustimmungen mehrerer Konversationen in einer Abfrage; in einer Transaktion gesperrt (REQ-CHAT-010). */
+  async function contactRows(conversationIds: string[], tx?: Tx): Promise<Map<string, ContactRowDb[]>> {
+    const byConversation = new Map<string, ContactRowDb[]>();
+    if (conversationIds.length === 0) return byConversation;
     const rows = await (tx?.db ?? db).query<ContactRowDb>(sql`
-      SELECT user_id, state, request_count, changed_at FROM messaging.contact_consent
-      WHERE conversation_id = ${conversationId} ${tx ? sql`FOR UPDATE` : empty}`);
+      SELECT conversation_id, user_id, state, request_count, changed_at FROM messaging.contact_consent
+      WHERE conversation_id = ANY(${conversationIds}::uuid[]) ${tx ? sql`FOR UPDATE` : empty}`);
+    for (const r of rows) byConversation.set(r.conversation_id, [...(byConversation.get(r.conversation_id) ?? []), r]);
+    return byConversation;
+  }
+
+  function contactContext(
+    rows: ContactRowDb[] | undefined,
+    me: string,
+    counterpartId: string,
+    status: { blocked: boolean; bothActive: boolean },
+  ): ContactContext {
     const toRow = (r?: ContactRowDb): ContactRow | undefined =>
       r && { state: r.state, requestCount: r.request_count, changedAt: new Date(r.changed_at) };
     return {
-      mine: toRow(rows.find((r) => r.user_id === me)),
-      theirs: toRow(rows.find((r) => r.user_id === counterpartId)),
-      blocked: await modules.trust.isBlockedEither(me, counterpartId),
-      bothActive: (await modules.identity.isActive(me)) && (await modules.identity.isActive(counterpartId)),
+      mine: toRow(rows?.find((r) => r.user_id === me)),
+      theirs: toRow(rows?.find((r) => r.user_id === counterpartId)),
+      ...status,
       now: new Date(),
     };
   }
 
-  async function contactShare(ctx: ContactContext, counterpartId: string): Promise<ContactShare> {
-    const view = contactView(ctx);
-    return {
+  /** Sichten mehrerer Konversationen; Adressen nur über das schmale identity-API und nur bei gegenseitiger Sichtbarkeit. */
+  async function contactShares(items: { ctx: ContactContext; counterpartId: string }[]): Promise<ContactShare[]> {
+    const views = items.map((item) => contactView(item.ctx));
+    const addresses = await modules.identity.getSharedContactAddresses(
+      items.filter((_, i) => views[i]!.visible).map((item) => item.counterpartId),
+    );
+    return views.map((view, i) => ({
       mine: view.mine,
       theirs: view.theirs,
-      // Adresse nur über das schmale identity-API und nur bei gegenseitiger Sichtbarkeit; nie als Nachricht
-      counterpartEmail: view.visible ? await modules.identity.getSharedContactAddress(counterpartId) : null,
+      counterpartEmail: view.visible ? (addresses.get(items[i]!.counterpartId) ?? null) : null,
       canGrant: view.canGrant,
       retryAfter: view.retryAfter?.toISOString() ?? null,
       requestsLeft: view.requestsLeft,
-    };
+    }));
+  }
+
+  type ConversationListRow = ConversationRow & {
+    last_body: string | null;
+    last_at: string | null;
+    last_sender: string | null;
+    unread: number;
+  };
+
+  async function conversationRows(auth: AuthContext, onlyId?: string): Promise<ConversationListRow[]> {
+    return db.query<ConversationListRow>(sql`
+      SELECT c.*, m.body AS last_body, m.created_at AS last_at, m.sender_id AS last_sender,
+        (SELECT count(*) FROM messaging.message u
+          WHERE u.conversation_id = c.id AND u.sender_id <> ${auth.userId} AND u.read_at IS NULL) AS unread
+      FROM messaging.conversation c
+      LEFT JOIN LATERAL (
+        SELECT body, created_at, sender_id FROM messaging.message
+        WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) m ON true
+      WHERE (c.buyer_id = ${auth.userId} OR c.seller_id = ${auth.userId}) ${onlyId ? sql`AND c.id = ${onlyId}` : empty}
+      ORDER BY c.last_message_at DESC LIMIT 200`);
   }
 
   return {
@@ -195,9 +234,18 @@ export function createMessagingService(deps: ModuleDeps) {
     /** REQ-CHAT-010: zustimmen, zurückziehen oder eine Anfrage ablehnen. */
     async contactAction(auth: AuthContext, conversationId: string, action: ContactAction): Promise<ContactShare> {
       const { conv, counterpartId } = await participant(auth, conversationId);
+      await limit(`contact:${auth.userId}`, CONTACT_ACTION_RATE);
+      // Vor der Transaktion lesen: keine zweite Pool-Verbindung, während die Zeilensperre gehalten wird
+      const status = {
+        blocked: await modules.trust.isBlockedEither(auth.userId, counterpartId),
+        bothActive: (await modules.identity.activeUserIds([auth.userId, counterpartId])).size === 2,
+      };
       const exchanged = await database.tx(async (tx) => {
-        await tx.db.exec(sql`SELECT 1 FROM messaging.conversation WHERE id = ${conv.id} FOR UPDATE`);
-        const decision = decideContactAction(action, await contactContext(conv.id, auth.userId, counterpartId, tx));
+        // Die Sperre serialisiert parallele Aktionen beider Teilnehmer; fehlt die Zeile, wurde die Konversation gelöscht
+        const locked = await tx.db.one(sql`SELECT 1 FROM messaging.conversation WHERE id = ${conv.id} FOR UPDATE`);
+        if (!locked) throw notFound('Konversation nicht gefunden');
+        const rows = (await contactRows([conv.id], tx)).get(conv.id);
+        const decision = decideContactAction(action, contactContext(rows, auth.userId, counterpartId, status));
         if (!decision.ok) throw CONTACT_ERRORS[decision.code]();
         if (decision.set === 'mine') {
           await tx.db.exec(sql`
@@ -225,39 +273,31 @@ export function createMessagingService(deps: ModuleDeps) {
       });
       if (exchanged) await publish([conv.buyer_id, conv.seller_id], { type: 'message', message: toMessage(exchanged) });
       await publish([conv.buyer_id, conv.seller_id], { type: 'conversation', conversationId: conv.id });
-      return contactShare(await contactContext(conv.id, auth.userId, counterpartId), counterpartId);
+      const rows = (await contactRows([conv.id])).get(conv.id);
+      const [share] = await contactShares([{ ctx: contactContext(rows, auth.userId, counterpartId, status), counterpartId }]);
+      return share!;
     },
 
+    /** Datenexport (REQ-ACC-003): eigene Zustimmungen und die Anfragen, die ich abgelehnt habe. */
     async exportContactConsents(userId: string) {
       return db.query(sql`
-        SELECT conversation_id AS "conversationId", state, request_count AS "requestCount",
+        SELECT conversation_id AS "conversationId", 'own' AS kind, state, request_count AS "requestCount",
                granted_at AS "grantedAt", withdrawn_at AS "withdrawnAt", declined_at AS "declinedAt"
-        FROM messaging.contact_consent WHERE user_id = ${userId}`);
+        FROM messaging.contact_consent WHERE user_id = ${userId}
+        UNION ALL
+        SELECT cc.conversation_id, 'declined_by_me', cc.state, NULL, NULL, NULL, cc.declined_at
+        FROM messaging.contact_consent cc JOIN messaging.conversation c ON c.id = cc.conversation_id
+        WHERE cc.user_id <> ${userId} AND cc.state = 'declined' AND (c.buyer_id = ${userId} OR c.seller_id = ${userId})`);
     },
 
     async list(auth: AuthContext): Promise<ConversationSummary[]> {
-      const rows = await db.query<ConversationRow & {
-        last_body: string | null;
-        last_at: string | null;
-        last_sender: string | null;
-        unread: number;
-      }>(sql`
-        SELECT c.*, m.body AS last_body, m.created_at AS last_at, m.sender_id AS last_sender,
-          (SELECT count(*) FROM messaging.message u
-            WHERE u.conversation_id = c.id AND u.sender_id <> ${auth.userId} AND u.read_at IS NULL) AS unread
-        FROM messaging.conversation c
-        LEFT JOIN LATERAL (
-          SELECT body, created_at, sender_id FROM messaging.message
-          WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) m ON true
-        WHERE c.buyer_id = ${auth.userId} OR c.seller_id = ${auth.userId}
-        ORDER BY c.last_message_at DESC LIMIT 200`);
-      return summarize(auth, rows);
+      return summarize(auth, await conversationRows(auth));
     },
 
+    /** Einzelabfrage, unabhängig davon, ob die Konversation unter den neuesten 200 ist. */
     async get(auth: AuthContext, id: string): Promise<ConversationSummary> {
       await participant(auth, id);
-      const all = await this.list(auth);
-      const found = all.find((c) => c.id === id);
+      const [found] = await summarize(auth, await conversationRows(auth, id));
       if (!found) throw notFound('Konversation nicht gefunden');
       return found;
     },
@@ -462,19 +502,31 @@ export function createMessagingService(deps: ModuleDeps) {
     },
   };
 
-  async function summarize(
-    auth: AuthContext,
-    rows: (ConversationRow & { last_body: string | null; last_at: string | null; last_sender: string | null; unread: number })[],
-  ): Promise<ConversationSummary[]> {
-    const listings = await modules.listings.summaries([...new Set(rows.map((r) => r.listing_id))]);
+  /** Feste Zahl von Abfragen je Liste, unabhängig von der Anzahl der Konversationen. */
+  async function summarize(auth: AuthContext, rows: ConversationListRow[]): Promise<ConversationSummary[]> {
+    const ids = rows.map((r) => r.id);
     const counterpartIds = rows.map((r) => (r.buyer_id === auth.userId ? r.seller_id : r.buyer_id));
-    const users = await modules.identity.getPublicUsers([...new Set(counterpartIds)]);
-    const blocked = new Set(await modules.trust.blockRelations(auth.userId));
+    const [listings, users, blockedIds, deals, consents, active] = await Promise.all([
+      modules.listings.summaries([...new Set(rows.map((r) => r.listing_id))]),
+      modules.identity.getPublicUsers([...new Set(counterpartIds)]),
+      modules.trust.blockRelations(auth.userId),
+      dealsFor(ids),
+      contactRows(ids),
+      modules.identity.activeUserIds([...new Set([auth.userId, ...counterpartIds])]),
+    ]);
+    const blocked = new Set(blockedIds);
+    const contacts = await contactShares(
+      rows.map((r, i) => {
+        const counterpartId = counterpartIds[i]!;
+        const status = { blocked: blocked.has(counterpartId), bothActive: active.has(auth.userId) && active.has(counterpartId) };
+        return { ctx: contactContext(consents.get(r.id), auth.userId, counterpartId, status), counterpartId };
+      }),
+    );
     const result: ConversationSummary[] = [];
     for (const [i, r] of rows.entries()) {
       const counterpartId = counterpartIds[i]!;
       const listing = listings.get(r.listing_id);
-      const deal = await dealFor(r.id);
+      const deal = deals.get(r.id);
       result.push({
         id: r.id,
         role: r.buyer_id === auth.userId ? 'buyer' : 'seller',
@@ -489,7 +541,7 @@ export function createMessagingService(deps: ModuleDeps) {
         unreadCount: r.unread,
         deal: deal ? toDeal(deal) : null,
         blocked: blocked.has(counterpartId),
-        contact: await contactShare(await contactContext(r.id, auth.userId, counterpartId), counterpartId),
+        contact: contacts[i]!,
       });
     }
     return result;

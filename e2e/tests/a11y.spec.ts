@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { apiSession, DEMO, keyboardLogin } from './helpers';
+import { apiSession, DEMO, keyboardLogin, liveConversation, type Conversation } from './helpers';
 
 /** Dokumentierte, befristete Ausnahmen für `serious` außerhalb der Kernseiten (REQ-A11Y-001). */
 const exceptions = JSON.parse(readFileSync(new URL('../a11y-exceptions.json', import.meta.url), 'utf8')) as {
@@ -20,8 +20,8 @@ async function scan(page: Page) {
 async function ids(request: Parameters<typeof apiSession>[0], baseURL: string) {
   const lea = await apiSession(request, baseURL, DEMO.lea);
   const search = await lea.call<{ items: { id: string }[] }>('GET', '/listings?q=Statistik');
-  const conversations = await lea.call<{ id: string }[]>('GET', '/conversations');
-  return { listingId: search.items[0]!.id, conversationId: conversations[0]!.id };
+  const conversations = await lea.call<Conversation[]>('GET', '/conversations');
+  return { listingId: search.items[0]!.id, conversationId: liveConversation(conversations).id };
 }
 
 test('[AT-A11Y-002-2] Kernseiten ohne Verstöße der Stufen serious/critical (axe-core)', async ({ page, request, baseURL }) => {
@@ -52,20 +52,22 @@ test('[AT-A11Y-001] Übrige Seiten ohne critical; serious nur mit dokumentierter
     if (bad.length) findings[path] = bad;
   };
 
-  const guest = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const contexts = await Promise.all([1, 2, 3, 4].map(() => browser.newContext({ locale: 'de-DE' })));
+  const guest = await contexts[0]!.newPage();
   for (const path of ['/forgot-password', '/verify?token=ungueltig-0123456789', '/reset-password?token=ungueltig-0123456789']) await check(guest, path);
 
-  const member = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const member = await contexts[1]!.newPage();
   await keyboardLogin(member, DEMO.lea);
   for (const path of ['/me/favorites', '/me/listings']) await check(member, path);
 
-  const mod = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const mod = await contexts[2]!.newPage();
   await keyboardLogin(mod, DEMO.mod);
   await check(mod, '/moderation');
 
-  const admin = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const admin = await contexts[3]!.newPage();
   await keyboardLogin(admin, DEMO.admin);
   await check(admin, '/admin');
+  await Promise.all(contexts.map((c) => c.close()));
 
   expect(findings).toEqual({});
 });

@@ -26,6 +26,7 @@ Die Fallstudie verlangt: „Die Anmeldung erfolgt über die Hochschulkennung“ 
 5. **Nutzertyp** folgt immer aus der Whitelist-Domain (BR-01); Attribute des Verfahrens werden nur protokolliert (Entscheidung Q-20).
 6. **Erstanmeldung per SSO** legt das Konto erst nach Zustimmung zu den Nutzungsbedingungen an (REQ-PRIV-001).
 7. **Verdrahtung** in `main.ts`; nur `identity` kennt den Port, eine dependency-cruiser-Regel verhindert Importe aus anderen Modulen.
+   *Stand (2026-10-24, Code-Review CR-12):* Solange es nur das Passwortverfahren gibt, erzeugt der Identity-Service den Adapter selbst; `begin()` wird noch nicht aufgerufen, weil das Formular fest in der SPA steht. Mit dem ersten SSO-Adapter (nach Spike S-01) wandert die Auswahl nach `main.ts` (Konfiguration `IDENTITY_PROVIDER`), und die SPA fragt `begin()` über eine Route ab. Der Test AT-AUTH-009 belegt bereits, dass `resolveLogin` mit einem zweiten Verfahren ohne Änderung funktioniert.
 
 ## Konsequenzen
 - (+) SSO ist ein neuer Adapter plus Konfiguration; andere Module ändern sich nicht.

@@ -223,8 +223,10 @@ export function createIdentityService(deps: ModuleDeps) {
     async login(rawEmail: string, password: string, ip: string): Promise<{ me: Me; sessionToken: string }> {
       const email = normalizeEmail(rawEmail);
       const failKey = `login-fail:${email?.canonical ?? rawEmail.toLowerCase()}:${ipKey(ip)}`;
-      // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP
-      if ((await rateLimit.peek(failKey, 900)) >= 5) throw rateLimited(900);
+      // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP. Erst atomar zählen, dann prüfen, damit parallele
+      // Versuche das Limit nicht gemeinsam unterlaufen; eine erfolgreiche Anmeldung setzt den Zähler zurück.
+      const attempt = await rateLimit.hit(failKey, 5, 900);
+      if (!attempt.allowed) throw rateLimited(attempt.retryAfterSeconds);
 
       const outcome = await resolveLogin(passwordProvider, { email: rawEmail, password }, {
         rules: await domainRules(),
@@ -232,7 +234,6 @@ export function createIdentityService(deps: ModuleDeps) {
       });
       if (!outcome.ok) {
         if (outcome.code === 'invalid_credentials' || outcome.code === 'domain_not_allowed') {
-          await rateLimit.hit(failKey, 5, 900);
           throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
         }
         if (outcome.code === 'not_verified') {
@@ -354,10 +355,19 @@ export function createIdentityService(deps: ModuleDeps) {
      * Schmales API für die Kontaktfreigabe (REQ-CHAT-010, Architektur §8.1): nur die bei der Registrierung
      * eingegebene Adresse eines aktiven Kontos. Die Zustimmungsprüfung liegt im Modul messaging.
      */
-    async getSharedContactAddress(userId: string): Promise<string | null> {
-      const row = await db.one<{ email: string }>(sql`
-        SELECT email FROM identity."user" WHERE id = ${userId} AND status = 'active'`);
-      return row?.email ?? null;
+    async getSharedContactAddresses(userIds: string[]): Promise<Map<string, string>> {
+      if (userIds.length === 0) return new Map();
+      const rows = await db.query<{ id: string; email: string }>(sql`
+        SELECT id, email FROM identity."user" WHERE id = ANY(${userIds}::uuid[]) AND status = 'active'`);
+      return new Map(rows.map((r) => [r.id, r.email]));
+    },
+
+    /** Aktive Konten unter den angegebenen, gesammelt für Konversationslisten. */
+    async activeUserIds(userIds: string[]): Promise<Set<string>> {
+      if (userIds.length === 0) return new Set();
+      const rows = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE id = ANY(${userIds}::uuid[]) AND status = 'active'`);
+      return new Set(rows.map((r) => r.id));
     },
 
     async isActive(userId: string): Promise<boolean> {

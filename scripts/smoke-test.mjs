@@ -271,9 +271,11 @@ const msgs = (await lea.call('GET', `/conversations/${convId}/messages`)).data;
 const systemMsg = msgs.find((m) => m.kind === 'system' && m.body.includes('Kontaktdaten wurden ausgetauscht'));
 const leaWithdraw = await lea.call('POST', `/conversations/${convId}/contact`, { action: 'withdraw' });
 const userAfterWithdraw = await contactOf(user, convId);
-check('[AT-CHAT-010] Einseitig nichts, beidseitig Adresse, Systemnachricht ohne Adresse, Widerruf blendet aus',
-  oneSided && exchanged && !!systemMsg && noEmail(msgs) && leaWithdraw.data?.counterpartEmail === null && userAfterWithdraw.counterpartEmail === null,
-  { oneSided, exchanged, systemMsg: !!systemMsg, withdraw: leaWithdraw.data, userAfterWithdraw });
+const leaRegrant = await lea.call('POST', `/conversations/${convId}/contact`, { action: 'grant' });
+check('[AT-CHAT-010] Einseitig nichts, beidseitig Adresse, Systemnachricht ohne Adresse, Widerruf blendet aus und sperrt 24 h',
+  oneSided && exchanged && !!systemMsg && noEmail(msgs) && leaWithdraw.data?.counterpartEmail === null && userAfterWithdraw.counterpartEmail === null &&
+  leaRegrant.status === 429 && leaRegrant.data.code === 'contact_request_limit',
+  { oneSided, exchanged, systemMsg: !!systemMsg, withdraw: leaWithdraw.data, userAfterWithdraw, leaRegrant: leaRegrant.status });
 check('[AT-CHAT-010-2] Fremde erhalten bei der Kontaktfreigabe „nicht gefunden“',
   (await ben.call('POST', `/conversations/${convId}/contact`, { action: 'grant' })).status === 404);
 
@@ -288,6 +290,15 @@ check('[AT-CHAT-010-3] Ablehnen; erneute Anfrage frühestens nach 24 h (429), Re
   miaRequest.status === 200 && userDecline.status === 200 && miaView.mine === 'declined' && miaRetry.status === 429 &&
   miaRetry.data.code === 'contact_request_limit' && !!miaView.retryAfter && miaView.requestsLeft === 2,
   { miaRequest: miaRequest.status, userDecline: userDecline.status, miaRetry: miaRetry.status, miaView });
+const benStart = await ben.call('POST', '/conversations', { listingId: created.data.id, body: 'Ist das noch zu haben?', clientMsgId: crypto.randomUUID() });
+const benConv = benStart.data?.conversationId;
+await ben.call('POST', `/conversations/${benConv}/contact`, { action: 'grant' });
+const openRequest = (await contactOf(user, benConv)).theirs === 'granted';
+await ben.call('POST', `/conversations/${benConv}/contact`, { action: 'withdraw' });
+const afterBenWithdraw = await contactOf(user, benConv);
+// Austausch zwischen Anbieter und Mia: Anbieter fragt an, Mia stimmt zu (ihre Ablehnungssperre betrifft nur eigene Anfragen)
+const userAsksMia = await user.call('POST', `/conversations/${miaConv}/contact`, { action: 'grant' });
+const miaAccepts = await mia.call('POST', `/conversations/${miaConv}/contact`, { action: 'grant' });
 ws?.close();
 
 // ------------------------------------------------------------------ Blockieren (REQ-MOD-005, REQ-CHAT-001)
@@ -297,6 +308,16 @@ const blockedSearch = (await searchIds(mia, 'Smoketest Zauberwürfel')).includes
 check('[AT-MOD-005] Nach Blockierung: Senden 403 contact_not_possible, Anzeige nicht in der Suche',
   block.status === 204 && blockedSend.status === 403 && blockedSend.data.code === 'contact_not_possible' && !blockedSearch);
 check('[AT-CHAT-001-4] Kontakt bei Blockierung → „Kontakt nicht möglich“', blockedSend.data?.code === 'contact_not_possible');
+const miaViewBlocked = await contactOf(mia, miaConv);
+const userViewBlocked = await contactOf(user, miaConv);
+await mia.call('POST', `/conversations/${miaConv}/contact`, { action: 'withdraw' });
+const miaGrantBlocked = await mia.call('POST', `/conversations/${miaConv}/contact`, { action: 'grant' });
+check('[AT-CHAT-010-4] Zurückziehen vor Zustimmung entfernt die Anfrage; Blockierung blendet ausgetauschte Adressen aus, neue Zustimmung „Kontakt nicht möglich“',
+  openRequest && afterBenWithdraw.theirs === 'withdrawn' && afterBenWithdraw.counterpartEmail === null &&
+  userAsksMia.status === 200 && miaAccepts.data?.counterpartEmail === email &&
+  miaViewBlocked.counterpartEmail === null && userViewBlocked.counterpartEmail === null && !miaViewBlocked.canGrant &&
+  miaGrantBlocked.status === 403 && miaGrantBlocked.data.code === 'contact_not_possible',
+  { openRequest, afterBenWithdraw, userAsksMia: userAsksMia.status, miaAccepts: miaAccepts.data, miaViewBlocked, miaGrantBlocked: miaGrantBlocked.status });
 await user.call('DELETE', `/users/${miaId}/block`);
 
 // ------------------------------------------------------------------ Melden und Moderation (UC-30/32)
@@ -316,7 +337,10 @@ check('[AT-MOD-001-2] Doppelte Meldung → 409, eigener Inhalt → 422', reportA
 
 const cases = (await mod.call('GET', '/moderation/cases?status=open')).data;
 check('[AT-DEMO-001] Demo-Daten: Queue mit Seed-Meldung und Inhaltsprüfungsfall, ≥ 25 Anzeigen',
-  cases.length >= 2 && (await lea.call('GET', '/listings?limit=50')).data.items.length >= 25);
+  cases.some((c) => c.targetType === 'message' && c.reports.some((r) => r.details?.includes('Vorkasse'))) &&
+  cases.some((c) => c.targetId === filtered.data?.id) &&
+  (await lea.call('GET', '/listings?limit=50')).data.items.length >= 25,
+  cases.map((c) => ({ targetType: c.targetType, reports: c.reports.length })));
 check('[AT-PRIV-002] Moderationsfälle ohne E-Mail-Adressen', noEmail(cases));
 const filterCase = cases.find((c) => c.targetId === filtered.data?.id);
 const decision = await mod.call('POST', `/moderation/cases/${filterCase?.id}/decision`, { decision: 'remove', reason: 'Verstoß gegen die Regeln: Prüfungslösungen' });
@@ -403,7 +427,7 @@ check('[AT-SEC-011-2] Nach Sperre: Anlegen, Upload und Bearbeiten mit alter Sitz
   [ban.status, bannedCreate.status, bannedUpload.status, bannedEdit.status]);
 const alias = email.replace('@', '+neu@');
 const aliasReg = await register(alias);
-const aliasMails = await waitForMails(alias, 'bestätige', 1, 8);
+const aliasMails = await waitForMails(alias, 'bestätige', 1, 30);
 check('[AT-AUTH-008] Gesperrte Adresse (auch mit +Alias): neutrale Antwort, kein neues Konto, keine Mail',
   aliasReg.status === 202 && aliasMails.length === 0,
   aliasReg.status === 429 ? 'Registrierungsgrenze je IP erreicht (Q-18): Stack mit „docker compose down -v“ neu starten oder eine Stunde warten' : aliasReg.status);

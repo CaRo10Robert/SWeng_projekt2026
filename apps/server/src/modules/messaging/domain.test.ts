@@ -45,6 +45,16 @@ describe('Kontaktfreigabe (REQ-CHAT-010) – Entscheidungsregeln', () => {
     expect(contactView(ctx(row('withdrawn', 1, 25))).canGrant).toBe(true);
   });
 
+  it('nach eigenem Widerruf gilt die Sperrfrist, auch wenn das Gegenüber weiter zustimmt', () => {
+    const view = contactView(ctx(row('withdrawn', 1, 1), row('granted')));
+    expect(view.canGrant).toBe(false);
+    expect(view.retryAfter?.toISOString()).toBe('2026-10-24T11:00:00.000Z');
+    expect(decideContactAction('grant', ctx(row('withdrawn', 1, 1), row('granted')))).toEqual({ ok: false, code: 'contact_request_limit' });
+    // nach Ablauf zählt das erneute Zustimmen als eigene Anfrage
+    expect(decideContactAction('grant', ctx(row('withdrawn', 1, 25), row('granted')))).toMatchObject({ ok: true, exchanged: true, countsAsRequest: true });
+    expect(decideContactAction('grant', ctx(row('withdrawn', 3, 25), row('granted')))).toEqual({ ok: false, code: 'contact_request_limit' });
+  });
+
   it('höchstens 3 Anfragen je Teilnehmer und Konversation', () => {
     expect(contactView(ctx(row('declined', 3, 48))).canGrant).toBe(false);
     expect(decideContactAction('grant', ctx(row('declined', 3, 48)))).toEqual({ ok: false, code: 'contact_request_limit' });

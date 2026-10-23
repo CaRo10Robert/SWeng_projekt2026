@@ -108,6 +108,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
 | 8a | [Requirements-Review v0.2](docs/04-review/review-v0.2-anforderungen.md) | 32 Befunde zu den Anforderungen und ihre Behebung | – |
 | 8b | [Architektur-Review v1.0](docs/04-review/review-v1.0-architektur.md) | 23 Befunde zur C4-Architektur und ihre Behebung | – |
+| 8c | [Code-Review v1.1](docs/04-review/review-v1.1-code.md) | 15 Befunde zum Sprint-1-Code und ihre Behebung | – |
 | 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | abgelöst durch den generierten Katalog-Index | – |
 
 ## Änderungshistorie

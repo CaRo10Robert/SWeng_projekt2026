@@ -34,6 +34,8 @@ export interface ContactContext {
 }
 
 export const CONTACT_RULES = { maxRequests: 3, cooldownHours: 24 };
+/** Obergrenze für Kontaktaktionen je Nutzer, unabhängig von der fachlichen Sperrfrist. */
+export const CONTACT_ACTION_RATE = { limit: 20, windowSeconds: 3600 };
 
 export interface ContactView {
   mine: ContactRowState | 'none';
@@ -45,6 +47,8 @@ export interface ContactView {
   requestsLeft: number;
 }
 
+const isOwnRequest = (mine: ContactView['mine'], theirs: ContactView['theirs']) => theirs !== 'granted' || mine === 'withdrawn';
+
 /** Sicht eines Teilnehmers auf die Kontaktfreigabe. Reine Funktion, tabellarisch getestet. */
 export function contactView(ctx: ContactContext): ContactView {
   const mine = ctx.mine?.state ?? 'none';
@@ -55,8 +59,9 @@ export function contactView(ctx: ContactContext): ContactView {
 
   let canGrant = open && mine !== 'granted';
   let retryAfter: Date | null = null;
-  // Zustimmen auf eine offene Anfrage ist immer möglich; eine eigene Anfrage unterliegt Sperrfrist und Höchstzahl
-  if (canGrant && theirs !== 'granted') {
+  // Zustimmen auf eine offene Anfrage ist möglich; eine eigene Anfrage unterliegt Sperrfrist und Höchstzahl.
+  // Nach eigenem Widerruf zählt erneutes Zustimmen immer als eigene Anfrage, auch wenn das Gegenüber noch zustimmt.
+  if (canGrant && isOwnRequest(mine, theirs)) {
     if (requestsLeft === 0) canGrant = false;
     if ((mine === 'declined' || mine === 'withdrawn') && ctx.mine) {
       const until = new Date(ctx.mine.changedAt.getTime() + CONTACT_RULES.cooldownHours * 3_600_000);
@@ -80,8 +85,8 @@ export function decideContactAction(action: ContactAction, ctx: ContactContext):
     if (ctx.blocked || !ctx.bothActive) return { ok: false, code: 'contact_not_possible' };
     if (view.mine === 'granted') return { ok: false, code: 'invalid_contact_action' };
     if (!view.canGrant) return { ok: false, code: 'contact_request_limit' };
-    const accepting = view.theirs === 'granted';
-    return { ok: true, set: 'mine', state: 'granted', countsAsRequest: !accepting, exchanged: accepting };
+    const exchanged = view.theirs === 'granted';
+    return { ok: true, set: 'mine', state: 'granted', countsAsRequest: isOwnRequest(view.mine, view.theirs), exchanged };
   }
   if (action === 'withdraw') {
     if (view.mine !== 'granted') return { ok: false, code: 'invalid_contact_action' };

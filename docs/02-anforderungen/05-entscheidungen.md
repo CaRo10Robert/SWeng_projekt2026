@@ -3,9 +3,9 @@ id: DECISION-LOG
 type: decision-log
 status: in-review
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-23
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 ---
 
 # Entscheidungslog (fachliche Fragen)
@@ -25,6 +25,7 @@ Fachliche Entscheidungen, die keine Architekturentscheidung (ADR) sind. Architek
 | Q-15 | Befristete Sperren und Widerspruch im System? | Nein. R1 kennt nur die dauerhafte Sperre; Aufhebung und Widerspruch laufen außerhalb des Systems per E-Mail an die Moderation. | Seltene Fälle; ein eigener Ablauf lohnt im Beispiel nicht. | Product Owner | vorläufig | REQ-MOD-002, REQ-MOD-003, UC-32, UC-33 |
 | Q-16 | Malware-Prüfung von Uploads? | Won't in R1. Schutz durch Formatprüfung und Neukodierung der Bilder (REQ-SEC-007); ein Virenscanner wäre ein vierter Dienst (Konflikt mit REQ-ARCH-005). | Neu kodierte Bilder enthalten keine ausführbaren Inhalte. | Product Owner + architecture-lead | vorläufig | UC-10, REQ-SEC-007 |
 | Q-17 | Deal-Kern als eigene Anforderung? | Ja: REQ-CHAT-011 „Reservierung und Abgabe für eine Person“ (Must, inkl. Ereignisse für spätere Bezahlung). REQ-CHAT-009 bleibt der Preisvorschlag (Could). | Must darf nicht an Could hängen (Guideline, MoSCoW-Governance). | Product Owner + architecture-lead | vorläufig | REQ-CHAT-009, REQ-CHAT-011, REQ-ARCH-001, REQ-LST-007 |
-| Q-18 | Rate-Limit-Schlüssel und Campus-NAT | Anmeldung: 5 Fehlversuche je (Konto, IP) in 15 min → Wartezeit, **keine** Kontosperre. Registrierung: 3 je Adresse und Stunde **und** 30 je IP und Stunde (statt 5 je IP). | Verhindert Aussperren fremder Konten; viele Studierende teilen sich im Campus-WLAN eine öffentliche IP. | security-lead | vorläufig | REQ-SEC-005, UC-01, UC-02 |
+| Q-18 | Rate-Limit-Schlüssel und Campus-NAT | Anmeldung: 5 Fehlversuche je (Konto, IP) in 15 min → Wartezeit, **keine** Kontosperre. Registrierung: 3 je Adresse und Stunde **und** 30 je IP und Stunde (statt 5 je IP). | Verhindert Aussperren fremder Konten; viele Studierende teilen sich im Campus-WLAN eine öffentliche IP. **Restrisiko (Code-Review CR-13):** Wer eine fremde Adresse dreimal je Stunde registriert, verzögert deren Registrierung um bis zu eine Stunde; akzeptiert, weil kein Konto gesperrt wird und die Grenze nach einer Stunde endet. | security-lead | vorläufig | REQ-SEC-005, UC-01, UC-02 |
 | Q-19 | Auslieferung über eine Container-Registry? | Optional. Abgabe als Quellcode mit lokalem Build (`docker compose up --build`); zusätzlich kann ein `docker save`-Archiv beigelegt werden. | Offline-Vorgabe, keine externen Konten (C-06). | Auftraggeber | vorläufig | REQ-OPS-004 |
 | Q-20 | Welche Quelle bestimmt den Nutzertyp bei einem SSO-Verfahren? | Immer die Whitelist-Domain (BR-01); vom Verfahren gelieferte Attribute werden nur protokolliert. | Eine Quelle der Wahrheit; die Whitelist ist bereits Daten und je Institution pflegbar (REQ-ARCH-003). | Product Owner | vorläufig | REQ-AUTH-009, ADR-0013 |
+| Q-21 | Gelten Kontaktfreigaben nach Aufheben einer Blockierung wieder? (Code-Review CR-09) | Ja. Die Blockierung blendet die Adressen nur aus; wird sie aufgehoben, gelten die früheren Zustimmungen wieder. Jede Seite kann jederzeit widerrufen. | Die Blockierung ist eine eigene, umkehrbare Entscheidung; beide hatten ihre Adresse bewusst geteilt. Ein automatisches Zurücksetzen würde Blockierung (trust) und Kontaktfreigabe (messaging) koppeln. | Product Owner | vorläufig | REQ-CHAT-010, REQ-MOD-005 |

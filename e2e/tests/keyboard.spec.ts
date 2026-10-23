@@ -154,7 +154,8 @@ test('[AT-A11Y-002] Kontaktdaten freigeben nur per Tastatur (zwei Mitglieder)', 
     clientMsgId: crypto.randomUUID(),
   });
 
-  const leaPage = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const leaContext = await browser.newContext({ locale: 'de-DE' });
+  const leaPage = await leaContext.newPage();
   await keyboardLogin(leaPage, DEMO.lea);
   await gotoTop(leaPage, `/messages/${conversationId}`);
   await activate(leaPage, leaPage.getByRole('button', { name: 'Kontaktdaten teilen' }));
@@ -163,8 +164,11 @@ test('[AT-A11Y-002] Kontaktdaten freigeben nur per Tastatur (zwei Mitglieder)', 
   await activate(leaPage, dlg.getByRole('button', { name: 'Teilen' }));
   await expect(leaPage.getByRole('region', { name: 'Kontaktdaten' }).getByText(/Warte auf Zustimmung/).first()).toBeVisible();
   await expect(leaPage.getByRole('link', { name: DEMO.ben })).toHaveCount(0);
+  // Die Schaltfläche verschwindet nach der Aktion; der Fokus darf nicht auf body zurückfallen (WCAG 2.4.3)
+  await expect.poll(() => leaPage.evaluate(() => document.activeElement !== document.body)).toBe(true);
 
-  const benPage = await (await browser.newContext({ locale: 'de-DE' })).newPage();
+  const benContext = await browser.newContext({ locale: 'de-DE' });
+  const benPage = await benContext.newPage();
   await keyboardLogin(benPage, DEMO.ben);
   await gotoTop(benPage, `/messages/${conversationId}`);
   await expect(benPage.getByRole('region', { name: 'Kontaktdaten' }).getByText(/möchte Kontaktdaten austauschen/).first()).toBeVisible();
@@ -172,6 +176,8 @@ test('[AT-A11Y-002] Kontaktdaten freigeben nur per Tastatur (zwei Mitglieder)', 
   await activate(benPage, benPage.getByRole('dialog').getByRole('button', { name: 'Zustimmen' }));
   await expect(benPage.getByRole('link', { name: DEMO.lea })).toBeVisible();
   await expect(leaPage.getByRole('link', { name: DEMO.ben })).toBeVisible();
+  await expect.poll(() => benPage.evaluate(() => document.activeElement !== document.body)).toBe(true);
 
+  await Promise.all([leaContext.close(), benContext.close()]);
   await ben.call('DELETE', `/listings/${listing.id}`);
 });

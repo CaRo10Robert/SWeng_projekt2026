@@ -18,11 +18,6 @@ export function createPgRateLimit(db: Db): RateLimitStore {
       const retryAfterSeconds = Math.ceil((start.getTime() + windowSeconds * 1000 - Date.now()) / 1000);
       return { allowed, retryAfterSeconds };
     },
-    async peek(key, windowSeconds) {
-      const row = await db.one<{ count: number }>(sql`
-        SELECT count FROM platform.rate_limit WHERE key = ${key} AND window_start = ${windowStart(windowSeconds)}`);
-      return row?.count ?? 0;
-    },
     async reset(key) {
       await db.exec(sql`DELETE FROM platform.rate_limit WHERE key = ${key}`);
     },
