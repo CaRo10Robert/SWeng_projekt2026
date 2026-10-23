@@ -3,7 +3,7 @@ id: REQ-ACC-003
 title: Daten exportieren
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-07
 source: DSGVO Art. 15, 20
 use_cases: [UC-06]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-ACC-003]
 ---
 
@@ -54,3 +54,4 @@ I · N: Format verhandelbar · V: Rechtspflicht · E: klein · S · T: automatis
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei; Export als direkter Download (statt Mail-Link aus UC-06) festgelegt |
 | 1.2 | 2026-10-23 | Review v0.2: keine inhaltliche Änderung |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-ACC-003 bestanden bzw. ausgeführt); Status → verified |

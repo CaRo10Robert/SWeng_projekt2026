@@ -3,7 +3,7 @@ id: REQ-MAINT-002
 title: Geprüfte Modulgrenzen
 type: architecture
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ moscow_reason: [4]
 kano: n/a
 epic: EPIC-00
 source: ADR-0001
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [CTRL-DEPCRUISE]
 ---
 
@@ -53,3 +53,4 @@ Erweiterbarkeit (Bezahlung, weitere Hochschulen) ohne Umbau setzt stabile Grenze
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 (Fehler- und Missbrauchsfälle), R-15 |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DEPCRUISE bestanden bzw. ausgeführt); Status → verified |

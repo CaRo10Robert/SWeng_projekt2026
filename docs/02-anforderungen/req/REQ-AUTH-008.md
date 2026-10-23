@@ -3,7 +3,7 @@ id: REQ-AUTH-008
 title: Gesperrte Adressen nicht erneut registrieren
 type: business-rule
 class: functional
-status: implemented
+status: verified
 owner: team-identity
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-01
 source: DSA Art. 23 (Missbrauch)
 use_cases: [UC-01, UC-33]
 depends_on: [REQ-MOD-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-AUTH-008]
 ---
 
@@ -55,3 +55,4 @@ Die Antwort ist neutral, damit sich die Sperre nicht von außen abfragen lässt 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Szenario und neutrale Antwort präzisiert |
 | 1.2 | 2026-10-23 | Review v0.2: R-08 Aufhebung der Sperre nach Q-15; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-008 bestanden bzw. ausgeführt); Status → verified |

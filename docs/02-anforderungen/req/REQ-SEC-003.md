@@ -3,7 +3,7 @@ id: REQ-SEC-003
 title: Passwortrichtlinie
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ review_due: 2027-04-23
 epic: EPIC-01
 source: NIST SP 800-63B
 use_cases: [UC-01, UC-03]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SEC-003]
 ---
 
@@ -56,3 +56,4 @@ Die Leak-Liste ist ohne neues Image austauschbar.
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-16 review_due; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SEC-003 bestanden bzw. ausgeführt); Status → verified |

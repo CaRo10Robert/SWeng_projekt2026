@@ -3,7 +3,7 @@ id: REQ-SEC-004
 title: Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -13,9 +13,9 @@ moscow_reason: [2]
 kano: basis
 epic: EPIC-01
 source: ASVS
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3]
 ---
 
@@ -59,3 +59,4 @@ Gestohlene oder fremdgesteuerte Sitzungen erlauben Zugriff auf private Chats und
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Lösungsneutral formuliert (Technik in ADR), Widerrufsfälle und Prüftabelle ergänzt |
 | 3.0 | 2026-10-23 | Review v0.2: R-03 `class: constraint`; R-22 Akzeptanzkriterien ohne Cookie-Attribute, von außen beobachtbar; R-15 moscow_reason |
+| 3.1 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3 bestanden bzw. ausgeführt); Status → verified |

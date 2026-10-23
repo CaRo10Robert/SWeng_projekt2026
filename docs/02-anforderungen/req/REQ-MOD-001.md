@@ -3,7 +3,7 @@ id: REQ-MOD-001
 title: Inhalte und Mitglieder melden
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSA Art. 16, BG-4
 use_cases: [UC-30]
 depends_on: [REQ-MOD-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-MOD-001, AT-MOD-001-2]
 ---
 
@@ -78,3 +78,4 @@ I: ohne Moderationsoberfläche testbar · N: Gründe verhandelbar · V: Rechtspf
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-08 (Eingangsbestätigung in der Oberfläche, Gründe abschließend, Profil-Szenario), R-15, R-16, R-24 |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-MOD-001, AT-MOD-001-2 bestanden bzw. ausgeführt); Status → verified |

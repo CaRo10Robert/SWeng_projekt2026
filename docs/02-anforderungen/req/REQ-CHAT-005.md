@@ -3,7 +3,7 @@ id: REQ-CHAT-005
 title: Ungelesene Nachrichten erkennen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-04
 source: Wettbewerbsanalyse
 use_cases: [UC-21]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-CHAT-005]
 ---
 
@@ -53,3 +53,4 @@ I: unabhängig · N: Darstellung verhandelbar · V: Übersicht · E/S: klein · 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
 | 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-CHAT-005 bestanden bzw. ausgeführt); Status → verified |

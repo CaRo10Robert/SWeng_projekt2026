@@ -3,7 +3,7 @@ id: REQ-AUTH-001
 title: Registrierung nur mit Hochschul-Domain (BR-01)
 type: business-rule
 class: domain
-status: implemented
+status: verified
 owner: team-identity
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ kano: basis
 epic: EPIC-01
 source: BG-1
 use_cases: [UC-01]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-AUTH-001, AT-AUTH-001-2]
 ---
 
@@ -64,3 +64,4 @@ Ablehnungen nennen den Grund („Registrierung nur mit einer E-Mail-Adresse der 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Zeile 8 (Formatfehler) aus der Umsetzung ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-27 Zeile 6 und Funktionspostfächer nach Q-2; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-001, AT-AUTH-001-2 bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-SEC-011
 title: Angebote nur von verifizierten Mitgliedern
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-02
 source: FS-C4
 use_cases: [UC-10, UC-11]
 depends_on: [REQ-AUTH-002, REQ-SEC-006]
-version: 2.1
+version: 2.2
 created: 2026-10-23
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SEC-011, AT-SEC-011-2, AT-SEC-011-3]
 ---
 
@@ -75,3 +75,4 @@ Szenario: Konto gesperrt
 | 1.0 | 2026-10-23 | Erstfassung aus Fallstudie FS-C4 (Abgleich A-4) |
 | 2.0 | 2026-10-23 | Review v0.2: R-12 Szenarien für Bild-Upload, Bearbeiten, Sperre und unbestätigtes Konto; Re-Verifikationszeile „ab REQ-AUTH-007 (R2)“; Nachweise erweitert; Status `approved` |
 | 2.1 | 2026-10-23 | Umgesetzt (Schritt 6): Anlegen/Upload nur mit bestätigtem, aktivem Konto; Sitzungen nach Sperre ungültig; AT-SEC-011/-2 im Smoke-Test; Status → implemented |
+| 2.2 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SEC-011, AT-SEC-011-2, AT-SEC-011-3 bestanden bzw. ausgeführt); Status → verified |

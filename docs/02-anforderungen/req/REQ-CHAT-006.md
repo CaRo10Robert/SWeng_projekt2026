@@ -3,7 +3,7 @@ id: REQ-CHAT-006
 title: Sicherheitshinweis bei Links, IBAN und Telefonnummern
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: basis
 epic: EPIC-06
 source: Wettbewerbsanalyse (Betrugsmuster Vorkasse, Phishing)
 use_cases: [UC-21]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-CHAT-006]
 ---
 
@@ -46,3 +46,4 @@ Vorkasse-Betrug und Phishing-Links sind die häufigsten Betrugsmuster auf Kleina
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-17 Klasse `constraint` passend zum Typ `security` |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-CHAT-006 bestanden bzw. ausgeführt); Status → verified |

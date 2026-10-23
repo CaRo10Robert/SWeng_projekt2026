@@ -3,7 +3,7 @@ id: REQ-DEMO-001
 title: Demo-Daten auf Knopfdruck
 type: operational
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: low
 release: R1
@@ -12,9 +12,9 @@ moscow_reason: [1]
 kano: n/a
 epic: EPIC-00
 source: BG-6, Risiko R-1
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-DEMO-001]
 ---
 
@@ -59,3 +59,4 @@ Szenario: Kein doppelter Seed
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-24 (feste Mengenangaben), R-15, R-17 (class constraint) |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-DEMO-001 bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-SRCH-001
 title: Freitextsuche mit Wortstämmen und Tippfehlertoleranz
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-03
 source: BG-2
 use_cases: [UC-13]
 depends_on: [REQ-PERF-001]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SRCH-001, AT-SRCH-001-2]
 ---
 
@@ -74,3 +74,4 @@ I: unabhängig von Filtern (REQ-SRCH-002) · N: Toleranzgrad verhandelbar · V: 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien inkl. Degradation |
 | 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SRCH-001, AT-SRCH-001-2 bestanden bzw. ausgeführt); Status → verified |

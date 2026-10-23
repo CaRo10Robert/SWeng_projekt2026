@@ -3,7 +3,7 @@ id: REQ-MOD-005
 title: Mitglieder blockieren
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-06
 source: BG-1
 use_cases: [UC-31]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-MOD-005]
 ---
 
@@ -60,3 +60,4 @@ I: unabhängig · N: Umfang der Ausblendung verhandelbar · V: Schutz · E: klei
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-08 (gegenseitige Blockierung ausdrücklich) |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-MOD-005 bestanden bzw. ausgeführt); Status → verified |

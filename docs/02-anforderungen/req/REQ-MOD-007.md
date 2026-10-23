@@ -3,7 +3,7 @@ id: REQ-MOD-007
 title: Rollen vergeben und entziehen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ kano: n/a
 epic: EPIC-06
 source: REQ-SEC-006
 use_cases: [UC-42]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-MOD-007, AT-MOD-007-2]
 ---
 
@@ -61,3 +61,4 @@ I: unabhängig · N · V: verteilte Verantwortung · E: klein · S · T: automat
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-15, R-16 |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-MOD-007, AT-MOD-007-2 bestanden bzw. ausgeführt); Status → verified |

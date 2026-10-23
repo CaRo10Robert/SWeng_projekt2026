@@ -3,7 +3,7 @@ id: REQ-AUTH-003
 title: Nutzertyp aus der Domain ableiten
 type: business-rule
 class: domain
-status: implemented
+status: verified
 owner: team-identity
 risk: low
 release: R1
@@ -13,9 +13,9 @@ epic: EPIC-01
 source: BG-1
 use_cases: [UC-01]
 depends_on: [REQ-AUTH-001]
-version: 1.1
+version: 1.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-AUTH-003, AT-AUTH-003-2]
 ---
 
@@ -45,3 +45,4 @@ Der Nutzertyp kann vom Mitglied nicht geändert werden.
 |---|---|---|
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei |
+| 1.2 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-003, AT-AUTH-003-2 bestanden bzw. ausgeführt); Status → verified |

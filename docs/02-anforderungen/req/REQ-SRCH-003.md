@@ -3,7 +3,7 @@ id: REQ-SRCH-003
 title: Aktualität der Suche
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 reviewers: [qa-lead]
@@ -13,9 +13,9 @@ kano: leistung
 epic: EPIC-03
 source: BG-2
 use_cases: [UC-10, UC-13]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SRCH-003, AT-SRCH-003-2]
 ---
 
@@ -46,3 +46,4 @@ Mitglieder prüfen nach dem Einstellen, ob ihre Anzeige gefunden wird. Verzöger
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Metrik und Messverfahren; Verschwinden nicht sichtbarer Anzeigen ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-24 Messverfahren um „Pausieren → nicht mehr gefunden ≤ 10 s“ ergänzt |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SRCH-003, AT-SRCH-003-2 bestanden bzw. ausgeführt); Status → verified |

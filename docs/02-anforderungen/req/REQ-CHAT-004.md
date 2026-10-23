@@ -3,7 +3,7 @@ id: REQ-CHAT-004
 title: Nachrichten genau einmal anzeigen, keine verlieren
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 reviewers: [qa-lead]
@@ -14,9 +14,9 @@ kano: basis
 epic: EPIC-04
 source: QS-4
 use_cases: [UC-21]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-CHAT-004, AT-CHAT-004-2]
 ---
 
@@ -55,3 +55,4 @@ Doppelte oder fehlende Nachrichten führen zu Missverständnissen bei Preis und 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Nachladen ohne Lücke ergänzt, Metrik und Messverfahren (FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-17 Typ `quality`; R-22 Kennung lösungsneutral (Technik in ADR-0004); Must-Begründung |
+| 2.2 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-CHAT-004, AT-CHAT-004-2 bestanden bzw. ausgeführt); Status → verified |

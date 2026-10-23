@@ -3,7 +3,7 @@ id: REQ-MOD-002
 title: Moderations-Queue bearbeiten
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSA Art. 16/17, BG-4
 use_cases: [UC-32, UC-33, UC-34]
 depends_on: [REQ-MOD-001, REQ-SEC-006]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3]
 ---
 
@@ -86,3 +86,4 @@ I: setzt REQ-MOD-001 voraus · N: Darstellung verhandelbar · V: Rechtspflicht �
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-08 (nur dauerhafte Sperre, Widerspruch per E-Mail, „zeitnah“ → ≤ 10 s), R-15, R-16 |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3 bestanden bzw. ausgeführt); Status → verified |

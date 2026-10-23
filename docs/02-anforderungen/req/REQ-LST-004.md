@@ -3,7 +3,7 @@ id: REQ-LST-004
 title: Übergabeort aus Campus-Standorten
 type: business-rule
 class: domain
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -13,9 +13,9 @@ kano: basis
 epic: EPIC-02
 source: BG-1, Wettbewerbsanalyse
 use_cases: [UC-10, UC-13]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-LST-004]
 ---
 
@@ -47,3 +47,4 @@ Jede Anzeige muss **mindestens einen und höchstens fünf** Übergabeorte aus de
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle, Obergrenze 5 (wie umgesetzt) |
 | 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LST-004 bestanden bzw. ausgeführt); Status → verified |

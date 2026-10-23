@@ -3,7 +3,7 @@ id: REQ-LST-010
 title: Verbotene Inhalte vor Veröffentlichung in die Moderation
 type: business-rule
 class: constraint
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-06
 source: BG-4, DSA, Hochschulordnung
 use_cases: [UC-10, UC-11, UC-32]
 depends_on: [REQ-MOD-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-LST-010, AT-LST-010-2]
 ---
 
@@ -62,3 +62,4 @@ Szenario: Anzeige in Prüfung
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle, Bearbeitung eingeschlossen |
 | 1.2 | 2026-10-23 | Review v0.2: R-05 Übergang aktiv → in Prüfung bei Bearbeitung mit Verweis auf §4; Must-Begründung; „Moderations-Queue“ |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LST-010, AT-LST-010-2 bestanden bzw. ausgeführt); Status → verified |

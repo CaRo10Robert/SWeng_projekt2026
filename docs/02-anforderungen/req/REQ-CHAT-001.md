@@ -3,7 +3,7 @@ id: REQ-CHAT-001
 title: Anbieter über anzeigenbezogenen Chat kontaktieren
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-04
 source: BG-3, FS-C1
 use_cases: [UC-20]
 depends_on: [REQ-PRIV-002]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4]
 ---
 
@@ -83,3 +83,4 @@ I: Echtzeit separat (REQ-CHAT-003) · N: Darstellung verhandelbar · V: Kernnutz
 | 1.0 | 2026-10-20 | Erstfassung im Katalog mit GWT |
 | 2.0 | 2026-10-23 | Ausnahme für beidseitige Kontaktfreigabe (REQ-CHAT-010, Fallstudie FS-C1); Szenario „Anzeige nicht verfügbar“ |
 | 2.1 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 2.2 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4 bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-ARCH-005
 title: Auslieferung als lokales Docker-Compose-Setup
 type: architecture
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, architecture-lead]
@@ -13,9 +13,9 @@ moscow_reason: [4]
 kano: n/a
 epic: EPIC-00
 source: Auftraggeber, ADR-0010
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-ARCH-005]
 ---
 
@@ -52,3 +52,4 @@ Vorgabe des Auftraggebers: kein öffentliches Hosting (ADR-0010, BG-6).
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-04, R-15 |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-ARCH-005 bestanden bzw. ausgeführt); Status → verified |

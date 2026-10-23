@@ -3,7 +3,7 @@ id: REQ-AUTH-006
 title: Passwort per E-Mail-Link zurücksetzen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-identity
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-01
 source: BG-2
 use_cases: [UC-03]
 depends_on: [REQ-NOTI-001]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-AUTH-006]
 ---
 
@@ -68,3 +68,4 @@ I: ja · N: Gültigkeitsdauer · V: Zugang wiederherstellen · E: klein · S: ja
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-15 moscow_reason (ohne Reset kein selbstständiger Zugang → nicht betreibbar) |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-006 bestanden bzw. ausgeführt); Status → verified |

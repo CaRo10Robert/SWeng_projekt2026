@@ -3,7 +3,7 @@ id: REQ-LST-005
 title: Studienbezogene Attribute für Bücher und Skripte
 type: data
 class: domain
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: begeisterung
 epic: EPIC-02
 source: Personas, Wettbewerbsanalyse
 use_cases: [UC-10]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-LST-005]
 ---
 
@@ -54,3 +54,4 @@ Szenario: Andere Kategorie
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Formate und Szenarien |
 | 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LST-005 bestanden bzw. ausgeführt); Status → verified |

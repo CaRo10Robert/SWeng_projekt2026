@@ -3,7 +3,7 @@ id: REQ-AUTH-005
 title: Anmelden und Abmelden
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-identity
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-01
 source: BG-1
 use_cases: [UC-02]
 depends_on: [REQ-AUTH-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-AUTH-005, AT-AUTH-005-2]
 ---
 
@@ -67,3 +67,4 @@ I: ja · N: Sitzungsdauer verhandelbar · V: Zugang · E: klein · S: ja · T: a
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-25 Rate-Limit-Schlüssel nach Q-18; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-005, AT-AUTH-005-2 bestanden bzw. ausgeführt); Status → verified |

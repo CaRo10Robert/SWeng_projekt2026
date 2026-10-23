@@ -3,7 +3,7 @@ id: REQ-PRIV-006
 title: Kein Tracking, keine Drittanbieter-Ressourcen
 type: privacy
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: basis
 review_due: 2027-04-23
 epic: EPIC-07
 source: TDDDG § 25, DSGVO Art. 25
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-PRIV-006, AT-PRIV-006-2]
 ---
 
@@ -51,3 +51,4 @@ Kein Datenabfluss an Dritte; das Docker-Beispiel muss zudem offline funktioniere
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Prüftabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-16 review_due; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-PRIV-006, AT-PRIV-006-2 bestanden bzw. ausgeführt); Status → verified |

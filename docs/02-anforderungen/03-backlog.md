@@ -107,6 +107,7 @@ gantt
 
 - **B-34 vorgezogen** (+1 SP, Sprint 1 damit 21 SP): Die automatisierten Tests aus B-02 und B-03 registrieren je Lauf mehrere Konten. Mit der alten Grenze (5 je IP und Stunde) scheiterten sie am Rate-Limit; die Grenzen aus Q-18 waren die Voraussetzung. Sprint 2 sinkt auf 17 SP.
 - **B-01, B-02, B-03, B-04, B-07 umgesetzt.** Nachweise: Smoke-Test (`scripts/smoke-test.mjs`), E2E-Paket (`e2e/`), Unit-Tests, CI-Workflow `.github/workflows/ci.yml`.
+- **Verifizierungsquote nach Sprint 1:** 27 von 69 R1-Musts (39 %), Ziel ≥ 40 % knapp verfehlt. Es fehlen vor allem manuelle Nachweise (MAN-…) und Tests für Leistung und Benachrichtigungen; Details im [Testbericht](../05-umsetzung/testbericht-2026-10-24.md). Die fehlenden Tests gehören zu den Einträgen der Sprints 2 und 3.
 - **B-05 umgesetzt ohne S-01:** Der zweistufige `IdentityProviderPort` und der Passwort-Adapter stehen; ein Fake-SSO-Provider belegt im Test, dass ein zweites Verfahren ohne Umbau passt. Der echte SSO-Adapter wartet weiterhin auf den Spike **S-01** (Abstimmung mit dem Rechenzentrum, Q-12), der noch offen ist.
 
 ## 4. Backlog: EPIC-09 Bezahlfunktion

@@ -3,7 +3,7 @@ id: REQ-SRCH-004
 title: Anzeigen merken
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-03
 source: Wettbewerbsanalyse
 use_cases: [UC-15]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-SRCH-004]
 ---
 
@@ -58,3 +58,4 @@ I: unabhängig · N: Benachrichtigung bei Preisänderung (UC-15 optional) nicht 
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
 | 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SRCH-004 bestanden bzw. ausgeführt); Status → verified |

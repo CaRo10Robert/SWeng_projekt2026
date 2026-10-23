@@ -3,7 +3,7 @@ id: REQ-SEC-010
 title: Gehärtetes Anwendungs-Image
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-00
 source: CIS Docker Benchmark, ADR-0010
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [CTRL-IMAGE-INSPECT]
 ---
 
@@ -49,3 +49,4 @@ Begrenzt die Folgen einer Kompromittierung der Anwendung.
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Prüftabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-IMAGE-INSPECT bestanden bzw. ausgeführt); Status → verified |

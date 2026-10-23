@@ -3,7 +3,7 @@ id: REQ-LST-006
 title: Eigene Anzeige bearbeiten, pausieren, reaktivieren, löschen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-02
 source: BG-3
 use_cases: [UC-11]
 depends_on: [REQ-LST-010]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-LST-006, AT-LST-006-2]
 ---
 
@@ -70,3 +70,4 @@ I: unabhängig von Suche und Chat · N: Aktionsumfang verhandelbar · V: Aktuali
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Übergangstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-05 an das Zustandsmodell (§4) angeglichen, Entwurf/Vorschau Won't in R1, Löschen aus allen Zuständen außer entfernt |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LST-006, AT-LST-006-2 bestanden bzw. ausgeführt); Status → verified |

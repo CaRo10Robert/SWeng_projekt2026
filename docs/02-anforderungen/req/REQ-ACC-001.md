@@ -3,7 +3,7 @@ id: REQ-ACC-001
 title: Profil pflegen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-produkt
 risk: low
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-07
 source: BG-2
 use_cases: [UC-04]
 depends_on: [REQ-PRIV-002]
-version: 2.0
+version: 2.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-ACC-001]
 ---
 
@@ -60,3 +60,4 @@ I: unabhängig · N: Felder verhandelbar · V: Vertrauen · E: klein · S: ein S
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 2.0 | 2026-10-23 | Review v0.2: R-09, R-21 (Profilbild nach REQ-ACC-004 abgespalten), R-15 |
+| 2.1 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-ACC-001 bestanden bzw. ausgeführt); Status → verified |

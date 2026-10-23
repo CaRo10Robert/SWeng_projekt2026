@@ -3,7 +3,7 @@ id: REQ-CHAT-011
 title: Reservierung und Abgabe für eine Person (Deal-Kern)
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-04
 source: BG-3, BG-5, ADR-0006
 use_cases: [UC-12, UC-21]
 depends_on: [REQ-CHAT-002, REQ-LST-007]
-version: 1.0
+version: 1.1
 created: 2026-10-23
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-CHAT-011, AT-CHAT-011-2]
 ---
 
@@ -80,3 +80,4 @@ I: unabhängig vom Preisvorschlag (REQ-CHAT-009) · N: Wortlaut der Systemnachri
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-23 | Abgespalten aus REQ-CHAT-009 v2.0 (Review v0.2 R-15/R-21, Q-17) |
+| 1.1 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-CHAT-011, AT-CHAT-011-2 bestanden bzw. ausgeführt); Status → verified |
