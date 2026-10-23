@@ -1,16 +1,31 @@
 ---
 id: UC-MODEL
 type: requirements
-status: draft
+status: in-review
 owner: team-produkt
-version: 0.1
+version: 1.0
 created: 2026-10-20
-last_updated: 2026-10-20
+last_updated: 2026-10-23
 ---
 
 # Use-Case-Modell
 
 Nach UML 2.5 (Use-Case-Diagramme) und Cockburn (Use-Case-Spezifikation, Template „fully dressed“ für die Kern-Use-Cases, „casual“ für den Rest).
+
+**Use Case oder User Story? (Fallstudie FS-M10)** Use Cases nutzen wir dort, wo ein zusammenhängender Ablauf mit vielen Varianten und Ausnahmen beschrieben werden muss oder wo Fehlinterpretationen teuer sind (Registrierung, Anzeige erstellen, Chat, Kontaktfreigabe, Moderation, Löschung). Die planbaren Umsetzungseinheiten sind die User Stories und Regeln in [req/](req/); jeder Use Case verweist auf sie.
+
+**Aufbau eines Use-Case-Dokuments (Fallstudie FS-M11).** Die Felder des Cockburn-Templates decken den Aufbau aus der Vorlesung vollständig ab:
+
+| Vorlesung (Folie 22) | Feld in diesem Dokument |
+|---|---|
+| Name | Überschrift „UC-NN Name“ |
+| Description | **Beschreibung (Zweck/Nutzen)** und **Ziel** |
+| Actors | **Primärakteur**, **Sekundärakteure** |
+| Preconditions | **Vorbedingung** |
+| Auslöser (Folie 21) | **Auslöser** |
+| Normal Flow | **Hauptszenario** |
+| Alternate Flows | **Erweiterungen** (Nummer = Schritt, an dem abgezweigt wird) |
+| Postconditions | **Nachbedingung (Erfolg/Fehlschlag)** |
 
 ## 1. Akteure
 
@@ -112,6 +127,7 @@ rectangle "CampusMarkt – Marktplatz" {
   package "Kommunikation" {
     usecase "UC-20\nAnbieter kontaktieren" as UC20
     usecase "UC-21\nNachrichten austauschen" as UC21
+    usecase "UC-25\nKontaktdaten freigeben" as UC25
     usecase "UC-22\nNutzer bewerten" as UC22
     usecase "UC-23\nBenachrichtigungen\nerhalten" as UC23
     usecase "UC-24\nBenachrichtigungs-\neinstellungen ändern" as UC24
@@ -130,7 +146,9 @@ M --> UC20
 M --> UC21
 M --> UC22
 M --> UC24
+M --> UC25
 Timer --> UC17
+UC25 .> UC21 : <<extend>>\n[beide stimmen zu]
 
 UC10 ..> UCB : <<include>>
 UC15 .> UC14 : <<extend>>\n[Interesse]
@@ -230,6 +248,7 @@ UC53 --> PSP
 | UC-20 | Anbieter kontaktieren | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
 | UC-21 | Nachrichten austauschen | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
 | UC-22 | Nutzer bewerten | Mitglied | Could | casual |
+| UC-25 | Kontaktdaten freigeben | Mitglied | Must (Fallstudie FS-C1) | [§4.8](#48-uc-25-kontaktdaten-freigeben) |
 | UC-23 | Benachrichtigungen erhalten | E-Mail-System (sekundär) | Must | casual |
 | UC-24 | Benachrichtigungseinstellungen ändern | Mitglied | Should | casual |
 | UC-30 | Inhalt / Nutzer melden | Mitglied | Must (DSA) | [§4.5](#45-uc-30--uc-32-melden-und-moderieren) |
@@ -248,6 +267,7 @@ UC53 --> PSP
 
 | Feld | Inhalt |
 |---|---|
+| **Beschreibung (Zweck/Nutzen)** | Gäste mit Hochschuladresse legen ein Konto an und bestätigen ihre Adresse. Nutzen: Nur echte Hochschulangehörige nehmen am Marktplatz teil (BG-1). |
 | **Ziel** | Ein Hochschulangehöriger erhält ein verifiziertes Konto |
 | **Primärakteur** | Gast |
 | **Sekundärakteure** | E-Mail-System |
@@ -303,6 +323,7 @@ flowchart TD
 
 | Feld | Inhalt |
 |---|---|
+| **Beschreibung (Zweck/Nutzen)** | Ein Mitglied stellt einen Gegenstand ein, den es anbietet, verschenkt, tauscht oder sucht. Nutzen: Dinge finden schnell neue Besitzer auf dem Campus (BG-2, BG-3). |
 | **Ziel** | Mitglied veröffentlicht ein Angebot oder Gesuch |
 | **Primärakteur** | Mitglied (als Anbieter) |
 | **Vorbedingung** | Mitglied ist angemeldet und nicht gesperrt |
@@ -331,6 +352,7 @@ flowchart TD
 
 | Feld | Inhalt |
 |---|---|
+| **Beschreibung (Zweck/Nutzen)** | Ein Mitglied durchsucht die Anzeigen per Freitext und Filter. Nutzen: passende Angebote ohne langes Stöbern finden. |
 | **Ziel** | Mitglied findet relevante Anzeigen |
 | **Primärakteur** | Mitglied |
 | **Vorbedingung** | Mitglied ist angemeldet (Q-1: Sollen Gäste suchen dürfen?) |
@@ -352,6 +374,7 @@ flowchart TD
 
 | Feld | Inhalt |
 |---|---|
+| **Beschreibung (Zweck/Nutzen)** | Interessent und Anbieter tauschen sich anzeigenbezogen aus, ohne Kontaktdaten preiszugeben. Nutzen: sichere, nachvollziehbare Absprache bis zur Übergabe (BG-3). |
 | **Ziel** | Interessent und Anbieter vereinbaren eine Übergabe |
 | **Primärakteur** | Mitglied (Interessent bzw. beide Teilnehmer) |
 | **Sekundärakteur** | E-Mail-System |
@@ -401,6 +424,7 @@ sequenceDiagram
 
 | Feld | Inhalt |
 |---|---|
+| **Beschreibung (Zweck/Nutzen)** | Mitglieder melden problematische Inhalte, Moderatoren entscheiden begründet. Nutzen: Vertrauen in die Community und Erfüllung der DSA-Pflichten (BG-1, BG-4). |
 | **Ziel** | Rechtswidrige oder regelwidrige Inhalte werden zeitnah entfernt (DSA Art. 16, 17) |
 | **Primärakteur** | Mitglied (UC-30), Moderator (UC-32) |
 | **Vorbedingung** | Inhalt (Anzeige, Nachricht, Profil) existiert |
@@ -437,13 +461,80 @@ stateDiagram-v2
 
 ### 4.6 UC-05 Konto löschen
 
-**Hauptszenario:** Mitglied wählt „Konto löschen“ und bestätigt mit dem Passwort. → System setzt das Konto auf `zur Löschung vorgemerkt`, deaktiviert alle Anzeigen und meldet ab. → Nach **14 Tagen** Karenz (Widerruf durch Anmeldung möglich) löscht das System das Konto endgültig. Anzeigen und Bilder werden gelöscht. In fremden Konversationen erscheint der Absender als „Gelöschtes Mitglied“, seine Nachrichtentexte werden gelöscht. Bewertungen werden anonymisiert.
-**Erweiterung:** Eine offene Moderationsmaßnahme (Sperre) verhindert die sofortige Löschung von Beweisdaten. Diese werden gemäß Aufbewahrungsregel (REQ-PRIV-003) getrennt aufbewahrt.
+| Feld | Inhalt |
+|---|---|
+| **Beschreibung (Zweck/Nutzen)** | Ein Mitglied lässt sein Konto und seine personenbezogenen Daten löschen. Nutzen: Recht auf Löschung (Art. 17 DSGVO), mit Karenzzeit gegen versehentliches Löschen. |
+| **Ziel** | Konto und personenbezogene Daten sind nach Ablauf der Karenz endgültig gelöscht |
+| **Primärakteur** | Mitglied |
+| **Sekundärakteure** | Zeitgeber, E-Mail-System |
+| **Vorbedingung** | Mitglied ist angemeldet |
+| **Auslöser** | Mitglied wählt im Profil „Konto löschen“ |
+| **Nachbedingung (Erfolg)** | Nach 14 Tagen: Konto, Anzeigen, Bilder, Merkliste, Blockierungen und eigene Nachrichtentexte gelöscht; in fremden Konversationen erscheint „Ehemaliges Mitglied“; Meldungen ohne Personenbezug aufbewahrt; Bestätigungsmail versendet |
+| **Nachbedingung (Fehlschlag)** | Konto unverändert aktiv |
+
+**Hauptszenario**
+1. Mitglied wählt „Konto löschen“ und bestätigt mit seinem Passwort.
+2. System prüft das Passwort, setzt das Konto auf `zur Löschung vorgemerkt`, beendet alle Sitzungen und sendet eine E-Mail mit dem Löschdatum.
+3. Anzeigen des Mitglieds sind ab sofort nicht mehr sichtbar.
+4. Nach 14 Tagen löscht der Zeitgeber das Konto endgültig (siehe Nachbedingung) und sendet eine Bestätigung an die bisherige Adresse.
+
+**Erweiterungen**
+- 1a. *Passwort falsch:* System lehnt ab, Konto bleibt aktiv.
+- 2a. *Mitglied meldet sich innerhalb der 14 Tage an:* Löschung wird abgebrochen, das Konto ist wieder aktiv, das System weist darauf hin.
+- 4a. *Offene Moderationsmaßnahme gegen das Mitglied:* Beweisdaten werden gemäß REQ-PRIV-003 getrennt und ohne Personenbezug aufbewahrt.
+
+**Sonderanforderungen:** REQ-ACC-002, REQ-PRIV-003, REQ-NOTI-001.
 
 ### 4.7 UC-07 Mitgliedschaft re-verifizieren
 
-**Auslöser:** Zeitgeber, **12 Monate** nach der letzten Verifikation. → System sendet einen Bestätigungslink an die Hochschuladresse. → Bei Klick gilt das Konto für weitere 12 Monate als verifiziert. → Ohne Klick innerhalb von 30 Tagen wird das Konto **eingeschränkt** (nur lesen, keine neuen Anzeigen oder Nachrichten). Nach weiteren 6 Monaten folgt der Inaktivitätslebenszyklus (Warnung, dann Löschung).
-**Begründung:** Exmatrikulierte oder ausgeschiedene Beschäftigte verlieren ihre Hochschuladresse. Das stellt sicher, dass die Community „nur Hochschulangehörige“ bleibt (siehe [Architektur, Risiko R-3](../03-architektur/architektur.md#11-risiken-und-technische-schulden)).
+| Feld | Inhalt |
+|---|---|
+| **Beschreibung (Zweck/Nutzen)** | Das System prüft regelmäßig, ob ein Mitglied seine Hochschuladresse noch besitzt. Nutzen: Exmatrikulierte und ausgeschiedene Beschäftigte verlieren den Zugang, die Community bleibt „nur Hochschulangehörige“ (BG-1, Risiko R-3). |
+| **Ziel** | Mitgliedschaft ist für weitere 12 Monate bestätigt oder das Konto ist eingeschränkt |
+| **Primärakteur** | Zeitgeber |
+| **Sekundärakteure** | Mitglied, E-Mail-System |
+| **Vorbedingung** | Letzte Verifikation liegt 12 Monate zurück |
+| **Auslöser** | Täglicher Lauf des Zeitgebers |
+| **Nachbedingung (Erfolg)** | Verifikationsdatum aktualisiert |
+| **Nachbedingung (Fehlschlag)** | Konto eingeschränkt: nur lesen, keine neuen Anzeigen oder Nachrichten |
+
+**Hauptszenario**
+1. Zeitgeber findet Konten, deren letzte Verifikation 12 Monate zurückliegt.
+2. System sendet einen Bestätigungslink an die Hochschuladresse.
+3. Mitglied öffnet den Link innerhalb von 30 Tagen.
+4. System setzt das Verifikationsdatum neu.
+
+**Erweiterungen**
+- 3a. *Kein Klick innerhalb von 30 Tagen:* System schränkt das Konto ein und informiert per E-Mail; ein späterer Klick hebt die Einschränkung auf.
+- 3b. *Adresse nicht mehr zustellbar:* wie 3a.
+
+**Sonderanforderungen:** REQ-AUTH-007, REQ-NOTI-001.
+
+### 4.8 UC-25 Kontaktdaten freigeben
+
+| Feld | Inhalt |
+|---|---|
+| **Beschreibung (Zweck/Nutzen)** | Zwei Teilnehmer einer Konversation tauschen ihre Hochschul-E-Mail-Adressen aus, aber nur, wenn **beide** zustimmen (Fallstudie FS-C1). Nutzen: Absprachen außerhalb der Plattform werden möglich, ohne Kontaktdaten einseitig preiszugeben. |
+| **Ziel** | Beide Teilnehmer sehen gegenseitig ihre Kontaktdaten |
+| **Primärakteur** | Mitglied (Anbieter oder Interessent) |
+| **Sekundärakteure** | anderes Mitglied der Konversation |
+| **Vorbedingung** | Konversation existiert; keiner hat den anderen blockiert; beide Konten aktiv |
+| **Auslöser** | Ein Teilnehmer wählt im Chat „Kontaktdaten teilen“ |
+| **Nachbedingung (Erfolg)** | Beide Zustimmungen gespeichert; jeder sieht die Adresse des anderen; Systemnachricht „Kontaktdaten wurden ausgetauscht“ im Verlauf |
+| **Nachbedingung (Fehlschlag)** | Keine Adresse sichtbar |
+
+**Hauptszenario**
+1. Teilnehmer A wählt „Kontaktdaten teilen“ und bestätigt den Hinweis, dass die Adresse erst nach Zustimmung beider sichtbar wird.
+2. System speichert die Zustimmung von A und zeigt B „A möchte Kontaktdaten austauschen“.
+3. B stimmt zu.
+4. System speichert die Zustimmung von B, zeigt beiden die Adresse des anderen und schreibt eine Systemnachricht in den Verlauf.
+
+**Erweiterungen**
+- 3a. *B stimmt nicht zu:* Es wird nichts angezeigt; A kann seine Zustimmung zurückziehen.
+- \*a. *Ein Teilnehmer widerruft:* Die Adressen werden für beide wieder ausgeblendet.
+- \*b. *Blockierung oder Sperre:* Freigabe nicht möglich bzw. Adressen werden ausgeblendet.
+
+**Sonderanforderungen:** REQ-CHAT-010, REQ-PRIV-002, REQ-CHAT-001, REQ-SEC-006.
 
 ## 5. Casual-Use-Cases (Kurzform)
 
@@ -451,7 +542,7 @@ stateDiagram-v2
 |---|---|
 | UC-02 | Anmeldung mit E-Mail und Passwort. Sitzung per sicherem Cookie. Nach 5 Fehlversuchen greifen eine progressive Verzögerung bzw. eine Sperre von 15 Minuten. Abmelden beendet die Sitzung serverseitig |
 | UC-03 | Gast gibt E-Mail ein. Unabhängig von der Existenz erscheint eine neutrale Meldung. Der Link ist 1 h gültig und einmalig. Nach dem Zurücksetzen werden alle Sitzungen beendet |
-| UC-04 | Anzeigename, optional Profilbild, Studiengang (optional), bevorzugte Übergabeorte. Die E-Mail-Adresse ist **nicht** öffentlich sichtbar |
+| UC-04 | Anzeigename, optional Profilbild, Studiengang (optional), bevorzugte Übergabeorte. Die E-Mail-Adresse ist **nicht** öffentlich sichtbar (Ausnahme: beidseitige Freigabe, UC-25) |
 | UC-06 | Export aller personenbezogenen Daten als JSON (Profil, Anzeigen, Nachrichten, Bewertungen) per Download-Link per E-Mail |
 | UC-11 | Bearbeiten (Änderungshistorie für die Moderation), pausieren, reaktivieren, verlängern, löschen |
 | UC-12 | Status `reserviert` (optional mit Konversation verknüpft) und `abgegeben`. Abgegebene Anzeigen verschwinden nach 7 Tagen aus der Suche |

@@ -1,0 +1,41 @@
+---
+id: REQ-SEC-008
+title: Sicherheitsprüfungen in der CI-Pipeline
+type: security
+class: constraint
+status: in-review
+owner: team-plattform
+risk: medium
+release: R1
+moscow: M
+kano: n/a
+epic: EPIC-00
+source: Guideline Kap. 07, NIST SSDF
+version: 1.1
+created: 2026-10-20
+last_updated: 2026-10-23
+verification: [CTRL-CI-SCAN]
+---
+
+# REQ-SEC-008 Sicherheitsprüfungen in der CI-Pipeline
+
+## Anforderung
+Jede Änderung muss vor der Zusammenführung automatisch geprüft werden auf: Schwachstellen im eigenen Code (SAST), verwundbare Abhängigkeiten (SCA), eingecheckte Geheimnisse, Schwachstellen im Container-Image. Pro Release wird eine Software-Stückliste (SBOM) erzeugt.
+
+## Begründung
+Lieferkettenrisiken und versehentlich eingecheckte Geheimnisse sind ohne Automatisierung nicht beherrschbar.
+
+## Akzeptanzkriterien
+- Befunde der Schwere „kritisch“ oder „hoch“ lassen die Pipeline fehlschlagen.
+- Ein gefundenes Geheimnis lässt die Pipeline fehlschlagen.
+- Jeder Release-Build enthält eine SBOM im CycloneDX-Format als Artefakt.
+
+## Nachweis
+- `CTRL-CI-SCAN`: Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt.
+- Stand: **nicht umgesetzt** (Umsetzungsstand ⬜).
+
+## Änderungshistorie
+| Version | Datum | Änderung |
+|---|---|---|
+| 1.0 | 2026-10-20 | Erstfassung im Katalog |
+| 1.1 | 2026-10-23 | Eigene Datei, Fehlschlagkriterien ergänzt |

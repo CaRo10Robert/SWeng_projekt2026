@@ -73,6 +73,7 @@ pnpm dev                                       # Server :8080 (tsx watch) + Vite
 | `pnpm test` | Unit-Tests der Fachregeln (u. a. Entscheidungstabelle BR-01) |
 | `pnpm typecheck` | TypeScript in allen Paketen |
 | `pnpm lint:deps` | Fitness Function: Modulgrenzen und Ports (dependency-cruiser) |
+| `node scripts/trace.mjs --report` | Nachverfolgbarkeit Anforderung → Nachweis → Test prüfen, Status aggregieren (`--write` aktualisiert den Katalog-Index) |
 | `node scripts/smoke-test.mjs [app-url] [mailpit-url]` | End-to-End-Smoke-Test gegen ein laufendes Compose-Setup |
 
 ### Struktur
@@ -94,9 +95,12 @@ compose.yaml           app + db (postgres:17) + mailpit
 |---|---|---|---|
 | 1 | [Reverse Engineering Kleinanzeigen](docs/01-analyse/01-reverse-engineering-kleinanzeigen.md) | Fachkonzept, Domänenobjekte, Prozesse und Geschäftsmodell des Vorbilds | Explanation |
 | 2 | [Wettbewerbsanalyse](docs/01-analyse/02-wettbewerbsanalyse.md) | Vergleich von 8 Plattformen und Kanälen, Feature-Matrix, SWOT, Positionierung | Explanation |
+| 2a | [Abgleich Fallstudie MWI131](docs/02-anforderungen/00-fallstudie-abgleich.md) | Anforderungen der Fallstudie, Abweichungen, offene Entscheidung Q-12 | Explanation |
 | 3 | [Use Cases](docs/02-anforderungen/01-use-cases.md) | Akteure, UML-Use-Case-Diagramme, Use-Case-Spezifikationen | Reference |
-| 4 | [Anforderungskatalog](docs/02-anforderungen/02-anforderungen.md) | Funktionale Anforderungen, Geschäftsregeln, NFRs (ISO 25010, SLI/SLO) | Reference |
-| 5 | [Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, MoSCoW je Release, Backlog (u. a. Bezahlfunktion, weitere Domains) | Reference |
+| 4 | [Anforderungskatalog](docs/02-anforderungen/02-anforderungen.md) | Ziele, Scope, Constraints, Zustandsmodell, Index aller Anforderungen ([req/](docs/02-anforderungen/req/), eine Datei je Anforderung) | Reference |
+| 4a | [Nachweiskatalog](docs/02-anforderungen/nachweise.md) | Tests, manuelle Prüfungen und Kontrollen je Anforderung | Reference |
+| 5 | [Product Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, Backlog mit Kano, Risiko, Story Points, WSJF; Sprint-Plan | Reference |
+| 5a | [Vorgehen](docs/02-anforderungen/04-vorgehen.md) | Scrum, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management | Explanation |
 | 6 | [Architekturdokumentation (arc42)](docs/03-architektur/architektur.md) | Kontext, C4-Container und -Komponenten, Laufzeitsicht, Verteilung, Konzepte | Explanation |
 | 7 | [Architekturentscheidungen (ADRs)](docs/03-architektur/decisions/) | Eine Datei pro Entscheidung | Explanation |
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
