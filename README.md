@@ -73,6 +73,7 @@ pnpm dev                                       # Server :8080 (tsx watch) + Vite
 | `pnpm test` | Unit-Tests der Fachregeln (u. a. Entscheidungstabelle BR-01) |
 | `pnpm typecheck` | TypeScript in allen Paketen |
 | `pnpm lint:deps` | Fitness Function: Modulgrenzen und Ports (dependency-cruiser) |
+| `node scripts/check-diagrams.mjs` | Alle Mermaid-Diagramme der Doku rendern (Syntaxprüfung; lokal mit `CHROME_PATH` auf einen installierten Browser) |
 | `node scripts/trace.mjs --report` | Nachverfolgbarkeit Anforderung → Nachweis → Test prüfen, Status aggregieren (`--write` aktualisiert den Katalog-Index) |
 | `node scripts/smoke-test.mjs [app-url] [mailpit-url]` | End-to-End-Smoke-Test gegen ein laufendes Compose-Setup |
 
@@ -102,7 +103,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 5 | [Product Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, Backlog mit Kano, Risiko, Story Points, WSJF; Sprint-Plan | Reference |
 | 5a | [Vorgehen](docs/02-anforderungen/04-vorgehen.md) | Scrum, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management | Explanation |
 | 5b | [Entscheidungslog](docs/02-anforderungen/05-entscheidungen.md) | Fachliche Entscheidungen Q-1 … Q-19 (vorläufig, zu bestätigen) | Reference |
-| 6 | [Architekturdokumentation (arc42)](docs/03-architektur/architektur.md) | Kontext, C4-Container und -Komponenten, Laufzeitsicht, Verteilung, Konzepte | Explanation |
+| 6 | [Architekturdokumentation (arc42 + C4)](docs/03-architektur/architektur.md) | C4-Systemkontext, -Container, -Komponenten und -Verteilung (Mermaid-C4), Laufzeitsicht, Konzepte | Explanation |
 | 7 | [Architekturentscheidungen (ADRs)](docs/03-architektur/decisions/) | Eine Datei pro Entscheidung | Explanation |
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
 | 8a | [Requirements-Review v0.2](docs/04-review/review-v0.2-anforderungen.md) | 32 Befunde zu den Anforderungen und ihre Behebung | – |

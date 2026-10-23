@@ -79,12 +79,12 @@ gantt
     axisFormat %d.%m.
     section Phase 0
     Analyse, Anforderungen, Architektur           :done, a1, 2026-10-20, 4d
-    Inkrement 0: Prototyp (Docker-Beispiel)       :done, p0, 2026-10-22, 2d
+    Inkrement 0 – Prototyp (Docker-Beispiel)       :done, p0, 2026-10-22, 2d
     section R1
-    Sprint 1: Constraints der Fallstudie, CI      :s1, 2026-10-26, 14d
-    Sprint 2: Datenschutz und Sicherheit           :s2, after s1, 14d
-    Sprint 3: Vollständigkeit und Nachweise        :s3, after s2, 14d
-    Sprint 4: Härtung und Messung (nach Freeze)    :s4, after s3, 14d
+    Sprint 1 – Constraints der Fallstudie, CI      :s1, 2026-10-26, 14d
+    Sprint 2 – Datenschutz und Sicherheit           :s2, after s1, 14d
+    Sprint 3 – Vollständigkeit und Nachweise        :s3, after s2, 14d
+    Sprint 4 – Härtung und Messung (nach Freeze)    :s4, after s3, 14d
     section Meilensteine
     Feature Freeze                                 :milestone, ff, after s3, 0d
 ```
