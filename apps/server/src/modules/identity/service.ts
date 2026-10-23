@@ -9,6 +9,7 @@ import type { AuthContext } from '../../platform/http/auth.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import { checkPassword, checkRegistrationEmail, hashToken, newToken, normalizeEmail, type DomainRule } from './domain.js';
+import { resolveLogin, type IdentityProviderPort } from './identity-provider.js';
 
 // OWASP Password Storage Cheat Sheet: Argon2id, m = 19 MiB, t = 2, p = 1 (REQ-SEC-002)
 const ARGON = { memoryCost: 19_456, timeCost: 2, parallelism: 1 };
@@ -63,6 +64,22 @@ export function createIdentityService(deps: ModuleDeps) {
   const link = (path: string, token: string) => `${config.publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const notify = deps.modules;
 
+  /** Passwortverfahren als interner Adapter des IdentityProviderPort (ADR-0013 Nr. 2). */
+  const passwordProvider: IdentityProviderPort = {
+    id: 'password',
+    async begin() {
+      return { kind: 'form' };
+    },
+    async complete(input) {
+      const { email: rawEmail, password } = input as { email: string; password: string };
+      const email = normalizeEmail(rawEmail);
+      const user = email ? await findByCanonical(email.canonical) : undefined;
+      // Hash auch bei unbekannter Adresse prüfen: gleiche Antwortzeit (REQ-AUTH-004)
+      const valid = await argonVerify(user?.password_hash ?? (await dummyHash), password);
+      return user && valid ? { email: user.email, attributes: {} } : null;
+    },
+  };
+
   async function limit(key: string, max: number, windowSeconds: number) {
     const result = await rateLimit.hit(key, max, windowSeconds);
     if (!result.allowed) throw rateLimited(result.retryAfterSeconds);
@@ -112,7 +129,10 @@ export function createIdentityService(deps: ModuleDeps) {
 
   return {
     async register(body: RegisterBody, ip: string): Promise<void> {
-      await limit(`register:${ipKey(ip)}`, 5, 3600);
+      // REQ-SEC-005 / Q-18: großzügig je IP (Campus-NAT), streng je Adresse
+      await limit(`register-ip:${ipKey(ip)}`, 30, 3600);
+      const normalized = normalizeEmail(body.email);
+      if (normalized) await limit(`register-addr:${normalized.canonical}`, 3, 3600);
       const check = checkRegistrationEmail(body.email, await domainRules());
       if (!check.ok) {
         throw unprocessable(
@@ -206,18 +226,21 @@ export function createIdentityService(deps: ModuleDeps) {
       // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP
       if ((await rateLimit.peek(failKey, 900)) >= 5) throw rateLimited(900);
 
-      const user = email ? await findByCanonical(email.canonical) : undefined;
-      const valid = await argonVerify(user?.password_hash ?? (await dummyHash), password);
-      if (!user || !valid) {
-        await rateLimit.hit(failKey, 5, 900);
-        throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
-      }
-      if (user.status === 'unverified') {
-        throw new AppError(403, 'not_verified', 'Bitte bestätige zuerst deine E-Mail-Adresse.');
-      }
-      if (user.status === 'suspended') {
+      const outcome = await resolveLogin(passwordProvider, { email: rawEmail, password }, {
+        rules: await domainRules(),
+        findByCanonical,
+      });
+      if (!outcome.ok) {
+        if (outcome.code === 'invalid_credentials' || outcome.code === 'domain_not_allowed') {
+          await rateLimit.hit(failKey, 5, 900);
+          throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
+        }
+        if (outcome.code === 'not_verified') {
+          throw new AppError(403, 'not_verified', 'Bitte bestätige zuerst deine E-Mail-Adresse.');
+        }
         throw new AppError(403, 'account_suspended', 'Dieses Konto ist gesperrt.');
       }
+      const user = outcome.account;
       await rateLimit.reset(failKey);
 
       return database.tx(async (tx) => {
@@ -325,6 +348,16 @@ export function createIdentityService(deps: ModuleDeps) {
         status: row.status,
         notificationPrefs: row.notification_prefs,
       };
+    },
+
+    /**
+     * Schmales API für die Kontaktfreigabe (REQ-CHAT-010, Architektur §8.1): nur die bei der Registrierung
+     * eingegebene Adresse eines aktiven Kontos. Die Zustimmungsprüfung liegt im Modul messaging.
+     */
+    async getSharedContactAddress(userId: string): Promise<string | null> {
+      const row = await db.one<{ email: string }>(sql`
+        SELECT email FROM identity."user" WHERE id = ${userId} AND status = 'active'`);
+      return row?.email ?? null;
     },
 
     async isActive(userId: string): Promise<boolean> {

@@ -1,10 +1,20 @@
-import type { ConversationSummary, Deal, DealActionBody, Message, ServerEvent } from '@campusmarkt/contracts';
+import type { ContactShare, ConversationSummary, Deal, DealActionBody, Message, ServerEvent } from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
 import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
-import { MESSAGE_RATE, needsSafetyHint, NEW_CONVERSATION_RATE, NOTIFY_DELAY_SECONDS } from './domain.js';
+import {
+  contactView,
+  decideContactAction,
+  MESSAGE_RATE,
+  needsSafetyHint,
+  NEW_CONVERSATION_RATE,
+  NOTIFY_DELAY_SECONDS,
+  type ContactAction,
+  type ContactContext,
+  type ContactRow,
+} from './domain.js';
 
 export const NOTIFY_UNREAD = 'notify-unread';
 export const DEAL_EVENTS = 'deal-events';
@@ -62,6 +72,21 @@ const toDeal = (d: DealRow): Deal => ({
 });
 
 const NOT_POSSIBLE = () => new AppError(403, 'contact_not_possible', 'Kontakt nicht möglich.');
+
+interface ContactRowDb {
+  user_id: string;
+  state: ContactRow['state'];
+  request_count: number;
+  changed_at: string;
+}
+
+const CONTACT_ERRORS = {
+  contact_not_possible: () => NOT_POSSIBLE(),
+  contact_request_limit: () =>
+    new AppError(429, 'contact_request_limit', 'Eine erneute Anfrage ist derzeit nicht möglich.'),
+  invalid_contact_action: () =>
+    conflict('invalid_contact_action', 'Diese Aktion ist im aktuellen Zustand nicht möglich.'),
+};
 
 export function createMessagingService(deps: ModuleDeps) {
   const { database, realtime, rateLimit, modules, config } = deps;
@@ -135,8 +160,80 @@ export function createMessagingService(deps: ModuleDeps) {
       ORDER BY (status = 'agreed') DESC, created_at DESC LIMIT 1`);
   }
 
+  /** Kontaktfreigabe: Zustände beider Teilnehmer, Blockierung und Kontostatus (REQ-CHAT-010). */
+  async function contactContext(conversationId: string, me: string, counterpartId: string, tx?: Tx): Promise<ContactContext> {
+    const rows = await (tx?.db ?? db).query<ContactRowDb>(sql`
+      SELECT user_id, state, request_count, changed_at FROM messaging.contact_consent
+      WHERE conversation_id = ${conversationId} ${tx ? sql`FOR UPDATE` : empty}`);
+    const toRow = (r?: ContactRowDb): ContactRow | undefined =>
+      r && { state: r.state, requestCount: r.request_count, changedAt: new Date(r.changed_at) };
+    return {
+      mine: toRow(rows.find((r) => r.user_id === me)),
+      theirs: toRow(rows.find((r) => r.user_id === counterpartId)),
+      blocked: await modules.trust.isBlockedEither(me, counterpartId),
+      bothActive: (await modules.identity.isActive(me)) && (await modules.identity.isActive(counterpartId)),
+      now: new Date(),
+    };
+  }
+
+  async function contactShare(ctx: ContactContext, counterpartId: string): Promise<ContactShare> {
+    const view = contactView(ctx);
+    return {
+      mine: view.mine,
+      theirs: view.theirs,
+      // Adresse nur über das schmale identity-API und nur bei gegenseitiger Sichtbarkeit; nie als Nachricht
+      counterpartEmail: view.visible ? await modules.identity.getSharedContactAddress(counterpartId) : null,
+      canGrant: view.canGrant,
+      retryAfter: view.retryAfter?.toISOString() ?? null,
+      requestsLeft: view.requestsLeft,
+    };
+  }
+
   return {
     send,
+
+    /** REQ-CHAT-010: zustimmen, zurückziehen oder eine Anfrage ablehnen. */
+    async contactAction(auth: AuthContext, conversationId: string, action: ContactAction): Promise<ContactShare> {
+      const { conv, counterpartId } = await participant(auth, conversationId);
+      const exchanged = await database.tx(async (tx) => {
+        await tx.db.exec(sql`SELECT 1 FROM messaging.conversation WHERE id = ${conv.id} FOR UPDATE`);
+        const decision = decideContactAction(action, await contactContext(conv.id, auth.userId, counterpartId, tx));
+        if (!decision.ok) throw CONTACT_ERRORS[decision.code]();
+        if (decision.set === 'mine') {
+          await tx.db.exec(sql`
+            INSERT INTO messaging.contact_consent (conversation_id, user_id, state, request_count, granted_at, withdrawn_at)
+            VALUES (${conv.id}, ${auth.userId}, ${decision.state}, ${decision.countsAsRequest ? 1 : 0},
+                    ${decision.state === 'granted' ? sql`now()` : sql`NULL`}, ${decision.state === 'withdrawn' ? sql`now()` : sql`NULL`})
+            ON CONFLICT (conversation_id, user_id) DO UPDATE SET
+              state = EXCLUDED.state,
+              request_count = messaging.contact_consent.request_count + ${decision.countsAsRequest ? 1 : 0},
+              granted_at = COALESCE(EXCLUDED.granted_at, messaging.contact_consent.granted_at),
+              withdrawn_at = COALESCE(EXCLUDED.withdrawn_at, messaging.contact_consent.withdrawn_at),
+              changed_at = now()`);
+        } else {
+          await tx.db.exec(sql`
+            UPDATE messaging.contact_consent SET state = 'declined', declined_at = now(), changed_at = now()
+            WHERE conversation_id = ${conv.id} AND user_id = ${counterpartId}`);
+        }
+        if (decision.exchanged) {
+          // Systemnachricht ohne Adressen; die Adressen erscheinen nur als Angabe zur Konversation
+          const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(),
+            'Kontaktdaten wurden ausgetauscht. Ihr seht die Hochschul-E-Mail-Adresse des anderen oben im Chat.', 'system');
+          return message;
+        }
+        return null;
+      });
+      if (exchanged) await publish([conv.buyer_id, conv.seller_id], { type: 'message', message: toMessage(exchanged) });
+      await publish([conv.buyer_id, conv.seller_id], { type: 'conversation', conversationId: conv.id });
+      return contactShare(await contactContext(conv.id, auth.userId, counterpartId), counterpartId);
+    },
+
+    async exportContactConsents(userId: string) {
+      return db.query(sql`
+        SELECT conversation_id AS "conversationId", state, request_count AS "requestCount",
+               granted_at AS "grantedAt", withdrawn_at AS "withdrawnAt", declined_at AS "declinedAt"
+        FROM messaging.contact_consent WHERE user_id = ${userId}`);
+    },
 
     async list(auth: AuthContext): Promise<ConversationSummary[]> {
       const rows = await db.query<ConversationRow & {
@@ -392,6 +489,7 @@ export function createMessagingService(deps: ModuleDeps) {
         unreadCount: r.unread,
         deal: deal ? toDeal(deal) : null,
         blocked: blocked.has(counterpartId),
+        contact: await contactShare(await contactContext(r.id, auth.userId, counterpartId), counterpartId),
       });
     }
     return result;

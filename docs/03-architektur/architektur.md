@@ -119,10 +119,10 @@ C4Context
 | Suche ohne Zusatzinfrastruktur | **PostgreSQL-Volltextsuche** + `pg_trgm` | [ADR-0008](decisions/0008-suche-postgres.md) |
 | API-Vertrag | **REST + OpenAPI 3.1**, Schema-first aus TypeBox-Schemas in `packages/contracts`; WebSocket-Ereignisse als TypeScript-Typen im selben Paket (kein AsyncAPI-Dokument) | [ADR-0009](decisions/0009-api-rest-openapi.md), [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 2 |
 | Kein Hosting, trotzdem vorführbar | **Docker Compose**: `app` + `db` + `mailpit`, Seed-Daten mit Demo-Konten | [ADR-0010](decisions/0010-docker-demo-deployment.md) |
-| Anmeldung über die Hochschulkennung (FS-C3) später ohne Umbau | Anmeldeverfahren hinter einem zweistufigen `IdentityProviderPort`; im Beispiel Hochschuladresse + Passwort (Stand: geplant B-05, Sprint 1) | [ADR-0013](decisions/0013-anmeldung-identity-provider-port.md) |
-| Kontaktdaten nur nach beidseitiger Zustimmung (FS-C1) | Zustimmungen als Zustand der Konversation; Adresse nur als Konversationsangabe, nie als Nachricht (Stand: geplant B-01, Sprint 1) | REQ-CHAT-010 |
+| Anmeldung über die Hochschulkennung (FS-C3) später ohne Umbau | Anmeldeverfahren hinter einem zweistufigen `IdentityProviderPort`; im Beispiel Hochschuladresse + Passwort (Stand: umgesetzt B-05; SSO-Adapter nach S-01) | [ADR-0013](decisions/0013-anmeldung-identity-provider-port.md) |
+| Kontaktdaten nur nach beidseitiger Zustimmung (FS-C1) | Zustimmungen als Zustand der Konversation; Adresse nur als Konversationsangabe, nie als Nachricht (Stand: umgesetzt B-01) | REQ-CHAT-010 |
 | IP-Adressen nur pseudonymisiert | HMAC-SHA256 mit zufälligem, täglich rotiertem Schlüssel in der Datenbank (Stand: geplant B-35, Sprint 2) | [ADR-0014](decisions/0014-ip-pseudonymisierung.md) |
-| Architektur verständlich und prüfbar dokumentieren | **C4-Modell** als Mermaid-C4-Diagramme, eine Ebene je Diagramm, gerendert mit `scripts/check-diagrams.mjs` (in CI ab B-07) | [ADR-0012](decisions/0012-c4-notation.md) |
+| Architektur verständlich und prüfbar dokumentieren | **C4-Modell** als Mermaid-C4-Diagramme, eine Ebene je Diagramm, gerendert mit `scripts/check-diagrams.mjs` (in CI, B-07) | [ADR-0012](decisions/0012-c4-notation.md) |
 
 **Leitprinzip:** Alles, was im Beispiel bewusst einfacher gelöst ist (Fan-out, Storage, Mail, Rate-Limit-Store, Suche, Job-Queue), steckt hinter einem **Port**. Ein späterer Echtbetrieb (EPIC-12) tauscht Adapter, nicht Fachlogik.
 
@@ -168,7 +168,7 @@ C4Container
 
 | Container | Technologie | Verantwortung | Qualitätsziele / Anforderungen | ADR | Stand |
 |---|---|---|---|---|---|
-| Web-App | React-SPA (Vite), PWA | Darstellung, Tastaturbedienung, Echtzeit-Empfang, Degradation auf Polling | REQ-A11Y-001/002, REQ-UX-001, REQ-CHAT-003 | 0002 | umgesetzt; Kontaktfreigabe geplant B-01, Tastatur-E2E geplant B-02 (Sprint 1) |
+| Web-App | React-SPA (Vite), PWA | Darstellung, Tastaturbedienung, Echtzeit-Empfang, Degradation auf Polling | REQ-A11Y-001/002, REQ-UX-001, REQ-CHAT-003 | 0002 | umgesetzt (Kontaktfreigabe B-01, Tastatur-E2E B-02) |
 | Anwendung | Node.js 22, Fastify, pg-boss | Fachlogik aller Module, Autorisierung, Jobs (E-Mail, Bilder, Fristen) | REQ-SEC-*, REQ-NOTI-005, REQ-OPS-* | 0001, 0002, 0004, 0005 | umgesetzt; offene Teile siehe 5.2 |
 | Datenbank | PostgreSQL 17 | Quelle der Wahrheit, transaktionale Outbox (Jobs im selben Commit), Volltextsuche | REQ-CHAT-004, REQ-SRCH-001, REQ-PERF-001 | 0005, 0008 | umgesetzt |
 | Bildablage | Docker-Volume `uploads` hinter `StoragePort` | Bilder außerhalb des Web-Roots, Auslieferung nur über die Anwendung | REQ-LST-003, REQ-SEC-007 | 0007 | umgesetzt |
@@ -233,7 +233,7 @@ C4Component
         Boundary(mods, "Fachlogik und Plattform", "Schicht") {
             Component(modules, "Fachmodule", "identity, listings, search, messaging, trust, privacy, notifications", "kennen nur Ports, nie Adapter; SQL nur auf das eigene Schema")
             Component(dbaccess, "Datenbankzugriff", "platform/db, sql-Template, pg", "Database/Tx, Unit of Work, transaktionales Enqueue")
-            Component(idport, "IdentityProviderPort → Passwortverfahren", "Modul identity", "geplant B-05; später OIDC/SAML-Adapter")
+            Component(idport, "IdentityProviderPort → Passwortverfahren", "Modul identity", "umgesetzt B-05; später OIDC/SAML-Adapter")
             Component(payport, "PaymentPort", "nur Schnittstelle", "EPIC-09, ADR-0006")
         }
         Boundary(ports, "Ports und Adapter", "Schicht") {
@@ -324,16 +324,16 @@ Weitere Aufrufe: `trust → messaging` (Nachrichtenkontext, Entfernen), `messagi
 | Admin-API und Audit | `modules/admin.ts`, `platform/audit.ts` | Rollen, Audit-Log (append-only), Job- und Dead-Letter-Übersicht, Demo-Werkzeug | REQ-MOD-007, REQ-NOTI-005, REQ-DEMO-002 | umgesetzt |
 | WebSocket-Gateway | `modules/messaging/routes.ts` (`websocketRoute`) | Echtzeit-Empfang, Origin-Prüfung; Senden per WS nur als Alternative, die Web-App sendet per REST | REQ-CHAT-003 | umgesetzt |
 | Job-Worker und Zeitsteuerung | `platform/adapters/pg-boss-queue.ts`, `registerJobs` je Modul | Asynchrone Arbeit, Retry, Dead-Letter; Zeitgeber Ü-11/Ü-17/Ü-18 (`listings-maintenance`, stündlich) und Kontolöschung (`privacy-purge`, täglich 03:17); Zeitgeber Ü-12, Ü-13 (inkl. `DealCancelled` und Hinweis-Mail) und Ü-19 | REQ-NOTI-005, REQ-LST-007/008, REQ-PRIV-003 | umgesetzt; Ü-12/Ü-13/Ü-19 geplant B-32 (Sprint 3) |
-| identity | `modules/identity/` | Zugang, BR-01, Rollen, Benachrichtigungs-Einstellungen (`PATCH /me`) | REQ-AUTH-*, REQ-SEC-002…005, REQ-SEC-011 | umgesetzt; `IdentityProviderPort` geplant B-05 (Sprint 1) |
+| identity | `modules/identity/` | Zugang, BR-01, Rollen, Benachrichtigungs-Einstellungen (`PATCH /me`) | REQ-AUTH-*, REQ-SEC-002…005, REQ-SEC-011 | umgesetzt, inkl. `IdentityProviderPort` (B-05) und Registrierungsgrenzen Q-18 (B-34) |
 | listings | `modules/listings/` | Anzeigen und Bilder | REQ-LST-* | umgesetzt |
 | search | `modules/search/` | Suche, Merkliste | REQ-SRCH-* | umgesetzt |
-| messaging | `modules/messaging/` | Chat, **Kontaktfreigabe**, Deals | REQ-CHAT-*, REQ-PRIV-002 | Chat und Deals umgesetzt; Kontaktfreigabe geplant B-01 (Sprint 1) |
+| messaging | `modules/messaging/` | Chat, **Kontaktfreigabe**, Deals | REQ-CHAT-*, REQ-PRIV-002 | umgesetzt (Kontaktfreigabe B-01) |
 | trust | `modules/trust/` | Meldungen, Moderation, Blockieren | REQ-MOD-* | umgesetzt |
 | privacy | `modules/privacy/` | Export, Löschung über alle Module | REQ-ACC-002/003, REQ-PRIV-003 | umgesetzt; Anonymisierung statt Löschen fremder Konversationen geplant B-22 (Sprint 2) |
 | notifications | `modules/notifications/` | Vorlagen, Versand über MailPort unter Beachtung der Einstellungen aus `identity` | REQ-NOTI-* | umgesetzt; Wiederholungsplan ≥ 30 min geplant B-36 (Sprint 2) |
 | Datenbankzugriff | `platform/db.ts`, `platform/sql.ts` | Verbindung, Unit of Work, parametrisiertes SQL | REQ-SEC-001 (Injection) | umgesetzt |
 | Ports + Adapter | `platform/ports/`, `platform/adapters/` | Austauschbare Infrastruktur | REQ-ARCH-006 | umgesetzt; HMAC-Schlüssel im RateLimitStore geplant B-35, publish/subscribe geplant B-40 (Sprint 2) |
-| IdentityProviderPort | `modules/identity/` (Passwortverfahren intern), später SSO-Adapter in `platform/adapters/` | Anmeldeverfahren austauschbar (ADR-0013) | REQ-AUTH-009 | geplant B-05 (Sprint 1) |
+| IdentityProviderPort | `modules/identity/` (Passwortverfahren intern), später SSO-Adapter in `platform/adapters/` | Anmeldeverfahren austauschbar (ADR-0013) | REQ-AUTH-009 | umgesetzt B-05; SSO-Adapter nach S-01 |
 | PaymentPort | `modules/payments/payment-port.ts` | Erweiterungspunkt Bezahlung | REQ-ARCH-001/002 | Schnittstelle vorhanden, Adapter EPIC-09 |
 
 **Modulregeln und ihre Prüfung (Fitness Functions, REQ-MAINT-002):**
@@ -374,8 +374,8 @@ C4Component
 
 | Komponente | Ort im Code | Verantwortung | Bezug zu den 9 Kernabläufen (REQ-A11Y-002) | Stand |
 |---|---|---|---|---|
-| Routen und Seiten | `apps/web/src/routes/`, `router.tsx` | Seiten je Use Case, Rollen-Guards für Moderation und Admin | Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe | umgesetzt; Kontaktfreigabe geplant B-01 (Sprint 1) |
-| UI-Bausteine | `apps/web/src/components/` | Zugängliche Grundbausteine, sichtbarer Fokus, ARIA-Live im Chat | alle 9 | umgesetzt; automatisierter Tastaturtest geplant B-02 (Sprint 1) |
+| Routen und Seiten | `apps/web/src/routes/`, `router.tsx` | Seiten je Use Case, Rollen-Guards für Moderation und Admin | Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe | umgesetzt |
+| UI-Bausteine | `apps/web/src/components/` | Zugängliche Grundbausteine, sichtbarer Fokus, ARIA-Live im Chat | alle 9 | umgesetzt; Tastatur-E2E und axe-core in `e2e/` (B-02) |
 | API-Client | `apps/web/src/api/` | Aufrufe, CSRF-Header, Fehlerbehandlung | alle 9 | umgesetzt |
 | Echtzeit-Hook | `apps/web/src/lib/realtime.ts` | WebSocket, Reconnect, Nachladen per `?after=`, Polling | Nachricht senden | umgesetzt |
 | Service Worker | erzeugt durch `vite-plugin-pwa` | Installierbarkeit (PWA); cacht ausschließlich statische Dateien, damit keine personenbezogenen Antworten im Gerät verbleiben | – | umgesetzt |
@@ -514,7 +514,7 @@ erDiagram
     }
 ```
 
-`CONTACT_CONSENT` hält je Teilnehmer und Konversation den Zustand der Kontaktfreigabe (REQ-CHAT-010): `state` ∈ {`granted`, `withdrawn`, `declined`}, mit Zeitpunkten für Zustimmung, Widerruf und Ablehnung sowie Zähler und Zeitpunkt der letzten Anfrage für die Sperrfrist (24 h) und die Höchstzahl (3). Die Adresse selbst bleibt im Modul `identity` und wird nur bei beidseitiger Zustimmung über ein schmales API gelesen (siehe 8.1). Ein Deal je Konversation kann nach Storno neu entstehen; offen ist höchstens einer je Anzeige. (Stand: `CONTACT_CONSENT` geplant B-01, Sprint 1.)
+`CONTACT_CONSENT` hält je Teilnehmer und Konversation den Zustand der Kontaktfreigabe (REQ-CHAT-010): `state` ∈ {`granted`, `withdrawn`, `declined`}, mit Zeitpunkten für Zustimmung, Widerruf und Ablehnung sowie Zähler und Zeitpunkt der letzten Anfrage für die Sperrfrist (24 h) und die Höchstzahl (3). Die Adresse selbst bleibt im Modul `identity` und wird nur bei beidseitiger Zustimmung über ein schmales API gelesen (siehe 8.1). Ein Deal je Konversation kann nach Storno neu entstehen; offen ist höchstens einer je Anzeige. (Stand: umgesetzt B-01, Migration `0002_contact_consent.sql`.)
 
 Unique-Constraints (Auszug): `USER(email_canonical)` · `CONVERSATION(listing_id, buyer_id)` (REQ-CHAT-002) · `MESSAGE(conversation_id, client_msg_id)` (REQ-CHAT-004, Idempotenz) · `DEAL(listing_id) WHERE status = 'agreed'` · `ALLOWED_DOMAIN(domain)`. Die Job-Tabellen verwaltet pg-boss in einem eigenen Schema `pgboss`.
 
@@ -527,7 +527,7 @@ Unique-Constraints (Auszug): `USER(email_canonical)` · `CONVERSATION(listing_id
 | Eigene Nachrichten | Text gelöscht, Nachricht bleibt als Platzhalter; das Gegenüber behält die Konversation | `message.body` nullable + `deleted_at`; „Ehemaliges Mitglied“ entsteht, weil `sender_id` nicht mehr auflösbar ist | geplant B-22 (Sprint 2); heute werden ganze Konversationen gelöscht |
 | Meldungen des Mitglieds | bleiben für die Frist, ohne Personenbezug | `report.reporter_id := NULL` | umgesetzt |
 | Einwilligungen | Nachweis bleibt ohne Profilbezug | `consent.user_id` nullable, `anonymized_at` | geplant B-22 (Sprint 2) |
-| Kontaktfreigaben | mit der Konversation gelöscht bzw. für das Gegenüber ausgeblendet | `CONTACT_CONSENT` | geplant B-01/B-22 |
+| Kontaktfreigaben | mit der Konversation gelöscht bzw. für das Gegenüber ausgeblendet | `CONTACT_CONSENT` | Kaskade mit der Konversation umgesetzt (B-01); Ausblenden geplant B-22 |
 
 ## 6. Laufzeitsicht
 
@@ -709,7 +709,7 @@ C4Deployment
 | Umgebung | Zweck | Infrastruktur | Stand |
 |---|---|---|---|
 | `local` | Entwicklung | `compose.dev.yaml` (db + mailpit), App per `pnpm dev` | umgesetzt |
-| `ci` | Tests | GitHub Actions: Typprüfung, Unit-Tests, `lint:deps`, `trace.mjs`, Image-Build, Smoke-Test gegen das Compose-Setup | geplant B-07 (Sprint 1) |
+| `ci` | Tests | GitHub Actions: Typprüfung, Unit-Tests, `lint:deps`, `trace.mjs`, Image-Build, E2E- und Smoke-Test gegen das Compose-Setup | umgesetzt B-07 (`.github/workflows/ci.yml`) |
 | `demo` | Abgabe / Vorführung | `docker compose up` | umgesetzt |
 
 ### 7.2 Ausblick Echtbetrieb (nicht Teil des Projekts, EPIC-12)
@@ -726,9 +726,9 @@ Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PI
 - **Autorisierung:** zentrale Prüfung pro Ressource in den Fachmodulen, *deny by default*; fremde Ressourcen liefern 404 (REQ-SEC-006).
 - **Eingaben:** Validierung an der Grenze gegen die TypeBox-Schemas aus `packages/contracts` (Fastify), aus denen auch die OpenAPI-Spezifikation erzeugt wird. Ausgabe-Encoding durch React. Strikte CSP (die SPA kommt vom selben Origin). CSRF-Schutz über Pflicht-Header und Origin-Prüfung (ADR-0011).
 - **Container-Härtung:** Non-root-User, Read-only-Root-FS, `no-new-privileges`, keine Secrets im Image, minimales Base-Image. Image-Scan (Trivy), Renovate, SCA, Secret-Scan und SBOM sind geplant (B-06, Sprint 4).
-- **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). (Stand: neue Grenzen geplant B-34, Sprint 2; HMAC-Schlüssel geplant B-35, Sprint 2.)
+- **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). (Stand: Grenzen umgesetzt B-34; HMAC-Schlüssel geplant B-35, Sprint 2.)
 - **Pseudonymisierte IP-Adressen (ADR-0014):** HMAC-SHA256 mit einem zufälligen 256-Bit-Schlüssel aus `platform.ip_pepper`. Er wird beim Start erzeugt, falls keiner gültig ist, und täglich per Job gewechselt; der Vorgänger bleibt 1 h gültig (längstes Zählfenster) und wird dann gelöscht. Kein Standardwert im Code, kein Secret im Image; für mehrere Instanzen tragfähig. Gespeicherte Werte sind ohne den Schlüssel nicht zurückrechenbar und höchstens 7 Tage vorhanden (REQ-PRIV-002). (Stand: geplant B-35, Sprint 2; heute fester Salt.)
-- **Vertrauensgrenze Kontaktfreigabe (REQ-CHAT-010, REQ-PRIV-002):** Die Entscheidung „darf die Adresse sehen“ ist eine reine Funktion in `messaging/domain.ts` (beide Zustimmungen erteilt, keine Blockierung, Gegenüber aktiv) und wird tabellarisch getestet. `identity` stellt dafür ein schmales API `getSharedContactAddress(userId)` bereit, das nur die bei der Registrierung eingegebene Adresse liefert; das bestehende `getContact` bleibt dem Versand von E-Mails (`notifications`) vorbehalten. Ein Vertragstest stellt sicher, dass in `packages/contracts` nur `Me`, `AdminUser` und `counterpartContact` E-Mail-Felder enthalten. Die Adresse ist nie Teil einer Nachricht, daher sieht die Moderation sie auch im gemeldeten Kontext nicht. Zustimmungen erscheinen im Datenexport. Missbrauchsschutz über Sperrfrist (24 h) und Höchstzahl (3). (Stand: geplant B-01, Sprint 1.)
+- **Vertrauensgrenze Kontaktfreigabe (REQ-CHAT-010, REQ-PRIV-002):** Die Entscheidung „darf die Adresse sehen“ ist eine reine Funktion in `messaging/domain.ts` (beide Zustimmungen erteilt, keine Blockierung, Gegenüber aktiv) und wird tabellarisch getestet. `identity` stellt dafür ein schmales API `getSharedContactAddress(userId)` bereit, das nur die bei der Registrierung eingegebene Adresse liefert; das bestehende `getContact` bleibt dem Versand von E-Mails (`notifications`) vorbehalten. In `packages/contracts` tragen nur `Me`, `AdminUser` und `ContactShare.counterpartEmail` E-Mail-Felder; die Smoke-Prüfung AT-CHAT-001-2 stellt sicher, dass Konversationen und Nachrichten außerhalb von `contact` keine Adresse enthalten. Die Adresse ist nie Teil einer Nachricht, daher sieht die Moderation sie auch im gemeldeten Kontext nicht. Zustimmungen erscheinen im Datenexport. Missbrauchsschutz über Sperrfrist (24 h) und Höchstzahl (3). (Stand: umgesetzt B-01.)
 - **Demo-spezifisch:** Demo-Passwörter stehen nur in der Seed-Dokumentation und werden nur bei `SEED_DEMO=true` angelegt.
 
 ### 8.2 Zuverlässigkeit
@@ -802,7 +802,7 @@ flowchart LR
 Strukturierte JSON-Logs (pino) mit Korrelations-ID, `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); ein Compose-Profil `observability` mit Grafana ist Could.
 
 ### 8.7 Barrierefreiheit und UX
-Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test geplant B-02, Sprint 1). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten).
+Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test umgesetzt B-02, `e2e/tests/keyboard.spec.ts`). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten).
 
 ## 9. Architekturentscheidungen
 
@@ -851,7 +851,7 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | R-3 | Exmatrikulierte behalten Postfächer | mittel / mittel | Re-Verifikation alle 12 Monate (REQ-AUTH-007) ist für **R2** geplant (Q-14) und **nicht umgesetzt**; bis dahin bleibt das Risiko bestehen |
 | R-4 | ~~Betreiberrolle ungeklärt~~ | entfällt (kein Hosting) | → EPIC-12 |
 | R-5 | Eigene Auth ist fehleranfällig | mittel / hoch | Bewährte Bibliotheken, ASVS-L2-Checkliste, Tests (ADR-0003) |
-| R-6 | Docker-Setup läuft auf Prüfrechnern nicht (ARM vs. x86, Ports belegt, Docker-Version) | mittel / **hoch** | Basis-Images sind multi-arch und das Image wird lokal gebaut; Multi-Arch-Build in CI geplant (B-08); Ports per `.env` änderbar; Smoke-Test von `docker compose up` (in CI ab B-07); README mit Troubleshooting |
+| R-6 | Docker-Setup läuft auf Prüfrechnern nicht (ARM vs. x86, Ports belegt, Docker-Version) | mittel / **hoch** | Basis-Images sind multi-arch und das Image wird lokal gebaut; Multi-Arch-Build in CI geplant (B-08); Ports per `.env` änderbar; Smoke-Test von `docker compose up` (in CI, B-07); README mit Troubleshooting |
 | R-7 | Teamkapazität | mittel / mittel | Schlanker Stack (ADR-0010), MoSCoW konsequent anwenden |
 | R-8 | Fallstudien-Constraint FS-C3 (Anmeldung über die Hochschulkennung) wird nicht anerkannt | mittel / hoch | Dokumentierte Abweichung, ADR-0013, Abstimmung mit Dozent/in (Q-12, Spike S-01) |
 | R-9 | Mermaid-C4 ist experimentell, Layout begrenzt | mittel / niedrig | Kleine Diagramme, Prüfung mit `scripts/check-diagrams.mjs`; Ausweg Structurizr DSL (ADR-0012) |

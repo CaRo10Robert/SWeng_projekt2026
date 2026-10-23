@@ -22,9 +22,11 @@ export function PriceTag({ listing, className }: { listing: Pick<Card, 'priceTyp
   return <span className={className ?? 'font-bold text-brand-800'}>{formatPrice(listing.priceType, listing.priceCents, listing.currency)}</span>;
 }
 
+/** Platzhalter ohne Bild. Mit leerem `label` rein dekorativ (vom Screenreader übersprungen). */
 export function ImagePlaceholder({ label = 'Kein Bild' }: { label?: string }) {
+  const a11y = label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true as const };
   return (
-    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-600" role="img" aria-label={label}>
+    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-600" {...a11y}>
       <span aria-hidden="true" className="text-3xl">
         📦
       </span>

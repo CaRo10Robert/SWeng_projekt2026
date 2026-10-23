@@ -155,13 +155,13 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 44 |
-| implemented | Umsetzung | 59 |
+| approved | Konkretisiert (bereit) | 37 |
+| implemented | Umsetzung | 66 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
-| [REQ-A11Y-001](req/REQ-A11Y-001.md) | Barrierefreiheit nach WCAG 2.2 AA | quality | M | basis | high | approved | AT-A11Y-001, MAN-A11Y-001 |
-| [REQ-A11Y-002](req/REQ-A11Y-002.md) | Vollständige Tastaturbedienbarkeit der Kernabläufe | quality | M | basis | high | approved | AT-A11Y-002, AT-A11Y-002-2, MAN-A11Y-002 |
+| [REQ-A11Y-001](req/REQ-A11Y-001.md) | Barrierefreiheit nach WCAG 2.2 AA | quality | M | basis | high | implemented | AT-A11Y-001, MAN-A11Y-001 |
+| [REQ-A11Y-002](req/REQ-A11Y-002.md) | Vollständige Tastaturbedienbarkeit der Kernabläufe | quality | M | basis | high | implemented | AT-A11Y-002, AT-A11Y-002-2, MAN-A11Y-002 |
 | [REQ-ACC-001](req/REQ-ACC-001.md) | Profil pflegen | functional | M | basis | low | implemented | AT-ACC-001 |
 | [REQ-ACC-002](req/REQ-ACC-002.md) | Konto löschen mit Karenzzeit | functional | M | basis | high | approved | AT-ACC-002, AT-ACC-002-2 |
 | [REQ-ACC-003](req/REQ-ACC-003.md) | Daten exportieren | functional | S | leistung | medium | implemented | AT-ACC-003 |
@@ -180,7 +180,7 @@ flowchart LR
 | [REQ-AUTH-006](req/REQ-AUTH-006.md) | Passwort per E-Mail-Link zurücksetzen | functional | M | basis | medium | implemented | AT-AUTH-006 |
 | [REQ-AUTH-007](req/REQ-AUTH-007.md) | Mitgliedschaft jährlich re-verifizieren | domain | S | n/a | medium | approved | AT-AUTH-007 |
 | [REQ-AUTH-008](req/REQ-AUTH-008.md) | Gesperrte Adressen nicht erneut registrieren | functional | M | basis | medium | implemented | AT-AUTH-008 |
-| [REQ-AUTH-009](req/REQ-AUTH-009.md) | Anmeldeverfahren austauschbar (Hochschulkennung) | constraint | M | n/a | high | approved | CTRL-DEPCRUISE, AT-AUTH-009, AT-ARCH-005 |
+| [REQ-AUTH-009](req/REQ-AUTH-009.md) | Anmeldeverfahren austauschbar (Hochschulkennung) | constraint | M | n/a | high | implemented | CTRL-DEPCRUISE, AT-AUTH-009, AT-ARCH-005 |
 | [REQ-AVAIL-001](req/REQ-AVAIL-001.md) | Verfügbarkeit der kritischen Funktionen | quality | W | basis | medium | approved | AT-AVAIL-001 |
 | [REQ-AVAIL-002](req/REQ-AVAIL-002.md) | Wiederherstellungsziele der Datenhaltung | quality | W | n/a | medium | approved | MAN-AVAIL-002 |
 | [REQ-CHAT-001](req/REQ-CHAT-001.md) | Anbieter über anzeigenbezogenen Chat kontaktieren | functional | M | basis | high | implemented | AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4 |
@@ -192,7 +192,7 @@ flowchart LR
 | [REQ-CHAT-007](req/REQ-CHAT-007.md) | Begrenzung von Nachrichtenlänge und Sendehäufigkeit | constraint | M | n/a | medium | implemented | AT-CHAT-007, AT-CHAT-007-2 |
 | [REQ-CHAT-008](req/REQ-CHAT-008.md) | Bilder im Chat senden | functional | C | begeisterung | medium | approved | AT-CHAT-008 |
 | [REQ-CHAT-009](req/REQ-CHAT-009.md) | Preisvorschlag im Chat | functional | C | begeisterung | low | approved | AT-CHAT-009-2 |
-| [REQ-CHAT-010](req/REQ-CHAT-010.md) | Kontaktdaten erst nach beidseitiger Zustimmung freigeben | constraint | M | basis | high | approved | AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3 |
+| [REQ-CHAT-010](req/REQ-CHAT-010.md) | Kontaktdaten erst nach beidseitiger Zustimmung freigeben | constraint | M | basis | high | implemented | AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3 |
 | [REQ-CHAT-011](req/REQ-CHAT-011.md) | Reservierung und Abgabe für eine Person (Deal-Kern) | functional | M | basis | medium | implemented | AT-CHAT-011, AT-CHAT-011-2 |
 | [REQ-DEMO-001](req/REQ-DEMO-001.md) | Demo-Daten auf Knopfdruck | constraint | M | n/a | low | implemented | AT-DEMO-001 |
 | [REQ-DEMO-002](req/REQ-DEMO-002.md) | Zeitgesteuerte Abläufe sofort auslösen | functional | S | n/a | low | implemented | AT-DEMO-002 |
@@ -228,7 +228,7 @@ flowchart LR
 | [REQ-OPS-001](req/REQ-OPS-001.md) | Gesundheitsprüfung und geordnetes Herunterfahren | quality | M | n/a | medium | implemented | AT-OPS-001, AT-OPS-001-2 |
 | [REQ-OPS-002](req/REQ-OPS-002.md) | Beobachtbarkeit ohne personenbezogene Daten | quality | M | n/a | medium | approved | AT-OPS-002, MAN-OPS-002 |
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | implemented | MAN-OPS-003 |
-| [REQ-OPS-004](req/REQ-OPS-004.md) | Reproduzierbarer, versionierter Image-Build | quality | M | n/a | medium | approved | CTRL-CI-IMAGE |
+| [REQ-OPS-004](req/REQ-OPS-004.md) | Reproduzierbarer, versionierter Image-Build | quality | M | n/a | medium | implemented | CTRL-CI-IMAGE |
 | [REQ-OPS-005](req/REQ-OPS-005.md) | Automatische, idempotente Datenbankmigration | quality | M | n/a | medium | implemented | AT-OPS-005 |
 | [REQ-PERF-001](req/REQ-PERF-001.md) | Antwortzeit der Suche | quality | M | leistung | medium | approved | AT-PERF-001 |
 | [REQ-PERF-002](req/REQ-PERF-002.md) | Zustellzeit von Chatnachrichten | quality | M | leistung | medium | approved | AT-PERF-002 |
@@ -248,13 +248,13 @@ flowchart LR
 | [REQ-SEC-002](req/REQ-SEC-002.md) | Passwörter mit Argon2id speichern | constraint | M | n/a | high | implemented | AT-SEC-002 |
 | [REQ-SEC-003](req/REQ-SEC-003.md) | Passwortrichtlinie | constraint | M | basis | medium | implemented | AT-SEC-003 |
 | [REQ-SEC-004](req/REQ-SEC-004.md) | Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen | constraint | M | basis | high | implemented | AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3 |
-| [REQ-SEC-005](req/REQ-SEC-005.md) | Begrenzung von Anfragen (Rate-Limits) | constraint | M | n/a | high | approved | AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3 |
+| [REQ-SEC-005](req/REQ-SEC-005.md) | Begrenzung von Anfragen (Rate-Limits) | constraint | M | n/a | high | implemented | AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3 |
 | [REQ-SEC-006](req/REQ-SEC-006.md) | Autorisierung pro Ressource, standardmäßig verweigern | constraint | M | basis | high | implemented | AT-SEC-006, AT-SEC-006-2 |
 | [REQ-SEC-007](req/REQ-SEC-007.md) | Sicherer Umgang mit hochgeladenen Bildern | constraint | M | basis | medium | approved | AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4 |
 | [REQ-SEC-008](req/REQ-SEC-008.md) | Sicherheitsprüfungen in der CI-Pipeline | constraint | M | n/a | medium | approved | CTRL-CI-SCAN |
 | [REQ-SEC-009](req/REQ-SEC-009.md) | Threat Model für Registrierung, Chat und Upload | constraint | M | n/a | high | approved | MAN-SEC-009 |
 | [REQ-SEC-010](req/REQ-SEC-010.md) | Gehärtetes Anwendungs-Image | constraint | M | n/a | medium | implemented | CTRL-IMAGE-INSPECT |
-| [REQ-SEC-011](req/REQ-SEC-011.md) | Angebote nur von verifizierten Mitgliedern | constraint | M | basis | high | approved | AT-SEC-011, AT-SEC-011-2, AT-SEC-011-3 |
+| [REQ-SEC-011](req/REQ-SEC-011.md) | Angebote nur von verifizierten Mitgliedern | constraint | M | basis | high | implemented | AT-SEC-011, AT-SEC-011-2, AT-SEC-011-3 |
 | [REQ-SRCH-001](req/REQ-SRCH-001.md) | Freitextsuche mit Wortstämmen und Tippfehlertoleranz | functional | M | leistung | medium | implemented | AT-SRCH-001, AT-SRCH-001-2 |
 | [REQ-SRCH-002](req/REQ-SRCH-002.md) | Filtern und Sortieren | functional | M | leistung | low | implemented | AT-SRCH-002 |
 | [REQ-SRCH-003](req/REQ-SRCH-003.md) | Aktualität der Suche | quality | S | leistung | low | implemented | AT-SRCH-003, AT-SRCH-003-2 |

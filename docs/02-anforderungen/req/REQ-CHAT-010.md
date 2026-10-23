@@ -3,7 +3,7 @@ id: REQ-CHAT-010
 title: Kontaktdaten erst nach beidseitiger Zustimmung freigeben
 type: user-story
 class: constraint
-status: approved
+status: implemented
 owner: team-kommunikation
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,7 +15,7 @@ epic: EPIC-04
 source: FS-C1
 use_cases: [UC-25]
 depends_on: [REQ-CHAT-001, REQ-PRIV-002]
-version: 2.0
+version: 2.1
 created: 2026-10-23
 last_updated: 2026-10-23
 verification: [AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3]
@@ -109,3 +109,4 @@ I: unabhängig von Deal und Bewertung · N: Umfang der Kontaktdaten und Grenzen 
 |---|---|---|
 | 1.0 | 2026-10-23 | Erstfassung aus Fallstudie FS-C1 (Abgleich A-1) |
 | 2.0 | 2026-10-23 | Review v0.2: R-10 Ablehnen, Zurückziehen, Sperre/Löschung, abgegebene Anzeige, Schutz vor wiederholten Anfragen, gezeigte Adresse (Q-2), nie als Nachrichtentext, Export und Löschung, Benachrichtigung, Grenzen des Widerrufs; INVEST lösungsneutral; Must-Begründung |
+| 2.1 | 2026-10-23 | Umgesetzt (Schritt 6): Tabelle messaging.contact_consent, POST /conversations/:id/contact, ContactShare in der SPA; Nachweise AT-CHAT-010/-2/-3 im Smoke-Test, Tastaturablauf in AT-A11Y-002; Status → implemented |

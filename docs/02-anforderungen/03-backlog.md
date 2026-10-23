@@ -45,7 +45,7 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-21 | Nachweise automatisieren EPIC-01 und Sicherheit (Abmelden, Reset, Sperre, Cookie-Eigenschaften, Rate-Limits, Autorisierung) | Test | REQ-AUTH-005, REQ-AUTH-006, REQ-AUTH-008, REQ-SEC-004, REQ-SEC-005, REQ-SEC-006 | basis | mittel | B-04 | 2 | 8 | 5 | 5 | 18 | 9,0 | 3 |
 | B-01 | Kontaktdaten nach beidseitiger Zustimmung freigeben | Feature | REQ-CHAT-010, REQ-PRIV-002, REQ-CHAT-001 | basis | hoch | – | 5 | 8 | 13 | 5 | 26 | 5,2 | 1 |
 | B-02 | Tastaturbedienbarkeit der Kernabläufe, automatisiert mit axe-core | Feature/Test | REQ-A11Y-002, REQ-A11Y-001 | basis | hoch | B-01 | 5 | 8 | 13 | 5 | 26 | 5,2 | 1 |
-| B-34 | Rate-Limit Registrierung je Adresse und je IP (Q-18) | Feature | REQ-SEC-005 | n/a | hoch | – | 1 | 1 | 3 | 5 | 9 | 9,0 | 2 |
+| B-34 | Rate-Limit Registrierung je Adresse und je IP (Q-18) | Feature | REQ-SEC-005 | n/a | hoch | – | 1 | 1 | 3 | 5 | 9 | 9,0 | 1 |
 | B-22 | Kontolöschung: eigene Nachrichten löschen, Konversation für das Gegenüber erhalten („Ehemaliges Mitglied“) | Feature | REQ-ACC-002, REQ-PRIV-003 | basis | hoch | – | 3 | 8 | 3 | 8 | 19 | 6,3 | 2 |
 | B-12 | Aufbewahrungsfristen: unbestätigte Konten (7 Tage), Chats, Meldungen, entfernte Anzeigen, Tokens, Audit-Log | Feature | REQ-PRIV-003, REQ-AUTH-002 | n/a | hoch | B-22 | 5 | 1 | 3 | 8 | 12 | 2,4 | 2 |
 | B-16 | axe-core auf allen Routen und manueller Screenreader-Durchlauf (NVDA) | Test | REQ-A11Y-001 | basis | hoch | B-02 | 3 | 8 | 3 | 5 | 16 | 5,3 | 2 |
@@ -98,10 +98,16 @@ gantt
 
 | Sprint | Sprint-Ziel | Einträge | SP |
 |---|---|---|---|
-| 1 | Die Constraints der Fallstudie sind umgesetzt und automatisiert nachgewiesen; CI prüft jede Änderung | S-01, B-03, B-07, B-04, B-05, B-01, B-02 | 20 |
-| 2 | Datenschutz- und Sicherheitslücken aus Anforderungs- und Architektur-Review geschlossen | B-34, B-35, B-36, B-38, B-40, B-41, B-22, B-12, B-16 | 18 |
+| 1 | Die Constraints der Fallstudie sind umgesetzt und automatisiert nachgewiesen; CI prüft jede Änderung | S-01, B-03, B-07, B-04, B-05, B-01, B-02, B-34 | 21 |
+| 2 | Datenschutz- und Sicherheitslücken aus Anforderungs- und Architektur-Review geschlossen | B-35, B-36, B-38, B-40, B-41, B-22, B-12, B-16 | 17 |
 | 3 | Alle R1-Funktionen vollständig und nachgewiesen | B-21, B-09, B-29, B-25, B-32, B-30, B-31 | 19 |
 | 4 | Nach Feature Freeze: nur Messung, Nachweise, Fehlerbehebung | B-23, B-27, B-10, B-06, B-08 | 20 |
+
+**Stand Sprint 1 (2026-10-23):**
+
+- **B-34 vorgezogen** (+1 SP, Sprint 1 damit 21 SP): Die automatisierten Tests aus B-02 und B-03 registrieren je Lauf mehrere Konten. Mit der alten Grenze (5 je IP und Stunde) scheiterten sie am Rate-Limit; die Grenzen aus Q-18 waren die Voraussetzung. Sprint 2 sinkt auf 17 SP.
+- **B-01, B-02, B-03, B-04, B-07 umgesetzt.** Nachweise: Smoke-Test (`scripts/smoke-test.mjs`), E2E-Paket (`e2e/`), Unit-Tests, CI-Workflow `.github/workflows/ci.yml`.
+- **B-05 umgesetzt ohne S-01:** Der zweistufige `IdentityProviderPort` und der Passwort-Adapter stehen; ein Fake-SSO-Provider belegt im Test, dass ein zweites Verfahren ohne Umbau passt. Der echte SSO-Adapter wartet weiterhin auf den Spike **S-01** (Abstimmung mit dem Rechenzentrum, Q-12), der noch offen ist.
 
 ## 4. Backlog: EPIC-09 Bezahlfunktion
 

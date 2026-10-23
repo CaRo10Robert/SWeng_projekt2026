@@ -47,6 +47,7 @@ export const ROUTES = {
   sendMessage: 'POST /conversations/:id/messages SendMessageBody → 201 Message (idempotent über clientMsgId)',
   markRead: 'POST /conversations/:id/read → 204',
   deal: 'POST /conversations/:id/deal DealActionBody → Deal (nur Anbieter)',
+  contact: 'POST /conversations/:id/contact ContactActionBody → ContactShare | 403 contact_not_possible | 429 contact_request_limit | 409 invalid_contact_action (REQ-CHAT-010)',
   unread: 'GET /me/unread → UnreadCount',
   websocket: 'GET /ws (WebSocket) – siehe ServerEvent / ClientEvent',
 

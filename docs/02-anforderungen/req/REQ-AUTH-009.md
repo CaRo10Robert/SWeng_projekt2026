@@ -3,7 +3,7 @@ id: REQ-AUTH-009
 title: Anmeldeverfahren austauschbar (Hochschulkennung)
 type: architecture
 class: constraint
-status: approved
+status: implemented
 owner: team-identity
 risk: high
 reviewers: [product-owner, architecture-lead, security-lead]
@@ -15,7 +15,7 @@ epic: EPIC-01
 source: FS-C3
 use_cases: [UC-02]
 depends_on: [REQ-AUTH-001, REQ-AUTH-005, REQ-AUTH-008]
-version: 2.1
+version: 2.2
 created: 2026-10-23
 last_updated: 2026-10-23
 verification: [CTRL-DEPCRUISE, AT-AUTH-009, AT-ARCH-005]
@@ -66,3 +66,4 @@ Regeln für ein zusätzliches Verfahren (gelten ab dessen Anbindung, im Test mit
 | 1.0 | 2026-10-23 | Erstfassung aus Fallstudie FS-C3 (Abgleich A-3) |
 | 2.0 | 2026-10-23 | Review v0.2: R-01 – Must (Kriterium 4), ADR-0013, beobachtbare Akzeptanzkriterien, Regeln für Kontoverknüpfung/Nutzertyp/fehlende Adresse, Abweichung von FS-C3 ausdrücklich; R-16 architecture-lead als Reviewer |
 | 2.1 | 2026-10-23 | Architektur-Review A-10: Nutzertyp immer aus der Domain (Q-20); Port zweistufig (ADR-0013) |
+| 2.2 | 2026-10-23 | Umgesetzt (Schritt 6): zweistufiger IdentityProviderPort (ADR-0013), Passwort-Anmeldung als Adapter, resolveLogin; AT-AUTH-009 mit Fake-SSO-Provider; Status → implemented |

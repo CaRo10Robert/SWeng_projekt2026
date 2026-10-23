@@ -64,7 +64,10 @@ const err = (file, msg) => errors.push(`${file}: ${msg}`);
 function walk(path, out = []) {
   let info;
   try { info = statSync(path); } catch { return out; }
-  if (info.isFile()) return out.concat(path);
+  if (info.isFile()) {
+    out.push(path);
+    return out;
+  }
   for (const entry of readdirSync(path)) {
     if (['node_modules', 'dist', '.turbo', 'dev-dist'].includes(entry)) continue;
     walk(join(path, entry), out);

@@ -3,7 +3,7 @@ id: REQ-OPS-004
 title: Reproduzierbarer, versionierter Image-Build
 type: operational
 class: quality
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,7 +13,7 @@ moscow_reason: [3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 10
-version: 2.1
+version: 2.2
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [CTRL-CI-IMAGE]
@@ -46,3 +46,4 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-32 (Registry optional, Abgabe als Quellcode bzw. Archiv; Q-19), R-15 |
+| 2.2 | 2026-10-23 | Umgesetzt (Schritt 6): GitHub-Actions-Workflow .github/workflows/ci.yml (Prüfungen, Diagramme, Compose mit E2E und Smoke); Status → implemented |

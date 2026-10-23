@@ -8,6 +8,7 @@ import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage, NetworkError } from '../api/client';
 import { ImagePlaceholder, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
+import { ContactShare } from '../components/ContactShare';
 import { Alert, Badge, Button, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
 import { formatChatTime, newId } from '../lib/format';
 
@@ -243,6 +244,7 @@ export function ConversationPage() {
       </div>
 
       <DealActions conversation={c} />
+      <ContactShare conversation={c} />
 
       <section aria-label="Nachrichtenverlauf" className="max-h-[60vh] min-h-64 overflow-y-auto rounded-xl bg-slate-100 p-3">
         {messages.isError && <Alert tone="error">{errorMessage(messages.error)}</Alert>}

@@ -300,7 +300,7 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
               ))}
             </ul>
           )}
-          <input ref={fileInput} type="file" accept={ACCEPTED.join(',')} multiple className="sr-only" id="file-input" onChange={(e) => void onFiles(e)} tabIndex={-1} />
+          <input ref={fileInput} type="file" accept={ACCEPTED.join(',')} multiple className="sr-only" id="file-input" aria-label="Bilddateien auswählen" onChange={(e) => void onFiles(e)} tabIndex={-1} />
           <Button variant="secondary" onClick={() => fileInput.current?.click()} disabled={images.length >= maxImages}>
             Bilder hinzufügen
           </Button>

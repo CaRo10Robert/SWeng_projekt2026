@@ -6,3 +6,5 @@ dist/
 coverage/
 apps/web/dev-dist/
 .data/
+e2e/test-results/
+e2e/playwright-report/

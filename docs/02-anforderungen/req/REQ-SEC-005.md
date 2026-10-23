@@ -3,7 +3,7 @@ id: REQ-SEC-005
 title: Begrenzung von Anfragen (Rate-Limits)
 type: security
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,7 +14,7 @@ kano: n/a
 epic: EPIC-01
 source: ASVS
 use_cases: [UC-01, UC-02, UC-03]
-version: 3.0
+version: 3.1
 created: 2026-10-20
 last_updated: 2026-10-23
 verification: [AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3]
@@ -63,3 +63,4 @@ Ohne Begrenzung sind Passwort-Raten, Spam und das Fluten von Hochschulpostfäche
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Speichertechnik entfernt (ADR-0010/0011), Grenze für „erneut senden“ und Akzeptanzkriterien ergänzt |
 | 3.0 | 2026-10-23 | Review v0.2: R-25 Entscheidungstabelle Schlüssel/Grenze/Fenster/Wirkung nach Q-18 (Campus-NAT, keine Kontosperre); R-26 Pseudonymisierung statt „gehasht“; R-03 `class: constraint`; R-04 Fehler- und Missbrauchsfälle; Status `approved`, weil die neuen Grenzen noch nicht umgesetzt sind |
+| 3.1 | 2026-10-23 | Umgesetzt (Schritt 6): Registrierungsgrenzen nach Q-18 (3 je Adresse, 30 je IP und Stunde); Status → implemented |

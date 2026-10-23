@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Ziel der Dev-Proxys, z. B. VITE_API_TARGET=http://localhost:8081, wenn das Docker-Beispiel dort läuft
+const apiTarget =
+  (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.VITE_API_TARGET ?? 'http://localhost:8080';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -33,8 +37,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:8080',
-      '/ws': { target: 'ws://localhost:8080', ws: true },
+      // changeOrigin: false, damit Host und Origin übereinstimmen (sonst lehnt die CSRF-Prüfung jede Änderung ab)
+      '/api': { target: apiTarget, changeOrigin: false },
+      '/ws': { target: apiTarget.replace(/^http/, 'ws'), ws: true, changeOrigin: false },
     },
   },
 });

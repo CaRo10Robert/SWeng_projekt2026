@@ -21,6 +21,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       listings: await modules.listings.exportForUser(userId),
       favorites: await modules.search.exportForUser(userId),
       messagesSent: await modules.messaging.exportForUser(userId),
+      contactConsents: await modules.messaging.exportContactConsents(userId),
       trust: await modules.trust.exportForUser(userId),
     };
   }

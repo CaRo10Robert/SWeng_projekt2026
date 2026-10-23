@@ -12,6 +12,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.js
 COPY packages/contracts/package.json packages/contracts/
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
+COPY e2e/package.json e2e/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY packages packages
 COPY apps apps
