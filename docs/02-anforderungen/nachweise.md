@@ -54,7 +54,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-009` | automatisiert | REQ-AUTH-009 | (neu) Test des Anmelde-Anwendungsfalls mit einem simulierten zweiten Verfahren: Kontoverknüpfung, Neuanlage, Ablehnung fremder bzw. fehlender Adresse. |
 | `AT-AVAIL-001` | automatisiert | REQ-AVAIL-001 | Auswertung der Fehlerquote in den k6-Lasttests (neu zu schreiben). |
 | `MAN-AVAIL-002` | manuell | REQ-AVAIL-002 | Protokoll der Restore-Übung (erst im Echtbetrieb). |
-| `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test in CI – Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich. |
+| `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test `tests/ops/restore-test.mjs` in CI (Job `compose`) – Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich, Anzeige mit Bild wieder da, Dauer ≤ 15 min. |
 | `CTRL-DOC-BACKUP` | Kontrolle | REQ-AVAIL-003 | Kontrolle `docs/07-betrieb/backup-restore.md` – Ablauf, Aufbewahrung, Verschlüsselung, Zuständigkeiten. |
 | `AT-CHAT-001` | automatisiert | REQ-CHAT-001 | Smoke-Test – Konversation starten, Anbieter erhält die Nachricht. |
 | `AT-CHAT-001-2` | automatisiert | REQ-CHAT-001 | API-Test – Antworten zu Konversation und Nachrichten enthalten keine E-Mail-Adressen (neu). |
@@ -152,14 +152,14 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-OPS-002` | automatisiert | REQ-OPS-002 | Smoke-Test `/metrics` (bestehend) plus Protokollsuche nach personenbezogenen Daten (Protokollsuche neu). |
 | `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder. |
 | `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests. |
-| `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job baut das Image aus sauberem Checkout, taggt es nach SemVer und legt das `docker save`-Archiv als Artefakt ab (neu; Umsetzungsstand ⬜). |
+| `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24). |
 | `AT-OPS-005` | automatisiert | REQ-OPS-005 | Neustart-Test – zweiter Start meldet keine neue Migration und wird gesund (Grundlage: Frischstart-Zyklen; als Skript neu zu schreiben). |
 | `AT-OPS-006` | automatisiert | REQ-OPS-006 | Smoke-Test – mit `MAINTENANCE_MODE=true` liefern Seiten und API 503 mit `Retry-After`, Health, Status und Rechtsseiten nicht. |
 | `AT-OPS-006-2` | automatisiert | REQ-OPS-006 | Smoke-Test – Administrator setzt und entfernt eine Ankündigung (Mitglied 403), die Ankündigung ist öffentlich abrufbar, Audit-Log-Eintrag. |
 | `AT-OPS-007` | automatisiert | REQ-OPS-007 | Smoke-Test – `/status` (Seite) und die zugehörige API sind ohne Anmeldung erreichbar, zeigen je Dienst „in Betrieb“ bzw. „gestört“ mit Zeitpunkt und enthalten keine Versionen, Hostnamen oder Fehlertexte. |
-| `CTRL-ALERT-RULES` | Kontrolle | REQ-OPS-008 | CI-Kontrolle – `promtool check rules` für die Alarmregeln, jede Regel mit Annotation `runbook`. |
+| `CTRL-ALERT-RULES` | Kontrolle | REQ-OPS-008 | CI-Kontrolle (Job `ops-config`) – `promtool check config`, `promtool test rules`, `amtool check-config`; jede Regel mit Annotation `runbook_url`. |
 | `MAN-OPS-008` | manuell | REQ-OPS-008 | Protokoll der Alarmübung (App gestoppt → Mail in Mailpit ≤ 5 min). |
-| `AT-OPS-009` | automatisiert | REQ-OPS-009 | Smoke-Test gegen das Profil `proxy` – Umleitung von HTTP, HSTS-Header, Anmeldung über HTTPS funktioniert. |
+| `AT-OPS-009` | automatisiert | REQ-OPS-009 | `tests/ops/proxy-test.mjs` gegen das Profil `proxy` (CI-Job `compose`) – Zertifikat der lokalen CA, Umleitung 308 von HTTP, HSTS-Header `max-age=31536000`, `/metrics` am Proxy 404, Anmeldung über HTTPS mit `Secure`-Cookie. Adresse im Beispiel: `https://campusmarkt.localhost:8443` (eigener Hostname, ADR-0017). |
 | `AT-OPS-010` | automatisiert | REQ-OPS-010 | Smoke-Test – Benachrichtigungs-Mail in Mailpit trägt beide Header; Bestätigungsmail nicht. |
 | `CTRL-DOC-MAIL` | Kontrolle | REQ-OPS-010 | Kontrolle `docs/07-betrieb/mail-zustellbarkeit.md` – SPF-, DKIM-, DMARC-Beispiele und Bounce-Ablauf vorhanden. |
 | `CTRL-DOC-BETRIEB` | Kontrolle | REQ-OPS-011, REQ-SEC-012 | Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden. |

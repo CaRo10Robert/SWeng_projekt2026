@@ -1,15 +1,28 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import { Accepted, AuditEntry, JobOverview } from '@campusmarkt/contracts';
+import {
+  Accepted,
+  AnnouncementBody,
+  AuditEntry,
+  EvidenceHold,
+  IdParams,
+  JobOverview,
+  MaintenanceBody,
+  SystemStatus,
+} from '@campusmarkt/contracts';
 import { audit } from '../platform/audit.js';
-import { notFound } from '../platform/errors.js';
+import { notFound, unprocessable } from '../platform/errors.js';
 import { requireRole } from '../platform/http/auth.js';
+import { SETTING } from '../platform/settings.js';
 import { sql } from '../platform/sql.js';
 import { LISTINGS_MAINTENANCE } from './listings/index.js';
 import { PRIVACY_PURGE } from './privacy/index.js';
 import type { ModuleDeps } from './shared.js';
 
-/** Admin-Bereich: Audit-Log, Job-Übersicht inkl. Dead-Letter-Queue, Demo-Werkzeug (REQ-DEMO-002). */
+/**
+ * Admin-Bereich: Audit-Log, Job-Übersicht inkl. Dead-Letter-Queue, Demo-Werkzeug (REQ-DEMO-002),
+ * Wartungsmodus und Ankündigung (REQ-OPS-006), Beweissicherung (REQ-LEGAL-008).
+ */
 export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
   const { db } = deps.database;
   return async (app) => {
@@ -53,6 +66,54 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
       await deps.jobs.enqueue(PRIVACY_PURGE, {});
       await audit(db, { actorId: auth.userId, action: 'demo.run_due_jobs', targetType: 'jobs' });
       return reply.status(202).send({ message: 'Wartungsjobs wurden angestoßen.' });
+    });
+
+    // ---------------------------------------------------------- Wartungsmodus und Ankündigung (REQ-OPS-006)
+    app.put('/admin/maintenance', { schema: { tags, body: MaintenanceBody, response: { 200: SystemStatus } } }, async (req) => {
+      const auth = requireRole(req, 'admin');
+      if (!req.body.on && deps.config.maintenanceMode) {
+        throw unprocessable('maintenance_env', 'Der Wartungsmodus ist per MAINTENANCE_MODE gesetzt und endet erst mit einem Neustart.');
+      }
+      if (req.body.on) await deps.settings.set(SETTING.maintenance, { on: true, until: req.body.until ?? null }, auth.userId);
+      else await deps.settings.remove(SETTING.maintenance);
+      await audit(db, {
+        actorId: auth.userId,
+        action: req.body.on ? 'maintenance.on' : 'maintenance.off',
+        targetType: 'setting',
+        targetId: SETTING.maintenance,
+        details: { until: req.body.until ?? null },
+      });
+      return deps.ops.status();
+    });
+
+    app.put('/admin/announcement', { schema: { tags, body: AnnouncementBody, response: { 200: SystemStatus } } }, async (req) => {
+      const auth = requireRole(req, 'admin');
+      const value = { text: req.body.text.trim(), startsAt: req.body.startsAt ?? null, endsAt: req.body.endsAt ?? null };
+      if (value.startsAt && value.endsAt && value.endsAt <= value.startsAt) {
+        throw unprocessable('invalid_period', 'Das Ende muss nach dem Beginn liegen.');
+      }
+      await deps.settings.set(SETTING.announcement, value, auth.userId);
+      await audit(db, { actorId: auth.userId, action: 'announcement.set', targetType: 'setting', targetId: SETTING.announcement, details: value });
+      return deps.ops.status();
+    });
+
+    app.delete('/admin/announcement', { schema: { tags, response: { 200: SystemStatus } } }, async (req) => {
+      const auth = requireRole(req, 'admin');
+      await deps.settings.remove(SETTING.announcement);
+      await audit(db, { actorId: auth.userId, action: 'announcement.removed', targetType: 'setting', targetId: SETTING.announcement });
+      return deps.ops.status();
+    });
+
+    // ---------------------------------------------------------- Beweissicherung (REQ-LEGAL-008)
+    app.get('/admin/evidence-holds', { schema: { tags, response: { 200: Type.Array(EvidenceHold) } } }, async (req) => {
+      requireRole(req, 'admin');
+      return deps.modules.trust.evidenceHolds();
+    });
+
+    app.post('/admin/evidence-holds/:id/release', { schema: { tags, params: IdParams } }, async (req, reply) => {
+      const auth = requireRole(req, 'admin');
+      await deps.modules.trust.releaseEvidenceHold(auth, req.params.id);
+      return reply.status(204).send();
     });
   };
 }

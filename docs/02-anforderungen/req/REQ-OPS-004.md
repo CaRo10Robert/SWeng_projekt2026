@@ -13,9 +13,9 @@ moscow_reason: [3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 10
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [CTRL-CI-IMAGE]
 ---
 
@@ -37,7 +37,7 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | Verhalten bei Verfehlung | Kein Release |
 
 ## Nachweis
-- `CTRL-CI-IMAGE`: CI-Job baut das Image aus sauberem Checkout, taggt es nach SemVer und legt das `docker save`-Archiv als Artefakt ab (neu; Umsetzungsstand ⬜).
+- `CTRL-CI-IMAGE`: CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24).
 
 
 ## Änderungshistorie
@@ -47,3 +47,4 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-32 (Registry optional, Abgabe als Quellcode bzw. Archiv; Q-19), R-15 |
 | 2.2 | 2026-10-23 | Umgesetzt (Schritt 6): GitHub-Actions-Workflow .github/workflows/ci.yml (Prüfungen, Diagramme, Compose mit E2E und Smoke); Status → implemented |
+| 2.3 | 2026-10-24 | Nachweis CTRL-CI-IMAGE im CI-Workflow umgesetzt (Tag aus package.json, Archiv als Artefakt) |

@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { hash as argonHash, verify as argonVerify } from '@node-rs/argon2';
-import type { AdminUser, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
+import type { AdminUser, Locale, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
 import { audit } from '../../platform/audit.js';
-import type { Tx } from '../../platform/db.js';
-import { AppError, badRequest, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
+import type { Db, Tx } from '../../platform/db.js';
+import { AppError, badRequest, conflict, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
@@ -30,6 +30,7 @@ interface UserRow {
   study_program: string | null;
   preferred_location_ids: string[];
   notification_prefs: NotificationPrefs;
+  locale: Locale;
   created_at: string;
   deletion_requested_at: string | null;
 }
@@ -39,9 +40,10 @@ export interface Contact {
   displayName: string;
   status: UserRow['status'];
   notificationPrefs: NotificationPrefs;
+  locale: Locale;
 }
 
-const toMe = (u: UserRow): Me => ({
+const toMe = (u: UserRow, terms: { accepted: string | null; current: string }): Me => ({
   id: u.id,
   email: u.email,
   displayName: u.display_name,
@@ -50,8 +52,16 @@ const toMe = (u: UserRow): Me => ({
   studyProgram: u.study_program,
   preferredLocationIds: u.preferred_location_ids,
   notificationPrefs: u.notification_prefs,
+  locale: u.locale,
+  termsAcceptedVersion: terms.accepted,
+  termsRequired: terms.accepted !== terms.current,
   createdAt: u.created_at,
 });
+
+/** Zuletzt zugestimmte Fassung der Nutzungsbedingungen (REQ-PRIV-001, REQ-LEGAL-003). */
+const LATEST_TERMS = (userId: unknown) => sql`
+  SELECT version FROM identity.consent WHERE user_id = ${userId} AND kind = 'terms_privacy'
+  ORDER BY given_at DESC LIMIT 1`;
 
 export function createIdentityService(deps: ModuleDeps) {
   const { database, rateLimit, config } = deps;
@@ -63,6 +73,11 @@ export function createIdentityService(deps: ModuleDeps) {
   const ipKey = (ip: string) => createHash('sha256').update(config.ipHashSalt + ip).digest('hex').slice(0, 32);
   const link = (path: string, token: string) => `${config.publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const notify = deps.modules;
+
+  async function meOf(executor: Db, user: UserRow): Promise<Me> {
+    const terms = await executor.one<{ version: string }>(LATEST_TERMS(user.id));
+    return toMe(user, { accepted: terms?.version ?? null, current: config.termsVersion });
+  }
 
   /** Passwortverfahren als interner Adapter des IdentityProviderPort (ADR-0013 Nr. 2). */
   const passwordProvider: IdentityProviderPort = {
@@ -199,7 +214,7 @@ export function createIdentityService(deps: ModuleDeps) {
           WHERE id = ${userId} AND status = 'unverified' RETURNING *`);
         if (!user) throw badRequest('token_used', 'Das Konto ist bereits bestätigt.');
         const sessionToken = await createSession(tx, userId);
-        return { me: toMe(user), sessionToken };
+        return { me: await meOf(tx.db, user), sessionToken };
       });
     },
 
@@ -254,7 +269,7 @@ export function createIdentityService(deps: ModuleDeps) {
           deletionCancelled = true;
         }
         const sessionToken = await createSession(tx, user.id);
-        return { me: { ...toMe(user), deletionCancelled }, sessionToken };
+        return { me: { ...(await meOf(tx.db, user)), deletionCancelled }, sessionToken };
       });
     },
 
@@ -264,8 +279,8 @@ export function createIdentityService(deps: ModuleDeps) {
 
     async resolveSession(token: string): Promise<AuthContext | null> {
       const sessionHash = hashToken(token);
-      const row = await db.one<{ id: string; role: Role; institution_id: string; display_name: string }>(sql`
-        SELECT u.id, u.role, u.institution_id, u.display_name
+      const row = await db.one<{ id: string; role: Role; institution_id: string; display_name: string; terms_version: string | null }>(sql`
+        SELECT u.id, u.role, u.institution_id, u.display_name, (${LATEST_TERMS(sql`u.id`)}) AS terms_version
         FROM identity.session s JOIN identity."user" u ON u.id = s.user_id
         WHERE s.token_hash = ${sessionHash} AND s.expires_at > now() AND u.status = 'active'`);
       if (!row) return null;
@@ -275,6 +290,7 @@ export function createIdentityService(deps: ModuleDeps) {
         institutionId: row.institution_id,
         displayName: row.display_name,
         sessionHash,
+        termsCurrent: row.terms_version === config.termsVersion,
       };
     },
 
@@ -312,7 +328,22 @@ export function createIdentityService(deps: ModuleDeps) {
     async getMe(userId: string): Promise<Me> {
       const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
       if (!user) throw notFound();
-      return toMe(user);
+      return meOf(db, user);
+    },
+
+    /** REQ-LEGAL-003: Zustimmung zur aktuellen Fassung der Nutzungsbedingungen, versioniert gespeichert. */
+    async acceptTerms(userId: string, version: string): Promise<Me> {
+      if (version !== config.termsVersion) {
+        throw conflict('terms_outdated', 'Diese Fassung ist nicht mehr aktuell. Bitte lade die Seite neu.');
+      }
+      const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
+      if (!user) throw notFound();
+      const current = await db.one<{ version: string }>(LATEST_TERMS(userId));
+      if (current?.version !== version) {
+        await db.exec(sql`
+          INSERT INTO identity.consent (user_id, kind, version) VALUES (${userId}, 'terms_privacy', ${version})`);
+      }
+      return meOf(db, user);
     },
 
     async updateMe(userId: string, body: UpdateMeBody): Promise<Me> {
@@ -325,10 +356,11 @@ export function createIdentityService(deps: ModuleDeps) {
           study_program = CASE WHEN ${body.studyProgram !== undefined} THEN ${body.studyProgram ?? null} ELSE study_program END,
           preferred_location_ids = COALESCE(${body.preferredLocationIds ?? null}::uuid[], preferred_location_ids),
           notification_prefs = COALESCE(${body.notificationPrefs ? JSON.stringify(body.notificationPrefs) : null}::jsonb, notification_prefs),
+          locale = COALESCE(${body.locale ?? null}, locale),
           updated_at = now()
         WHERE id = ${userId} RETURNING *`);
       if (!user) throw notFound();
-      return toMe(user);
+      return meOf(db, user);
     },
 
     async getPublicUsers(ids: string[]): Promise<Map<string, PublicUser>> {
@@ -348,7 +380,24 @@ export function createIdentityService(deps: ModuleDeps) {
         displayName: row.display_name,
         status: row.status,
         notificationPrefs: row.notification_prefs,
+        locale: row.locale,
       };
+    },
+
+    /** Abmeldung einer Benachrichtigungskategorie über den signierten Link (REQ-NOTI-003, REQ-OPS-010). */
+    async disableNotification(userId: string, category: keyof NotificationPrefs): Promise<boolean> {
+      const changed = await db.exec(sql`
+        UPDATE identity."user"
+        SET notification_prefs = jsonb_set(notification_prefs, ${`{${category}}`}::text[], 'false'::jsonb), updated_at = now()
+        WHERE id = ${userId}`);
+      return changed > 0;
+    },
+
+    /** Aktive Administratoren, z. B. für die Eskalation nach DSA Art. 18 (REQ-LEGAL-008). */
+    async adminIds(): Promise<string[]> {
+      const rows = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE role = 'admin' AND status = 'active'`);
+      return rows.map((r) => r.id);
     },
 
     /**
@@ -390,6 +439,14 @@ export function createIdentityService(deps: ModuleDeps) {
       await tx.db.exec(sql`
         INSERT INTO identity.banned_email (email_canonical, reason) VALUES (${user.email_canonical}, ${reason})
         ON CONFLICT DO NOTHING`);
+    },
+
+    /** Sperre aufheben, z. B. nach erfolgreichem Widerspruch (REQ-LEGAL-007). */
+    async unsuspend(tx: Tx, userId: string): Promise<void> {
+      const user = await tx.db.one<UserRow>(sql`
+        UPDATE identity."user" SET status = 'active', updated_at = now()
+        WHERE id = ${userId} AND status = 'suspended' RETURNING *`);
+      if (user) await tx.db.exec(sql`DELETE FROM identity.banned_email WHERE email_canonical = ${user.email_canonical}`);
     },
 
     async listUsers(query: string | undefined): Promise<AdminUser[]> {
@@ -468,7 +525,7 @@ export function createIdentityService(deps: ModuleDeps) {
         SELECT kind, version, given_at AS "givenAt" FROM identity.consent WHERE user_id = ${userId} ORDER BY given_at`);
       const sessions = await db.query(sql`
         SELECT created_at AS "createdAt", expires_at AS "expiresAt" FROM identity.session WHERE user_id = ${userId}`);
-      return { profile: toMe(user), status: user.status, consents, sessions };
+      return { profile: await meOf(db, user), status: user.status, consents, sessions };
     },
 
     /** Für den Seed: Konto direkt aktiv anlegen. */
@@ -478,6 +535,7 @@ export function createIdentityService(deps: ModuleDeps) {
       displayName: string;
       role: Role;
       studyProgram?: string;
+      termsVersion?: string;
     }): Promise<string> {
       const check = checkRegistrationEmail(input.email, await domainRules());
       if (!check.ok) throw new Error(`Seed-Adresse ${input.email} nicht zugelassen`);
@@ -489,7 +547,7 @@ export function createIdentityService(deps: ModuleDeps) {
                 ${input.displayName}, ${check.userType}, ${input.role}, 'active', now(), ${input.studyProgram ?? null})
         RETURNING id`);
       await tx.db.exec(sql`
-        INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${config.termsVersion})`);
+        INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${input.termsVersion ?? config.termsVersion})`);
       return row!.id;
     },
   };

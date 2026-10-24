@@ -58,6 +58,7 @@ export async function seedDemoData(deps: ModuleDeps): Promise<void> {
         institutionId: HWG_INSTITUTION_ID,
         displayName: u.displayName,
         sessionHash: 'seed',
+        termsCurrent: true,
       });
     }
   });

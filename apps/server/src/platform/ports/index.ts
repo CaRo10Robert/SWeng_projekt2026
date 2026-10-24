@@ -10,10 +10,14 @@ export interface MailMessage {
   subject: string;
   text: string;
   html: string;
+  /** Zusätzliche Kopfzeilen, z. B. List-Unsubscribe (REQ-OPS-010). */
+  headers?: Record<string, string>;
 }
 
 export interface MailPort {
   send(message: MailMessage): Promise<void>;
+  /** Erreichbarkeit des Versanddienstes für die Statusseite (REQ-OPS-007). */
+  verify(): Promise<boolean>;
 }
 
 // ----------------------------------------------------------------- StoragePort (ADR-0007)

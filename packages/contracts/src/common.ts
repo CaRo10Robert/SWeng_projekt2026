@@ -11,6 +11,8 @@ export const Problem = Type.Object({
   detail: Type.Optional(Type.String()),
   code: Type.Optional(Type.String()),
   errors: Type.Optional(Type.Array(Type.Object({ path: Type.String(), message: Type.String() }))),
+  /** Korrelations-ID der Anfrage (auch im Header `x-request-id`), für Rückfragen und das Log (REQ-UX-003). */
+  requestId: Type.Optional(Type.String()),
 });
 export type Problem = Static<typeof Problem>;
 

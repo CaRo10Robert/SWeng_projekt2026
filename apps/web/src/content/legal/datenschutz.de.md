@@ -43,7 +43,7 @@ E-Mail: [Platzhalter: datenschutz@hochschule.example]
 | E-Mail-Benachrichtigungen | E-Mail-Adresse, Art der Benachrichtigung (ohne Nachrichteninhalt) | Bestätigungen, Hinweise auf neue Nachrichten, ablaufende Anzeigen | wie Konto; abbestellbar je Kategorie, außer notwendige Kontomails | Versandprotokoll [Platzhalter: Frist des Mail-Dienstes] |
 | Missbrauchsschutz | IP-Adresse nur in pseudonymisierter Form (Schlüssel wechselt täglich), Zähler | Schutz vor automatisierten Angriffen (Anmeldung, Registrierung, Nachrichten) | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | 7 Tage |
 | Server-Protokolle und Metriken | Zeitpunkt, aufgerufener Pfad, Statuscode, Dauer – ohne IP-Adresse, E-Mail oder Inhalte | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | [Platzhalter: z. B. 14 Tage] |
-| Datensicherungen | Kopie der Datenbank und Bilder | Wiederherstellung nach Störungen | Art. 32 DSGVO | spätestens nach 30 Tagen überschrieben |
+| Datensicherungen | Kopie der Datenbank und Bilder | Wiederherstellung nach Störungen | Art. 32 DSGVO | spätestens nach 28 Tagen gelöscht |
 | Steuerliche Meldepflicht der Plattform (DAC7) | bei Erreichen der Schwellen (30 Verkäufe oder 2.000 € je Kalenderjahr): Name, Anschrift, Geburtsdatum, Steuer-ID, Summe und Anzahl der Verkäufe | Erfüllung des Plattformen-Steuertransparenzgesetzes (PStTG) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. PStTG | 10 Jahre nach Ablauf des Meldezeitraums (§ 23 PStTG) [Platzhalter: im Beispiel nur Auswertung, keine Erhebung] |
 
 ## 5. Empfänger

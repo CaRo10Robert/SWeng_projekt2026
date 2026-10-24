@@ -8,12 +8,16 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { API_PREFIX, CSRF_HEADER } from '@campusmarkt/contracts';
+import { API_PREFIX, CSRF_HEADER, SystemStatus } from '@campusmarkt/contracts';
 import type { Config } from '../../config.js';
 import { AppError } from '../errors.js';
 import type { Logger } from '../logger.js';
 import type { Metrics } from '../metrics.js';
+import type { Ops } from '../ops.js';
 import { SESSION_COOKIE, type AuthContext } from './auth.js';
+import { isMaintenanceExempt, maintenancePage, retryAfterSeconds } from './maintenance.js';
+import { isKnownSpaPath } from './spa-routes.js';
+import { requiresCurrentTerms } from './terms.js';
 
 export interface HttpServerOptions {
   config: Config;
@@ -21,7 +25,11 @@ export interface HttpServerOptions {
   metrics: Metrics;
   resolveSession(token: string): Promise<AuthContext | null>;
   isReady(): Promise<boolean>;
+  ops: Ops;
 }
+
+/** One-Click-Abmeldung aus Mail-Programmen (RFC 8058) kommt ohne CSRF-Header; geschützt durch das signierte Token. */
+const CSRF_EXEMPT = new Set([`${API_PREFIX}/notifications/unsubscribe`]);
 
 const PROBLEM_BASE = 'https://campusmarkt.local/problems/';
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -49,6 +57,7 @@ export async function createHttpServer(options: HttpServerOptions) {
     genReqId: () => randomUUID(),
     bodyLimit: 1024 * 1024,
     return503OnClosing: true,
+    trustProxy: config.trustProxy,
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   await app.register(cookie);
@@ -74,6 +83,11 @@ export async function createHttpServer(options: HttpServerOptions) {
 
   app.decorateRequest('auth', null);
 
+  // Formular-POST der One-Click-Abmeldung (List-Unsubscribe-Post: List-Unsubscribe=One-Click)
+  app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, body, done) => {
+    done(null, Object.fromEntries(new URLSearchParams(body as string)));
+  });
+
   app.addHook('onRequest', async (req, reply) => {
     reply.header('x-request-id', req.id);
     const token = req.cookies[SESSION_COOKIE];
@@ -81,12 +95,35 @@ export async function createHttpServer(options: HttpServerOptions) {
 
     // CSRF: zustandsändernde API-Requests brauchen den Custom Header (nicht cross-origin setzbar)
     // und, falls vorhanden, einen Origin des eigenen Hosts (REQ-SEC-004).
-    if (UNSAFE_METHODS.has(req.method) && req.url.startsWith('/api/')) {
+    if (UNSAFE_METHODS.has(req.method) && req.url.startsWith('/api/') && !CSRF_EXEMPT.has(req.url.split('?')[0]!)) {
       const origin = req.headers.origin;
       const sameOrigin = !origin || new URL(origin).host === req.headers.host;
       if (req.headers[CSRF_HEADER] !== '1' || !sameOrigin) {
         throw new AppError(403, 'csrf', 'Anfrage wurde aus Sicherheitsgründen abgelehnt (CSRF).');
       }
+    }
+
+    // Wartungsmodus (REQ-OPS-006): 503 mit Retry-After, Ausnahmen siehe maintenance.ts
+    const maintenance = await options.ops.maintenance().catch(() => ({ active: false, until: null }));
+    if (maintenance.active && !isMaintenanceExempt({ url: req.url, method: req.method, role: req.auth?.role ?? null })) {
+      const retryAfter = retryAfterSeconds(maintenance.until);
+      if (req.url.startsWith('/api/') || req.method !== 'GET') {
+        throw Object.assign(
+          new AppError(503, 'maintenance', 'CampusMarkt wird gerade gewartet. Bitte versuche es später erneut.'),
+          { retryAfterSeconds: retryAfter },
+        );
+      }
+      return reply
+        .status(503)
+        .header('retry-after', String(retryAfter))
+        .header('cache-control', 'no-store')
+        .type('text/html; charset=utf-8')
+        .send(maintenancePage(maintenance.until));
+    }
+
+    // Neue Nutzungsbedingungen: schreibende Aktionen erst nach erneuter Zustimmung (REQ-LEGAL-003)
+    if (req.auth && !req.auth.termsCurrent && requiresCurrentTerms(req)) {
+      throw new AppError(403, 'terms_required', 'Bitte stimme zuerst den aktuellen Nutzungsbedingungen zu.');
     }
   });
 
@@ -95,6 +132,8 @@ export async function createHttpServer(options: HttpServerOptions) {
     reply.header('referrer-policy', 'same-origin');
     reply.header('x-frame-options', 'DENY');
     reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+    // Keine Indexierung durch Suchmaschinen (REQ-PRIV-008)
+    reply.header('x-robots-tag', 'noindex, nofollow');
     if (!req.url.startsWith('/api/docs')) reply.header('content-security-policy', CSP);
     if (req.url.startsWith('/api/') && !reply.hasHeader('cache-control')) reply.header('cache-control', 'no-store');
     return payload;
@@ -120,6 +159,7 @@ export async function createHttpServer(options: HttpServerOptions) {
           detail: error.message,
           code: error.code,
           errors: error.errors,
+          requestId: req.id,
         });
     }
     if ('validation' in error && error.validation) {
@@ -136,18 +176,22 @@ export async function createHttpServer(options: HttpServerOptions) {
             path: (v.instancePath || (v.params as { missingProperty?: string }).missingProperty || '').replace(/^\//, ''),
             message: v.message ?? 'ungültig',
           })),
+          requestId: req.id,
         });
     }
     const status = error.statusCode && error.statusCode < 500 ? error.statusCode : 500;
     if (status >= 500) req.log.error({ err: error }, 'Unbehandelter Fehler');
+    // REQ-UX-003: nie Stacktrace oder interne Meldungen ausliefern; Details stehen im Log unter der Request-ID
     return reply
       .status(status)
       .type('application/problem+json')
       .send({
         type: PROBLEM_BASE + (status === 500 ? 'internal' : 'request_error'),
-        title: status === 500 ? 'Interner Fehler' : error.message,
+        title: status === 500 ? 'Etwas ist schiefgelaufen' : error.message,
         status,
         code: status === 500 ? 'internal' : (error.code ?? 'request_error').toLowerCase(),
+        ...(status === 500 ? { detail: `Bitte versuche es erneut. Fehlerkennung: ${req.id}` } : {}),
+        requestId: req.id,
       });
   });
 
@@ -162,23 +206,60 @@ export async function createHttpServer(options: HttpServerOptions) {
     return metrics.registry.metrics();
   });
 
+  // Statusseite (REQ-OPS-007), öffentlich und auch im Wartungsmodus erreichbar
+  app.get(
+    `${API_PREFIX}/status`,
+    { schema: { tags: ['ops'], security: [], response: { 200: SystemStatus } } },
+    async (_req, reply) => {
+      reply.header('cache-control', 'no-store');
+      return options.ops.status();
+    },
+  );
+
+  // Keine Indexierung (REQ-PRIV-008) und Meldeweg für Sicherheitslücken nach RFC 9116 (REQ-SEC-012)
+  app.get('/robots.txt', { schema: { hide: true } }, async (_req, reply) =>
+    reply.type('text/plain; charset=utf-8').send('User-agent: *\nDisallow: /\n'),
+  );
+  const securityTxt = buildSecurityTxt(config.publicUrl, config.securityContact);
+  app.get('/.well-known/security.txt', { schema: { hide: true } }, async (_req, reply) =>
+    reply.type('text/plain; charset=utf-8').send(securityTxt),
+  );
+
   // React-SPA als statische Dateien (ADR-0002), Fallback auf index.html für Client-Routen
   const spaAvailable = existsSync(config.webDistDir);
   if (spaAvailable) {
     await app.register(fastifyStatic, { root: config.webDistDir, wildcard: false, index: ['index.html'] });
   }
+  // Bekannte SPA-Routen → 200, sonstige Seitenaufrufe → 404 mit der SPA, die „Seite nicht gefunden“ zeigt (REQ-UX-003)
   app.setNotFoundHandler((req, reply) => {
     const isApi = req.url.startsWith(API_PREFIX) || req.url.startsWith('/api/') || req.url.startsWith('/health');
     if (spaAvailable && req.method === 'GET' && !isApi && !/\.[a-z0-9]+$/i.test(req.url.split('?')[0] ?? '')) {
-      return reply.header('cache-control', 'no-cache').sendFile('index.html');
+      return reply
+        .status(isKnownSpaPath(req.url) ? 200 : 404)
+        .header('cache-control', 'no-cache')
+        .sendFile('index.html');
     }
     return reply
       .status(404)
       .type('application/problem+json')
-      .send({ type: PROBLEM_BASE + 'not_found', title: 'Nicht gefunden', status: 404, code: 'not_found' });
+      .send({ type: PROBLEM_BASE + 'not_found', title: 'Nicht gefunden', status: 404, code: 'not_found', requestId: req.id });
   });
 
   return app;
 }
 
 export type App = Awaited<ReturnType<typeof createHttpServer>>;
+
+/** RFC 9116: Pflichtfelder Contact und Expires; Expires höchstens ein Jahr, hier 180 Tage ab Start. */
+export function buildSecurityTxt(publicUrl: string, contact: string, now = new Date()): string {
+  const expires = new Date(now.getTime() + 180 * 86_400_000);
+  expires.setUTCHours(0, 0, 0, 0);
+  return [
+    `Contact: ${contact}`,
+    `Expires: ${expires.toISOString()}`,
+    'Preferred-Languages: de, en',
+    `Policy: ${publicUrl}/kontakt`,
+    `Canonical: ${publicUrl}/.well-known/security.txt`,
+    '',
+  ].join('\n');
+}

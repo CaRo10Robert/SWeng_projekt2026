@@ -20,12 +20,21 @@ export const CATEGORIES: { slug: string; name: string; study?: boolean; color: s
 /** Nur für das Docker-Beispiel. Passwörter stehen bewusst im README (ADR-0010, §8.1 Demo-spezifisch). */
 export const DEMO_PASSWORD = 'CampusMarkt-Demo-2026';
 
-export const DEMO_USERS: { key: string; email: string; displayName: string; role: Role; studyProgram?: string }[] = [
+export const DEMO_USERS: {
+  key: string;
+  email: string;
+  displayName: string;
+  role: Role;
+  studyProgram?: string;
+  /** Ältere Fassung der Nutzungsbedingungen: zeigt die erneute Zustimmung (REQ-LEGAL-003). */
+  termsVersion?: string;
+}[] = [
   { key: 'lea', email: 'lea@studmail.hwg-lu.de', displayName: 'Lea', role: 'member', studyProgram: 'BWL (B.Sc.)' },
   { key: 'ben', email: 'ben@studmail.hwg-lu.de', displayName: 'Ben', role: 'member', studyProgram: 'Wirtschaftsinformatik (B.Sc.)' },
   { key: 'mia', email: 'mia@studmail.hwg-lu.de', displayName: 'Mia', role: 'member', studyProgram: 'Soziale Arbeit (B.A.)' },
   { key: 'jonas', email: 'jonas.weber@hwg-lu.de', displayName: 'Jonas (Bibliothek)', role: 'member' },
   { key: 'sara', email: 'sara@studmail.hwg-lu.de', displayName: 'Sara', role: 'member', studyProgram: 'Weinbau und Oenologie (B.Sc.)' },
+  { key: 'tim', email: 'tim@studmail.hwg-lu.de', displayName: 'Tim', role: 'member', studyProgram: 'BWL (B.Sc.)', termsVersion: '2026-01' },
   { key: 'mod', email: 'mod@hwg-lu.de', displayName: 'Moderation (Demo)', role: 'moderator' },
   { key: 'admin', email: 'admin@hwg-lu.de', displayName: 'Admin (Demo)', role: 'admin' },
 ];

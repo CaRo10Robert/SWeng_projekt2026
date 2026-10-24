@@ -1,6 +1,9 @@
 # CampusMarkt HWG LU – lokales Docker-Beispiel (ADR-0010)
 #   docker compose up --build   → App http://localhost:8080, E-Mails http://localhost:8025
 #   docker compose down -v      → alle Daten löschen
+# Optionale Profile (ADR-0017, Q-27), der Standardstart bleibt app + db + mailpit:
+#   docker compose --profile proxy up -d       → https://campusmarkt.localhost:8443 (TLS, HSTS)
+#   docker compose --profile monitoring up -d  → Prometheus :9090, Alertmanager :9093 (nur 127.0.0.1)
 name: campusmarkt
 
 services:
@@ -10,11 +13,12 @@ services:
       dockerfile: docker/Dockerfile
     image: campusmarkt:local
     ports:
-      - "${APP_PORT:-8080}:8080"
+      # Nur lokal erreichbar: kein unverschlüsselter Zugriff aus dem Netz am Proxy vorbei (REQ-OPS-009)
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
     environment:
       APP_MODE: all
       DATABASE_URL: postgres://campusmarkt:campusmarkt@db:5432/campusmarkt
-      PUBLIC_URL: http://localhost:${APP_PORT:-8080}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:${APP_PORT:-8080}}
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       MAIL_FROM: CampusMarkt HWG LU <no-reply@campusmarkt.local>
@@ -22,6 +26,9 @@ services:
       DEMO_MODE: ${DEMO_MODE:-true}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Wartungsmodus (REQ-OPS-006) und Vertrauen in X-Forwarded-* hinter dem Proxy (Profil proxy)
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
     volumes:
       - uploads:/data/uploads
     read_only: true
@@ -55,9 +62,62 @@ services:
   mailpit:
     image: axllent/mailpit:v1.27
     ports:
-      - "${MAILPIT_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILPIT_PORT:-8025}:8025"
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ Profil proxy (REQ-OPS-009)
+  proxy:
+    image: caddy:2.11.6-alpine
+    profiles: [proxy]
+    ports:
+      - "${PROXY_HTTPS_PORT:-8443}:443"
+      - "${PROXY_HTTP_PORT:-8088}:80"
+    environment:
+      PROXY_HTTPS_PORT: ${PROXY_HTTPS_PORT:-8443}
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ Profil monitoring (REQ-OPS-008)
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./ops/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - alertmanager
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.34.1
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - "127.0.0.1:${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./ops/alertmanager:/etc/alertmanager:ro
+      - alertmanager_data:/alertmanager
+    depends_on:
+      - mailpit
     restart: unless-stopped
 
 volumes:
   pgdata:
   uploads:
+  caddy_data:
+  caddy_config:
+  prometheus_data:
+  alertmanager_data:

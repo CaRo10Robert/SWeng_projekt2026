@@ -8,6 +8,8 @@ export interface AuthContext {
   institutionId: string;
   displayName: string;
   sessionHash: string;
+  /** Zustimmung zur aktuellen Fassung der Nutzungsbedingungen liegt vor (REQ-LEGAL-003). */
+  termsCurrent: boolean;
 }
 
 declare module 'fastify' {

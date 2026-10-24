@@ -461,10 +461,40 @@ export function createMessagingService(deps: ModuleDeps) {
         WHERE m.id = ${messageId} AND (c.buyer_id = ${userId} OR c.seller_id = ${userId})`));
     },
 
+    /**
+     * Entfernen durch die Moderation: Der Text bleibt für Widerspruch und Beweissicherung erhalten, ist aber nur
+     * für die Wiederherstellung lesbar (REQ-LEGAL-007/008) und wird nach Ablauf der Frist geleert.
+     */
     async removeByModeration(tx: Tx, messageId: string): Promise<void> {
       await tx.db.exec(sql`
-        UPDATE messaging.message SET body = '[Nachricht wurde von der Moderation entfernt]', kind = 'system'
-        WHERE id = ${messageId}`);
+        UPDATE messaging.message SET original_body = body, original_kind = kind, removed_at = now(),
+          body = '[Nachricht wurde von der Moderation entfernt]', kind = 'system'
+        WHERE id = ${messageId} AND removed_at IS NULL`);
+    },
+
+    async restoreByModeration(tx: Tx, messageId: string): Promise<void> {
+      await tx.db.exec(sql`
+        UPDATE messaging.message SET body = original_body, kind = original_kind,
+          removed_at = NULL, original_body = NULL, original_kind = NULL
+        WHERE id = ${messageId} AND removed_at IS NOT NULL AND original_body IS NOT NULL`);
+    },
+
+    /** Gespeicherte Originaltexte nach Ende der Widerspruchsfrist leeren, außer bei Beweissicherung. */
+    async purgeRemovedOriginals(heldMessageIds: string[]): Promise<number> {
+      return db.exec(sql`
+        UPDATE messaging.message SET original_body = NULL
+        WHERE original_body IS NOT NULL AND removed_at < now() - interval '6 months'
+          AND id <> ALL(${heldMessageIds}::uuid[])`);
+    },
+
+    /** DAC7 (REQ-LEGAL-009): abgeschlossene Deals mit Gegenleistung je Anbieter in einem Kalenderjahr. */
+    async completedSales(year: number): Promise<{ sellerId: string; priceCents: number; completedAt: string }[]> {
+      return db.query(sql`
+        SELECT seller_id AS "sellerId", agreed_price_cents AS "priceCents", updated_at AS "completedAt"
+        FROM messaging.deal
+        WHERE status = 'completed' AND agreed_price_cents > 0
+          AND updated_at >= make_timestamptz(${year}, 1, 1, 0, 0, 0, 'Europe/Berlin')
+          AND updated_at < make_timestamptz(${year + 1}, 1, 1, 0, 0, 0, 'Europe/Berlin')`);
     },
 
     async deleteForUser(tx: Tx, userId: string): Promise<void> {

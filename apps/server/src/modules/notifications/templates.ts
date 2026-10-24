@@ -1,6 +1,11 @@
+import type { Locale } from '@campusmarkt/contracts';
+
 /**
- * E-Mail-Templates (deutsch). Chat-Benachrichtigungen enthalten nie den Nachrichteninhalt (REQ-NOTI-002).
- * `category` steuert die Abbestellbarkeit; `security` ist nicht abbestellbar (REQ-NOTI-003).
+ * E-Mail-Templates. Chat-Benachrichtigungen enthalten nie den Nachrichteninhalt (REQ-NOTI-002).
+ * `category` steuert die Abbestellbarkeit; `security` und `service` sind nicht abbestellbar (REQ-NOTI-003),
+ * `service` sind Pflichtmitteilungen (z. B. Begründungen nach DSA Art. 17) und erreichen auch gesperrte Konten.
+ *
+ * Sprachen (ADR-0016): Texte liegen je Sprache in `TEXTS`; fehlt eine Übersetzung, gilt Deutsch.
  */
 export type EmailTemplate =
   | 'verify'
@@ -9,8 +14,13 @@ export type EmailTemplate =
   | 'new_message'
   | 'listing_expiry'
   | 'moderation_decision'
+  | 'moderation_report_result'
+  | 'appeal_result'
+  | 'criminal_suspicion_alert'
   | 'deletion_scheduled'
   | 'deletion_completed';
+
+export type EmailCategory = 'security' | 'service' | 'newMessage' | 'listingExpiry';
 
 type Params = Record<string, string>;
 
@@ -20,18 +30,24 @@ interface Rendered {
   action?: { label: string; url: string };
 }
 
-export const templateCategory: Record<EmailTemplate, 'security' | 'newMessage' | 'listingExpiry' | 'service'> = {
+export const templateCategory: Record<EmailTemplate, EmailCategory> = {
   verify: 'security',
   account_exists: 'security',
   password_reset: 'security',
   new_message: 'newMessage',
   listing_expiry: 'listingExpiry',
   moderation_decision: 'service',
+  moderation_report_result: 'service',
+  appeal_result: 'service',
+  criminal_suspicion_alert: 'service',
   deletion_scheduled: 'security',
   deletion_completed: 'security',
 };
 
-const templates: Record<EmailTemplate, (p: Params) => Rendered> = {
+/** Kategorien mit Abmeldelink und List-Unsubscribe-Header (REQ-OPS-010). */
+export const UNSUBSCRIBABLE: ReadonlySet<EmailCategory> = new Set(['newMessage', 'listingExpiry']);
+
+const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
   verify: (p) => ({
     subject: 'Bitte bestätige deine E-Mail-Adresse',
     paragraphs: [
@@ -75,14 +91,56 @@ const templates: Record<EmailTemplate, (p: Params) => Rendered> = {
     ],
     action: { label: 'Anzeige verlängern', url: p.link! },
   }),
+  // Begründung an Betroffene nach DSA Art. 17 Abs. 3 (REQ-LEGAL-006), Vorlage in docs/06-recht/dsa-prozesse.md
   moderation_decision: (p) => ({
-    subject: 'Entscheidung zu einer Meldung',
+    subject: `Entscheidung der Moderation: ${p.measure}`,
     paragraphs: [
       `Hallo ${p.name},`,
-      `wir haben eine Meldung zu ${p.target} geprüft. Entscheidung: ${p.decision}.`,
-      `Begründung: ${p.reason}`,
-      'Wenn du mit der Entscheidung nicht einverstanden bist, antworte bitte auf diese E-Mail (DSA Art. 20).',
+      `Maßnahme: ${p.measure} (${p.target}).`,
+      `Begründung: ${p.facts}`,
+      ...(p.rule ? [`Verletzte Regel: ${p.rule}`] : []),
+      `Grundlage: ${p.basis}. Geprüft und entschieden hat ein Mensch aus der Moderation.`,
+      ...(p.appealLink
+        ? [
+            `Deine Möglichkeiten: Du kannst bis zum ${p.deadline} kostenlos Widerspruch einlegen (DSA Art. 20); eine andere Person aus der Moderation prüft den Fall dann erneut. Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen.`,
+          ]
+        : []),
     ],
+    action: p.appealLink ? { label: 'Widerspruch einlegen', url: p.appealLink } : undefined,
+  }),
+  // Mitteilung an Meldende nach DSA Art. 16 Abs. 5; ohne Angaben zur betroffenen Person
+  moderation_report_result: (p) => ({
+    subject: 'Ergebnis deiner Meldung',
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `wir haben deine Meldung zu ${p.target} geprüft. Ergebnis: ${p.result}.`,
+      ...(p.appealLink
+        ? [`Wenn du mit dem Ergebnis nicht einverstanden bist, kannst du bis zum ${p.deadline} Widerspruch einlegen (DSA Art. 20).`]
+        : ['Danke, dass du hilfst, CampusMarkt sicher zu halten.']),
+    ],
+    action: p.appealLink ? { label: 'Mitteilung ansehen', url: p.appealLink } : undefined,
+  }),
+  appeal_result: (p) => ({
+    subject: 'Ergebnis des Widerspruchs',
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `eine andere Person aus der Moderation hat den Widerspruch zu ${p.target} geprüft. Ergebnis: ${p.outcome}.`,
+      `Begründung: ${p.reason}`,
+      'Gegen diese Entscheidung stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen.',
+    ],
+    action: p.link ? { label: 'Mitteilung ansehen', url: p.link } : undefined,
+  }),
+  // Eskalation nach DSA Art. 18 (REQ-LEGAL-008): keine Inhalte in der Mail, nur der Verweis auf den Fall
+  criminal_suspicion_alert: (p) => ({
+    subject: `${p.urgent === 'true' ? 'DRINGEND – ' : ''}Verdacht auf Straftat gekennzeichnet`,
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `eine Moderationsentscheidung (Fall ${p.caseId}) wurde als „${p.label}“ gekennzeichnet. Die Inhalte sind gesichert.`,
+      p.urgent === 'true'
+        ? 'Gefahr für Leben oder Sicherheit: Bitte informiere unverzüglich die zuständige Stelle ([Platzhalter: zuständige Polizeidienststelle]) nach dem Prozess in docs/06-recht/dsa-prozesse.md.'
+        : 'Bitte prüfe den Fall mit [Platzhalter: Justiziariat der Hochschule] nach dem Prozess in docs/06-recht/dsa-prozesse.md.',
+    ],
+    action: { label: 'Zur Administration', url: p.link! },
   }),
   deletion_scheduled: (p) => ({
     subject: 'Dein Konto wird gelöscht',
@@ -99,19 +157,68 @@ const templates: Record<EmailTemplate, (p: Params) => Rendered> = {
   }),
 };
 
+interface FooterTexts {
+  sender: string;
+  imprint: string;
+  privacy: string;
+  contact: string;
+  unsubscribe: string;
+  demo: string;
+}
+
+const FOOTER_DE: FooterTexts = {
+  sender: 'CampusMarkt HWG LU – ein Angebot von [Platzhalter: Name der Hochschule]',
+  imprint: 'Impressum',
+  privacy: 'Datenschutz',
+  contact: 'Kontakt',
+  unsubscribe: 'Diese Benachrichtigungen abbestellen',
+  demo: 'Demo-Version im Rahmen einer Übungsaufgabe, kein Echtbetrieb.',
+};
+
+/** Texte je Sprache; der i18n-Fork ergänzt `en` (ADR-0016). */
+export const TEXTS: Record<Locale, { templates: Partial<Record<EmailTemplate, (p: Params) => Rendered>>; footer: FooterTexts }> = {
+  de: { templates: DE, footer: FOOTER_DE },
+  en: { templates: {}, footer: FOOTER_DE },
+};
+
+export interface RenderContext {
+  publicUrl: string;
+  locale?: Locale;
+  /** Signierter Abmeldelink, nur bei abbestellbaren Kategorien. */
+  unsubscribeUrl?: string;
+}
+
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-export function renderEmail(template: EmailTemplate, params: Params) {
-  const r = templates[template](params);
-  const footer = 'CampusMarkt HWG LU – Demo-Version, kein Echtbetrieb.';
-  const text = [...r.paragraphs, r.action ? `${r.action.label}: ${r.action.url}` : '', '', '--', footer]
+export function renderEmail(template: EmailTemplate, params: Params, context: RenderContext) {
+  const locale = context.locale ?? 'de';
+  const texts = TEXTS[locale];
+  const r = (texts.templates[template] ?? DE[template])(params);
+  const f = texts.footer;
+  // Rechtliche Links in jeder Mail (REQ-UX-006, DDG § 5)
+  const links = [
+    { label: f.imprint, url: `${context.publicUrl}/impressum` },
+    { label: f.privacy, url: `${context.publicUrl}/datenschutz` },
+    { label: f.contact, url: `${context.publicUrl}/kontakt` },
+  ];
+  const footerText = [
+    f.sender,
+    links.map((l) => `${l.label}: ${l.url}`).join(' · '),
+    ...(context.unsubscribeUrl ? [`${f.unsubscribe}: ${context.unsubscribeUrl}`] : []),
+    f.demo,
+  ];
+  const text = [...r.paragraphs, r.action ? `${r.action.label}: ${r.action.url}` : '', '', '--', ...footerText]
     .filter((l, i, all) => l !== '' || all[i - 1] !== '')
     .join('\n\n');
-  const html = `<!doctype html><html lang="de"><body style="font-family:system-ui,sans-serif;color:#1f2937;max-width:560px;margin:auto;padding:24px">
+  const linkHtml = (l: { label: string; url: string }) =>
+    `<a href="${escapeHtml(l.url)}" style="color:#4b5563">${escapeHtml(l.label)}</a>`;
+  const html = `<!doctype html><html lang="${locale}"><body style="font-family:system-ui,sans-serif;color:#1f2937;max-width:560px;margin:auto;padding:24px">
 <h1 style="font-size:20px;color:#0b4884">CampusMarkt HWG LU</h1>
 ${r.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('\n')}
 ${r.action ? `<p><a href="${escapeHtml(r.action.url)}" style="display:inline-block;background:#0b4884;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">${escapeHtml(r.action.label)}</a></p><p style="font-size:12px;color:#6b7280">Oder kopiere diesen Link: ${escapeHtml(r.action.url)}</p>` : ''}
-<hr><p style="font-size:12px;color:#6b7280">${footer}</p></body></html>`;
+<hr><p style="font-size:12px;color:#4b5563">${escapeHtml(f.sender)}<br>${links.map(linkHtml).join(' · ')}${
+    context.unsubscribeUrl ? `<br>${linkHtml({ label: f.unsubscribe, url: context.unsubscribeUrl })}` : ''
+  }<br>${escapeHtml(f.demo)}</p></body></html>`;
   return { subject: r.subject, text, html };
 }

@@ -2,6 +2,7 @@ import type { FastifyReply } from 'fastify';
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import {
+  AcceptTermsBody,
   Accepted,
   AdminUser,
   EmailBody,
@@ -89,6 +90,10 @@ export function identityRoutes(service: IdentityService, config: Config): Fastif
 
     app.patch('/me', { schema: { tags, body: UpdateMeBody, response: { 200: Me } } }, async (req) => {
       return service.updateMe(requireAuth(req).userId, req.body);
+    });
+
+    app.post('/me/terms', { schema: { tags, body: AcceptTermsBody, response: { 200: Me } } }, async (req) => {
+      return service.acceptTerms(requireAuth(req).userId, req.body.version);
     });
 
     app.get(

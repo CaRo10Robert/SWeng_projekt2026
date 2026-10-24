@@ -12,7 +12,10 @@ import { createDatabase, createPool } from './platform/db.js';
 import { createHttpServer } from './platform/http/server.js';
 import { createLogger } from './platform/logger.js';
 import { createMetrics } from './platform/metrics.js';
+import { strictLegalProblems } from './platform/legal.js';
 import { migrate } from './platform/migrate.js';
+import { createOps } from './platform/ops.js';
+import { createSettings } from './platform/settings.js';
 import type { JobQueue } from './platform/ports/index.js';
 import { adminRoutes } from './modules/admin.js';
 import { createIdentityModule } from './modules/identity/index.js';
@@ -20,6 +23,7 @@ import { createListingsModule } from './modules/listings/index.js';
 import { createMessagingModule } from './modules/messaging/index.js';
 import { createNotificationsModule } from './modules/notifications/index.js';
 import { createPrivacyModule } from './modules/privacy/index.js';
+import { createReportingModule } from './modules/reporting/index.js';
 import { createSearchModule } from './modules/search/index.js';
 import type { ModuleDeps, Modules } from './modules/shared.js';
 import { createTrustModule } from './modules/trust/index.js';
@@ -30,7 +34,13 @@ async function main() {
   const config = loadConfig();
   const logger = createLogger(config.logLevel);
   const metrics = createMetrics();
-  logger.info({ mode: config.mode }, 'CampusMarkt startet');
+  logger.info({ mode: config.mode, termsVersion: config.termsVersion }, 'CampusMarkt startet');
+  // Echtbetrieb (ADR-0015 Nr. 7): nicht mit Muster-Rechtstexten starten
+  const legalProblems = strictLegalProblems(config.legalManifest);
+  if (config.legalStrict && legalProblems.length) {
+    throw new Error(`LEGAL_STRICT: Rechtstexte unvollständig – ${legalProblems.join('; ')}`);
+  }
+  if (legalProblems.length) logger.warn({ legalProblems }, 'Rechtstexte sind Muster mit Platzhaltern (Übungsaufgabe)');
 
   const pool = createPool(config.databaseUrl, config.dbPoolSize);
   await waitForDatabase(pool, logger);
@@ -41,6 +51,20 @@ async function main() {
   jobs = await createPgBossQueue(config.databaseUrl, logger);
 
   await mkdir(config.uploadsDir, { recursive: true });
+  const mail = createSmtpMail(config.smtp);
+  const settings = createSettings(database.db);
+  const ops = createOps({
+    maintenanceFromEnv: config.maintenanceMode,
+    maintenanceUntilFromEnv: config.maintenanceUntil,
+    settings,
+    checkDatabase: () => database.ping(),
+    checkMail: () => mail.verify(),
+  });
+  metrics.bindProbes({
+    ready: () => database.ping(),
+    maintenance: async () => (await ops.maintenance()).active,
+    lastBackupAt: () => ops.lastBackupAt(),
+  });
   const modules = {} as Modules;
   const deps: ModuleDeps = {
     config,
@@ -51,16 +75,19 @@ async function main() {
     storage: createFsStorage(config.uploadsDir),
     realtime: createInProcessRealtime(),
     rateLimit: createPgRateLimit(database.db),
+    settings,
+    ops,
     modules,
   };
 
   const identity = createIdentityModule(deps);
-  const notifications = createNotificationsModule(deps, createSmtpMail(config.smtp));
+  const notifications = createNotificationsModule(deps, mail);
   const listings = createListingsModule(deps);
   const search = createSearchModule(deps, createPgSearch(database.db, logger));
   const messaging = createMessagingModule(deps);
   const trust = createTrustModule(deps);
   const privacy = createPrivacyModule(deps);
+  const reporting = createReportingModule(deps);
   Object.assign(modules, {
     identity: identity.api,
     notifications: notifications.api,
@@ -84,8 +111,9 @@ async function main() {
       metrics,
       resolveSession: (token) => identity.api.resolveSession(token),
       isReady: () => database.ping(),
+      ops,
     });
-    for (const module of [identity, listings, search, messaging, trust, privacy]) {
+    for (const module of [identity, notifications, listings, search, messaging, trust, privacy, reporting]) {
       if (module.routes) await app.register(module.routes, { prefix: API_PREFIX });
     }
     await app.register(adminRoutes(deps), { prefix: API_PREFIX });

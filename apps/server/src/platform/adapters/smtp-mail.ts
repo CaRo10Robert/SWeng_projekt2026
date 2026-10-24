@@ -26,5 +26,12 @@ export function createSmtpMail(options: SmtpOptions): MailPort {
     async send(message: MailMessage) {
       await transport.sendMail({ from: options.from, ...message });
     },
+    async verify() {
+      try {
+        return await transport.verify();
+      } catch {
+        return false;
+      }
+    },
   };
 }

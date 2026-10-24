@@ -1,0 +1,28 @@
+# Reverse Proxy für das Compose-Profil `proxy` (REQ-OPS-009, ADR-0017, docs/07-betrieb/tls-reverse-proxy.md)
+#   docker compose --profile proxy up -d  →  https://campusmarkt.localhost:8443
+# Eigener Hostname statt localhost: HSTS gilt je Hostname und soll andere lokale Dienste nicht betreffen.
+{
+	# Lokale CA statt ACME, läuft offline; im Echtbetrieb Zertifikat des RZ bzw. ACME [Platzhalter]
+	local_certs
+	# Die Weiterleitung http → https übernimmt der eigene Block unten, weil der äußere Port (8443) vom inneren (443) abweicht
+	auto_https disable_redirects
+	admin off
+}
+
+https://campusmarkt.localhost {
+	tls internal
+
+	# HSTS im Beispiel ohne includeSubDomains und ohne preload (Echtbetrieb: nach Prüfung aller Subdomains)
+	header Strict-Transport-Security "max-age=31536000"
+
+	# Metriken nur im internen Compose-Netz (Prometheus liest app:8080/metrics direkt)
+	@metrics path /metrics /metrics/*
+	respond @metrics 404
+
+	# Setzt X-Forwarded-For/-Proto/-Host; die App vertraut ihnen nur mit TRUST_PROXY=true. WebSockets (/ws) laufen durch.
+	reverse_proxy app:8080
+}
+
+http://campusmarkt.localhost {
+	redir https://{host}:{$PROXY_HTTPS_PORT:8443}{uri} 308
+}

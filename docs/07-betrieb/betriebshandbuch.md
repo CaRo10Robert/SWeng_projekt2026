@@ -3,7 +3,7 @@ id: OPS-RUNBOOK
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.0
+version: 1.1
 created: 2026-10-24
 last_updated: 2026-10-24
 ---
@@ -19,9 +19,9 @@ last_updated: 2026-10-24
 | `app` | `campusmarkt:local` (eigener Build) | REST-API, WebSocket, Web-App, Job-Worker | Volume `uploads` (Bilder) | Standard |
 | `db` | PostgreSQL 17 | Datenbank, Job-Queue (pg-boss), Rate-Limits | Volume `pgdata` | Standard |
 | `mailpit` | Mailpit | fängt alle E-Mails ab (Weboberfläche Port 8025) | – | Standard |
-| `proxy` | Caddy | TLS mit interner CA, HSTS, Weiterleitung http → https | Volume für Zertifikate | `proxy` |
-| `prometheus` | Prometheus | sammelt Metriken von `/metrics`, wertet Alarmregeln aus | Volume für Metriken | `monitoring` |
-| `alertmanager` | Alertmanager | verschickt Alarme per Mail (an Mailpit) | – | `monitoring` |
+| `proxy` | `caddy:2.11.6-alpine`, Konfiguration `docker/caddy/Caddyfile` | TLS mit interner CA, HSTS, Weiterleitung http → https; Ports `PROXY_HTTPS_PORT` (8443), `PROXY_HTTP_PORT` (8088) | Volume für Zertifikate | `proxy` |
+| `prometheus` | `prom/prometheus:v3.15.0`, Konfiguration `ops/prometheus/` | sammelt Metriken von `/metrics`, wertet Alarmregeln aus; nur `127.0.0.1:${PROMETHEUS_PORT:-9090}` | Volume für Metriken | `monitoring` |
+| `alertmanager` | `prom/alertmanager:v0.34.1`, Konfiguration `ops/alertmanager/` | verschickt Alarme per Mail (an Mailpit), nach Schweregrad an zwei Empfänger; nur `127.0.0.1:${ALERTMANAGER_PORT:-9093}` | – | `monitoring` |
 
 Architektur und Begründung: [Architektur, Verteilungssicht](../03-architektur/architektur.md#7-verteilungssicht), ADR-0010, ADR-0017.
 
@@ -30,7 +30,7 @@ Architektur und Begründung: [Architektur, Verteilungssicht](../03-architektur/a
 | Aufgabe | Befehl |
 |---|---|
 | Standard starten | `docker compose up -d` |
-| mit TLS-Proxy | `docker compose --profile proxy up -d` |
+| mit TLS-Proxy | `PUBLIC_URL=https://campusmarkt.localhost:8443 TRUST_PROXY=true docker compose --profile proxy up -d` |
 | mit Überwachung | `docker compose --profile monitoring up -d` |
 | Zustand prüfen | `docker compose ps` (Spalte „healthy“) |
 | Protokolle | `docker compose logs -f app` |
@@ -38,7 +38,7 @@ Architektur und Begründung: [Architektur, Verteilungssicht](../03-architektur/a
 | alles zurücksetzen (**löscht Daten**) | `docker compose down -v` |
 | Image neu bauen | `docker compose build` |
 
-Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://localhost:8443`), Mailpit unter `http://localhost:8025`.
+Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campusmarkt.localhost:8443`), Mailpit unter `http://localhost:8025`, mit Profil `monitoring` Prometheus unter `http://127.0.0.1:9090` und Alertmanager unter `http://127.0.0.1:9093`.
 
 ## 3. Konfiguration (Umgebungsvariablen)
 

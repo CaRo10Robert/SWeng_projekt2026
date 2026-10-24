@@ -1,0 +1,55 @@
+# Regeltests: promtool test rules ops/prometheus/alerts.test.yml (CTRL-ALERT-RULES)
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: AppDown nach 2 Minuten
+    interval: 1m
+    input_series:
+      - series: 'up{job="campusmarkt", instance="app:8080"}'
+        values: '1 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: AppDown
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: AppDown
+        exp_alerts:
+          - exp_labels: { severity: SEV-1, job: campusmarkt, instance: 'app:8080' }
+            exp_annotations:
+              summary: CampusMarkt ist nicht erreichbar
+              description: Prometheus erreicht app:8080/metrics seit 2 Minuten nicht (REQ-OPS-001).
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+
+  - name: BackupMissing nur bei Sicherung älter als 26 Stunden
+    interval: 1h
+    input_series:
+      # Sicherung zum Zeitpunkt 0, danach keine neue
+      - series: 'campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt", instance="app:8080"}'
+        values: '0x30'
+    alert_rule_test:
+      - eval_time: 25h
+        alertname: BackupMissing
+        exp_alerts: []
+      - eval_time: 27h
+        alertname: BackupMissing
+        exp_alerts:
+          - exp_labels: { severity: SEV-2, job: campusmarkt, instance: 'app:8080' }
+            exp_annotations:
+              summary: Letzte erfolgreiche Sicherung älter als 26 Stunden
+              description: Die letzte Sicherung ist 1d 3h 0m 0s alt (REQ-AVAIL-003).
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/backup-restore.md
+
+  - name: Keine Fehlalarme bei gesunder App
+    interval: 1m
+    input_series:
+      - series: 'http_request_duration_seconds_count{job="campusmarkt", method="GET", route="/api/v1/listings", status="200"}'
+        values: '0+100x20'
+      - series: 'http_request_duration_seconds_count{job="campusmarkt", method="GET", route="/api/v1/listings", status="500"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: HighErrorRate
+        exp_alerts: []

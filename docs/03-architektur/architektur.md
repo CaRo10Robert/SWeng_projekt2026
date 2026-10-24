@@ -878,16 +878,16 @@ C4Deployment
             Container(spa2, "Web-App", "über https://campusmarkt.localhost:8443")
         }
         Deployment_Node(compose2, "Docker Compose", "Projekt campusmarkt") {
-            Deployment_Node(proxyc, "Docker-Container proxy", "caddy:2-alpine, Profil proxy") {
+            Deployment_Node(proxyc, "Docker-Container proxy", "caddy:2.11.6-alpine, Profil proxy") {
                 Container(proxy2, "Reverse Proxy", "TLS intern, HSTS, Weiterleitung")
             }
             Deployment_Node(appc2, "Docker-Container app", "Image campusmarkt") {
                 Container(app2, "Anwendung", "Fastify, TRUST_PROXY=true")
             }
-            Deployment_Node(promc, "Docker-Container prometheus", "Profil monitoring, 127.0.0.1:9090") {
+            Deployment_Node(promc, "Docker-Container prometheus", "prom/prometheus:v3.15.0, Profil monitoring, 127.0.0.1:9090") {
                 Container(prom2, "Prometheus", "Abfrage alle 15 s, Alarmregeln")
             }
-            Deployment_Node(amc, "Docker-Container alertmanager", "Profil monitoring, 127.0.0.1:9093") {
+            Deployment_Node(amc, "Docker-Container alertmanager", "prom/alertmanager:v0.34.1, Profil monitoring, 127.0.0.1:9093") {
                 Container(am2, "Alertmanager", "Gruppierung, Mail-Versand")
             }
             Deployment_Node(mpc2, "Docker-Container mailpit", "axllent/mailpit") {
@@ -912,13 +912,14 @@ flowchart LR
     B1["backup.mjs"] --> B2["pg_dump -Fc im Container db"]
     B2 --> B3["tar der Uploads im Container app"]
     B3 --> B4["manifest.json mit SHA-256, Migration, Version"]
-    B4 --> B5[("backups/Zeitstempel")]
+    B4 --> B6["Zeitpunkt in platform.setting"]
+    B6 --> B5[("backups/Zeitstempel")]
     B5 --> R1["restore.mjs"]
-    R1 --> R2["Prüfsummen und Migration prüfen"]
-    R2 --> R3["App im Wartungsmodus"]
-    R3 --> R4["pg_restore --clean"]
+    R1 --> R2["Prüfsummen und Migration gegen Repo prüfen"]
+    R2 --> R3["App stoppen"]
+    R3 --> R4["Datenbank neu anlegen, pg_restore"]
     R4 --> R5["Uploads entpacken"]
-    R5 --> R6["App normal starten, Migrationen idempotent"]
+    R5 --> R6["App starten, Migrationen idempotent"]
 ```
 
 ## 8. Querschnittliche Konzepte
@@ -972,7 +973,7 @@ flowchart LR
 | Anwendungs-Logs | intern, **ohne PII** | – | Container-Logs, nicht persistiert |
 | Widersprüche | vertraulich | trust | wie Moderationsentscheidungen, Fristen geplant B-12 |
 | DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach PStTG (vom DSB zu prüfen), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
-| Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: 7 tägliche, 4 wöchentliche; gelöschte Konten verschwinden nach ≤ 35 Tagen auch aus Sicherungen (ADR-0018) |
+| Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: alle der letzten 7 Tage, danach je Woche die neueste; gelöschte Konten verschwinden nach ≤ 28 Tagen auch aus Sicherungen (ADR-0018) |
 | Einstellungen, Ankündigung | intern | platform | bis zur Änderung |
 | Sprachwahl | intern | identity (`user.locale`) bzw. Browser (`cm_locale`, nur auf Wunsch) | mit dem Konto bzw. durch Nutzer löschbar |
 
@@ -1123,7 +1124,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | R-11 | Platzhalter oder Musterhinweise bleiben in einem Echtbetrieb stehen | mittel / **hoch** | `LEGAL_STRICT=true` verhindert den Start mit Platzhaltern (ADR-0015); [Go-live-Checkliste](../07-betrieb/go-live-checkliste.md) |
 | R-12 | Englische Übersetzung veraltet oder unvollständig | hoch / mittel | `scripts/check-i18n.mjs` in CI, deutscher Katalog als Quelle, Review-Hinweis (ADR-0016) |
 | R-13 | HSTS für `localhost` würde andere lokale Dienste auf https zwingen | mittel / mittel | Proxy-Profil nur unter `campusmarkt.localhost`, im Beispiel ohne `includeSubDomains`/`preload` (ADR-0017) |
-| R-14 | Gelöschte personenbezogene Daten leben in Sicherungen weiter | sicher / niedrig | Rotation ≤ 35 Tage, in Datenschutzerklärung und VVT genannt; Löschläufe nach Wiederherstellung (ADR-0018) |
+| R-14 | Gelöschte personenbezogene Daten leben in Sicherungen weiter | sicher / niedrig | Rotation ≤ 28 Tage, in Datenschutzerklärung und VVT genannt; Löschläufe nach Wiederherstellung (ADR-0018) |
 | R-15 | Rechtstexte der Übung sind inhaltlich unzutreffend oder unvollständig | mittel / hoch (nur im Echtbetrieb) | Kennzeichnung als Muster, Prüfung durch DSB und Justiziariat vor Go-live, Rechtskataster als Prüfliste |
 | R-16 | Widerspruch gesperrter Konten nicht möglich, weil keine Anmeldung | mittel / mittel | Einmal-Link mit Token in der Begründungs-Mail (6.5) |
 

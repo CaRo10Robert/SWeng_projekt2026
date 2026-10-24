@@ -1,0 +1,67 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Automatisierte Aktualisierung von Abhängigkeiten (REQ-OPS-012, docs/07-betrieb/update-prozess.md)",
+  "extends": ["config:recommended", ":pinAllExceptPeerDependencies", "helpers:pinGitHubActionDigests", "docker:pinDigests"],
+  "timezone": "Europe/Berlin",
+  "schedule": ["before 6am on monday"],
+  "labels": ["abhängigkeiten"],
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "14 days",
+  "rangeStrategy": "pin",
+  "postUpdateOptions": ["pnpmDedupe"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "minimumReleaseAge": null,
+    "labels": ["sicherheit"]
+  },
+  "packageRules": [
+    {
+      "description": "Kleine Updates von Entwicklungswerkzeugen gebündelt",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Entwicklungswerkzeuge"
+    },
+    {
+      "description": "Patch-Updates von Entwicklungsabhängigkeiten nach grüner CI automatisch mergen",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Frontend-Bibliotheken gemeinsam aktualisieren",
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom", "/^@tanstack//", "/^@vitejs//", "vite", "/^vite-plugin-/", "tailwindcss", "/^@tailwindcss//"],
+      "groupName": "Frontend"
+    },
+    {
+      "description": "Server-Framework gemeinsam aktualisieren",
+      "matchPackageNames": ["fastify", "/^@fastify//", "@sinclair/typebox"],
+      "groupName": "Fastify"
+    },
+    {
+      "description": "Test-Werkzeuge gemeinsam aktualisieren",
+      "matchPackageNames": ["vitest", "/^@vitest//", "@playwright/test", "/^@axe-core//"],
+      "groupName": "Tests"
+    },
+    {
+      "description": "Container-Images (Dockerfile, compose.yaml) gebündelt, Hauptversionen einzeln",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "Container-Images"
+    },
+    {
+      "description": "PostgreSQL-Hauptversion nur manuell (Daten-Upgrade nötig, ADR-0018)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["postgres"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "GitHub Actions gepinnt auf Digest, gebündelt",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    }
+  ]
+}

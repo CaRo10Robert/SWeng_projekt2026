@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { readLegalManifest, termsVersionOf } from './platform/legal.js';
 
 /** Wurzel des Server-Pakets (gleich für `src/` mit tsx und `dist/` im Image). */
 export const APP_ROOT = resolve(import.meta.dirname, '..');
@@ -29,6 +30,10 @@ function int(name: string, fallback: number): number {
 export function loadConfig() {
   const mode = env('APP_MODE', 'all') as StartMode;
   if (!['all', 'api', 'worker'].includes(mode)) throw new Error(`APP_MODE ${mode} ungültig`);
+  const webDistDir = env('WEB_DIST_DIR', resolve(APP_ROOT, '../web/dist'));
+  // Eine Quelle für die Version der Nutzungsbedingungen: Front Matter des Rechtstexts (ADR-0015);
+  // TERMS_VERSION nur noch als Override, z. B. für Tests.
+  const legalManifest = readLegalManifest(webDistDir, resolve(APP_ROOT, '../web/src/content/legal'));
 
   return {
     mode,
@@ -46,10 +51,15 @@ export function loadConfig() {
       from: env('MAIL_FROM', 'CampusMarkt HWG LU <no-reply@campusmarkt.local>'),
     },
     uploadsDir: env('UPLOADS_DIR', resolve(APP_ROOT, '../../.data/uploads')),
-    webDistDir: env('WEB_DIST_DIR', resolve(APP_ROOT, '../web/dist')),
+    webDistDir,
+    legalManifest,
+    /** Echtbetrieb: Start verweigern, solange Rechtstexte Muster oder Platzhalter enthalten (ADR-0015 Nr. 7). */
+    legalStrict: bool('LEGAL_STRICT', false),
     cookieSecure: bool('COOKIE_SECURE', true),
+    /** Hinter dem Reverse Proxy (Profil `proxy`, ADR-0017): Client-IP und Protokoll aus X-Forwarded-* übernehmen. */
+    trustProxy: bool('TRUST_PROXY', false),
     sessionTtlDays: int('SESSION_TTL_DAYS', 30),
-    termsVersion: env('TERMS_VERSION', '2026-10'),
+    termsVersion: process.env.TERMS_VERSION || termsVersionOf(legalManifest) || '2026-10',
     seedDemo: bool('SEED_DEMO', false),
     demoMode: bool('DEMO_MODE', false),
     logLevel: env('LOG_LEVEL', 'info'),
@@ -57,6 +67,13 @@ export function loadConfig() {
     /** Geheimnis für das Hashen von IP-Adressen (REQ-PRIV-002). Im Beispiel unkritisch. */
     ipHashSalt: env('IP_HASH_SALT', 'campusmarkt-demo-salt'),
     shutdownTimeoutMs: int('SHUTDOWN_TIMEOUT_MS', 25_000),
+    /** Harter Wartungsmodus, z. B. während einer Wiederherstellung (REQ-OPS-006, ADR-0018). */
+    maintenanceMode: bool('MAINTENANCE_MODE', false),
+    maintenanceUntil: process.env.MAINTENANCE_UNTIL || null,
+    /** Signiert die Abmeldelinks in Benachrichtigungs-Mails (REQ-NOTI-003, REQ-OPS-010). Im Beispiel unkritisch. */
+    unsubscribeSecret: env('UNSUBSCRIBE_SECRET', 'campusmarkt-demo-unsubscribe'),
+    /** Kontakt in security.txt (REQ-SEC-012); Platzhalter bis zum Echtbetrieb. */
+    securityContact: env('SECURITY_CONTACT', 'mailto:security@hwg-lu.example'),
   };
 }
 

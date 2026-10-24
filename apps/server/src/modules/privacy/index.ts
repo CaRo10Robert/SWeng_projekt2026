@@ -29,7 +29,14 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
   const api: PrivacyApi = {
     async purgeDueAccounts() {
       const due = await modules.identity.dueDeletions();
+      let deleted = 0;
       for (const user of due) {
+        // Beweissicherung bei Verdacht auf Straftat geht vor (REQ-LEGAL-008); Löschung nach Freigabe
+        if (await modules.trust.hasActiveHoldForUser(user.id)) {
+          deps.logger.info({ userId: user.id }, 'Kontolöschung wegen Beweissicherung zurückgestellt');
+          continue;
+        }
+        deleted++;
         await database.tx(async (tx) => {
           await modules.listings.deleteAllForOwner(tx, user.id);
           await modules.messaging.deleteForUser(tx, user.id);
@@ -40,7 +47,8 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
         await modules.search.deleteForUser(user.id);
         deps.logger.info({ userId: user.id }, 'Konto endgültig gelöscht');
       }
-      return due.length;
+      await modules.messaging.purgeRemovedOriginals(await modules.trust.heldTargetIds('message'));
+      return deleted;
     },
   };
 

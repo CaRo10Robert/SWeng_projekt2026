@@ -378,8 +378,15 @@ export function createListingsService(deps: ModuleDeps) {
     async setHidden(tx: Tx, id: string, hidden: boolean) {
       await tx.db.exec(sql`UPDATE listings.listing SET hidden = ${hidden} WHERE id = ${id}`);
     },
-    async setOwnerSuspended(tx: Tx, ownerId: string) {
-      await tx.db.exec(sql`UPDATE listings.listing SET owner_suspended = true WHERE owner_id = ${ownerId}`);
+    async setOwnerSuspended(tx: Tx, ownerId: string, suspended: boolean) {
+      await tx.db.exec(sql`UPDATE listings.listing SET owner_suspended = ${suspended} WHERE owner_id = ${ownerId}`);
+    },
+    /** Widerspruch stattgegeben (REQ-LEGAL-007): entfernte Anzeige wieder sichtbar, mit voller Laufzeit. */
+    async restoreByModeration(tx: Tx, id: string) {
+      await tx.db.exec(sql`
+        UPDATE listings.listing SET status = 'active', hidden = false, status_changed_at = now(),
+          expires_at = now() + make_interval(days => ${LISTING_LIFETIME_DAYS})
+        WHERE id = ${id} AND status = 'removed'`);
     },
     async deleteAllForOwner(tx: Tx, ownerId: string) {
       const rows = await tx.db.query<{ id: string }>(sql`SELECT id FROM listings.listing WHERE owner_id = ${ownerId}`);
@@ -474,16 +481,20 @@ export function createListingsService(deps: ModuleDeps) {
       stats.expired = await db.exec(sql`
         UPDATE listings.listing SET status = 'expired', status_changed_at = now()
         WHERE status = 'active' AND expires_at < now()`);
-      // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell)
+      // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell); gesicherte Anzeigen
+      // (Verdacht auf Straftat, REQ-LEGAL-008) bleiben bis zur Freigabe erhalten
+      const held = await modules.trust.heldTargetIds('listing');
       const purge = await db.query<{ id: string }>(sql`
         UPDATE listings.listing SET status = 'deleted', status_changed_at = now()
-        WHERE (status = 'expired' AND status_changed_at < now() - interval '90 days')
-           OR (status = 'completed' AND status_changed_at < now() - interval '30 days')
+        WHERE ((status = 'expired' AND status_changed_at < now() - interval '90 days')
+           OR (status = 'completed' AND status_changed_at < now() - interval '30 days'))
+          AND id <> ALL(${held}::uuid[])
         RETURNING id`);
       stats.purged = purge.length;
       for (const { id } of purge) await storage.deletePrefix(`public/${id}`);
       stats.hardDeleted = await db.exec(sql`
-        DELETE FROM listings.listing WHERE status = 'deleted' AND status_changed_at < now() - interval '1 day'`);
+        DELETE FROM listings.listing WHERE status = 'deleted' AND status_changed_at < now() - interval '1 day'
+          AND id <> ALL(${held}::uuid[])`);
       const stale = await db.query<ImageRow>(sql`
         DELETE FROM listings.image WHERE listing_id IS NULL AND created_at < now() - interval '24 hours' RETURNING *`);
       for (const image of stale) await deleteImageFiles(image);

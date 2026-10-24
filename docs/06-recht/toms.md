@@ -54,7 +54,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 | Zuverlässiger Mailversand | Jobs mit Wiederholung (Transactional Outbox, pg-boss) | REQ-NOTI-005, ADR-0005 | umgesetzt |
 | Gesundheitsprüfung | `/health/live`, `/health/ready`, geordnetes Herunterfahren | REQ-OPS-001 | umgesetzt |
 | Überwachung und Alarmierung | Prometheus-Metriken, Alarmregeln, Benachrichtigung | REQ-OPS-008 | im Beispiel (Profil `monitoring`) |
-| Datensicherung | täglich `pg_dump` und Archiv der Bilder, 30 Tage rollierend | REQ-AVAIL-003 | im Beispiel (Skripte, Restore-Test) |
+| Datensicherung | täglich `pg_dump` und Archiv der Bilder, höchstens 28 Tage rollierend | REQ-AVAIL-003 | im Beispiel (Skripte, Restore-Test) |
 | Wartungsmodus | geplante Wartung mit 503 und Hinweisseite, Ankündigung vorab | REQ-OPS-006 | im Beispiel |
 
 ## 4. Wiederherstellbarkeit

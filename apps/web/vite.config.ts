@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { legalManifest } from './scripts/legal-manifest.mjs';
 
 // Ziel der Dev-Proxys, z. B. VITE_API_TARGET=http://localhost:8081, wenn das Docker-Beispiel dort läuft
 const apiTarget =
@@ -11,6 +12,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // dist/legal-manifest.json: Versionen der Rechtstexte für den Server (ADR-0015)
+    legalManifest(new URL('./src/content/legal', import.meta.url)),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -28,7 +31,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/ws/, /^\/health/, /^\/metrics/],
+        navigateFallbackDenylist: [/^\/api\//, /^\/ws/, /^\/health/, /^\/metrics/, /^\/robots\.txt$/, /^\/\.well-known\//],
         runtimeCaching: [],
       },
     }),
