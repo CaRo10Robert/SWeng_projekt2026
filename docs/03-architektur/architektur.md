@@ -3,14 +3,16 @@ id: ARC-001
 type: architecture
 status: draft
 owner: team-architektur
-version: 1.1
+version: 1.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 review_due: 2027-01-31
 ---
 
 # Architekturdokumentation CampusMarkt (arc42, kompakt)
 
+> **v1.2:** Recht, Auftritt und Betrieb als Übung mit Platzhaltern (EPIC-13, Q-23): Rechtstexte als versionierte Markdown-Inhalte ([ADR-0015](decisions/0015-rechtstexte-als-markdown.md)), englische Oberfläche ([ADR-0016](decisions/0016-internationalisierung.md)), optionale Compose-Profile für Reverse Proxy mit TLS/HSTS und Überwachung ([ADR-0017](decisions/0017-optionale-betriebsprofile.md)), Datensicherung mit getesteter Wiederherstellung ([ADR-0018](decisions/0018-datensicherung.md)). Neu: DSA-Begründung und Widerspruch (Vier-Augen), Wartungsmodus und Statusseite, DAC7-Auswertung, Fehlerseiten mit korrekten Statuscodes, Laufzeitsichten 6.5/6.6, Verteilungssicht 7.3, Querschnitt 8.8–8.11. Alle neuen Bausteine sind **geplant** (Spalte „Stand“ mit Backlog-ID B-43 … B-58; Sprint-Zuordnung im [Backlog](../02-anforderungen/03-backlog.md)). Prozessartefakte: [Recht](../06-recht/README.md), [Betrieb](../07-betrieb/README.md).
+>
 > **v1.1:** Befunde aus dem [Architektur-Review v1.0](../04-review/review-v1.0-architektur.md) behoben: Soll und Ist getrennt (Spalte „Stand“ mit Backlog-ID), Datenbankzugriff und Modulabhängigkeiten in der Komponentensicht, Löschung und Anonymisierung im Datenmodell, Schlüsselkonzept für die IP-Pseudonymisierung ([ADR-0014](decisions/0014-ip-pseudonymisierung.md)), Laufzeitsichten an den Code angeglichen, Qualitätsszenarien an die Anforderungen angeglichen.
 >
 > **v1.0:** Bausteinsicht, Kontext und Verteilung im **C4-Modell** (Mermaid-C4, [ADR-0012](decisions/0012-c4-notation.md)); angeglichen an Anforderungen v1 und die Fallstudie (Kontaktfreigabe, Anmeldung hinter `IdentityProviderPort`, [ADR-0013](decisions/0013-anmeldung-identity-provider-port.md)).
@@ -50,7 +52,7 @@ Ein Marktplatz für Angehörige der HWG LU zum Verkaufen, Tauschen, Verschenken 
 | Organisatorisch | DEV Guideline ist verbindlich. Abweichungen nur per ADR oder Exception |
 | **Technisch** | **Kein öffentliches Hosting. Auslieferung als Docker-Image + Compose-Datei, lokal lauffähig, ohne Internetzugang** (ADR-0010) |
 | Technisch | Web-first (PWA). Keine native App |
-| Rechtlich | Kein Produktivbetrieb, daher keine Betreiberpflichten im Projekt. DSGVO, DSA und BITV werden **konzeptionell** berücksichtigt (Privacy by Design), damit ein Echtbetrieb möglich bliebe |
+| Rechtlich | Kein Produktivbetrieb. DSGVO, DSA und BITV werden **konzeptionell** berücksichtigt (Privacy by Design). Betreiberpflichten (Impressum, Datenschutzerklärung, Nutzungsbedingungen, Barrierefreiheitserklärung, DSA-Prozesse, DAC7) werden als **Übung mit Platzhaltern** umgesetzt; Betreiber im Muster ist die Hochschule als öffentliche Stelle in Rheinland-Pfalz (Q-23, [Rechtskataster](../06-recht/rechtskataster.md)). Kein Rechtsrat; vor einem Echtbetrieb prüft der/die Datenschutzbeauftragte |
 | Fachlich | Domain-Whitelist `hwg-lu.de`, `studmail.hwg-lu.de` |
 | Fallstudie (MWI131) | Kontaktdaten erst nach beidseitiger Zustimmung (C-01), Tastaturbedienbarkeit (C-02), Anmeldung über die Hochschulkennung (C-03, dokumentierte Abweichung, ADR-0013), Angebote nur von verifizierten Nutzern (C-04) – siehe [Constraints](../02-anforderungen/02-anforderungen.md#3-constraints-und-ihre-operationalisierung) |
 
@@ -63,15 +65,17 @@ Zeigt CampusMarkt als **ein** Softwaresystem mit seinen Nutzern und Nachbarsyste
 ```mermaid
 C4Context
     title C4 Ebene 1 – Systemkontext CampusMarkt
-    Person(gast, "Gast", "Hochschulangehörige Person ohne Konto")
+    Person(gast, "Gast", "Person ohne Konto; sieht Startseite, Rechtstexte, Hilfe und Statusseite")
     Person(mitglied, "Mitglied", "Studierende oder Beschäftigte der HWG LU; Anbieter und Interessent zugleich")
     Person(mod, "Moderator / Admin", "Bearbeitet Meldungen, vergibt Rollen")
     Person(pruefer, "Prüfer/in", "Nur Docker-Beispiel: liest abgefangene Mails")
+    Person(betreiber, "Betreiber", "Übung: Sicherung, Wartung, Alarme (Rolle der Hochschule)")
     System(cm, "CampusMarkt", "Marktplatz für Hochschulangehörige: Anzeigen, Suche, Chat, Kontaktfreigabe, Moderation")
     System_Ext(mail, "E-Mail-System", "Beispiel: Mailpit (fängt alle Mails ab); Echtbetrieb: SMTP-Relay der Hochschule")
     System_Ext(idp, "Identity Provider der Hochschule", "geplant (Q-12, ADR-0013)")
     System_Ext(psp, "Zahlungsdienstleister", "geplant (EPIC-09, ADR-0006)")
-    Rel(gast, cm, "registriert sich mit Hochschuladresse", "HTTPS")
+    System_Ext(crawler, "Suchmaschinen", "ausgeschlossen per robots.txt und noindex (REQ-PRIV-008)")
+    Rel(gast, cm, "registriert sich, liest Rechtstexte und Hilfe", "HTTPS")
     Rel(mitglied, cm, "inseriert, sucht, chattet", "HTTPS, WSS")
     Rel(mod, cm, "moderiert, verwaltet", "HTTPS")
     Rel(cm, mail, "sendet Verifikations- und Hinweis-Mails", "SMTP")
@@ -80,15 +84,19 @@ C4Context
     Rel(pruefer, mail, "liest Mails in der Web-UI", "HTTP :8025")
     Rel(cm, idp, "authentifiziert (geplant)", "OIDC/SAML")
     Rel(cm, psp, "Zahlungen (geplant)", "HTTPS, Webhooks")
+    Rel(betreiber, cm, "sichert, setzt Wartung, erhält Alarme (geplant)", "Skripte, HTTPS, E-Mail")
+    Rel(crawler, cm, "wird abgewiesen", "HTTPS")
     UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="1")
 ```
 
 | Element | Art | Verantwortung | Bezug | Stand |
 |---|---|---|---|---|
-| Gast | Person | Registrierung mit Whitelist-Adresse | UC-01, REQ-AUTH-001 | umgesetzt |
+| Gast | Person | Registrierung mit Whitelist-Adresse; ohne Konto Startseite, Rechtstexte, Hilfe, Statusseite | UC-01, UC-08, REQ-AUTH-001, REQ-LEGAL-001…005, REQ-UX-004/005 | Registrierung umgesetzt; öffentliche Seiten geplant B-43, B-45 |
 | Mitglied | Person | Anbieter und Interessent; Rollen „Käufer/Verkäufer“ sind kontextabhängig | UC-10 … UC-25 | umgesetzt |
 | Moderator / Admin | Person | Meldungen entscheiden, Rollen vergeben | UC-32, UC-42 | umgesetzt |
 | Prüfer/in | Person (nur Beispiel) | Verifikations- und Hinweis-Mails in Mailpit lesen | ADR-0010 | umgesetzt |
+| Betreiber | Person (Übung) | Sicherung und Wiederherstellung, Wartungsmodus, Reaktion auf Alarme nach Runbook | UC-44, UC-45, REQ-AVAIL-003, REQ-OPS-006…011 | geplant B-53, B-54, B-56, B-57 |
+| Suchmaschinen | Externes System (ausgeschlossen) | Dürfen keine Inhalte indexieren; `robots.txt` mit `Disallow: /`, Header `X-Robots-Tag: noindex, nofollow` | REQ-PRIV-008 | geplant B-52 |
 | CampusMarkt | Softwaresystem (Scope dieses Dokuments) | Alle fachlichen Funktionen | alle REQ | teilweise, siehe Index |
 | E-Mail-System | Externes System | Zustellung transaktionaler Mails | REQ-NOTI-*, ADR-0005 | umgesetzt (Mailpit) |
 | Identity Provider der Hochschule | Externes System | Anmeldung über die Hochschulkennung | Fallstudie FS-C3, Q-12 | **geplant** (Spike S-01) |
@@ -102,6 +110,9 @@ C4Context
 | Browser ↔ CampusMarkt | WebSocket `/ws` | Chat-Ereignisse (JSON, Typen in `packages/contracts`) | bidirektional |
 | CampusMarkt → E-Mail-System | SMTP (`mailpit:1025`), per Umgebungsvariablen austauschbar | E-Mails | ausgehend |
 | Browser → Mailpit-UI | HTTP `localhost:8025` | abgefangene E-Mails (nur Beispiel) | – |
+| *(Profil `proxy`)* Browser ↔ Reverse Proxy | HTTPS `campusmarkt.localhost:8443`, Weiterleitung von HTTP | wie oben, zusätzlich HSTS | bidirektional |
+| *(Profil `monitoring`)* Prometheus → CampusMarkt | HTTP `app:8080/metrics` (nur internes Compose-Netz) | Metriken | eingehend |
+| *(Profil `monitoring`)* Alertmanager → E-Mail-System | SMTP `mailpit:1025` | Alarm-Mails | ausgehend |
 | *(geplant)* CampusMarkt ↔ IdP | OIDC oder SAML (Umleitung + Rückruf) | Identität, Hochschulkennung | bidirektional |
 | *(geplant)* CampusMarkt ↔ PSP | HTTPS-API + signierte Webhooks | Zahlungen | bidirektional |
 
@@ -122,6 +133,11 @@ C4Context
 | Anmeldung über die Hochschulkennung (FS-C3) später ohne Umbau | Anmeldeverfahren hinter einem zweistufigen `IdentityProviderPort`; im Beispiel Hochschuladresse + Passwort (Stand: umgesetzt B-05; SSO-Adapter nach S-01) | [ADR-0013](decisions/0013-anmeldung-identity-provider-port.md) |
 | Kontaktdaten nur nach beidseitiger Zustimmung (FS-C1) | Zustimmungen als Zustand der Konversation; Adresse nur als Konversationsangabe, nie als Nachricht (Stand: umgesetzt B-01) | REQ-CHAT-010 |
 | IP-Adressen nur pseudonymisiert | HMAC-SHA256 mit zufälligem, täglich rotiertem Schlüssel in der Datenbank (Stand: geplant B-35, Sprint 2) | [ADR-0014](decisions/0014-ip-pseudonymisierung.md) |
+| Rechtstexte ohne zweite Quelle, Platzhalter nie live | **Markdown-Dateien im Repo**, zur Build-Zeit gebündelt, mit `react-markdown` ohne HTML gerendert; Version der Nutzungsbedingungen über ein Build-Manifest an den Server; `LEGAL_STRICT` verhindert den Start mit Platzhaltern (Stand: geplant B-43) | [ADR-0015](decisions/0015-rechtstexte-als-markdown.md) |
+| Internationale Studierende | **react-intl** mit ICU MessageFormat, Kataloge `de`/`en`, Sprachwahl im Konto bzw. auf ausdrücklichen Wunsch im Browser; CI prüft Kataloge (Stand: geplant B-51) | [ADR-0016](decisions/0016-internationalisierung.md) |
+| TLS, HSTS und Alarmierung vorführbar, ohne den Standardstart zu ändern | **Optionale Compose-Profile** `proxy` (Caddy, `tls internal`, eigener Hostname `campusmarkt.localhost`) und `monitoring` (Prometheus + Alertmanager → Mailpit) (Stand: geplant B-54, B-55) | [ADR-0017](decisions/0017-optionale-betriebsprofile.md) |
+| Datenverlust begrenzen, Wiederherstellung belegt | `pg_dump` + Uploads-Archiv per Skript, **Restore-Test in CI** (Stand: geplant B-56) | [ADR-0018](decisions/0018-datensicherung.md) |
+| Professioneller Auftritt, sauberer Betrieb | Fehlerseiten mit echten Statuscodes (404/500/503), Wartungsmodus mit Ankündigung, öffentliche Statusseite, `robots.txt`/`noindex`, `security.txt` (Stand: geplant B-44, B-52, B-53) | §8.10, §8.11 |
 | Architektur verständlich und prüfbar dokumentieren | **C4-Modell** als Mermaid-C4-Diagramme, eine Ebene je Diagramm, gerendert mit `scripts/check-diagrams.mjs` (in CI, B-07) | [ADR-0012](decisions/0012-c4-notation.md) |
 
 **Leitprinzip:** Alles, was im Beispiel bewusst einfacher gelöst ist (Fan-out, Storage, Mail, Rate-Limit-Store, Suche, Job-Queue), steckt hinter einem **Port**. Ein späterer Echtbetrieb (EPIC-12) tauscht Adapter, nicht Fachlogik.
@@ -149,7 +165,10 @@ C4Container
         Container(app, "Anwendung", "Node.js 22, Fastify, pg-boss", "REST-API /api/v1, WebSocket /ws, Auslieferung der Web-App, Job-Worker und Zeitsteuerung")
         ContainerDb(db, "Datenbank", "PostgreSQL 17", "Fachdaten je Modul-Schema, Sessions, Job-Queue, Volltextindex")
         ContainerDb(files, "Bildablage", "Dateisystem (Docker-Volume)", "Originale in Quarantäne, verarbeitete WebP-Bilder")
+        Container(proxy, "Reverse Proxy", "Caddy 2, Profil proxy", "optional: TLS (tls internal), HSTS, Weiterleitung http zu https")
+        Container(mon, "Überwachung", "Prometheus und Alertmanager, Profil monitoring", "optional: Metriken, Alarmregeln, Alarm-Mails")
     }
+    Person(betreiber, "Betreiber", "Übung")
     System_Ext(mail, "E-Mail-System", "Mailpit / SMTP-Relay")
     System_Ext(idp, "Identity Provider", "geplant")
     System_Ext(psp, "Zahlungsdienstleister", "geplant")
@@ -163,6 +182,10 @@ C4Container
     Rel(app, mail, "sendet E-Mails", "SMTP")
     Rel(app, idp, "authentifiziert (geplant)", "OIDC/SAML")
     Rel(app, psp, "Zahlungen (geplant)", "HTTPS")
+    Rel(proxy, app, "leitet weiter (optional)", "HTTP, WS")
+    Rel(mon, app, "liest Metriken (optional)", "HTTP /metrics")
+    Rel(mon, mail, "sendet Alarme (optional)", "SMTP")
+    Rel(betreiber, mon, "sieht Alarme und Regeln")
     UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
@@ -172,8 +195,12 @@ C4Container
 | Anwendung | Node.js 22, Fastify, pg-boss | Fachlogik aller Module, Autorisierung, Jobs (E-Mail, Bilder, Fristen) | REQ-SEC-*, REQ-NOTI-005, REQ-OPS-* | 0001, 0002, 0004, 0005 | umgesetzt; offene Teile siehe 5.2 |
 | Datenbank | PostgreSQL 17 | Quelle der Wahrheit, transaktionale Outbox (Jobs im selben Commit), Volltextsuche | REQ-CHAT-004, REQ-SRCH-001, REQ-PERF-001 | 0005, 0008 | umgesetzt |
 | Bildablage | Docker-Volume `uploads` hinter `StoragePort` | Bilder außerhalb des Web-Roots, Auslieferung nur über die Anwendung | REQ-LST-003, REQ-SEC-007 | 0007 | umgesetzt |
+| Reverse Proxy (Profil `proxy`) | Caddy 2 | TLS mit lokaler CA, HSTS nur für `campusmarkt.localhost`, Weiterleitung, WebSocket, `/metrics` gesperrt | REQ-OPS-009 | 0017 | geplant B-55 |
+| Überwachung (Profil `monitoring`) | Prometheus, Alertmanager | Metriken sammeln, Alarmregeln auswerten, Alarme per Mail an Mailpit | REQ-OPS-008 | 0017 | geplant B-54 |
 | Identity Provider | extern | Anmeldung mit Hochschulkennung | REQ-AUTH-009 | 0013 | geplant (S-01) |
 | Zahlungsdienstleister | extern | Zahlungen | REQ-ARCH-001/002 | 0006 | geplant (EPIC-09) |
+
+**Standardstart unverändert:** `docker compose up` startet weiter nur `app`, `db` und `mailpit` (ADR-0010, REQ-ARCH-005). Reverse Proxy und Überwachung kommen nur mit `--profile proxy` bzw. `--profile monitoring` dazu (ADR-0017). Sicherung und Wiederherstellung sind Skripte außerhalb der Anwendung (`scripts/backup.mjs`, `scripts/restore.mjs`, ADR-0018), kein eigener Container.
 
 **Startmodi:** Die Anwendung kennt die Modi `all` (Standard im Beispiel), `api` und `worker` (`APP_MODE`). Im Docker-Beispiel laufen API und Worker in **einem** Prozess mit getrennten Concurrency-Pools (Bulkhead). Für einen Echtbetrieb werden daraus zwei Container gleicher Codebasis **ohne Änderung der Fachlogik**; nötig sind nur Betriebsanpassungen (siehe 7.2): Healthcheck des Worker-Containers per Kommando statt HTTP, `TRUST_PROXY` hinter einem Reverse Proxy und ein `PgNotifyAdapter`, damit Ereignisse aus Jobs WebSockets erreichen (Stand: Health und `TRUST_PROXY` geplant B-41, Sprint 2).
 
@@ -191,7 +218,8 @@ C4Component
     Container_Boundary(app, "Anwendung") {
         Boundary(inb, "Eingehende Adapter", "Schicht") {
             Component(http, "HTTP-API", "Fastify, TypeBox", "REST /api/v1, Validierung, CSRF, Session, Problem Details")
-            Component(admin, "Admin-API und Audit", "Fastify, platform/audit", "Rollen, Audit-Log, Job- und Dead-Letter-Übersicht, Demo-Werkzeug")
+            Component(admin, "Admin-API und Audit", "Fastify, platform/audit", "Rollen, Audit-Log, Job- und Dead-Letter-Übersicht, Demo-Werkzeug, Wartung und Ankündigung, DAC7-Auswertung")
+            Component(ops, "Betriebs-Endpunkte", "Fastify-Hooks, platform/http", "Wartungsmodus (503), /status, robots.txt, security.txt, 404 für unbekannte Pfade")
             Component(ws, "WebSocket-Gateway", "@fastify/websocket", "/ws, Authentifizierung beim Handshake, Origin-Prüfung")
             Component(jobs, "Job-Worker und Zeitsteuerung", "pg-boss", "E-Mail, Bilder, Fristen, ungelesene Nachrichten, Domain Events")
         }
@@ -200,9 +228,9 @@ C4Component
             Component(listings, "listings", "Modul", "Anzeigen, Bilder, Lebenszyklus, Inhaltsprüfung")
             Component(search, "search", "Modul", "Suche, Merkliste")
             Component(messaging, "messaging", "Modul", "Konversationen, Nachrichten, Kontaktfreigabe, Deals")
-            Component(trust, "trust", "Modul", "Meldungen, Moderation, Blockieren")
+            Component(trust, "trust", "Modul", "Meldungen, Moderation, Begründung, Widerspruch (Vier-Augen), Straftatverdacht, Blockieren")
             Component(privacy, "privacy", "Modul", "Export, Kontolöschung")
-            Component(notifications, "notifications", "Modul", "E-Mail-Vorlagen, Versand unter Beachtung der Einstellungen")
+            Component(notifications, "notifications", "Modul", "E-Mail-Vorlagen de/en mit Rechts-Fußzeile, Versand unter Beachtung der Einstellungen")
         }
     }
     Rel(spa, http, "Anfragen", "JSON/HTTPS")
@@ -214,6 +242,8 @@ C4Component
     Rel(http, trust, "ruft öffentliche API auf")
     Rel(http, privacy, "ruft öffentliche API auf")
     Rel(admin, identity, "Rollen, Nutzerliste")
+    Rel(admin, messaging, "DAC7: abgeschlossene Deals je Verkäufer")
+    Rel(spa, ops, "Statusseite, Wartungshinweis", "JSON/HTTPS")
     Rel(ws, messaging, "senden, gelesen markieren")
     Rel(jobs, listings, "Bilder, Fristen")
     Rel(jobs, messaging, "ungelesene Nachrichten, Deal-Ereignisse")
@@ -235,6 +265,7 @@ C4Component
             Component(dbaccess, "Datenbankzugriff", "platform/db, sql-Template, pg", "Database/Tx, Unit of Work, transaktionales Enqueue")
             Component(idport, "IdentityProviderPort → Passwortverfahren", "Modul identity", "umgesetzt B-05; später OIDC/SAML-Adapter")
             Component(payport, "PaymentPort", "nur Schnittstelle", "EPIC-09, ADR-0006")
+            Component(settings, "Einstellungen und Rechtsinhalte", "platform/settings, legal-manifest.json", "Wartungsmodus, Ankündigung, Version der Nutzungsbedingungen, LEGAL_STRICT")
         }
         Boundary(ports, "Ports und Adapter", "Schicht") {
             Component(mailport, "MailPort → SMTP-Adapter", "Nodemailer", "Versand mit Timeout 10 s")
@@ -258,6 +289,7 @@ C4Component
     Rel(modules, searchport, "sucht")
     Rel(modules, rlport, "zählt")
     Rel(dbaccess, db, "SQL")
+    Rel(settings, dbaccess, "Einstellungen", "SQL")
     Rel(payport, psp, "geplant", "HTTPS")
     Rel(mailport, mail, "SMTP")
     Rel(storeport, files, "liest/schreibt")
@@ -318,6 +350,8 @@ C4Component
 
 Weitere Aufrufe: `trust → messaging` (Nachrichtenkontext, Entfernen), `messaging`/`search → trust` (Blockierungen), `listings → trust` (Fall der Inhaltsprüfung) und `listings → search` (Merkliste). Alle über das öffentliche API.
 
+**Neu mit EPIC-13 (geplant):** Die Admin-API (eingehender Adapter, kein Fachmodul) ruft für die DAC7-Auswertung `messaging` auf (abgeschlossene Deals je Verkäufer und Kalenderjahr) und `identity` (Anzeigenamen). Rohdaten anderer Schemas liest sie nicht; Modulregel 2 bleibt gewahrt. Begründung und Widerspruch bleiben vollständig in `trust` und nutzen die bestehenden Aufrufe `trust → notifications` (Mitteilung) und `trust → identity` (Sperre aufheben, Namen). Es entsteht **keine** neue Abhängigkeit zwischen Fachmodulen.
+
 | Komponente | Ort im Code | Verantwortung | Wichtige Anforderungen | Stand |
 |---|---|---|---|---|
 | HTTP-API | `apps/server/src/platform/http/` + `routes.ts` je Modul | Validierung gegen den Vertrag (`packages/contracts`), Session, CSRF, Fehlerformat | REQ-SEC-004, REQ-SEC-006 | umgesetzt |
@@ -335,6 +369,12 @@ Weitere Aufrufe: `trust → messaging` (Nachrichtenkontext, Entfernen), `messagi
 | Ports + Adapter | `platform/ports/`, `platform/adapters/` | Austauschbare Infrastruktur | REQ-ARCH-006 | umgesetzt; HMAC-Schlüssel im RateLimitStore geplant B-35, publish/subscribe geplant B-40 (Sprint 2) |
 | IdentityProviderPort | `modules/identity/` (Passwortverfahren intern), später SSO-Adapter in `platform/adapters/` | Anmeldeverfahren austauschbar (ADR-0013) | REQ-AUTH-009 | umgesetzt B-05; SSO-Adapter nach S-01 |
 | PaymentPort | `modules/payments/payment-port.ts` | Erweiterungspunkt Bezahlung | REQ-ARCH-001/002 | Schnittstelle vorhanden, Adapter EPIC-09 |
+| Betriebs-Endpunkte | `platform/http/` (Hooks und Routen) | Wartungsmodus (503 mit `Retry-After`, Ausnahmen siehe §8.11), `/api/v1/status` und Seite `/status`, `robots.txt`, `/.well-known/security.txt`, `X-Robots-Tag`, 404 für unbekannte Pfade | REQ-OPS-006/007, REQ-UX-003, REQ-PRIV-008, REQ-SEC-012 | geplant B-44, B-52, B-53 |
+| Einstellungen und Rechtsinhalte | `platform/settings.ts` (Tabelle `platform.setting`), `legal-manifest.json` aus dem Web-Build | Wartungsmodus und Ankündigung (Cache 10 s), `termsVersion` aus dem Manifest, Startprüfung `LEGAL_STRICT` | REQ-OPS-006, REQ-LEGAL-003 | geplant B-43, B-53 |
+| DSA-Begründung und Widerspruch | `modules/trust/` | Begründung an Betroffene mit Regel und Widerspruchshinweis; Widerspruch binnen 6 Monaten (DSA Art. 20 Abs. 1), auch für Meldende bei abgelehnter Meldung, Entscheidung durch einen **anderen** Moderator; Straftatverdacht als Kennzeichen mit Pflichtbegründung | REQ-LEGAL-006/007/008 | geplant B-46, B-47 |
+| DAC7-Auswertung | `modules/admin.ts` → `messaging` (öffentliches API) | Verkäufer mit ≥ 30 abgeschlossenen Deals oder ≥ 2.000 € je Kalenderjahr, JSON und CSV, nur Admin, Audit-Eintrag | REQ-LEGAL-009 | geplant B-48 |
+| E-Mail-Fußzeile und Sprache | `modules/notifications/` | Jede Mail mit Links zu Impressum, Datenschutz und Einstellungen; Vorlagen je Sprache | REQ-UX-006, REQ-UX-007 | geplant B-43, B-51 |
+| Sicherung und Wiederherstellung | `scripts/backup.mjs`, `scripts/restore.mjs` (außerhalb der Anwendung) | `pg_dump` + Uploads-Archiv, Prüfsummen, Restore mit Wartungsmodus | REQ-AVAIL-003 | geplant B-56 |
 
 **Modulregeln und ihre Prüfung (Fitness Functions, REQ-MAINT-002):**
 
@@ -354,7 +394,9 @@ C4Component
     Person(mitglied, "Mitglied", "Tastatur, Maus, Screenreader")
     Person(mod, "Moderator / Admin", "Browser")
     Container_Boundary(spa, "Web-App") {
-        Component(router, "Routen und Seiten", "TanStack Router", "Registrierung, Suche, Anzeige, Formular, Chat mit Kontaktfreigabe, Profil, Moderation, Admin; Rollen-Guards")
+        Component(router, "Routen und Seiten", "TanStack Router", "Startseite, Registrierung, Suche, Anzeige, Formular, Chat mit Kontaktfreigabe, Profil, Moderation, Admin, Fehler-, Status- und Wartungsseite; Rollen-Guards")
+        Component(legal, "Rechts- und Hilfeseiten", "react-markdown, content/legal, content/help", "Impressum, Datenschutz, Nutzungsbedingungen, Community-Regeln, Barrierefreiheit, Kontakt, Hilfe; ohne Anmeldung")
+        Component(i18n, "Internationalisierung", "react-intl, Kataloge de und en", "Sprachwahl, html lang, Formatierung von Datum und Preis")
         Component(ui, "UI-Bausteine", "React, Tailwind, natives dialog", "zugängliche Formulare, Fokus-Management, ARIA-Live")
         Component(client, "API-Client", "fetch, TanStack Query", "CSRF-Header, Problem Details, Cache")
         Component(rt, "Echtzeit-Hook", "WebSocket", "Reconnect mit Backoff, Nachladen, Polling im Degradationsmodus")
@@ -364,6 +406,8 @@ C4Component
     Rel(mitglied, router, "bedient")
     Rel(mod, router, "bedient")
     Rel(router, ui, "rendert mit")
+    Rel(router, legal, "öffentliche Routen")
+    Rel(router, i18n, "Texte")
     Rel(router, client, "lädt/ändert Daten")
     Rel(rt, client, "aktualisiert Cache")
     Rel(client, app, "JSON", "HTTPS")
@@ -379,6 +423,10 @@ C4Component
 | API-Client | `apps/web/src/api/` | Aufrufe, CSRF-Header, Fehlerbehandlung | alle 9 | umgesetzt |
 | Echtzeit-Hook | `apps/web/src/lib/realtime.ts` | WebSocket, Reconnect, Nachladen per `?after=`, Polling | Nachricht senden | umgesetzt |
 | Service Worker | erzeugt durch `vite-plugin-pwa` | Installierbarkeit (PWA); cacht ausschließlich statische Dateien, damit keine personenbezogenen Antworten im Gerät verbleiben | – | umgesetzt |
+| Rechts- und Hilfeseiten | `apps/web/src/routes/legal.tsx`, Inhalte `apps/web/src/content/` | Darstellung der Markdown-Inhalte (ADR-0015), Inhaltsverzeichnis, Muster-Hinweis, Footer-Links auf jeder Seite | – (öffentlich, REQ-LEGAL-001…005, REQ-UX-005/006) | geplant B-43, B-45 |
+| Startseite, Fehler-, Status- und Wartungsseite | `apps/web/src/routes/` | Startseite für Gäste, 404 mit Suche und Hilfe, Seite für Serverfehler, `/status`, Hinweis bei 503 | – (REQ-UX-003/004, REQ-OPS-006/007) | geplant B-44, B-45, B-53 |
+| Internationalisierung | `apps/web/src/i18n/` | Kataloge, Sprachschalter, `<html lang>`, Übersetzung von Fehlercodes | alle 9 (Texte, Labels) | geplant B-51 |
+| Widerspruch | `apps/web/src/routes/profile.tsx` bzw. eigene Seite | Mitteilungen zu Moderationsentscheidungen, Widerspruch einlegen (UC-35); Moderationsseite mit Widerspruchs-Queue (UC-36) | Melden (Folgeablauf) | geplant B-46 |
 
 ### 5.4 Fachliches Datenmodell (Auszug)
 
@@ -402,6 +450,13 @@ erDiagram
     DEAL ||--o| PAYMENT : "BACKLOG (ref)"
     MODERATION_CASE ||--o{ REPORT : sammelt
     MODERATION_CASE ||--o{ DECISION : fuehrt_zu
+    DECISION ||--o| APPEAL : "angefochten durch"
+    SETTING {
+        string key PK
+        jsonb value
+        timestamptz updated_at
+        uuid updated_by "ref identity.user"
+    }
     USER ||--o{ BLOCK : "blockiert (ref)"
     USER ||--o{ FAVORITE : "merkt (ref)"
 
@@ -424,6 +479,7 @@ erDiagram
         string user_type
         string status
         string role
+        string locale "de oder en, geplant B-51"
         timestamptz verified_at
     }
     SESSION {
@@ -511,12 +567,28 @@ erDiagram
         uuid moderator_id "ref"
         string decision
         string reason
+        string rule_ref "Regel bzw. Grundlage, geplant B-46"
+        bool criminal_suspicion "geplant B-47"
+        timestamptz notified_at "geplant B-46"
+    }
+    APPEAL {
+        uuid id PK
+        uuid decision_id FK
+        uuid appellant_id "ref identity.user"
+        text reason
+        string status "open, upheld, reversed"
+        uuid reviewer_id "ref, ungleich decision.moderator_id"
+        text outcome_reason
+        timestamptz created_at
+        timestamptz decided_at
     }
 ```
 
 `CONTACT_CONSENT` hält je Teilnehmer und Konversation den Zustand der Kontaktfreigabe (REQ-CHAT-010): `state` ∈ {`granted`, `withdrawn`, `declined`}, mit Zeitpunkten für Zustimmung, Widerruf und Ablehnung sowie Zähler und Zeitpunkt der letzten Anfrage für die Sperrfrist (24 h) und die Höchstzahl (3). Die Adresse selbst bleibt im Modul `identity` und wird nur bei beidseitiger Zustimmung über ein schmales API gelesen (siehe 8.1). Ein Deal je Konversation kann nach Storno neu entstehen; offen ist höchstens einer je Anzeige. (Stand: umgesetzt B-01, Migration `0002_contact_consent.sql`.)
 
-Unique-Constraints (Auszug): `USER(email_canonical)` · `CONVERSATION(listing_id, buyer_id)` (REQ-CHAT-002) · `MESSAGE(conversation_id, client_msg_id)` (REQ-CHAT-004, Idempotenz) · `DEAL(listing_id) WHERE status = 'agreed'` · `ALLOWED_DOMAIN(domain)`. Die Job-Tabellen verwaltet pg-boss in einem eigenen Schema `pgboss`.
+`APPEAL` (geplant B-46) hält den Widerspruch gegen genau eine Entscheidung. Pro Entscheidung und betroffenem Mitglied gibt es höchstens einen Widerspruch. Er ist binnen 6 Monaten nach `notified_at` möglich (DSA Art. 20 Abs. 1); widersprechen können Betroffene und Meldende, deren Meldung abgelehnt wurde. Entschieden wird er von einem Moderator, der nicht der ursprüngliche Entscheider ist; die Anwendung prüft das (`reviewer_id ≠ decision.moderator_id`), weil ein Constraint über zwei Zeilen in Postgres nur per Trigger ginge. `SETTING` (Schema `platform`) hält Wartungsmodus und Ankündigung. `USER.locale` speichert die Sprachwahl (ADR-0016).
+
+Unique-Constraints (Auszug): `USER(email_canonical)` · `CONVERSATION(listing_id, buyer_id)` (REQ-CHAT-002) · `MESSAGE(conversation_id, client_msg_id)` (REQ-CHAT-004, Idempotenz) · `DEAL(listing_id) WHERE status = 'agreed'` · `ALLOWED_DOMAIN(domain)` · `APPEAL(decision_id, appellant_id)` (geplant). Die Job-Tabellen verwaltet pg-boss in einem eigenen Schema `pgboss`.
 
 #### Löschung und Anonymisierung (Soll-Modell, REQ-PRIV-003, REQ-ACC-002)
 
@@ -618,7 +690,7 @@ sequenceDiagram
     J->>DB: Bildstatus ready
 ```
 
-### 6.4 Kontaktdaten freigeben (UC-25, REQ-CHAT-010) – Soll (B-01, Sprint 1)
+### 6.4 Kontaktdaten freigeben (UC-25, REQ-CHAT-010) – umgesetzt (B-01)
 
 ```mermaid
 sequenceDiagram
@@ -644,8 +716,8 @@ sequenceDiagram
         MSG->>RB: publish(Lea, Ben, conversation)
         A->>SPA: Konversation laden
         SPA->>MSG: GET /api/v1/conversations/{id}
-        MSG->>ID: getSharedContactAddress(Ben) – nur wenn beide zugestimmt haben
-        MSG-->>SPA: counterpartContact (Konversationsangabe)
+        MSG->>ID: getSharedContactAddresses([Ben]) – nur wenn beide zugestimmt haben
+        MSG-->>SPA: contact.counterpartEmail (Konversationsangabe)
     else Ben lehnt ab
         B->>SPA: „Ablehnen“
         SPA->>MSG: POST /api/v1/conversations/{id}/contact {action: decline}
@@ -655,9 +727,77 @@ sequenceDiagram
         A->>SPA: „Zustimmung widerrufen“ bzw. Blockierung
         SPA->>MSG: POST /api/v1/conversations/{id}/contact {action: withdraw}
         MSG->>DB: withdrawn_at speichern
-        MSG-->>SPA: counterpartContact entfällt für beide
+        MSG-->>SPA: contact.counterpartEmail = null für beide
     end
     Note over MSG,DB: Die Adresse wird nie als Nachricht gespeichert und erscheint daher<br/>nicht im gemeldeten Kontext (REQ-PRIV-004).
+```
+
+### 6.5 Widerspruch gegen eine Moderationsentscheidung (UC-35, UC-36, REQ-LEGAL-006/007) – Soll (B-46)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor M as Mitglied (betroffen)
+    participant SPA as Web-App
+    participant T as Anwendung: trust
+    participant DB as Datenbank
+    participant N as Anwendung: notifications
+    actor M1 as Moderator 1
+    actor M2 as Moderator 2
+
+    M1->>SPA: Entscheidung „entfernen“ mit Regel und Begründung
+    SPA->>T: POST /api/v1/moderation/cases/{id}/decision
+    T->>DB: BEGIN → Entscheidung, Audit-Eintrag, notified_at<br/>Mail-Job einreihen → COMMIT
+    T->>N: Begründung mit Regel, Folgen und Widerspruchshinweis (6 Monate)
+    M->>SPA: Mitteilung öffnen, „Widerspruch einlegen“
+    SPA->>T: POST /api/v1/moderation/decisions/{id}/appeal {reason}
+    T->>T: betroffen? Frist? noch kein Widerspruch?
+    T->>DB: Widerspruch speichern (open), Audit-Eintrag
+    T-->>SPA: 201 Widerspruch eingegangen
+    M2->>SPA: Widerspruchs-Queue öffnen
+    SPA->>T: GET /api/v1/moderation/appeals?status=open
+    T-->>SPA: Widersprüche ohne die eigenen Entscheidungen von M2
+    M2->>SPA: „Entscheidung aufheben“ mit Begründung
+    SPA->>T: POST /api/v1/moderation/appeals/{id}/decision
+    T->>T: Vier-Augen-Prüfung, M2 ist nicht M1
+    alt aufgehoben
+        T->>DB: Inhalt wiederherstellen bzw. Sperre aufheben, Status reversed
+    else bestätigt
+        T->>DB: Status upheld
+    end
+    T->>N: Ergebnis mit Begründung an das Mitglied
+    Note over T,DB: Alle Schritte stehen im Audit-Log (REQ-MOD-003).<br/>Ein gesperrtes Konto erreicht den Widerspruch über den Link in der Mail, ohne Anmeldung.
+```
+
+**Gesperrte Konten:** Wer gesperrt ist, kann sich nicht anmelden (REQ-SEC-011). Die Begründungs-Mail enthält deshalb einen einmaligen, 6 Monate gültigen Link (gehashtes Token wie bei der Verifikation). Er öffnet nur das Widerspruchsformular für genau diese Entscheidung.
+
+### 6.6 Wartungsmodus (UC-44, REQ-OPS-006) – Soll (B-53)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor AD as Administrator
+    actor M as Mitglied
+    participant SPA as Web-App
+    participant H as Anwendung: Betriebs-Endpunkte
+    participant S as Anwendung: Einstellungen
+    participant DB as Datenbank
+
+    AD->>SPA: Ankündigung „Wartung heute 18–19 Uhr“ setzen
+    SPA->>H: PUT /api/v1/admin/announcement
+    H->>S: speichern, Audit-Eintrag
+    S->>DB: platform.setting
+    M->>SPA: beliebige Seite
+    SPA->>H: GET /api/v1/status
+    H-->>SPA: Ankündigung als Banner
+    AD->>SPA: Wartungsmodus einschalten
+    SPA->>H: PUT /api/v1/admin/maintenance {on: true, until}
+    M->>SPA: Anzeige anlegen
+    SPA->>H: POST /api/v1/listings
+    H->>S: Wartungsmodus aktiv? (Cache ≤ 10 s)
+    H-->>SPA: 503 Problem Details, Retry-After
+    SPA-->>M: Wartungsseite mit Zeitpunkt, Rechtstexte und Statusseite bleiben erreichbar
+    Note over H,S: Ausnahmen: Health, Status, Anmeldung und Admin-API für Admins,<br/>statische Dateien und Rechtsseiten. Harte Wartung per MAINTENANCE_MODE=true beim Start.
 ```
 
 ## 7. Verteilungssicht
@@ -711,13 +851,75 @@ C4Deployment
 | `local` | Entwicklung | `compose.dev.yaml` (db + mailpit), App per `pnpm dev` | umgesetzt |
 | `ci` | Tests | GitHub Actions: Typprüfung, Unit-Tests, `lint:deps`, `trace.mjs`, Image-Build, E2E- und Smoke-Test gegen das Compose-Setup | umgesetzt B-07 (`.github/workflows/ci.yml`) |
 | `demo` | Abgabe / Vorführung | `docker compose up` | umgesetzt |
+| `demo` + Profile | Vorführung Betrieb | `docker compose --profile proxy --profile monitoring up` | geplant B-54, B-55 |
+
+| Aspekt (Betrieb, EPIC-13) | Festlegung |
+|---|---|
+| Sicherung | `node scripts/backup.mjs` → `backups/<Zeitstempel>/` mit `db.dump`, `uploads.tar.gz`, `manifest.json` (ADR-0018) |
+| Wiederherstellung | `node scripts/restore.mjs <ordner>`; App läuft dabei im Wartungsmodus; in CI nach jeder Änderung getestet |
+| Wartung | `MAINTENANCE_MODE=true` (harte Wartung beim Start) oder per Admin-Oberfläche (weiche Wartung) |
+| Aktualisierung | Renovate-Pull-Requests (REQ-OPS-012), Ablauf in [docs/07-betrieb/update-prozess.md](../07-betrieb/update-prozess.md) |
+| Runbooks | [Betriebshandbuch](../07-betrieb/betriebshandbuch.md), [Störungen](../07-betrieb/incident-prozess.md), [Datenpannen](../06-recht/datenpannen-prozess.md) |
 
 ### 7.2 Ausblick Echtbetrieb (nicht Teil des Projekts, EPIC-12)
-Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PITR, echter SMTP-Relay (SPF/DKIM/DMARC), S3-Adapter, `PgNotifyAdapter`, Reverse Proxy mit TLS, Tracing (geplant R2). Dazu kommen die Betreiberpflichten (Impressum, Datenschutzerklärung, DSA-Prozesse). Die **Fachlogik** ändert sich nicht; nötig sind folgende Betriebsanpassungen:
+Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PITR, echter SMTP-Relay (SPF/DKIM/DMARC, Vorlage in [mail-zustellbarkeit.md](../07-betrieb/mail-zustellbarkeit.md)), S3-Adapter, `PgNotifyAdapter`, Reverse Proxy mit TLS (Vorlage: Profil `proxy`, ADR-0017), Tracing (geplant R2). Die Betreiberpflichten (Impressum, Datenschutzerklärung, DSA-Prozesse) sind als Übung mit Platzhaltern vorhanden (EPIC-13); vor dem Go-live werden die Platzhalter ersetzt und rechtlich geprüft ([Go-live-Checkliste](../07-betrieb/go-live-checkliste.md), `LEGAL_STRICT=true`). Die **Fachlogik** ändert sich nicht; nötig sind folgende Betriebsanpassungen:
 - **Health im Worker-Modus:** Der Worker startet keinen HTTP-Server; sein Healthcheck läuft per Kommando (Datenbank erreichbar, pg-boss aktiv) statt über `/health/ready` (geplant B-41, Sprint 2).
 - **`TRUST_PROXY`:** Hinter einem Reverse Proxy muss die Client-IP aus `X-Forwarded-For` übernommen werden, sonst teilen sich alle Nutzer einen Rate-Limit-Schlüssel (geplant B-41, Sprint 2).
 - **Ereignisse aus Jobs:** erreichen WebSockets erst mit dem `PgNotifyAdapter`, weil der In-Process-Broker nur innerhalb eines Prozesses verteilt.
 - **`/metrics`:** nur intern erreichbar (eigener Port oder Proxy-Regel), nicht öffentlich.
+
+### 7.3 Optionale Betriebsprofile `proxy` und `monitoring` (ADR-0017) – Soll (B-54, B-55)
+
+```mermaid
+C4Deployment
+    title C4 Verteilung – Docker-Beispiel mit den Profilen proxy und monitoring
+    Deployment_Node(host2, "Prüf- oder Entwicklerrechner", "Docker") {
+        Deployment_Node(browser2, "Browser", "Edge, Chrome, Firefox, Safari") {
+            Container(spa2, "Web-App", "über https://campusmarkt.localhost:8443")
+        }
+        Deployment_Node(compose2, "Docker Compose", "Projekt campusmarkt") {
+            Deployment_Node(proxyc, "Docker-Container proxy", "caddy:2-alpine, Profil proxy") {
+                Container(proxy2, "Reverse Proxy", "TLS intern, HSTS, Weiterleitung")
+            }
+            Deployment_Node(appc2, "Docker-Container app", "Image campusmarkt") {
+                Container(app2, "Anwendung", "Fastify, TRUST_PROXY=true")
+            }
+            Deployment_Node(promc, "Docker-Container prometheus", "Profil monitoring, 127.0.0.1:9090") {
+                Container(prom2, "Prometheus", "Abfrage alle 15 s, Alarmregeln")
+            }
+            Deployment_Node(amc, "Docker-Container alertmanager", "Profil monitoring, 127.0.0.1:9093") {
+                Container(am2, "Alertmanager", "Gruppierung, Mail-Versand")
+            }
+            Deployment_Node(mpc2, "Docker-Container mailpit", "axllent/mailpit") {
+                System_Ext(mail2, "E-Mail-System", "Mailpit")
+            }
+        }
+    }
+    Rel(spa2, proxy2, "HTTPS :8443, WSS")
+    Rel(proxy2, app2, "HTTP :8080")
+    Rel(prom2, app2, "HTTP /metrics")
+    Rel(prom2, am2, "Alarme")
+    Rel(am2, mail2, "SMTP :1025")
+    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
+```
+
+**Hinweise:** `db` ist der Übersicht halber nicht gezeichnet (unverändert wie 7.1). HSTS gilt nur für `campusmarkt.localhost`, nicht für `localhost`, damit andere lokale Dienste nicht betroffen sind (Risiko R-13).
+
+**Ablauf der Datensicherung (ADR-0018, B-56):**
+
+```mermaid
+flowchart LR
+    B1["backup.mjs"] --> B2["pg_dump -Fc im Container db"]
+    B2 --> B3["tar der Uploads im Container app"]
+    B3 --> B4["manifest.json mit SHA-256, Migration, Version"]
+    B4 --> B5[("backups/Zeitstempel")]
+    B5 --> R1["restore.mjs"]
+    R1 --> R2["Prüfsummen und Migration prüfen"]
+    R2 --> R3["App im Wartungsmodus"]
+    R3 --> R4["pg_restore --clean"]
+    R4 --> R5["Uploads entpacken"]
+    R5 --> R6["App normal starten, Migrationen idempotent"]
+```
 
 ## 8. Querschnittliche Konzepte
 
@@ -728,8 +930,12 @@ Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PI
 - **Container-Härtung:** Non-root-User, Read-only-Root-FS, `no-new-privileges`, keine Secrets im Image, minimales Base-Image. Image-Scan (Trivy), Renovate, SCA, Secret-Scan und SBOM sind geplant (B-06, Sprint 4).
 - **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). (Stand: Grenzen umgesetzt B-34; HMAC-Schlüssel geplant B-35, Sprint 2.)
 - **Pseudonymisierte IP-Adressen (ADR-0014):** HMAC-SHA256 mit einem zufälligen 256-Bit-Schlüssel aus `platform.ip_pepper`. Er wird beim Start erzeugt, falls keiner gültig ist, und täglich per Job gewechselt; der Vorgänger bleibt 1 h gültig (längstes Zählfenster) und wird dann gelöscht. Kein Standardwert im Code, kein Secret im Image; für mehrere Instanzen tragfähig. Gespeicherte Werte sind ohne den Schlüssel nicht zurückrechenbar und höchstens 7 Tage vorhanden (REQ-PRIV-002). (Stand: geplant B-35, Sprint 2; heute fester Salt.)
-- **Vertrauensgrenze Kontaktfreigabe (REQ-CHAT-010, REQ-PRIV-002):** Die Entscheidung „darf die Adresse sehen“ ist eine reine Funktion in `messaging/domain.ts` (beide Zustimmungen erteilt, keine Blockierung, Gegenüber aktiv) und wird tabellarisch getestet. `identity` stellt dafür ein schmales API `getSharedContactAddress(userId)` bereit, das nur die bei der Registrierung eingegebene Adresse liefert; das bestehende `getContact` bleibt dem Versand von E-Mails (`notifications`) vorbehalten. In `packages/contracts` tragen nur `Me`, `AdminUser` und `ContactShare.counterpartEmail` E-Mail-Felder; die Smoke-Prüfung AT-CHAT-001-2 stellt sicher, dass Konversationen und Nachrichten außerhalb von `contact` keine Adresse enthalten. Die Adresse ist nie Teil einer Nachricht, daher sieht die Moderation sie auch im gemeldeten Kontext nicht. Zustimmungen erscheinen im Datenexport. Missbrauchsschutz über Sperrfrist (24 h) und Höchstzahl (3). (Stand: umgesetzt B-01.)
+- **Vertrauensgrenze Kontaktfreigabe (REQ-CHAT-010, REQ-PRIV-002):** Die Entscheidung „darf die Adresse sehen“ ist eine reine Funktion in `messaging/domain.ts` (beide Zustimmungen erteilt, keine Blockierung, Gegenüber aktiv) und wird tabellarisch getestet. `identity` stellt dafür ein schmales API `getSharedContactAddresses(userIds)` bereit, das nur für aktive Konten die bei der Registrierung eingegebene Adresse liefert; das bestehende `getContact` bleibt dem Versand von E-Mails (`notifications`) vorbehalten. In `packages/contracts` tragen nur `Me`, `AdminUser` und `ContactShare.counterpartEmail` E-Mail-Felder; die Smoke-Prüfung AT-CHAT-001-2 stellt sicher, dass Konversationen und Nachrichten außerhalb von `contact` keine Adresse enthalten. Die Adresse ist nie Teil einer Nachricht, daher sieht die Moderation sie auch im gemeldeten Kontext nicht. Zustimmungen erscheinen im Datenexport. Missbrauchsschutz über Sperrfrist (24 h) und Höchstzahl (3). (Stand: umgesetzt B-01.)
 - **Demo-spezifisch:** Demo-Passwörter stehen nur in der Seed-Dokumentation und werden nur bei `SEED_DEMO=true` angelegt.
+- **Meldeweg für Sicherheitslücken (REQ-SEC-012):** `/.well-known/security.txt` nach RFC 9116 mit `Contact`, `Expires`, `Preferred-Languages` und `Policy`; Kontakt als Platzhalter. Ablauf in [docs/07-betrieb/incident-prozess.md](../07-betrieb/incident-prozess.md) (Stand: geplant B-52).
+- **Keine Indexierung (REQ-PRIV-008):** `robots.txt` mit `Disallow: /` und Header `X-Robots-Tag: noindex, nofollow` auf allen Antworten (Stand: geplant B-52).
+- **Transportverschlüsselung (REQ-OPS-009):** im Beispiel optional über das Profil `proxy` mit HSTS (ADR-0017); das Sitzungscookie ist bereits `Secure`.
+- **Penetrationstest (REQ-SEC-013):** vor einem Go-live nach ASVS L2, Plan in [docs/07-betrieb/pentest-plan.md](../07-betrieb/pentest-plan.md).
 
 ### 8.2 Zuverlässigkeit
 - **Transaktionales Enqueue** (pg-boss im selben Commit) für alle Seiteneffekte. Kein Seiteneffekt geht verloren, keiner wird ohne Commit ausgeführt.
@@ -743,7 +949,10 @@ Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PI
 - Vorlagen als TypeScript-Funktionen (HTML + Text) im Modul `notifications`, deutsch und i18n-fähig ([ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 3).
 - **Keine Chatinhalte** in E-Mails, nur Hinweise mit Link.
 - Im Beispiel landen alle Mails in Mailpit. Damit ist auch die Registrierung mit echten Adressformaten wie `@studmail.hwg-lu.de` gefahrlos vorführbar, weil nichts das Rechnernetz verlässt.
-- Zustellbarkeit (SPF/DKIM/DMARC, Bounces) ist N/A für das Beispiel → EPIC-12.
+- Zustellbarkeit (SPF/DKIM/DMARC, Bounces) ist für das Beispiel nicht relevant; Beispiel-DNS-Einträge für den Echtbetrieb stehen in [mail-zustellbarkeit.md](../07-betrieb/mail-zustellbarkeit.md) (REQ-OPS-010).
+- **Fußzeile (REQ-UX-006):** Jede Mail enthält Links zu Impressum, Datenschutzerklärung und den Benachrichtigungs-Einstellungen; Werbung gibt es nicht (nur transaktionale Mails) (Stand: geplant B-43).
+- **Sprache:** Mails gehen in der Konto-Sprache (ADR-0016, geplant B-51).
+- **Begründung bei Moderation (DSA Art. 17):** Die Entscheidungs-Mail enthält Entscheidung, Regel, Tatsachen, ob automatisiert erkannt (Wortfilter) und den Widerspruchsweg (REQ-LEGAL-006, Vorlage in [dsa-prozesse.md](../06-recht/dsa-prozesse.md)).
 
 ### 8.4 Datenschutz: Datenklassen und verantwortliche Löschläufe
 
@@ -761,6 +970,11 @@ Gleiches Image. Getrennte `api`- und `worker`-Instanzen, managed Postgres mit PI
 | Zählerspeicher Rate-Limit (pseudonymisierte IP und Adresse) | vertraulich | platform | täglich in `privacy-purge` |
 | IP-Pseudonymisierungsschlüssel | geheim | platform | Rotation täglich, Vorgänger nach 1 h gelöscht (ADR-0014, geplant B-35) |
 | Anwendungs-Logs | intern, **ohne PII** | – | Container-Logs, nicht persistiert |
+| Widersprüche | vertraulich | trust | wie Moderationsentscheidungen, Fristen geplant B-12 |
+| DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach PStTG (vom DSB zu prüfen), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
+| Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: 7 tägliche, 4 wöchentliche; gelöschte Konten verschwinden nach ≤ 35 Tagen auch aus Sicherungen (ADR-0018) |
+| Einstellungen, Ankündigung | intern | platform | bis zur Änderung |
+| Sprachwahl | intern | identity (`user.locale`) bzw. Browser (`cm_locale`, nur auf Wunsch) | mit dem Konto bzw. durch Nutzer löschbar |
 
 ### 8.5 Erweiterungspunkt Bezahlung (ADR-0006)
 
@@ -799,10 +1013,49 @@ flowchart LR
 - Im Docker-Beispiel wäre ein **Fake-PSP-Adapter** (Sandbox-Simulation) ausreichend, um den Ablauf zu zeigen, ohne externe Konten.
 
 ### 8.6 Observability (Beispiel-Niveau)
-Strukturierte JSON-Logs (pino) mit Korrelations-ID, `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); ein Compose-Profil `observability` mit Grafana ist Could.
+Strukturierte JSON-Logs (pino) mit Korrelations-ID, `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Profil `proxy` ist es am Proxy gesperrt, im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. **Überwachung und Alarmierung** (REQ-OPS-008) liefert das Profil `monitoring` (ADR-0017): Prometheus mit Alarmregeln auf Symptome (App nicht erreichbar oder nicht bereit, Fehlerrate, Latenz, Dead-Letter, Wartungsmodus zu lange aktiv), Alertmanager sendet an Mailpit; jede Regel verweist auf ein Runbook in [monitoring-alarmierung.md](../07-betrieb/monitoring-alarmierung.md). Neu ist die Metrik `app_ready` (0/1) aus der Readiness-Prüfung (Stand: geplant B-54). Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); Grafana bleibt Could.
 
 ### 8.7 Barrierefreiheit und UX
 Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test umgesetzt B-02, `e2e/tests/keyboard.spec.ts`). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten).
+
+### 8.8 Rechtliche Inhalte und Versionierung (ADR-0015)
+- **Eine Quelle:** Rechtstexte und Hilfe liegen als Markdown in `apps/web/src/content/`. Die Doku in `docs/06-recht/` verlinkt sie nur. Die Version der Nutzungsbedingungen erreicht den Server über `legal-manifest.json`. Eine abweichende Zustimmung erzwingt die erneute Zustimmung vor schreibenden Aktionen (REQ-LEGAL-003).
+- **Erreichbarkeit:** Alle Rechtsseiten sind öffentlich, von jeder Seite über den Footer mit einem Klick erreichbar und aus jeder E-Mail verlinkt (REQ-UX-006). Sie bleiben auch im Wartungsmodus erreichbar.
+- **Platzhalter:** Format `[Platzhalter: …]` plus Muster-Hinweis (`sample: true`). `LEGAL_STRICT=true` verhindert im Echtbetrieb den Start mit Platzhaltern (Risiko R-11).
+- **Sicherheit:** kein HTML im Markdown, keine `javascript:`-Links, kein `dangerouslySetInnerHTML`; die CSP bleibt unverändert.
+- **Kein Cookie-Banner (Q-24, REQ-LEGAL-010):** Es gibt nur das Sitzungscookie und – auf ausdrücklichen Wunsch – die Sprachwahl im Browser. Beides ist nach TDDDG § 25 Abs. 2 Nr. 2 einwilligungsfrei und in der Datenschutzerklärung aufgeführt. Jede weitere Speicherung auf dem Endgerät braucht vorher eine Einwilligung. Ein E2E-Test prüft, dass nach den Kernabläufen keine weiteren Cookies oder Speichereinträge entstehen (Erweiterung von AT-PRIV-006).
+
+### 8.9 Internationalisierung (ADR-0016)
+- `react-intl` mit ICU MessageFormat, Kataloge `de` (Quelle) und `en`, Schlüssel `bereich.seite.element`.
+- Sprachermittlung: Konto-Einstellung → ausdrückliche Wahl im Browser (`cm_locale`) → `navigator.languages` → `de`.
+- `<html lang>` folgt der Sprache (WCAG 3.1.1). Fehlertexte übersetzt die Web-App anhand des stabilen `code` aus Problem Details. Mails gehen in der Konto-Sprache.
+- Bei Rechtstexten ist nur die deutsche Fassung verbindlich; die englische trägt einen Hinweis.
+- `scripts/check-i18n.mjs` prüft in CI gleiche Schlüssel, gültige ICU-Syntax und gleiche Platzhalter (Risiko R-12).
+
+### 8.10 Fehlerbehandlung und HTTP-Statuscodes (REQ-UX-003)
+
+| Situation | Antwort der API (`/api/*`) | Antwort für Seitenaufrufe (HTML) |
+|---|---|---|
+| Unbekannte API-Route | 404 Problem Details | – |
+| Bekannte SPA-Route (z. B. `/impressum`, `/listings/{id}`) | – | 200, SPA (`index.html`); fehlt die Ressource, zeigt die SPA „nicht gefunden“ |
+| Unbekannter Pfad | – | **404** mit SPA, die die Fehlerseite zeigt (Liste der Routenpräfixe auf dem Server, abgeleitet aus dem Router) |
+| Unerwarteter Fehler | 500 Problem Details ohne interne Details, Korrelations-ID im Log und in der Antwort | Fehlerseite mit Korrelations-ID und „Erneut versuchen“ |
+| Wartungsmodus | 503 Problem Details mit `Retry-After` | Wartungsseite; Rechtsseiten und `/status` bleiben erreichbar |
+| Rate-Limit | 429 mit `Retry-After` (unverändert) | Hinweis mit Wartezeit |
+
+Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten sind barrierefrei: Überschrift mit Fokus und verständlicher Text ohne Fachjargon. Fehlerseiten werden nicht indexiert (siehe 8.1).
+
+### 8.11 Betrieb: Sicherung, Überwachung, Wartung, Aktualisierung
+- **Sicherung und Wiederherstellung (ADR-0018, REQ-AVAIL-003):** Skripte außerhalb der Anwendung, Wiederherstellung in CI getestet (QS-15).
+- **Überwachung und Alarmierung (ADR-0017, REQ-OPS-008):** siehe 8.6, Alarm innerhalb von 2 min (QS-16).
+- **Wartungsmodus und Ankündigung (REQ-OPS-006):**
+  - *Weich:* Der Admin schaltet ihn in der Oberfläche ein, gespeichert in `platform.setting` mit 10 s Cache.
+  - *Hart:* `MAINTENANCE_MODE=true` beim Start, z. B. während einer Wiederherstellung.
+  - Ausnahmen: `/health/*`, `/status` und `/api/v1/status`, statische Dateien, Rechtsseiten, Anmeldung und Admin-API für Admins.
+  - Jede Änderung steht im Audit-Log.
+- **Statusseite (REQ-OPS-007):** `/status` öffentlich, aus der Readiness-Prüfung und dem Wartungsmodus abgeleitet. Sie zeigt nur „Betrieb normal / eingeschränkt / Wartung“ und die Ankündigung, keine internen Details (Versionen, Hosts, Fehlermeldungen).
+- **Aktualisierung (REQ-OPS-012):** Renovate gruppiert Updates. Sicherheitsupdates kommen sofort, alle anderen wöchentlich; CI muss grün sein, und vor dem Update wird gesichert ([update-prozess.md](../07-betrieb/update-prozess.md)).
+- **Störungen und Datenpannen (REQ-OPS-011, REQ-LEGAL-013):** Schweregrade, Rollen und Kommunikation über Ankündigung bzw. Statusseite. Bei Personenbezug greift der Datenpannen-Prozess mit Meldung binnen 72 h ([incident-prozess.md](../07-betrieb/incident-prozess.md), [datenpannen-prozess.md](../06-recht/datenpannen-prozess.md)).
 
 ## 9. Architekturentscheidungen
 
@@ -822,6 +1075,10 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | [0012](decisions/0012-c4-notation.md) | C4-Modell als Notation, Mermaid-C4-Diagramme | Accepted |
 | [0013](decisions/0013-anmeldung-identity-provider-port.md) | Anmeldung hinter einem IdentityProviderPort (Hochschulkennung, Q-12) | Proposed (Abstimmung mit Dozent/in) |
 | [0014](decisions/0014-ip-pseudonymisierung.md) | Pseudonymisierung von IP-Adressen mit rotierendem Schlüssel | Proposed |
+| [0015](decisions/0015-rechtstexte-als-markdown.md) | Rechtstexte als versionierte Markdown-Inhalte im Repository | Accepted (vorläufig, Q-23) |
+| [0016](decisions/0016-internationalisierung.md) | Internationalisierung mit react-intl (ICU MessageFormat) | Accepted (vorläufig, Q-25) |
+| [0017](decisions/0017-optionale-betriebsprofile.md) | Optionale Compose-Profile für Reverse Proxy und Überwachung (erweitert 0010) | Accepted (vorläufig, Q-27) |
+| [0018](decisions/0018-datensicherung.md) | Datensicherung mit pg_dump und Uploads-Archiv, Wiederherstellung in CI getestet | Accepted (vorläufig, Q-23) |
 
 ## 10. Qualitätsszenarien
 
@@ -841,6 +1098,13 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | QS-12 | Performance | 200 gleichzeitige WebSocket-Verbindungen, 5 Nachrichten/s → Zeit vom Eingang beim Server bis zur Zustellung an den verbundenen Empfänger p95 < 2 s (REQ-PERF-002) |
 | QS-13 | Sicherheit | Ein Konto wird gesperrt, während es noch eine gültige Sitzung hat → die nächste Anfrage mit der alten Sitzung (z. B. Anzeige anlegen, Bild hochladen) wird abgewiesen → 0 Aktionen gesperrter oder unbestätigter Konten (REQ-SEC-011) |
 | QS-14 | Verfügbarkeit / Sicherheit | Zum Semesterstart registrieren sich 30 Studierende über dieselbe öffentliche Campus-IP innerhalb einer Stunde → alle 30 Registrierungen werden angenommen, die 31. erhält eine Wartezeit; eine Adresse kann höchstens 3-mal je Stunde registrieren (REQ-SEC-005, Q-18) |
+| QS-15 | Zuverlässigkeit (Wiederherstellbarkeit) | Das Volume `pgdata` geht verloren (`docker compose down -v`) → Wiederherstellung aus der letzten Sicherung mit `scripts/restore.mjs` → Login mit Demo-Konto, alle Anzeigen und Bilder der Sicherung vorhanden, Dauer ≤ 15 min; in CI nach jeder Änderung geprüft (REQ-AVAIL-003) |
+| QS-16 | Betreibbarkeit | Der Container `app` stürzt ab (Profil `monitoring`) → Alarm `AppDown` als Mail in Mailpit → spätestens 2 min nach dem Ausfall (REQ-OPS-008) |
+| QS-17 | Betreibbarkeit | Der Admin schaltet den Wartungsmodus ein → schreibende Anfragen von Mitgliedern erhalten 503 mit `Retry-After` und die Wartungsseite → Rechtsseiten, `/status` und Health bleiben erreichbar, innerhalb von 10 s wirksam (REQ-OPS-006) |
+| QS-18 | Rechtskonformität | Gast und Mitglied erreichen Impressum, Datenschutzerklärung und Kontakt von **jeder** Seite und aus jeder E-Mail mit einem Klick, ohne Anmeldung, auch im Wartungsmodus → 100 % der Seiten im E2E-Test (REQ-UX-006, REQ-LEGAL-001) |
+| QS-19 | Benutzbarkeit / Korrektheit | Ein Aufruf von `/gibt-es-nicht` → HTTP-Status 404 (nicht 200) und Fehlerseite mit Weg zurück; `/api/v1/gibt-es-nicht` → 404 Problem Details (REQ-UX-003) |
+| QS-20 | Rechtskonformität (DSA) | Ein Moderator versucht, einen Widerspruch gegen seine eigene Entscheidung zu entscheiden → 403 → 0 Widersprüche ohne Vier-Augen-Prinzip (REQ-LEGAL-007) |
+| QS-21 | Benutzbarkeit (Internationalisierung) | Ein neuer Text wird nur im deutschen Katalog ergänzt → CI schlägt fehl (`check-i18n.mjs`) → 0 fehlende Schlüssel in `en` auf `main` (REQ-UX-007) |
 
 ## 11. Risiken und technische Schulden
 
@@ -856,6 +1120,12 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | R-8 | Fallstudien-Constraint FS-C3 (Anmeldung über die Hochschulkennung) wird nicht anerkannt | mittel / hoch | Dokumentierte Abweichung, ADR-0013, Abstimmung mit Dozent/in (Q-12, Spike S-01) |
 | R-9 | Mermaid-C4 ist experimentell, Layout begrenzt | mittel / niedrig | Kleine Diagramme, Prüfung mit `scripts/check-diagrams.mjs`; Ausweg Structurizr DSL (ADR-0012) |
 | R-10 | Zyklus `listings ↔ messaging` über späte Bindung | mittel / mittel | Abhängigkeitsrichtung festgelegt (OE-1), Umstellung auf Domain Events B-39 |
+| R-11 | Platzhalter oder Musterhinweise bleiben in einem Echtbetrieb stehen | mittel / **hoch** | `LEGAL_STRICT=true` verhindert den Start mit Platzhaltern (ADR-0015); [Go-live-Checkliste](../07-betrieb/go-live-checkliste.md) |
+| R-12 | Englische Übersetzung veraltet oder unvollständig | hoch / mittel | `scripts/check-i18n.mjs` in CI, deutscher Katalog als Quelle, Review-Hinweis (ADR-0016) |
+| R-13 | HSTS für `localhost` würde andere lokale Dienste auf https zwingen | mittel / mittel | Proxy-Profil nur unter `campusmarkt.localhost`, im Beispiel ohne `includeSubDomains`/`preload` (ADR-0017) |
+| R-14 | Gelöschte personenbezogene Daten leben in Sicherungen weiter | sicher / niedrig | Rotation ≤ 35 Tage, in Datenschutzerklärung und VVT genannt; Löschläufe nach Wiederherstellung (ADR-0018) |
+| R-15 | Rechtstexte der Übung sind inhaltlich unzutreffend oder unvollständig | mittel / hoch (nur im Echtbetrieb) | Kennzeichnung als Muster, Prüfung durch DSB und Justiziariat vor Go-live, Rechtskataster als Prüfliste |
+| R-16 | Widerspruch gesperrter Konten nicht möglich, weil keine Anmeldung | mittel / mittel | Einmal-Link mit Token in der Begründungs-Mail (6.5) |
 
 ## 12. Glossar
 
@@ -878,3 +1148,21 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | Pseudonymisierung | Ersetzen eines Merkmals (z. B. IP-Adresse) durch einen Wert, der ohne zusätzlichen, getrennt aufbewahrten Schlüssel nicht zurückgeführt werden kann |
 | PSP | Payment Service Provider, Zahlungsdienstleister |
 | DSA | Digital Services Act (EU-Verordnung 2022/2065) |
+| Begründung (DSA Art. 17) | Mitteilung an Betroffene bei Entfernen, Ausblenden oder Sperren: Entscheidung, Tatsachen, Regel bzw. Rechtsgrundlage, ob automatisiert erkannt, Rechtsbehelfe |
+| Widerspruch (DSA Art. 20) | Internes Beschwerdeverfahren gegen eine Moderationsentscheidung, binnen 6 Monaten nach der Entscheidung, entschieden nach dem Vier-Augen-Prinzip |
+| Vier-Augen-Prinzip | Eine Entscheidung wird von einer zweiten, unabhängigen Person geprüft; hier entscheidet nie der ursprüngliche Moderator über den Widerspruch |
+| Impressum | Anbieterkennzeichnung nach § 5 Digitale-Dienste-Gesetz (DDG) |
+| Datenschutzerklärung | Information der Betroffenen nach Art. 13 DSGVO |
+| VVT | Verzeichnis von Verarbeitungstätigkeiten nach Art. 30 DSGVO |
+| TOMs | Technische und organisatorische Maßnahmen nach Art. 32 DSGVO |
+| DAC7 / PStTG | EU-Richtlinie 2021/514 bzw. deutsches Plattformen-Steuertransparenzgesetz: Meldepflicht von Plattformen für Verkäufer ab bestimmten Schwellen |
+| Platzhalter | Kennzeichnung `[Platzhalter: …]` für Betreiberdaten, die in der Übung nicht real sind |
+| Wartungsmodus | Betriebszustand, in dem die Anwendung Anfragen mit 503 und `Retry-After` beantwortet; Rechtsseiten und Status bleiben erreichbar |
+| Statusseite | Öffentliche Seite mit dem Betriebszustand ohne interne Details |
+| Reverse Proxy | Vorgeschalteter Server, der TLS beendet und Anfragen an die Anwendung weiterleitet (hier Caddy) |
+| HSTS | HTTP Strict Transport Security: Der Browser nutzt für einen Hostnamen nur noch HTTPS |
+| Compose-Profil | Gruppe von Diensten in `compose.yaml`, die nur mit `--profile` gestartet wird |
+| RPO / RTO | Recovery Point Objective (maximal tolerierter Datenverlust) / Recovery Time Objective (maximale Wiederherstellungsdauer) |
+| BCP 47 | Standard für Sprachcodes (`de`, `en`) |
+| ICU MessageFormat | Standardsyntax für übersetzbare Texte mit Plural- und Auswahlregeln |
+| security.txt | Datei nach RFC 9116 unter `/.well-known/`, die den Meldeweg für Sicherheitslücken nennt |

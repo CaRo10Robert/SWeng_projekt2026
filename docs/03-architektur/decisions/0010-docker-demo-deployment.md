@@ -3,6 +3,7 @@
 - **Status:** Accepted (Vorgabe des Auftraggebers, 2026-10-20)
 - **Datum:** 2026-10-20
 - **Bezug:** REQ-ARCH-005, REQ-DEMO-001, Review Q-3 / O-1 / A-1; wirkt auf ADR-0002, 0004, 0005, 0007
+- **Erweitert durch:** [ADR-0017](0017-optionale-betriebsprofile.md) (optionale Profile `proxy` und `monitoring`; der Standardstart mit `app`, `db` und `mailpit` bleibt unverändert). Betreiberpflichten werden seit Q-23 als Übung mit Platzhaltern umgesetzt (EPIC-13), ohne Echtbetrieb.
 
 ## Kontext
 Die Plattform wird **nicht öffentlich betrieben**. Das Ergebnis des Projekts ist ein lauffähiges Beispiel als Docker-Image bzw. Docker-Compose-Setup, das Prüfer/innen und Team lokal starten. Damit entfallen Betreiberpflichten (Impressum, DSA-Prozesse im Echtbetrieb, AV-Verträge, Zustellbarkeit echter E-Mails) für das Projekt. Die fachlichen Anforderungen dazu bleiben als Konzept erhalten (EPIC-12 „Produktivbetrieb“).
