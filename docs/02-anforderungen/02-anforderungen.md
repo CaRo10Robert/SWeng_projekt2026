@@ -3,9 +3,9 @@ id: REQ-CATALOG
 type: requirements
 status: in-review
 owner: team-produkt
-version: 1.1
+version: 1.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 ---
 
 # Anforderungskatalog
@@ -24,6 +24,7 @@ last_updated: 2026-10-23
 | [03-backlog.md](03-backlog.md) | Product Backlog mit Kano, Risiko, Abhängigkeiten, Story Points, WSJF; Release-Plan |
 | [04-vorgehen.md](04-vorgehen.md) | Vorgehensmodell, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management |
 | [05-entscheidungen.md](05-entscheidungen.md) | Entscheidungslog der fachlichen Fragen (Q-…) |
+| [06-abgleich-recht-betrieb.md](06-abgleich-recht-betrieb.md) | Ist/Soll-Abgleich und Rechtskataster für Recht, Auftritt und Betrieb (EPIC-13, Übung mit Platzhaltern) |
 
 **Darstellung je Typ (Guideline Kap. 01):** User Stories mit Akzeptanzkriterien (Given–When–Then) und INVEST-Prüfung, Geschäftsregeln mit Entscheidungstabelle, Datenanforderungen mit Schema und Grenzwerten, Qualitätsanforderungen mit **Qualitätsmerkmal, Metrik, Akzeptanzkriterium, Messverfahren und -kontext** (Fallstudie FS-M3), Sicherheitsanforderungen als Kontrolle oder Abuse Case, Architektur-Constraints als Shall-Satz mit ADR und Konformitätsprüfung.
 
@@ -55,10 +56,11 @@ Antwort auf Aufgabe II a) der Fallstudie. „Im Scope“ heißt: im Release R1 p
 | P3 Finden | Freitextsuche, Filter, Sortierung, Merkliste | Suchaufträge mit E-Mail-Digest (C) | REQ-SRCH-* |
 | P4 Kontakt und Absprache | Anbieter kontaktieren, Nachrichten in Echtzeit, Lesestatus, **Kontaktdaten nach beidseitiger Zustimmung freigeben**, für eine Person reservieren, an sie abgeben | Bilder im Chat (C), strukturierter Preisvorschlag (REQ-CHAT-009, C), Web-Push (C) | REQ-CHAT-001…007, 010, 011, REQ-NOTI-001…003, 005, 007 |
 | P5 Übergabe und Abschluss | Abschluss im System markieren (Deal-Kern mit Ereignissen für die spätere Bezahlung) | Die Übergabe selbst (offline auf dem Campus), Bezahlung (EPIC-09), Versand, Bewertungen (C) | REQ-CHAT-011, REQ-LST-007, REQ-ARCH-001/002 |
-| P6 Vertrauen und Moderation | Melden mit Eingangsbestätigung in der Oberfläche, automatisch ausblenden, Moderations-Queue, Entscheidung mit Begründung, Blockieren, dauerhaft sperren | Befristete Sperren, Aufhebung und Widerspruch als eigener Ablauf (außerhalb des Systems per E-Mail, Q-15), Bewertungen (C) | REQ-MOD-001…005, 007 |
+| P6 Vertrauen und Moderation | Melden mit Eingangsbestätigung in der Oberfläche, automatisch ausblenden, Moderations-Queue, Entscheidung mit Begründung, Blockieren, dauerhaft sperren | Befristete Sperren (Q-15), Bewertungen (C). Widerspruch, Begründung nach DSA Art. 17 und Kennzeichnung von Straftatverdacht sind seit Q-22 im Scope (P10) | REQ-MOD-001…005, 007 |
 | P7 Konto und Datenschutz | Profil pflegen (Anzeigename, Studiengang, Übergabeorte), Daten exportieren, Konto mit Karenz löschen, Benachrichtigungen abbestellen, Fristen und Löschungen | Profilbild (REQ-ACC-004, R2, Q-14) | REQ-ACC-001…003, REQ-PRIV-* |
 | P8 Administration | Rollen vergeben, Audit-Log, Job-Übersicht, Demo-Werkzeug | Whitelist- und Kategorienverwaltung per Oberfläche (C) | REQ-MOD-007/008, REQ-DEMO-* |
-| P9 Betrieb | Start per Docker Compose, Migrationen, Health, Logs, Metriken | Öffentliches Hosting und alle Betreiberpflichten (EPIC-12), weitere Hochschulen (EPIC-10), native Apps (EPIC-11), gewerbliche Anbieter, Wohnungsbörse, Werbung | REQ-OPS-*, REQ-ARCH-005/006 |
+| P9 Betrieb | Start per Docker Compose, Migrationen, Health, Logs, Metriken, Wartungsmodus, Statusseite, Datensicherung mit Restore-Test, optionale Profile für Monitoring und TLS (Q-27) | Öffentliches Hosting (EPIC-12), weitere Hochschulen (EPIC-10), native Apps (EPIC-11), gewerbliche Anbieter, Wohnungsbörse, Werbung | REQ-OPS-*, REQ-AVAIL-003, REQ-ARCH-005/006 |
+| P10 Recht und Auftritt (EPIC-13, Übung, Q-23) | Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Erklärung zur Barrierefreiheit, Kontaktstelle, Begründung und Widerspruch nach DSA, Kennzeichnung Straftatverdacht, DAC7-Auswertung, Startseite, Hilfe, Fehlerseiten, englische Oberfläche; Prozessdokumente (VVT, TOMs, AVV, Datenpannen, DSFA-Schwellwertanalyse, Betriebshandbuch) mit Platzhaltern | Echte Betreiberangaben, Meldung an BZSt und Behörden, Abschluss von AV-Verträgen, Durchführung des Penetrationstests (EPIC-12) | REQ-LEGAL-*, REQ-UX-003…007, REQ-PRIV-007/008, REQ-SEC-012/013 |
 
 ## 3. Constraints und ihre Operationalisierung
 
@@ -76,6 +78,7 @@ Antwort auf Aufgabe II b) der Fallstudie: Jeder vorgegebene Constraint wird in �
 | C-08 | Datenschutz nach DSGVO (Privacy by Design) | Gesetz | REQ-PRIV-001…007, REQ-ACC-002/003 | Export- und Löschtests, Audit-Log-Prüfung, Netzwerk-Scan ohne Drittanbieter |
 | C-09 | Melde- und Abhilfeverfahren nach DSA | Gesetz | REQ-MOD-001…003 | Akzeptanztests Melden/Entscheiden, Audit-Log unveränderlich |
 | C-10 | Vorgaben der DEV Guideline | Projekt | REQ-MAINT-002, REQ-ARCH-006, REQ-SEC-008, REQ-OPS-004 | Fitness Functions und `trace.mjs` in CI bei jedem Pull Request (Backlog B-07, Sprint 1) |
+| C-11 | Rechts- und Betreiberpflichten eines Online-Marktplatzes (DDG, DSGVO, TDDDG, DSA, BITV 2.0, PStTG) als Übung mit Platzhaltern | Auftraggeber (Q-23), Gesetz | REQ-LEGAL-001…013, REQ-UX-006, REQ-PRIV-007/008 | E2E-Tests der Rechtsseiten und Links, Speicher-Allowlist, Smoke-Tests für Begründung, Widerspruch und DAC7; Kontrollen der Prozessdokumente (CTRL-DOC-…); Rechtskataster in [06-abgleich-recht-betrieb.md](06-abgleich-recht-betrieb.md) |
 
 ## 4. Zustandsmodell Anzeige (normativ)
 
@@ -151,11 +154,11 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 103 Anforderungen · R1-Must verifiziert: 27 von 69 (39 %)
+**Stand:** 132 Anforderungen · R1-Must verifiziert: 27 von 83 (33 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 37 |
+| approved | Konkretisiert (bereit) | 66 |
 | implemented | Umsetzung | 30 |
 | verified | Test | 36 |
 
@@ -184,6 +187,7 @@ flowchart LR
 | [REQ-AUTH-009](req/REQ-AUTH-009.md) | Anmeldeverfahren austauschbar (Hochschulkennung) | constraint | M | n/a | high | implemented | CTRL-DEPCRUISE, AT-AUTH-009, AT-ARCH-005 |
 | [REQ-AVAIL-001](req/REQ-AVAIL-001.md) | Verfügbarkeit der kritischen Funktionen | quality | W | basis | medium | approved | AT-AVAIL-001 |
 | [REQ-AVAIL-002](req/REQ-AVAIL-002.md) | Wiederherstellungsziele der Datenhaltung | quality | W | n/a | medium | approved | MAN-AVAIL-002 |
+| [REQ-AVAIL-003](req/REQ-AVAIL-003.md) | Datensicherung und getestete Wiederherstellung im Docker-Beispiel | quality | M | n/a | high | approved | AT-AVAIL-003, CTRL-DOC-BACKUP |
 | [REQ-CHAT-001](req/REQ-CHAT-001.md) | Anbieter über anzeigenbezogenen Chat kontaktieren | functional | M | basis | high | verified | AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4 |
 | [REQ-CHAT-002](req/REQ-CHAT-002.md) | Genau eine Konversation pro Anzeige und Interessent | functional | M | basis | medium | verified | AT-CHAT-002 |
 | [REQ-CHAT-003](req/REQ-CHAT-003.md) | Nachrichten in Echtzeit empfangen | functional | M | leistung | medium | implemented | AT-CHAT-003, AT-CHAT-003-2 |
@@ -197,6 +201,19 @@ flowchart LR
 | [REQ-CHAT-011](req/REQ-CHAT-011.md) | Reservierung und Abgabe für eine Person (Deal-Kern) | functional | M | basis | medium | verified | AT-CHAT-011, AT-CHAT-011-2 |
 | [REQ-DEMO-001](req/REQ-DEMO-001.md) | Demo-Daten auf Knopfdruck | constraint | M | n/a | low | verified | AT-DEMO-001 |
 | [REQ-DEMO-002](req/REQ-DEMO-002.md) | Zeitgesteuerte Abläufe sofort auslösen | functional | S | n/a | low | verified | AT-DEMO-002 |
+| [REQ-LEGAL-001](req/REQ-LEGAL-001.md) | Impressum | constraint | M | basis | medium | approved | AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE |
+| [REQ-LEGAL-002](req/REQ-LEGAL-002.md) | Datenschutzerklärung | constraint | M | basis | high | approved | AT-LEGAL-002, AT-LEGAL-002-2, CTRL-DOC-LEGAL-TEXTE |
+| [REQ-LEGAL-003](req/REQ-LEGAL-003.md) | Nutzungsbedingungen und Community-Regeln | constraint | M | basis | medium | approved | AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE |
+| [REQ-LEGAL-004](req/REQ-LEGAL-004.md) | Erklärung zur Barrierefreiheit | quality | M | basis | medium | approved | AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE |
+| [REQ-LEGAL-005](req/REQ-LEGAL-005.md) | Zentrale Kontaktstelle | constraint | M | basis | low | approved | AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE |
+| [REQ-LEGAL-006](req/REQ-LEGAL-006.md) | Begründung an Betroffene bei Moderationsentscheidungen | functional | M | basis | high | approved | AT-LEGAL-006, AT-LEGAL-006-2 |
+| [REQ-LEGAL-007](req/REQ-LEGAL-007.md) | Widerspruch gegen Moderationsentscheidungen | functional | M | basis | high | approved | AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4 |
+| [REQ-LEGAL-008](req/REQ-LEGAL-008.md) | Verdacht auf Straftaten kennzeichnen und eskalieren | functional | S | n/a | high | approved | AT-LEGAL-008, CTRL-DOC-DSA |
+| [REQ-LEGAL-009](req/REQ-LEGAL-009.md) | Auswertung meldepflichtiger Anbieter (DAC7) | functional | S | n/a | medium | approved | AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7 |
+| [REQ-LEGAL-010](req/REQ-LEGAL-010.md) | Einwilligung vor nicht notwendiger Speicherung auf Endgeräten | constraint | M | basis | medium | approved | AT-LEGAL-010 |
+| [REQ-LEGAL-011](req/REQ-LEGAL-011.md) | Verzeichnis der Verarbeitungstätigkeiten und TOMs | constraint | M | n/a | medium | approved | CTRL-DOC-VVT, CTRL-DOC-TOM |
+| [REQ-LEGAL-012](req/REQ-LEGAL-012.md) | Auftragsverarbeitung dokumentiert | constraint | S | n/a | low | approved | CTRL-DOC-AVV |
+| [REQ-LEGAL-013](req/REQ-LEGAL-013.md) | Prozess für Datenschutzverletzungen | constraint | M | n/a | high | approved | CTRL-DOC-DATENPANNE, MAN-LEGAL-013 |
 | [REQ-LST-001](req/REQ-LST-001.md) | Angebot oder Gesuch schnell erstellen | functional | M | basis | medium | implemented | AT-LST-001, MAN-LST-001 |
 | [REQ-LST-002](req/REQ-LST-002.md) | Preistypen und Preisgrenzen | domain | M | basis | low | verified | AT-LST-002, AT-LST-002-2 |
 | [REQ-LST-003](req/REQ-LST-003.md) | Bilder hochladen, Metadaten entfernen, Vorschaubilder | functional | M | leistung | medium | implemented | AT-LST-003, AT-LST-003-2, AT-LST-003-3 |
@@ -231,6 +248,13 @@ flowchart LR
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | implemented | MAN-OPS-003 |
 | [REQ-OPS-004](req/REQ-OPS-004.md) | Reproduzierbarer, versionierter Image-Build | quality | M | n/a | medium | implemented | CTRL-CI-IMAGE |
 | [REQ-OPS-005](req/REQ-OPS-005.md) | Automatische, idempotente Datenbankmigration | quality | M | n/a | medium | implemented | AT-OPS-005 |
+| [REQ-OPS-006](req/REQ-OPS-006.md) | Wartungsmodus und Ankündigungen | quality | S | n/a | medium | approved | AT-OPS-006, AT-OPS-006-2 |
+| [REQ-OPS-007](req/REQ-OPS-007.md) | Öffentliche Statusseite | quality | C | leistung | low | approved | AT-OPS-007 |
+| [REQ-OPS-008](req/REQ-OPS-008.md) | Überwachung und Alarmierung | quality | S | n/a | medium | approved | CTRL-ALERT-RULES, MAN-OPS-008 |
+| [REQ-OPS-009](req/REQ-OPS-009.md) | Verschlüsselte Verbindung mit HSTS über Reverse Proxy | constraint | S | n/a | medium | approved | AT-OPS-009 |
+| [REQ-OPS-010](req/REQ-OPS-010.md) | Zustellbarkeit der E-Mails | constraint | C | n/a | low | approved | AT-OPS-010, CTRL-DOC-MAIL |
+| [REQ-OPS-011](req/REQ-OPS-011.md) | Betriebshandbuch, Störungs- und Notfallprozess | constraint | M | n/a | medium | approved | CTRL-DOC-BETRIEB, MAN-OPS-011 |
+| [REQ-OPS-012](req/REQ-OPS-012.md) | Automatisierte Aktualisierung von Abhängigkeiten | constraint | S | n/a | low | approved | CTRL-RENOVATE |
 | [REQ-PERF-001](req/REQ-PERF-001.md) | Antwortzeit der Suche | quality | M | leistung | medium | approved | AT-PERF-001 |
 | [REQ-PERF-002](req/REQ-PERF-002.md) | Zustellzeit von Chatnachrichten | quality | M | leistung | medium | approved | AT-PERF-002 |
 | [REQ-PERF-003](req/REQ-PERF-003.md) | Antwortzeit beim Erstellen einer Anzeige | quality | M | leistung | low | approved | AT-PERF-003 |
@@ -244,7 +268,8 @@ flowchart LR
 | [REQ-PRIV-004](req/REQ-PRIV-004.md) | Moderation sieht nur gemeldeten Chat-Kontext | constraint | M | basis | high | implemented | AT-PRIV-004 |
 | [REQ-PRIV-005](req/REQ-PRIV-005.md) | Hosting und Auftragsverarbeiter in der EU | constraint | W | n/a | high | approved | MAN-PRIV-005 |
 | [REQ-PRIV-006](req/REQ-PRIV-006.md) | Kein Tracking, keine Drittanbieter-Ressourcen | constraint | M | basis | medium | verified | AT-PRIV-006, AT-PRIV-006-2 |
-| [REQ-PRIV-007](req/REQ-PRIV-007.md) | Prüfung der Datenschutz-Folgenabschätzung | constraint | W | n/a | medium | approved | MAN-PRIV-007 |
+| [REQ-PRIV-007](req/REQ-PRIV-007.md) | Prüfung der Datenschutz-Folgenabschätzung | constraint | S | n/a | medium | approved | CTRL-DOC-DSFA, MAN-PRIV-007 |
+| [REQ-PRIV-008](req/REQ-PRIV-008.md) | Keine Indexierung durch Suchmaschinen | constraint | S | basis | low | approved | AT-PRIV-008 |
 | [REQ-SEC-001](req/REQ-SEC-001.md) | OWASP ASVS Level 2 | quality | M | basis | high | approved | MAN-SEC-001 |
 | [REQ-SEC-002](req/REQ-SEC-002.md) | Passwörter mit Argon2id speichern | constraint | M | n/a | high | implemented | AT-SEC-002 |
 | [REQ-SEC-003](req/REQ-SEC-003.md) | Passwortrichtlinie | constraint | M | basis | medium | verified | AT-SEC-003 |
@@ -256,6 +281,8 @@ flowchart LR
 | [REQ-SEC-009](req/REQ-SEC-009.md) | Threat Model für Registrierung, Chat und Upload | constraint | M | n/a | high | approved | MAN-SEC-009 |
 | [REQ-SEC-010](req/REQ-SEC-010.md) | Gehärtetes Anwendungs-Image | constraint | M | n/a | medium | verified | CTRL-IMAGE-INSPECT |
 | [REQ-SEC-011](req/REQ-SEC-011.md) | Angebote nur von verifizierten Mitgliedern | constraint | M | basis | high | verified | AT-SEC-011, AT-SEC-011-2, AT-SEC-011-3 |
+| [REQ-SEC-012](req/REQ-SEC-012.md) | Meldeweg für Sicherheitslücken | constraint | S | n/a | low | approved | AT-SEC-012, CTRL-DOC-BETRIEB |
+| [REQ-SEC-013](req/REQ-SEC-013.md) | Penetrationstest vor dem Go-live | constraint | S | n/a | medium | approved | CTRL-DOC-PENTEST, MAN-SEC-013 |
 | [REQ-SRCH-001](req/REQ-SRCH-001.md) | Freitextsuche mit Wortstämmen und Tippfehlertoleranz | functional | M | leistung | medium | verified | AT-SRCH-001, AT-SRCH-001-2 |
 | [REQ-SRCH-002](req/REQ-SRCH-002.md) | Filtern und Sortieren | functional | M | leistung | low | implemented | AT-SRCH-002 |
 | [REQ-SRCH-003](req/REQ-SRCH-003.md) | Aktualität der Suche | quality | S | leistung | low | verified | AT-SRCH-003, AT-SRCH-003-2 |
@@ -264,5 +291,10 @@ flowchart LR
 | [REQ-SRCH-006](req/REQ-SRCH-006.md) | Keine Anzeigen blockierter oder gesperrter Nutzer in der Suche | functional | M | basis | medium | implemented | AT-SRCH-006 |
 | [REQ-UX-001](req/REQ-UX-001.md) | Mobile Nutzung und Installierbarkeit | quality | M | basis | medium | implemented | AT-UX-001, AT-UX-001-2 |
 | [REQ-UX-002](req/REQ-UX-002.md) | Deutsche Oberfläche, übersetzbar vorbereitet | quality | S | basis | low | approved | MAN-UX-002 |
+| [REQ-UX-003](req/REQ-UX-003.md) | Fehlerseiten und korrekte HTTP-Statuscodes | functional | M | basis | medium | approved | AT-UX-003, AT-UX-003-2 |
+| [REQ-UX-004](req/REQ-UX-004.md) | Startseite für Gäste | functional | S | leistung | low | approved | AT-UX-004 |
+| [REQ-UX-005](req/REQ-UX-005.md) | Hilfe, FAQ und Sicherheitstipps | functional | S | leistung | low | approved | AT-UX-005 |
+| [REQ-UX-006](req/REQ-UX-006.md) | Rechtliche Links auf jeder Seite und in jeder E-Mail | constraint | M | basis | medium | approved | AT-UX-006, AT-UX-006-2 |
+| [REQ-UX-007](req/REQ-UX-007.md) | Englische Oberfläche | functional | S | leistung | medium | approved | AT-UX-007, AT-UX-007-2, AT-UX-007-3 |
 
 <!-- req-index:end -->

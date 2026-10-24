@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 7
 use_cases: [UC-01, UC-02]
-version: 2.0
+version: 2.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-PRIV-001, AT-PRIV-001-2]
 ---
 
@@ -24,7 +24,7 @@ verification: [AT-PRIV-001, AT-PRIV-001-2]
 ## Anforderung
 1. Das System muss die Zustimmung zu Nutzungsbedingungen und Datenschutzhinweis mit **Version** und **Zeitstempel** speichern.
 2. Eine Registrierung mit veralteter Version der Bedingungen wird abgelehnt.
-3. Erscheint eine neue Version, müssen **bestehende** Mitglieder bei der nächsten Anmeldung zustimmen, bevor sie die Plattform weiter nutzen.
+3. Erscheint eine neue Version, müssen **bestehende** Mitglieder bei der nächsten Anmeldung zustimmen, bevor sie die Plattform weiter nutzen (Ablauf und Texte: REQ-LEGAL-003, Datenschutzerklärung: REQ-LEGAL-002).
 4. Optionale Einwilligungen werden getrennt erfasst und sind einzeln widerrufbar – **ab REQ-SRCH-005** (Suchauftrags-Mails, Could). In R1 gibt es keine optionale Einwilligung.
 
 ## Begründung
@@ -56,3 +56,4 @@ Nachweispflicht der Einwilligung (DSGVO Art. 7 Abs. 1); Kopplungsverbot für opt
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
 | 2.0 | 2026-10-23 | Review v0.2: R-14 Status `approved` statt `implemented`; optionale Einwilligungen „ab REQ-SRCH-005“; neue Version → Zustimmung bei nächster Anmeldung; R-04 Fehler- und Missbrauchsfälle |
+| 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Texte der Nutzungsbedingungen und der Datenschutzerklärung, Ablauf der erneuten Zustimmung und Fehlercode `terms_required` in REQ-LEGAL-003 bzw. REQ-LEGAL-002 |

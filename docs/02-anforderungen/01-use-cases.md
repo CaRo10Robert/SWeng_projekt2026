@@ -3,9 +3,9 @@ id: UC-MODEL
 type: requirements
 status: in-review
 owner: team-produkt
-version: 1.1
+version: 1.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 ---
 
 # Use-Case-Modell
@@ -41,6 +41,7 @@ actor "Administrator" as Admin
 actor "E-Mail-System" as Mail <<System>>
 actor "Zeitgeber" as Timer <<System>>
 actor "Zahlungsdienstleister\n(Backlog)" as PSP <<System>>
+actor "Betreiber" as Ops
 
 Gast <|-- Mitglied
 Mitglied <|-- Mod
@@ -50,13 +51,14 @@ Mod <|-- Admin
 
 | Akteur | Typ | Beschreibung |
 |---|---|---|
-| **Gast** | primär, menschlich | Nicht angemeldete Person. Sieht nur die Landingpage, Hilfe, Impressum und Datenschutz und kann sich registrieren oder anmelden |
+| **Gast** | primär, menschlich | Nicht angemeldete Person. Sieht nur die Startseite, Hilfe, Rechtsseiten (Impressum, Datenschutz, Nutzungsbedingungen, Barrierefreiheit, Kontakt) und die Statusseite und kann sich registrieren oder anmelden |
 | **Mitglied** | primär, menschlich | Verifizierte Person mit Adresse `@hwg-lu.de` (Beschäftigte) oder `@studmail.hwg-lu.de` (Studierende). Ist **Anbieter und Interessent zugleich**. Die Rollen „Verkäufer“ und „Käufer“ sind **kontextabhängig**, keine eigenen Akteure |
 | **Moderator** | primär, menschlich | Mitglied mit Moderationsrechten (z. B. AStA, Hilfskraft). Spezialisiert *Mitglied* |
 | **Administrator** | primär, menschlich | Technische und fachliche Verwaltung (Whitelist, Kategorien, Rollen). Spezialisiert *Moderator* |
 | **E-Mail-System** | sekundär, System | SMTP-Server. Im Docker-Beispiel **Mailpit**, das alle Mails abfängt und in einer Weboberfläche anzeigt (ADR-0010) |
 | **Zeitgeber** | primär, System | Löst zeitgesteuerte Abläufe aus (Ablauf von Anzeigen, Re-Verifikation, Löschfristen) |
 | **Zahlungsdienstleister** | sekundär, System | *Backlog (EPIC-09).* Wickelt Zahlungen ab |
+| **Betreiber** | primär, menschlich | Technischer Betrieb des Systems (Start, Wartung, Datensicherung). Im Docker-Beispiel die Person, die `docker compose` ausführt; kein Konto im System (Q-23) |
 
 > **Designentscheidung:** Verkäufer und Käufer sind keine eigenen Akteure, weil dieselbe Person in derselben Sitzung beides sein kann. Im Diagramm stehen die Rollen daher als Paketnamen, nicht als Akteure. Das entspricht dem Lehrbuchrat, Akteure nach **Rollen gegenüber dem System** zu bilden und nicht nach Personen.
 
@@ -226,6 +228,45 @@ UC53 --> PSP
 @enduml
 ```
 
+### 2.5 Übersicht: Recht und Betrieb (EPIC-13)
+
+```plantuml
+@startuml uc_recht_betrieb
+left to right direction
+skinparam packageStyle rectangle
+actor "Gast" as G
+actor "Mitglied" as M
+actor "Moderator" as Mod
+actor "Administrator" as Admin
+actor "Betreiber" as Ops
+actor "E-Mail-System" as Mail <<System>>
+
+G <|-- M
+M <|-- Mod
+Mod <|-- Admin
+
+rectangle "CampusMarkt – Recht und Betrieb" {
+  usecase "UC-08\nRechtstexte und\nHilfe einsehen" as UC08
+  usecase "UC-35\nWiderspruch einlegen" as UC35
+  usecase "UC-36\nWiderspruch prüfen" as UC36
+  usecase "UC-43\nDAC7-Auswertung\nerstellen" as UC43
+  usecase "UC-44\nWartungsmodus und\nAnkündigung setzen" as UC44
+  usecase "UC-45\nDatensicherung erstellen\nund wiederherstellen" as UC45
+  usecase "Ergebnis mitteilen\n(DSA Art. 17/20)" as UCN
+}
+
+G --> UC08
+M --> UC35
+Mod --> UC36
+Admin --> UC43
+Admin --> UC44
+Ops --> UC44
+Ops --> UC45
+UC36 ..> UCN : <<include>>
+UCN --> Mail
+@enduml
+```
+
 ## 3. Use-Case-Liste
 
 | ID | Name | Primärakteur | Priorität (MVP) | Detail |
@@ -237,6 +278,7 @@ UC53 --> PSP
 | UC-05 | Konto löschen | Mitglied | Must (DSGVO) | [§4.6](#46-uc-05-konto-löschen) |
 | UC-06 | Daten exportieren | Mitglied | Should (DSGVO) | casual |
 | UC-07 | Mitgliedschaft re-verifizieren | Zeitgeber | Should (R2, Q-14) | [§4.7](#47-uc-07-mitgliedschaft-re-verifizieren) |
+| UC-08 | Rechtstexte und Hilfe einsehen | Gast / Mitglied | Must (DDG, DSGVO, DSA) | casual |
 | UC-10 | Anzeige erstellen | Mitglied | Must | [§4.2](#42-uc-10-anzeige-erstellen) |
 | UC-11 | Anzeige verwalten | Mitglied | Must | casual |
 | UC-12 | Anzeige als reserviert / abgegeben markieren | Mitglied | Must | casual |
@@ -256,9 +298,14 @@ UC53 --> PSP
 | UC-32 | Meldungen bearbeiten | Moderator | Must (DSA) | [§4.5](#45-uc-30--uc-32-melden-und-moderieren) |
 | UC-33 | Nutzer sperren | Moderator | Must | casual |
 | UC-34 | Inhalt entfernen | Moderator | Must | casual |
+| UC-35 | Widerspruch gegen Moderationsentscheidung einlegen | Mitglied (betroffen oder meldend) | Must (DSA Art. 20, Q-22) | [§4.9](#49-uc-35-widerspruch-gegen-eine-moderationsentscheidung-einlegen) |
+| UC-36 | Widerspruch prüfen | Moderator (nicht der ursprüngliche Entscheider) | Must (DSA Art. 20) | casual |
 | UC-40 | Domain-Whitelist verwalten | Administrator | Should (MVP: Konfiguration) | casual |
 | UC-41 | Kategorien verwalten | Administrator | Could (MVP: Seed-Daten) | casual |
 | UC-42 | Rollen vergeben | Administrator | Must | casual |
+| UC-43 | DAC7-Auswertung erstellen | Administrator | Should (Q-26) | casual |
+| UC-44 | Wartungsmodus und Ankündigung setzen | Betreiber / Administrator | Should | casual |
+| UC-45 | Datensicherung erstellen und wiederherstellen | Betreiber | Must (EPIC-13) | casual |
 | UC-50…53 | Bezahlung | Mitglied | **Won't (MVP)**, Backlog EPIC-09 | – |
 
 ## 4. Use-Case-Spezifikationen (fully dressed)
@@ -438,11 +485,11 @@ sequenceDiagram
 3. System bestätigt den Eingang in der Oberfläche und stellt die Meldung in die Moderations-Queue (sichtbar ≤ 10 s).
 4. Moderator öffnet die Meldung und sieht den gemeldeten Inhalt mit Kontext.
 5. Moderator entscheidet: *keine Maßnahme* · *Inhalt entfernen* (UC-34) · *Nutzer verwarnen oder sperren* (UC-33).
-6. System protokolliert die Entscheidung (Audit-Log) und informiert beide Seiten mit Begründung und Hinweis auf den Widerspruch (DSA Art. 17).
+6. System protokolliert die Entscheidung (Audit-Log) und informiert beide Seiten per E-Mail und Mitteilung im Konto mit Begründung, verletzter Regel und Hinweis auf den Widerspruch im System (DSA Art. 17, REQ-LEGAL-006, UC-35).
 
 **Erweiterungen**
 - 2a. *Gleicher Inhalt mehrfach gemeldet (≥ 3 unterschiedliche Mitglieder):* Inhalt wird vorläufig ausgeblendet, bis ein Moderator entscheidet.
-- 5a. *Verdacht auf Straftat:* Moderator eskaliert an den Administrator bzw. die Hochschule (Prozess offen, Q-4).
+- 5a. *Verdacht auf Straftat:* Moderator kennzeichnet die Entscheidung; das System protokolliert, benachrichtigt die Administratoren und sichert die Inhalte. Die Information der Strafverfolgung folgt dem Prozess in `docs/06-recht/dsa-prozesse.md` (DSA Art. 18, REQ-LEGAL-008, Q-4).
 
 ```mermaid
 stateDiagram-v2
@@ -452,9 +499,9 @@ stateDiagram-v2
     VorlaeufigAusgeblendet --> InBearbeitung
     InBearbeitung --> Abgewiesen : kein Verstoß
     InBearbeitung --> MassnahmeErgriffen : Entfernen / Sperren
-    MassnahmeErgriffen --> Widerspruch : Betroffener widerspricht (per E-Mail, außerhalb des Systems)
-    Abgewiesen --> Widerspruch : Melder widerspricht (per E-Mail, außerhalb des Systems)
-    Widerspruch --> InBearbeitung : anderer Moderator
+    MassnahmeErgriffen --> Widerspruch : Betroffener widerspricht (im System, UC-35)
+    Abgewiesen --> Widerspruch : Melder widerspricht (im System, UC-35)
+    Widerspruch --> InBearbeitung : anderer Moderator (UC-36)
     Abgewiesen --> [*]
     MassnahmeErgriffen --> [*]
 ```
@@ -540,6 +587,52 @@ stateDiagram-v2
 
 **Sonderanforderungen:** REQ-CHAT-010, REQ-PRIV-002, REQ-CHAT-001, REQ-SEC-006.
 
+### 4.9 UC-35 Widerspruch gegen eine Moderationsentscheidung einlegen
+
+| Feld | Inhalt |
+|---|---|
+| **Beschreibung (Zweck/Nutzen)** | Ein Mitglied, das von einer Moderationsentscheidung betroffen ist oder die Meldung erstattet hat, lässt die Entscheidung von einem anderen Moderator überprüfen. Nutzen: Schutz vor Fehlentscheidungen und Erfüllung von DSA Art. 20 (BG-4). |
+| **Ziel** | Die Entscheidung ist innerhalb kurzer Zeit von einer zweiten Person überprüft; das Ergebnis ist begründet mitgeteilt |
+| **Primärakteur** | Mitglied (betroffen oder meldend); bei gesperrtem Konto die betroffene Person ohne Anmeldung |
+| **Sekundärakteure** | Moderator (UC-36), E-Mail-System |
+| **Auslöser** | Mitteilung über eine Moderationsentscheidung (REQ-LEGAL-006) |
+| **Vorbedingung** | Mitteilung der Entscheidung liegt höchstens 6 Monate zurück; die Person hat zu dieser Entscheidung noch keinen Widerspruch eingelegt |
+| **Nachbedingung (Erfolg)** | Fall „Widerspruch“ in der Moderations-Queue, Eingangsbestätigung angezeigt, Audit-Log-Eintrag |
+| **Nachbedingung (Fehlschlag)** | Kein Fall; Hinweis auf den Grund (Frist abgelaufen, schon widersprochen, Link ungültig) und auf den Rechtsweg |
+| **Anforderungen** | REQ-LEGAL-007, REQ-LEGAL-006, REQ-MOD-002, REQ-MOD-003 |
+
+**Hauptszenario**
+1. Mitglied öffnet „Meine Mitteilungen“ und wählt bei der Entscheidung „Widerspruch einlegen“.
+2. System zeigt Entscheidung, Begründung und Frist und fragt eine Begründung des Widerspruchs ab (20–2.000 Zeichen).
+3. Mitglied sendet den Widerspruch ab.
+4. System legt einen Fall „Widerspruch“ an, sperrt ihn für den ursprünglichen Entscheider und bestätigt den Eingang.
+5. Ein anderer Moderator entscheidet (UC-36): *stattgeben* oder *zurückweisen*, jeweils mit Begründung.
+6. System setzt die Entscheidung um (bei Stattgeben: Inhalt wiederherstellen bzw. Konto entsperren), protokolliert sie und teilt beiden Seiten das Ergebnis mit.
+
+**Erweiterungen**
+- 1a. *Konto gesperrt:* Die Person öffnet den einmaligen Link aus der E-Mail (gültig 6 Monate ab Mitteilung); das System zeigt das Widerspruchsformular ohne Anmeldung. Weiter mit 2.
+- 1b. *Link ungültig, benutzt oder abgelaufen:* System zeigt „Dieser Link ist nicht mehr gültig“ und den Hinweis auf die Kontaktstelle (REQ-LEGAL-005). Ende.
+- 3a. *Frist abgelaufen oder bereits widersprochen:* System lehnt ab und nennt den Grund. Ende.
+- 5a. *Nur ein Moderator vorhanden:* Ein Administrator entscheidet.
+- 6a. *Inhalt inzwischen vom Anbieter gelöscht:* Stattgeben wird mitgeteilt, eine Wiederherstellung entfällt.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor S as Mitglied (betroffen)
+    participant W as Web-App
+    participant A as API (trust)
+    actor M2 as anderer Moderator
+    S->>W: Widerspruch einlegen (Begründung)
+    W->>A: Widerspruch senden
+    A-->>W: 201 Fall "Widerspruch"
+    M2->>A: Entscheidung "stattgeben" mit Begründung
+    A->>A: Maßnahme rückgängig, Audit-Log
+    A-->>S: Mitteilung und E-Mail mit Ergebnis
+```
+
+---
+
 ## 5. Casual-Use-Cases (Kurzform)
 
 | ID | Kurzbeschreibung |
@@ -547,6 +640,7 @@ stateDiagram-v2
 | UC-02 | Anmeldung mit Hochschuladresse und Passwort (Anmeldeverfahren austauschbar, ADR-0013). Nach 5 Fehlversuchen derselben Kombination aus Konto und IP in 15 Minuten muss gewartet werden; das Konto wird nicht gesperrt (REQ-SEC-005, Q-18). Abmelden beendet die Sitzung serverseitig |
 | UC-03 | Gast gibt E-Mail ein. Unabhängig von der Existenz erscheint eine neutrale Meldung. Der Link ist 1 h gültig und einmalig. Nach dem Zurücksetzen werden alle Sitzungen beendet |
 | UC-04 | Anzeigename, Studiengang (optional), Profilbild (R2, REQ-ACC-004), bevorzugte Übergabeorte. Die E-Mail-Adresse ist **nicht** öffentlich sichtbar (Ausnahme: beidseitige Freigabe, UC-25) |
+| UC-08 | Gast oder Mitglied öffnet aus dem Seitenfuß Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Erklärung zur Barrierefreiheit, Kontakt oder Hilfe; alle Seiten ohne Anmeldung, auch im Wartungsmodus (REQ-LEGAL-001…005, REQ-UX-004…006). Inhalte stammen aus versionierten Markdown-Dateien mit Platzhaltern (Q-23) |
 | UC-06 | Export aller personenbezogenen Daten als JSON-Datei zum sofortigen Download (Profil, Einwilligungen, Anzeigen, eigene Nachrichten, Merkliste, Meldungen, Blockierungen, Kontaktfreigaben) (REQ-ACC-003) |
 | UC-11 | Bearbeiten (Änderungshistorie für die Moderation), pausieren, reaktivieren, verlängern, löschen |
 | UC-12 | Status `reserviert` (direkt oder im Chat für eine bestimmte Person, REQ-CHAT-011) und `abgegeben`. Abgegebene Anzeigen verschwinden sofort aus der Suche und werden nach 30 Tagen gelöscht; Reservierungen fallen nach 30 Tagen auf `aktiv` zurück (Zustandsmodell Ü-10, Ü-13, Ü-17) |
@@ -558,6 +652,10 @@ stateDiagram-v2
 | UC-23 | Transaktionale E-Mails: Verifikation, „Konto existiert“, Passwort, neue Nachricht (ohne Inhalt), Ablauf-Erinnerung, Moderationsentscheidung, Löschbestätigung (REQ-NOTI-001); Suchauftrag und Re-Verifikation folgen mit UC-16 bzw. UC-07 |
 | UC-24 | Opt-out pro Kategorie (Nachrichten, Erinnerungen; Suchaufträge ab UC-16). Sicherheitsrelevante Mails sind nicht abwählbar |
 | UC-31 | Nach dem Blockieren können beide einander keine Nachrichten mehr senden und sehen die Anzeigen des anderen nicht mehr in der Suche (gegenseitig, REQ-MOD-005, REQ-SRCH-006) |
-| UC-33 | Verwarnung oder dauerhafte Sperre, mit Begründung. Die Sperre gilt für die **E-Mail-Adresse**, damit sich der Nutzer nicht erneut registrieren kann. Befristete Sperren, Aufhebung und Widerspruch laufen außerhalb des Systems per E-Mail (Q-15) |
+| UC-33 | Verwarnung oder dauerhafte Sperre, mit Begründung nach DSA Art. 17 (REQ-LEGAL-006). Die Sperre gilt für die **E-Mail-Adresse**, damit sich der Nutzer nicht erneut registrieren kann. Befristete Sperren laufen nicht im System (Q-15); der Widerspruch läuft im System über einen einmaligen Link aus der E-Mail (UC-35, Q-22) |
+| UC-36 | Moderator öffnet einen Fall „Widerspruch“ mit ursprünglicher Entscheidung, Begründung und Widerspruchsbegründung. Der ursprüngliche Entscheider kann ihn nicht bearbeiten. Entscheidung *stattgeben* (Maßnahme wird rückgängig gemacht) oder *zurückweisen*, jeweils mit Begründung; beide Seiten erhalten das Ergebnis (REQ-LEGAL-007) |
 | UC-40 | Domain hinzufügen, deaktivieren und dem Nutzertyp zuordnen (`studmail.` → Studierende). MVP: per Konfiguration bzw. Datenbank-Seed |
 | UC-42 | Rollen Mitglied, Moderator und Administrator vergeben bzw. entziehen. Wird protokolliert |
+| UC-43 | Administrator wählt ein Kalenderjahr; System zeigt die Anbieter, die 30 Verkäufe oder 2.000 € erreichen, mit Summen je Quartal, und bietet einen CSV-Export an. Jeder Abruf wird protokolliert (REQ-LEGAL-009, Q-26) |
+| UC-44 | Betreiber schaltet den Wartungsmodus per Konfiguration ein (alle Seiten 503 außer Health, Status und Rechtsseiten); Administrator setzt oder entfernt eine Ankündigung, die als Banner und auf der Statusseite erscheint (REQ-OPS-006, REQ-OPS-007) |
+| UC-45 | Betreiber erstellt mit einem Befehl eine Sicherung (Datenbank-Dump und Uploads-Archiv mit Prüfsumme) und stellt sie in ein leeres System wieder her; die Wiederherstellung wird in CI regelmäßig getestet (REQ-AVAIL-003) |

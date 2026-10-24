@@ -3,9 +3,9 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 ---
 
 # Product Backlog und Release-Planung
@@ -29,6 +29,7 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | **EPIC-10** | **Weitere Hochschulen (Backlog)** | Domains weiterer Hochschulen freischalten | R3+ |
 | EPIC-11 | Native Apps (Backlog) | iOS/Android, falls die PWA nicht reicht | offen |
 | **EPIC-12** | **Echtbetrieb (Backlog)** | Öffentliches Hosting inkl. Betreiberpflichten | nicht Teil des Projekts |
+| **EPIC-13** | **Recht, Auftritt und Betrieb (Übung)** | Rechtsseiten, DSA-Verfahren, Prozessdokumente und Betriebsvorkehrungen eines professionellen Marktplatzes, mit Platzhaltern statt echter Betreiberdaten (Q-23, [Abgleich](06-abgleich-recht-betrieb.md)) | R1 (Sprints 5–7) |
 
 ## 2. Product Backlog (R1)
 
@@ -70,8 +71,24 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-41 | `TRUST_PROXY` konfigurierbar, Health im Worker-Modus | Enabler | REQ-OPS-001 | n/a | mittel | – | 1 | 1 | 2 | 3 | 6 | 6,0 | 2 |
 | B-39 | listings informiert messaging nur per Domain Event (Abhängigkeitsrichtung OE-1) | Enabler | REQ-MAINT-002 | n/a | mittel | B-40 | 2 | 1 | 1 | 3 | 5 | 2,5 | R2 |
 | B-42 | Schmale öffentliche APIs je Modul (Interface statt ganzer Service) | Enabler | REQ-MAINT-002 | n/a | mittel | – | 2 | 1 | 1 | 2 | 4 | 2,0 | R2 |
+| B-43 | Rechtsseiten (Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Barrierefreiheit, Kontakt) aus versionierten Markdown-Inhalten, Seitenfuß auf allen Seiten, Fußzeile in allen E-Mails | Feature | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005, REQ-UX-006 | basis | mittel | – | 5 | 8 | 5 | 8 | 21 | 4,2 | 5 |
+| B-44 | Fehlerseiten 404/500/503 und echte Statuscodes statt SPA-Fallback mit 200 | Feature | REQ-UX-003 | basis | mittel | – | 2 | 8 | 3 | 3 | 14 | 7,0 | 5 |
+| B-45 | Startseite für Gäste, Hilfe und FAQ mit Sicherheitstipps, Link aus dem Chat-Sicherheitshinweis | Feature | REQ-UX-004, REQ-UX-005 | leistung | niedrig | B-43 | 3 | 5 | 2 | 2 | 9 | 3,0 | 6 |
+| B-46 | Begründung nach DSA Art. 17 (Pflichtangaben, Mitteilungen im Konto) und Widerspruch im System mit Vier-Augen-Prinzip und Link für gesperrte Konten | Feature | REQ-LEGAL-006, REQ-LEGAL-007, REQ-MOD-002, REQ-MOD-003 | basis | hoch | – | 8 | 8 | 5 | 8 | 21 | 2,6 | 5 |
+| B-47 | Kennzeichnung „Verdacht auf Straftat“, Eskalation an Administratoren, Beweissicherung | Feature | REQ-LEGAL-008 | n/a | hoch | B-46 | 2 | 1 | 2 | 8 | 11 | 5,5 | 6 |
+| B-48 | DAC7-Auswertung mit CSV-Export für Administratoren, Konzeptdokument | Feature | REQ-LEGAL-009 | n/a | mittel | – | 3 | 1 | 2 | 5 | 8 | 2,7 | 6 |
+| B-49 | Speicher-Allowlist und E2E-Test „keine nicht notwendige Speicherung, kein Banner“ | Test | REQ-LEGAL-010 | basis | mittel | – | 1 | 8 | 3 | 5 | 16 | 16,0 | 5 |
+| B-50 | Datenschutz-Dokumentation: VVT, TOMs, Auftragsverarbeitung, Datenpannen-Prozess mit Übung, DSFA-Schwellwertanalyse | Enabler | REQ-LEGAL-011, REQ-LEGAL-012, REQ-LEGAL-013, REQ-PRIV-007 | n/a | mittel | – | 5 | 1 | 3 | 8 | 12 | 2,4 | 6 |
+| B-51 | Englische Oberfläche, E-Mails und Rechtstexte inkl. Auslagerung aller Texte in Sprachressourcen (umfasst B-17) | Feature | REQ-UX-007, REQ-UX-002 | leistung | mittel | – | 8 | 5 | 1 | 1 | 7 | 0,9 | 7 |
+| B-52 | `robots.txt`, `X-Robots-Tag` und `/.well-known/security.txt` | Feature | REQ-PRIV-008, REQ-SEC-012 | basis | niedrig | – | 1 | 8 | 2 | 3 | 13 | 13,0 | 5 |
+| B-53 | Wartungsmodus, Ankündigungen und öffentliche Statusseite | Feature | REQ-OPS-006, REQ-OPS-007 | n/a | mittel | B-44 | 3 | 1 | 2 | 3 | 6 | 2,0 | 7 |
+| B-54 | Compose-Profil `monitoring` mit Alarmregeln, Runbooks und Alarmübung | Enabler | REQ-OPS-008 | n/a | mittel | B-57 | 3 | 1 | 1 | 5 | 7 | 2,3 | 7 |
+| B-55 | Compose-Profil `proxy` mit TLS und HSTS, Smoke-Test gegen den Proxy | Enabler | REQ-OPS-009 | n/a | mittel | B-41 | 2 | 1 | 1 | 5 | 7 | 3,5 | 6 |
+| B-56 | Datensicherung und Wiederherstellung per Skript, Restore-Test in CI | Enabler | REQ-AVAIL-003 | n/a | hoch | B-07 | 3 | 1 | 3 | 13 | 17 | 5,7 | 5 |
+| B-57 | Betriebshandbuch, Störungsprozess mit Übung, Mail-Zustellbarkeit, Pentest-Plan, Go-live-Checkliste | Enabler | REQ-OPS-011, REQ-OPS-010, REQ-SEC-013 | n/a | mittel | – | 3 | 1 | 2 | 5 | 8 | 2,7 | 6 |
+| B-58 | Renovate-Konfiguration mit Prüfung in CI | Enabler | REQ-OPS-012 | n/a | niedrig | B-07 | 1 | 1 | 1 | 3 | 5 | 5,0 | 6 |
 
-**Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002, 5 SP), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
+**Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
 
 **Platzhalter (Could, R2-Kandidaten):** REQ-CHAT-009 Preisvorschlag (5 SP), REQ-MOD-006 Bewertungen (5 SP), REQ-LST-009 Vorschau-Link (3 SP), REQ-MOD-008 Whitelist-Oberfläche (3 SP), REQ-CHAT-008 Bilder im Chat (5 SP), REQ-SRCH-005 Suchaufträge (8 SP), REQ-NOTI-006 Web-Push (8 SP). Werden erst konkretisiert, wenn sie in den Release-Umfang rücken.
 
@@ -92,8 +109,13 @@ gantt
     Sprint 2 – Datenschutz und Sicherheit           :s2, after s1, 14d
     Sprint 3 – Vollständigkeit und Nachweise        :s3, after s2, 14d
     Sprint 4 – Härtung und Messung (nach Freeze)    :s4, after s3, 14d
+    section EPIC-13 (Q-23)
+    Sprint 5 – Rechtspflichten und Datensicherung    :s5, after s4, 14d
+    Sprint 6 – Prozesse und Betrieb                 :s6, after s5, 14d
+    Sprint 7 – Should/Could, Englisch               :s7, after s6, 14d
     section Meilensteine
     Feature Freeze                                 :milestone, ff, after s3, 0d
+    Abgabe R1 inkl. EPIC-13                        :milestone, ab, after s7, 0d
 ```
 
 | Sprint | Sprint-Ziel | Einträge | SP |
@@ -102,6 +124,11 @@ gantt
 | 2 | Datenschutz- und Sicherheitslücken aus Anforderungs- und Architektur-Review geschlossen | B-35, B-36, B-38, B-40, B-41, B-22, B-12, B-16 | 17 |
 | 3 | Alle R1-Funktionen vollständig und nachgewiesen | B-21, B-09, B-29, B-25, B-32, B-30, B-31 | 19 |
 | 4 | Nach Feature Freeze: nur Messung, Nachweise, Fehlerbehebung | B-23, B-27, B-10, B-06, B-08 | 20 |
+| 5 | Der Auftritt erfüllt die Rechtspflichten (Rechtsseiten, Links, Fehlerseiten, DSA-Begründung und Widerspruch), und Daten lassen sich nachweislich wiederherstellen | B-49, B-52, B-44, B-56, B-43, B-46 | 20 |
+| 6 | Prozesse und Betrieb sind dokumentiert und eingeübt; DAC7, Straftatverdacht, TLS und Abhängigkeitspflege laufen | B-47, B-58, B-55, B-45, B-48, B-57, B-50 | 19 |
+| 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung | B-54, B-53, B-51 | 14 |
+
+**Einordnung EPIC-13 (2026-10-24, Q-23):** Der Auftraggeber hat die Rechts- und Betreiberpflichten als Übung in R1 aufgenommen. Sie passen nicht in die Sprints 1–4, deren Umfang feststeht; der Feature Freeze nach Sprint 3 gilt weiter für den bisherigen R1-Umfang. EPIC-13 erweitert R1 um drei Sprints (53 SP bei ~20 SP Kapazität). **Reihenfolge:** alle Must-Einträge (B-43, B-44, B-46, B-49, B-50, B-56, B-57) in Sprint 5 und 6; Sprint 5 zuerst die Einträge mit hohem WSJF und die Rechtspflichten, die ein Besucher sofort sieht; Sprint 7 enthält nur Should/Could und ist der Puffer: Reicht die Kapazität nicht, rücken B-51, B-53 und B-54 nach R2. Die Einträge entstehen im Docker-Beispiel teilweise schon vorab als Übungsinkrement; der Sprint-Plan bleibt der Maßstab für Nachweise und Abnahme.
 
 **Stand Sprint 1 (2026-10-23):**
 
@@ -142,11 +169,11 @@ gantt
 
 | ID | Item | Bezug |
 |---|---|---|
-| OPS-01 | Betreiber klären (Hochschule, AStA), Impressum (DDG), Datenschutzerklärung, AGB, Nutzungsregeln | Review O-1 |
+| OPS-01 | Betreiber klären (Hochschule, AStA), Impressum (DDG), Datenschutzerklärung, AGB, Nutzungsregeln | Review O-1; **exemplarisch in EPIC-13 umgesetzt** (B-43, Platzhalter); offen bleibt die Klärung des Betreibers |
 | OPS-02 | Hosting in der EU / im Hochschul-RZ, AV-Verträge | REQ-PRIV-005 |
 | OPS-03 | Echter SMTP-Relay mit SPF/DKIM/DMARC, Bounce-Verarbeitung | REQ-NOTI-004 |
-| OPS-04 | Verfügbarkeits-SLO, RTO/RPO, Backups mit PITR, Restore-Übung | REQ-AVAIL-001/002 |
-| OPS-05 | Monitoring, Alarme, Runbooks, Incident-Prozess | Guideline Kap. 11 |
+| OPS-04 | Verfügbarkeits-SLO, RTO/RPO, Backups mit PITR, Restore-Übung | REQ-AVAIL-001/002; **exemplarisch in EPIC-13 umgesetzt** (B-56: Sicherung und Restore-Test im Docker-Beispiel); offen bleiben PITR und Ziele im Echtbetrieb |
+| OPS-05 | Monitoring, Alarme, Runbooks, Incident-Prozess | Guideline Kap. 11; **exemplarisch in EPIC-13 umgesetzt** (B-54, B-57) |
 | OPS-06 | Skalierung: `api`/`worker` getrennt, `PgNotifyAdapter`, S3-Adapter | ADR-0004, 0007 |
 | OPS-07 | DSFA-Prüfung, DSA-Prozesse mit realen Moderator/innen | REQ-PRIV-007 |
 | OPS-08 | Hochschul-SSO | INST-04 |

@@ -1,0 +1,97 @@
+---
+title: Datenschutzerklärung
+version: 2026-10
+last_updated: 2026-10-24
+---
+
+> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Vom Datenschutzbeauftragten der Hochschule zu prüfen. Angaben in eckigen Klammern sind Platzhalter.
+
+Diese Erklärung informiert nach Art. 13 der Datenschutz-Grundverordnung (DSGVO) darüber, welche personenbezogenen Daten CampusMarkt HWG LU verarbeitet, wozu und wie lange.
+
+## 1. Verantwortlicher
+
+[Platzhalter: Name der Hochschule], vertreten durch [Platzhalter: Präsidentin/Präsident]
+[Platzhalter: Anschrift]
+E-Mail: [Platzhalter: campusmarkt@hochschule.example]
+
+## 2. Datenschutzbeauftragte/r
+
+[Platzhalter: Name der/des Datenschutzbeauftragten]
+[Platzhalter: Anschrift]
+E-Mail: [Platzhalter: datenschutz@hochschule.example]
+
+## 3. Grundsätze
+
+- Wir verarbeiten nur Daten, die für den Marktplatz nötig sind (Datenminimierung).
+- Es gibt **kein Tracking**, keine Werbung, keine Analyse- oder Social-Media-Dienste und keine Inhalte von fremden Servern (Schriften, Skripte, Karten).
+- Ihre E-Mail-Adresse ist für andere Mitglieder **nicht sichtbar**. Sie wird nur angezeigt, wenn Sie und Ihr Gegenüber in einer Konversation beide der Kontaktfreigabe zustimmen.
+- Daten werden nicht in Länder außerhalb der EU bzw. des EWR übermittelt.
+
+## 4. Verarbeitungen im Einzelnen
+
+| Verarbeitung | Daten | Zweck | Rechtsgrundlage | Speicherdauer |
+|---|---|---|---|---|
+| Registrierung und Konto | Hochschul-E-Mail-Adresse, Passwort (nur als Hash), Anzeigename, optional Studiengang und bevorzugte Übergabeorte, Nutzertyp (aus der Domain) | Zugang nur für Hochschulangehörige, Betrieb des Kontos | Art. 6 Abs. 1 lit. e DSGVO i. V. m. dem Landesdatenschutzgesetz Rheinland-Pfalz und den Aufgaben der Hochschule [Platzhalter: genaue Norm prüfen]; Nutzungsverhältnis | bis zur Löschung des Kontos; Löschung 14 Tage nach dem Löschantrag. Unbestätigte Konten werden 7 Tage nach der Registrierung gelöscht |
+| Bestätigungs- und Passwort-Links | Zufallswert (gespeichert nur als Hash), Zeitpunkt | Bestätigung der Adresse, Passwort zurücksetzen | wie oben | 7 Tage nach Ablauf bzw. Nutzung |
+| Einwilligung in Nutzungsbedingungen und Datenschutzhinweis | Version, Zeitpunkt | Nachweis | Art. 7 Abs. 1, Art. 5 Abs. 2 DSGVO | bis zur Kontolöschung, danach 3 Jahre ohne Profilbezug |
+| Anzeigen und Bilder | Titel, Beschreibung, Preis, Kategorie, Zustand, Übergabeorte, Fotos (neu kodiert, ohne Metadaten wie GPS-Position) | Veröffentlichung im Marktplatz für Mitglieder | wie Konto | sofort bei Löschung durch Sie; 30 Tage nach „abgegeben“; 90 Tage nach Ablauf; nie zugeordnete Bilder nach 24 Stunden |
+| Nachrichten | Nachrichtentexte, Zeitpunkte, Lesestatus | Kommunikation zwischen Mitgliedern | wie Konto | 12 Monate nach der letzten Nachricht der Konversation; bei Kontolöschung werden Ihre eigenen Texte gelöscht |
+| Kontaktfreigabe | Zustimmung, Widerruf oder Ablehnung je Konversation | Austausch der Hochschul-E-Mail-Adressen nur nach beidseitiger Zustimmung | Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) | mit der Konversation bzw. dem Konto |
+| Merkliste, Blockierungen, Benachrichtigungseinstellungen | Verweise auf Anzeigen bzw. Mitglieder, Einstellungen | Funktionen Ihres Kontos | wie Konto | bis zur Kontolöschung |
+| Meldungen und Moderation | Meldung (Grund, Text), betroffener Inhalt, Entscheidung mit Begründung, Widerspruch | Melde- und Abhilfeverfahren nach dem Digital Services Act (Art. 16, 17, 20 DSA) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. der Verordnung (EU) 2022/2065 | 12 Monate nach Abschluss; entfernte Anzeigen 12 Monate nach der Entscheidung |
+| Audit-Log | wer hat wann welche Verwaltungsaktion ausgeführt | Nachvollziehbarkeit von Moderation und Verwaltung | Art. 6 Abs. 1 lit. c und e DSGVO | 24 Monate |
+| E-Mail-Benachrichtigungen | E-Mail-Adresse, Art der Benachrichtigung (ohne Nachrichteninhalt) | Bestätigungen, Hinweise auf neue Nachrichten, ablaufende Anzeigen | wie Konto; abbestellbar je Kategorie, außer notwendige Kontomails | Versandprotokoll [Platzhalter: Frist des Mail-Dienstes] |
+| Missbrauchsschutz | IP-Adresse nur in pseudonymisierter Form (Schlüssel wechselt täglich), Zähler | Schutz vor automatisierten Angriffen (Anmeldung, Registrierung, Nachrichten) | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | 7 Tage |
+| Server-Protokolle und Metriken | Zeitpunkt, aufgerufener Pfad, Statuscode, Dauer – ohne IP-Adresse, E-Mail oder Inhalte | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | [Platzhalter: z. B. 14 Tage] |
+| Datensicherungen | Kopie der Datenbank und Bilder | Wiederherstellung nach Störungen | Art. 32 DSGVO | spätestens nach 30 Tagen überschrieben |
+| Steuerliche Meldepflicht der Plattform (DAC7) | bei Erreichen der Schwellen (30 Verkäufe oder 2.000 € je Kalenderjahr): Name, Anschrift, Geburtsdatum, Steuer-ID, Summe und Anzahl der Verkäufe | Erfüllung des Plattformen-Steuertransparenzgesetzes (PStTG) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. PStTG | 10 Jahre nach Ablauf des Meldezeitraums (§ 23 PStTG) [Platzhalter: im Beispiel nur Auswertung, keine Erhebung] |
+
+## 5. Empfänger
+
+- **Andere Mitglieder** sehen Ihren Anzeigenamen, Ihre Anzeigen und – in einer Konversation – Ihre Nachrichten. Ihre E-Mail-Adresse sehen sie nur nach beidseitiger Kontaktfreigabe.
+- **Moderatorinnen und Moderatoren** der Hochschule sehen gemeldete Inhalte und bei gemeldeten Nachrichten nur den Ausschnitt um die gemeldete Nachricht.
+- **Auftragsverarbeiter:** [Platzhalter: Rechenzentrum der Hochschule bzw. Hosting-Dienstleister in der EU], [Platzhalter: E-Mail-Versanddienst in der EU]. Mit allen besteht ein Vertrag nach Art. 28 DSGVO.
+- **Behörden** nur, wenn eine gesetzliche Pflicht besteht (z. B. Art. 18 DSA bei Verdacht auf schwere Straftaten gegen Leib und Leben, Meldung an das Bundeszentralamt für Steuern nach PStTG).
+
+## 6. Pflicht zur Bereitstellung
+
+Ohne Hochschul-E-Mail-Adresse und Passwort ist keine Registrierung möglich, weil die Plattform nur Hochschulangehörigen offensteht. Alle weiteren Profilangaben sind freiwillig.
+
+## 7. Automatisierte Entscheidungen
+
+Es gibt keine automatisierte Entscheidung im Sinne von Art. 22 DSGVO. Ein Wortfilter prüft neue Anzeigen auf eindeutig verbotene Begriffe. Trifft er zu, wird die Anzeige zunächst nicht veröffentlicht, sondern von einem Menschen geprüft. Erst diese Person entscheidet.
+
+## 8. Cookies und lokale Speicherung
+
+Wir speichern nur, was technisch unbedingt erforderlich ist (§ 25 Abs. 2 Nr. 2 TDDDG). Deshalb fragen wir keine Einwilligung ab und zeigen kein Cookie-Banner.
+
+| Name / Art | Zweck | Dauer |
+|---|---|---|
+| Cookie `cm_session` (HttpOnly, Secure, SameSite) | hält Sie angemeldet; enthält nur einen zufälligen Sitzungsschlüssel | bis zur Abmeldung, höchstens 30 Tage |
+| Zwischenspeicher des Service Workers (Cache Storage) | speichert die Programmdateien der App (keine persönlichen Daten), damit sie schnell lädt und installierbar ist | bis zur nächsten Version der App bzw. bis Sie die Websitedaten löschen |
+
+Es werden kein `localStorage`, kein `sessionStorage` und keine IndexedDB genutzt. Sollte später eine Speicherung hinzukommen, die nicht unbedingt erforderlich ist, fragen wir vorher Ihre Einwilligung ab.
+
+## 9. Ihre Rechte
+
+Sie haben das Recht auf
+
+- **Auskunft** (Art. 15 DSGVO) – direkt über „Profil → Daten exportieren“,
+- **Berichtigung** (Art. 16) – direkt im Profil,
+- **Löschung** (Art. 17) – direkt über „Profil → Konto löschen“ (mit 14 Tagen Bedenkzeit),
+- **Einschränkung der Verarbeitung** (Art. 18),
+- **Datenübertragbarkeit** (Art. 20) – der Export ist maschinenlesbar (JSON),
+- **Widerspruch** (Art. 21) gegen Verarbeitungen auf Grundlage von Art. 6 Abs. 1 lit. e DSGVO aus Gründen, die sich aus Ihrer besonderen Situation ergeben.
+
+Eine erteilte Einwilligung (Kontaktfreigabe) können Sie jederzeit mit Wirkung für die Zukunft in der Konversation zurückziehen. Für alle anderen Anliegen schreiben Sie an [Platzhalter: datenschutz@hochschule.example].
+
+## 10. Beschwerderecht
+
+Sie können sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere beim
+
+Landesbeauftragten für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz
+[Platzhalter: Anschrift und Kontaktdaten der Aufsichtsbehörde]
+
+## 11. Änderungen
+
+Ändert sich diese Erklärung wesentlich, erhält sie eine neue Version. Sie werden beim nächsten Anmelden darauf hingewiesen.

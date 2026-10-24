@@ -15,9 +15,9 @@ epic: EPIC-05
 source: BG-1, DSA Art. 17, DSGVO Art. 17
 use_cases: [UC-23]
 depends_on: [REQ-AUTH-002, REQ-AUTH-004, REQ-AUTH-006, REQ-NOTI-002, REQ-LST-008, REQ-MOD-003, REQ-ACC-002, REQ-NOTI-005]
-version: 2.0
+version: 2.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [AT-NOTI-001, AT-NOTI-001-2]
 ---
 
@@ -25,6 +25,8 @@ verification: [AT-NOTI-001, AT-NOTI-001-2]
 
 ## Anforderung
 Als Mitglied möchte ich zu sicherheits- und vorgangsrelevanten Ereignissen eine E-Mail an meine Hochschuladresse erhalten, damit ich auch ohne geöffnete Plattform handeln kann.
+
+Jede Mail trägt eine Fußzeile mit Absender, Impressum und Datenschutz (REQ-UX-006); die Moderationsmitteilung enthält die Pflichtangaben nach REQ-LEGAL-006; Header für die Zustellbarkeit regelt REQ-OPS-010.
 
 Das System **muss** folgende E-Mails versenden:
 
@@ -76,3 +78,4 @@ I: Versandzuverlässigkeit separat (REQ-NOTI-005) · N: Texte verhandelbar · V:
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Tabelle der Mailarten mit Abbestellbarkeit |
 | 2.0 | 2026-10-23 | Review v0.2: R-15/R-21 Re-Verifikationsmail nach REQ-AUTH-007 (R2) verschoben, damit vollständig umgesetzt; `depends_on` gefüllt; Must-Begründung |
+| 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Fußzeile mit Absender, Impressum und Datenschutz in jeder Mail (REQ-UX-006); Moderationsmitteilung mit Pflichtangaben nach REQ-LEGAL-006; Zustellbarkeit REQ-OPS-010 |

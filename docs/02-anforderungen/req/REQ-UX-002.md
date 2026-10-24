@@ -12,15 +12,15 @@ moscow: S
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 verification: [MAN-UX-002]
 ---
 
 # REQ-UX-002 Deutsche Oberfläche, übersetzbar vorbereitet
 ## Anforderung
-Die Oberfläche muss vollständig auf Deutsch vorliegen; alle Texte müssen ohne Änderung der Programmlogik in weitere Sprachen übersetzt werden können (Englisch für internationale Studierende im nächsten Release).
+Die Oberfläche muss vollständig auf Deutsch vorliegen; alle Texte müssen ohne Änderung der Programmlogik in weitere Sprachen übersetzt werden können (Englisch für internationale Studierende: REQ-UX-007, Q-25).
 
 ## Begründung
 Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende brauchen perspektivisch Englisch.
@@ -48,3 +48,4 @@ Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende br
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Metrik und Messverfahren ergänzt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should), R-22 |
+| 2.2 | 2026-10-24 | Abgleich Recht und Betrieb: Englische Oberfläche als eigene Anforderung REQ-UX-007 (Q-25); diese Anforderung bleibt die Voraussetzung (Auslagerung der Texte) |

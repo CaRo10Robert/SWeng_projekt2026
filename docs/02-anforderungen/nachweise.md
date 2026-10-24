@@ -54,6 +54,8 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-009` | automatisiert | REQ-AUTH-009 | (neu) Test des Anmelde-Anwendungsfalls mit einem simulierten zweiten Verfahren: Kontoverknüpfung, Neuanlage, Ablehnung fremder bzw. fehlender Adresse. |
 | `AT-AVAIL-001` | automatisiert | REQ-AVAIL-001 | Auswertung der Fehlerquote in den k6-Lasttests (neu zu schreiben). |
 | `MAN-AVAIL-002` | manuell | REQ-AVAIL-002 | Protokoll der Restore-Übung (erst im Echtbetrieb). |
+| `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test in CI – Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich. |
+| `CTRL-DOC-BACKUP` | Kontrolle | REQ-AVAIL-003 | Kontrolle `docs/07-betrieb/backup-restore.md` – Ablauf, Aufbewahrung, Verschlüsselung, Zuständigkeiten. |
 | `AT-CHAT-001` | automatisiert | REQ-CHAT-001 | Smoke-Test – Konversation starten, Anbieter erhält die Nachricht. |
 | `AT-CHAT-001-2` | automatisiert | REQ-CHAT-001 | API-Test – Antworten zu Konversation und Nachrichten enthalten keine E-Mail-Adressen (neu). |
 | `AT-CHAT-001-3` | automatisiert | REQ-CHAT-001 | API-Test – Kontakt zur eigenen Anzeige wird abgelehnt (neu). |
@@ -77,6 +79,31 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-CHAT-011-2` | automatisiert | REQ-CHAT-011 | Smoke-Test – der Interessent darf den Deal nicht steuern. |
 | `AT-DEMO-001` | automatisiert | REQ-DEMO-001 | Smoke-Test – Login mit Demo-Konto, Suche liefert Anzeigen, Queue ≥ 2 Fälle (bestehend: „Moderations-Queue enthält Seed-Meldung und Wortfilter-Fall“). |
 | `AT-DEMO-002` | automatisiert | REQ-DEMO-002 | Smoke-Test – Auslösen liefert 202 und erzeugt die Erinnerungsmail in Mailpit (neu zu schreiben). |
+| `AT-LEGAL-001` | automatisiert | REQ-LEGAL-001 | E2E-Test – Impressum ohne Anmeldung aus dem Seitenfuß erreichbar, HTTP 200 bei Direktaufruf, alle Pflichtabschnitte und der Muster-Hinweis sichtbar. |
+| `CTRL-DOC-LEGAL-TEXTE` | Kontrolle | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005 | Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als `[Platzhalter: …]` markiert, Version und Datum im Front Matter, Review protokolliert. |
+| `AT-LEGAL-002` | automatisiert | REQ-LEGAL-002 | E2E-Test – Datenschutzerklärung ohne Anmeldung erreichbar, aus dem Registrierungsformular verlinkt, Abschnitte 1–12 und Version vorhanden. |
+| `AT-LEGAL-002-2` | automatisiert | REQ-LEGAL-002 | E2E-Test – jede nach den Kernabläufen vorhandene Speicherung im Browser steht im Abschnitt „Cookies und lokale Speicherung“. |
+| `AT-LEGAL-003` | automatisiert | REQ-LEGAL-003 | E2E-Test – Nutzungsbedingungen und Community-Regeln ohne Anmeldung erreichbar, Version sichtbar, aus dem Registrierungsformular verlinkt. |
+| `AT-LEGAL-003-2` | automatisiert | REQ-LEGAL-003 | Smoke- oder Unit-Test – Mitglied mit älterer Zustimmung muss erneut zustimmen; schreibende Anfrage vorher 403 `terms_required`; danach Version gespeichert. |
+| `AT-LEGAL-004` | automatisiert | REQ-LEGAL-004 | E2E-Test – Erklärung von jeder Seite per Tastatur erreichbar, 5 Pflichtabschnitte und Kontaktmöglichkeit vorhanden. |
+| `AT-LEGAL-005` | automatisiert | REQ-LEGAL-005 | E2E-Test – Kontaktseite ohne Anmeldung erreichbar, alle 7 Anliegen mit Weg sichtbar. |
+| `AT-LEGAL-006` | automatisiert | REQ-LEGAL-006 | Smoke-Test – Entfernen einer gemeldeten Anzeige erzeugt für die Betroffene eine Mitteilung und eine E-Mail mit den Angaben 1–5, ohne Identität des Meldenden. |
+| `AT-LEGAL-006-2` | automatisiert | REQ-LEGAL-006 | Smoke-Test – der Meldende erhält das Ergebnis; Entscheidung ohne Regel oder mit zu kurzer Begründung ergibt 422. |
+| `AT-LEGAL-007` | automatisiert | REQ-LEGAL-007 | Smoke-Test – Widerspruch aus der Mitteilung erzeugt einen Fall „Widerspruch“; zweiter Widerspruch 409. |
+| `AT-LEGAL-007-2` | automatisiert | REQ-LEGAL-007 | Smoke-Test – der ursprüngliche Entscheider kann den Widerspruch nicht entscheiden (403). |
+| `AT-LEGAL-007-3` | automatisiert | REQ-LEGAL-007 | Smoke-Test – Stattgeben stellt die Anzeige wieder her bzw. entsperrt das Konto; beide Seiten erhalten eine Mitteilung; Audit-Log-Einträge vorhanden. |
+| `AT-LEGAL-007-4` | automatisiert | REQ-LEGAL-007 | Smoke-Test – gesperrtes Konto widerspricht über den Link aus der E-Mail ohne Anmeldung; zweite Nutzung des Links schlägt fehl. |
+| `AT-LEGAL-008` | automatisiert | REQ-LEGAL-008 | Smoke-Test – Entscheidung mit Kennzeichnung „Verdacht auf Straftat“ erzeugt Audit-Log-Eintrag und E-Mail an Administratoren; ohne Begründung 422; Mitteilung an Betroffene enthält die Kennzeichnung nicht. |
+| `CTRL-DOC-DSA` | Kontrolle | REQ-LEGAL-008 | Kontrolle `docs/06-recht/dsa-prozesse.md` – Melde- und Abhilfeverfahren, Begründung, Widerspruch, Art. 18 und Kontaktstellen beschrieben, Zuständigkeiten als Platzhalter markiert. |
+| `AT-LEGAL-009` | automatisiert | REQ-LEGAL-009 | Unit-Test – Schwellenfunktion mit den Grenzfällen der Tabelle. |
+| `AT-LEGAL-009-2` | automatisiert | REQ-LEGAL-009 | Smoke-Test – Auswertung als JSON und CSV nur für Administratoren, Mitglied 403, Abruf im Audit-Log. |
+| `CTRL-DOC-DAC7` | Kontrolle | REQ-LEGAL-009 | Kontrolle `docs/06-recht/dac7-konzept.md` – Zählregeln, Schwellen, fehlende Stammdaten und Meldeweg beschrieben. |
+| `AT-LEGAL-010` | automatisiert | REQ-LEGAL-010 | E2E-Test – nach Gast- und Mitgliederabläufen enthalten Cookies, localStorage, sessionStorage, IndexedDB und Cache Storage nur Einträge der Allowlist; kein Cookie-Banner sichtbar. |
+| `CTRL-DOC-VVT` | Kontrolle | REQ-LEGAL-011 | Kontrolle `docs/06-recht/vvt.md` – alle genannten Verarbeitungen mit allen Pflichtfeldern, Abgleich mit der Datenschutzerklärung. |
+| `CTRL-DOC-TOM` | Kontrolle | REQ-LEGAL-011 | Kontrolle `docs/06-recht/toms.md` – Gliederung nach Art. 32, jede Maßnahme mit Anforderung und Nachweis. |
+| `CTRL-DOC-AVV` | Kontrolle | REQ-LEGAL-012 | Kontrolle `docs/06-recht/auftragsverarbeitung.md` – Kategorien, Ort, Vertragsstatus und Checkliste vorhanden. |
+| `CTRL-DOC-DATENPANNE` | Kontrolle | REQ-LEGAL-013 | Kontrolle `docs/06-recht/datenpannen-prozess.md` – Rollen, Fristen, Bewertung, Vorlagen vorhanden. |
+| `MAN-LEGAL-013` | manuell | REQ-LEGAL-013 | Protokoll einer Tabletop-Übung. |
 | `AT-LST-001` | automatisiert | REQ-LST-001 | Smoke-Test – Anzeige mit Bild anlegen, Status `aktiv`. |
 | `MAN-LST-001` | manuell | REQ-LST-001 | Usability-Test mit 5 Studierenden, Median der Erstellzeit < 2 min (noch nicht durchgeführt). |
 | `AT-LST-002` | automatisiert | REQ-LST-002 | Unit-Test der Preisregel (Entscheidungstabelle oben). |
@@ -127,6 +154,17 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests. |
 | `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job baut das Image aus sauberem Checkout, taggt es nach SemVer und legt das `docker save`-Archiv als Artefakt ab (neu; Umsetzungsstand ⬜). |
 | `AT-OPS-005` | automatisiert | REQ-OPS-005 | Neustart-Test – zweiter Start meldet keine neue Migration und wird gesund (Grundlage: Frischstart-Zyklen; als Skript neu zu schreiben). |
+| `AT-OPS-006` | automatisiert | REQ-OPS-006 | Smoke-Test – mit `MAINTENANCE_MODE=true` liefern Seiten und API 503 mit `Retry-After`, Health, Status und Rechtsseiten nicht. |
+| `AT-OPS-006-2` | automatisiert | REQ-OPS-006 | Smoke-Test – Administrator setzt und entfernt eine Ankündigung (Mitglied 403), die Ankündigung ist öffentlich abrufbar, Audit-Log-Eintrag. |
+| `AT-OPS-007` | automatisiert | REQ-OPS-007 | Smoke-Test – `/status` (Seite) und die zugehörige API sind ohne Anmeldung erreichbar, zeigen je Dienst „in Betrieb“ bzw. „gestört“ mit Zeitpunkt und enthalten keine Versionen, Hostnamen oder Fehlertexte. |
+| `CTRL-ALERT-RULES` | Kontrolle | REQ-OPS-008 | CI-Kontrolle – `promtool check rules` für die Alarmregeln, jede Regel mit Annotation `runbook`. |
+| `MAN-OPS-008` | manuell | REQ-OPS-008 | Protokoll der Alarmübung (App gestoppt → Mail in Mailpit ≤ 5 min). |
+| `AT-OPS-009` | automatisiert | REQ-OPS-009 | Smoke-Test gegen das Profil `proxy` – Umleitung von HTTP, HSTS-Header, Anmeldung über HTTPS funktioniert. |
+| `AT-OPS-010` | automatisiert | REQ-OPS-010 | Smoke-Test – Benachrichtigungs-Mail in Mailpit trägt beide Header; Bestätigungsmail nicht. |
+| `CTRL-DOC-MAIL` | Kontrolle | REQ-OPS-010 | Kontrolle `docs/07-betrieb/mail-zustellbarkeit.md` – SPF-, DKIM-, DMARC-Beispiele und Bounce-Ablauf vorhanden. |
+| `CTRL-DOC-BETRIEB` | Kontrolle | REQ-OPS-011, REQ-SEC-012 | Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden. |
+| `MAN-OPS-011` | manuell | REQ-OPS-011 | Protokoll einer Störungsübung (z. B. Datenbank gestoppt) nach dem Handbuch. |
+| `CTRL-RENOVATE` | Kontrolle | REQ-OPS-012 | CI-Kontrolle – `renovate-config-validator` prüft `renovate.json`. |
 | `AT-PERF-001` | automatisiert | REQ-PERF-001 | k6-Lasttest `tests/load/search.js` (geplant, siehe Umsetzungsstand). |
 | `AT-PERF-002` | automatisiert | REQ-PERF-002 | k6-Lasttest Chat (neu zu schreiben; Umsetzungsstand ⬜ – nicht gemessen). |
 | `AT-PERF-003` | automatisiert | REQ-PERF-003 | k6-Lasttest „Anzeige erstellen“ (neu zu schreiben; Umsetzungsstand ⬜). |
@@ -145,7 +183,9 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-PRIV-005` | manuell | REQ-PRIV-005 | Verzeichnis der Auftragsverarbeiter mit AV-Verträgen. |
 | `AT-PRIV-006` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Browser-Test protokolliert alle Netzwerkanfragen über Anmelden, Suchen, Anzeige, Chat; keine fremde Domain, nur ein Cookie. |
 | `AT-PRIV-006-2` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Smoke-Test prüft, dass die Content-Security-Policy nur den eigenen Ursprung erlaubt. |
-| `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Prüfprotokoll zur DSFA-Pflicht. |
+| `CTRL-DOC-DSFA` | Kontrolle | REQ-PRIV-007 | Kontrolle `docs/06-recht/dsfa-schwellwertanalyse.md` – alle Kriterien bewertet, Ergebnis begründet. |
+| `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Bestätigung der Schwellwertanalyse durch die/den DSB (erst vor einem Echtbetrieb). |
+| `AT-PRIV-008` | automatisiert | REQ-PRIV-008 | Smoke-Test – `robots.txt` mit `Disallow: /`, Header `X-Robots-Tag` auf Start- und Rechtsseiten. |
 | `MAN-SEC-001` | manuell | REQ-SEC-001 | ASVS-L2-Checkliste mit Nachweis je Kontrolle und ZAP-Bericht. |
 | `AT-SEC-002` | automatisiert | REQ-SEC-002 | neu zu schreiben – Test prüft Algorithmus und Parameter eines frisch erzeugten Hashes. |
 | `AT-SEC-003` | automatisiert | REQ-SEC-003 | Unit-Test der Tabelle (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „Passwortrichtlinie“). |
@@ -167,6 +207,9 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SEC-011` | automatisiert | REQ-SEC-011 | (neu) Registrierung ohne Bestätigung: Anmeldung liefert `not_verified`; Anzeige anlegen, Bild hochladen und Anzeige bearbeiten ohne Sitzung liefern 401. |
 | `AT-SEC-011-2` | automatisiert | REQ-SEC-011 | (neu) nach Sperre durch die Moderation liefern Anzeige anlegen, Bild hochladen und Bearbeiten mit der alten Sitzung 401. |
 | `AT-SEC-011-3` | automatisiert | REQ-SEC-011 | (neu) nach beantragter Kontolöschung liefert Anzeige anlegen mit der alten Sitzung 401. |
+| `AT-SEC-012` | automatisiert | REQ-SEC-012 | Smoke-Test – `/.well-known/security.txt` liefert 200, `text/plain`, alle Pflichtfelder, `Expires` in der Zukunft. |
+| `CTRL-DOC-PENTEST` | Kontrolle | REQ-SEC-013 | Kontrolle `docs/07-betrieb/pentest-plan.md` – Umfang, Methode, Befundbehandlung vorhanden. |
+| `MAN-SEC-013` | manuell | REQ-SEC-013 | Abschlussbericht des Penetrationstests (erst vor einem Echtbetrieb). |
 | `AT-SRCH-001` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit Tippfehler findet die Anzeige. |
 | `AT-SRCH-001-2` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit abweichender Wortform findet Anzeigen. |
 | `AT-SRCH-002` | automatisiert | REQ-SRCH-002 | API-Test – Filterkombinationen und Sortierungen gegen Seed-Daten (neu). |
@@ -178,3 +221,12 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben). |
 | `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test – Manifest und Service Worker sind vorhanden und registriert. |
 | `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte. |
+| `AT-UX-003` | automatisiert | REQ-UX-003 | Smoke- oder E2E-Test – unbekannte Seite ergibt 404 mit Seite „Seite nicht gefunden“ und Links; unbekannter API-Pfad ergibt JSON-404. |
+| `AT-UX-003-2` | automatisiert | REQ-UX-003 | Unit-Test – Fehlerbehandler liefert bei unerwartetem Fehler 500 mit Request-ID ohne Stacktrace. |
+| `AT-UX-004` | automatisiert | REQ-UX-004 | E2E-Test – Gast sieht die Startseite mit Zugangsregel, drei Schritten, Registrieren und Anmelden; angemeldetes Mitglied wird zur Suche weitergeleitet; axe-core ohne Verstöße `serious`/`critical`. |
+| `AT-UX-005` | automatisiert | REQ-UX-005 | E2E-Test – Hilfeseite ohne Anmeldung erreichbar, alle Themen als Überschrift vorhanden, Link aus dem Chat-Sicherheitshinweis führt zum Abschnitt „Betrugsmaschen“. |
+| `AT-UX-006` | automatisiert | REQ-UX-006 | E2E-Test – alle öffentlichen und internen Routen sowie die 404-Seite enthalten die sechs Links im Seitenfuß. |
+| `AT-UX-006-2` | automatisiert | REQ-UX-006 | Unit-Test – jede E-Mail-Vorlage enthält Absender, Impressum- und Datenschutz-Link. |
+| `AT-UX-007` | automatisiert | REQ-UX-007 | E2E-Test – Sprachwechsel auf Englisch ändert Texte und `lang`, Wahl bleibt nach Neuladen erhalten. |
+| `AT-UX-007-2` | automatisiert | REQ-UX-007 | Unit-Test – Schlüsselmengen Deutsch und Englisch sind gleich. |
+| `AT-UX-007-3` | automatisiert | REQ-UX-007 | E2E-Test – englische Rechtstexte zeigen den Hinweis auf die verbindliche deutsche Fassung. |
