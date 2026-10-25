@@ -1,4 +1,5 @@
 import type { Problem } from '@campusmarkt/contracts';
+import { currentLocale, t, tMaybe } from '../i18n';
 
 export const API_BASE = '/api/v1';
 export const CSRF_HEADER = 'x-campusmarkt-csrf';
@@ -14,7 +15,7 @@ export class ApiError extends Error {
     /** Sekunden aus `Retry-After`, z. B. im Wartungsmodus (REQ-OPS-006). */
     readonly retryAfter?: number,
   ) {
-    super(detail ?? `Fehler ${status}`);
+    super(detail ?? `HTTP ${status}`);
     this.name = 'ApiError';
   }
 }
@@ -22,7 +23,7 @@ export class ApiError extends Error {
 /** Netzwerkfehler (kein HTTP-Status) – unterscheidbar von Serverfehlern. */
 export class NetworkError extends Error {
   constructor() {
-    super('Keine Verbindung zum Server.');
+    super(t('error.network'));
     this.name = 'NetworkError';
   }
 }
@@ -88,12 +89,18 @@ export function qs(params: Record<string, string | number | undefined | null>): 
   return s ? `?${s}` : '';
 }
 
-export function errorMessage(err: unknown, fallback = 'Es ist ein Fehler aufgetreten.'): string {
+/**
+ * Verständliche Fehlermeldung in der gewählten Sprache: zuerst über den Fehlercode des Servers (`apiError.<code>`),
+ * sonst der Text des Servers (Deutsch), sonst ein allgemeiner Hinweis (ADR-0016).
+ */
+export function errorMessage(err: unknown, fallback?: string): string {
   if (err instanceof ApiError) {
-    if (err.status === 429) return 'Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.';
-    if (err.status === 503 && err.code === 'maintenance') return 'CampusMarkt wird gerade gewartet. Bitte versuche es später erneut.';
-    return err.detail ?? fallback;
+    if (err.status === 429) return t('apiError.rate_limited');
+    if (err.status === 503 && err.code === 'maintenance') return t('apiError.maintenance');
+    const translated = err.code ? tMaybe(`apiError.${err.code}`) : undefined;
+    if (translated && currentLocale() !== 'de') return translated;
+    return err.detail ?? translated ?? fallback ?? t('error.generic');
   }
-  if (err instanceof NetworkError) return err.message;
-  return fallback;
+  if (err instanceof NetworkError) return t('error.network');
+  return fallback ?? t('error.generic');
 }

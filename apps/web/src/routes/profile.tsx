@@ -7,6 +7,7 @@ import { API_BASE, errorMessage } from '../api/client';
 import { Dialog } from '../components/Dialog';
 import { Alert, Button, Card, Checkbox, EmptyState, Field, FormError, Loading, PageHeader } from '../components/ui';
 import { formatDate, roleLabels, userTypeLabels } from '../lib/format';
+import { t } from '../i18n';
 
 function ProfileForm({ me }: { me: Me }) {
   const { data: meta } = useMeta();
@@ -28,10 +29,10 @@ function ProfileForm({ me }: { me: Me }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <Field label="Anzeigename" required minLength={2} maxLength={40} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-      <Field label="Studiengang (optional)" maxLength={80} value={studyProgram} onChange={(e) => setStudyProgram(e.target.value)} />
+      <Field label={t('auth.displayName')} required minLength={2} maxLength={40} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+      <Field label={t('profile.studyProgram')} maxLength={80} value={studyProgram} onChange={(e) => setStudyProgram(e.target.value)} />
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-slate-800">Bevorzugte Übergabeorte</legend>
+        <legend className="text-sm font-medium text-slate-800">{t('profile.locations')}</legend>
         {meta?.locations.map((l) => (
           <Checkbox
             key={l.id}
@@ -42,15 +43,15 @@ function ProfileForm({ me }: { me: Me }) {
         ))}
       </fieldset>
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-slate-800">E-Mail-Benachrichtigungen</legend>
-        <Checkbox label="Neue Chat-Nachrichten (gebündelt, ohne Inhalt)" checked={prefs.newMessage} onChange={(e) => setPrefs({ ...prefs, newMessage: e.target.checked })} />
-        <Checkbox label="Erinnerung vor Ablauf meiner Anzeigen" checked={prefs.listingExpiry} onChange={(e) => setPrefs({ ...prefs, listingExpiry: e.target.checked })} />
-        <p className="text-sm text-slate-600">Sicherheitsrelevante E-Mails (z. B. Passwort-Reset) werden immer gesendet.</p>
+        <legend className="text-sm font-medium text-slate-800">{t('profile.emailNotifications')}</legend>
+        <Checkbox label={t('profile.notifyMessages')} checked={prefs.newMessage} onChange={(e) => setPrefs({ ...prefs, newMessage: e.target.checked })} />
+        <Checkbox label={t('profile.notifyExpiry')} checked={prefs.listingExpiry} onChange={(e) => setPrefs({ ...prefs, listingExpiry: e.target.checked })} />
+        <p className="text-sm text-slate-600">{t('profile.securityMails')}</p>
       </fieldset>
-      <div aria-live="polite">{update.isSuccess && <Alert tone="success">Gespeichert.</Alert>}</div>
+      <div aria-live="polite">{update.isSuccess && <Alert tone="success">{t('common.saved')}</Alert>}</div>
       <FormError error={update.isError ? errorMessage(update.error) : null} />
       <Button type="submit" busy={update.isPending}>
-        Speichern
+        {t('common.save')}
       </Button>
     </form>
   );
@@ -60,16 +61,16 @@ function BlockedUsers() {
   const { data, isPending } = useBlocks();
   const setBlock = useSetBlock();
   if (isPending) return <Loading />;
-  if (!data?.length) return <EmptyState>Du hast niemanden blockiert.</EmptyState>;
+  if (!data?.length) return <EmptyState>{t('profile.noBlocks')}</EmptyState>;
   return (
     <ul className="divide-y divide-slate-200">
       {data.map((b) => (
         <li key={b.userId} className="flex items-center justify-between gap-2 py-2">
           <span>
-            {b.displayName} <span className="text-sm text-slate-600">seit {formatDate(b.blockedAt)}</span>
+            {b.displayName} <span className="text-sm text-slate-600">{t('profile.blockedSince', { date: formatDate(b.blockedAt) })}</span>
           </span>
           <Button variant="secondary" busy={setBlock.isPending && setBlock.variables?.userId === b.userId} onClick={() => setBlock.mutate({ userId: b.userId, blocked: false })}>
-            Entsperren
+            {t('profile.unblock')}
           </Button>
         </li>
       ))}
@@ -85,12 +86,12 @@ function DeleteAccount() {
   return (
     <>
       <p className="text-sm text-slate-700">
-        Nach dem Löschantrag wirst du abgemeldet. Dein Konto wird 14 Tage lang aufbewahrt; meldest du dich in dieser Zeit wieder an, wird die Löschung abgebrochen. Danach werden deine Daten endgültig gelöscht.
+        {t('profile.delete.text')}
       </p>
       <Button variant="danger" onClick={() => setOpen(true)}>
-        Konto löschen
+        {t('profile.delete.title')}
       </Button>
-      <Dialog open={open} onClose={() => setOpen(false)} title="Konto wirklich löschen?">
+      <Dialog open={open} onClose={() => setOpen(false)} title={t('profile.delete.confirmTitle')}>
         <form
           className="space-y-4"
           onSubmit={(e) => {
@@ -98,15 +99,15 @@ function DeleteAccount() {
             del.mutate({ password }, { onSuccess: () => void navigate({ to: '/login', search: {} }) });
           }}
         >
-          <p>Bitte bestätige mit deinem Passwort. Deine Anzeigen werden sofort ausgeblendet.</p>
-          <Field label="Passwort" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <p>{t('profile.delete.confirmText')}</p>
+          <Field label={t('auth.password')} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           <FormError error={del.isError ? errorMessage(del.error) : null} />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setOpen(false)}>
-              Abbrechen
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="danger" busy={del.isPending} disabled={!password}>
-              Endgültig beantragen
+              {t('profile.delete.submit')}
             </Button>
           </div>
         </form>
@@ -120,32 +121,32 @@ export function ProfilePage() {
   if (!me) return <Loading />;
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader title="Profil" />
-      {me.deletionCancelled && <Alert tone="success">Willkommen zurück! Die geplante Löschung deines Kontos wurde abgebrochen.</Alert>}
+      <PageHeader title={t('nav.profile')} />
+      {me.deletionCancelled && <Alert tone="success">{t('profile.deletionCancelled')}</Alert>}
       <Card className="space-y-1">
         <p className="font-semibold">{me.email}</p>
         <p className="text-sm text-slate-600">
-          {userTypeLabels[me.userType]} · {roleLabels[me.role]} · Mitglied seit {formatDate(me.createdAt)}
+          {userTypeLabels[me.userType]} · {roleLabels[me.role]} · {t('profile.memberSince', { date: formatDate(me.createdAt) })}
         </p>
-        <p className="text-sm text-slate-600">Deine E-Mail-Adresse ist für andere Mitglieder nie sichtbar.</p>
+        <p className="text-sm text-slate-600">{t('profile.emailPrivate')}</p>
       </Card>
       <Card>
-        <h2 className="mb-3 text-lg font-semibold">Profildaten</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t('profile.data')}</h2>
         <ProfileForm me={me} />
       </Card>
       <Card>
-        <h2 className="mb-3 text-lg font-semibold">Blockierte Mitglieder</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t('profile.blocked')}</h2>
         <BlockedUsers />
       </Card>
       <Card className="space-y-3">
-        <h2 className="text-lg font-semibold">Meine Daten</h2>
-        <p className="text-sm text-slate-700">Lade alle Daten herunter, die wir über dich speichern (JSON, Art. 15 und 20 DSGVO).</p>
+        <h2 className="text-lg font-semibold">{t('profile.myData')}</h2>
+        <p className="text-sm text-slate-700">{t('profile.exportText')}</p>
         <a href={`${API_BASE}/me/export`} download className="inline-flex min-h-11 items-center rounded-lg border border-slate-400 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-100">
-          Daten exportieren
+          {t('profile.export')}
         </a>
       </Card>
       <Card className="space-y-3">
-        <h2 className="text-lg font-semibold">Konto löschen</h2>
+        <h2 className="text-lg font-semibold">{t('profile.delete.title')}</h2>
         <DeleteAccount />
       </Card>
     </div>

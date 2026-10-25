@@ -5,6 +5,7 @@ import { errorMessage } from '../api/client';
 import { reasonLabels } from '../lib/format';
 import { Dialog } from './Dialog';
 import { Alert, Button, FormError, Select, TextArea } from './ui';
+import { t } from '../i18n';
 
 const reasons = (Object.keys(reasonLabels) as ReportReason[]).filter((r) => r !== 'auto_filter');
 
@@ -34,32 +35,32 @@ export function ReportDialog({
     report.mutate({ targetType, targetId, reason, details: details.trim() || undefined });
   };
 
-  const title = { listing: 'Anzeige melden', message: 'Nachricht melden', user: 'Profil melden' }[targetType];
+  const title = { listing: t('report.titleListing'), message: t('report.titleMessage'), user: t('report.titleUser') }[targetType];
 
   return (
     <Dialog open={open} onClose={close} title={title}>
       {report.isSuccess ? (
         <div className="space-y-4">
-          <Alert tone="success">Danke! Deine Meldung wird vom Moderationsteam geprüft.</Alert>
-          <Button onClick={close}>Schließen</Button>
+          <Alert tone="success">{t('report.thanks')}</Alert>
+          <Button onClick={close}>{t('common.close')}</Button>
         </div>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <Select
-            label="Grund"
+            label={t('report.reason')}
             required
             value={reason}
             onChange={(e) => setReason(e.target.value as ReportReason)}
             options={reasons.map((r) => ({ value: r, label: reasonLabels[r] }))}
           />
-          <TextArea label="Details (optional)" rows={3} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} />
+          <TextArea label={t('report.details')} rows={3} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} />
           <FormError error={report.isError ? errorMessage(report.error) : null} />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={close}>
-              Abbrechen
+              {t('common.cancel')}
             </Button>
             <Button type="submit" busy={report.isPending}>
-              Meldung senden
+              {t('report.submit')}
             </Button>
           </div>
         </form>

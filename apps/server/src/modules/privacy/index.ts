@@ -41,7 +41,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
           await modules.listings.deleteAllForOwner(tx, user.id);
           await modules.messaging.deleteForUser(tx, user.id);
           await modules.trust.deleteForUser(tx, user.id);
-          await modules.notifications.email(tx, { address: user.email }, 'deletion_completed', { name: user.displayName });
+          await modules.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_completed', { name: user.displayName });
           await modules.identity.deleteUser(tx, user.id);
         });
         await modules.search.deleteForUser(user.id);

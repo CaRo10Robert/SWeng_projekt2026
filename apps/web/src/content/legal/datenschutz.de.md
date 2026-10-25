@@ -73,8 +73,9 @@ Wir speichern nur, was technisch unbedingt erforderlich ist (§ 25 Abs. 2 Nr. 2 
 |---|---|---|
 | Cookie `cm_session` (HttpOnly, Secure, SameSite) | hält Sie angemeldet; enthält nur einen zufälligen Sitzungsschlüssel | bis zur Abmeldung, höchstens 30 Tage |
 | Zwischenspeicher des Service Workers (Cache Storage) | speichert die Programmdateien der App (keine persönlichen Daten), damit sie schnell lädt und installierbar ist | bis zur nächsten Version der App bzw. bis Sie die Websitedaten löschen |
+| `localStorage`-Eintrag `cm_locale` | merkt sich die Sprache (`de` oder `en`), die Sie ausdrücklich gewählt haben; wird erst gesetzt, wenn Sie die Sprache umschalten. Unbedingt erforderlich, weil Sie diese Einstellung ausdrücklich wünschen | bis Sie eine andere Sprache wählen oder die Websitedaten löschen |
 
-Es werden kein `localStorage`, kein `sessionStorage` und keine IndexedDB genutzt. Sollte später eine Speicherung hinzukommen, die nicht unbedingt erforderlich ist, fragen wir vorher Ihre Einwilligung ab.
+Darüber hinaus werden kein `localStorage`, kein `sessionStorage` und keine IndexedDB genutzt. Sollte später eine Speicherung hinzukommen, die nicht unbedingt erforderlich ist, fragen wir vorher Ihre Einwilligung ab.
 
 ## 10. Ihre Rechte
 

@@ -8,26 +8,28 @@ import { Alert, Badge, Button, Card, EmptyState, FormError, Loading, PageHeader,
 import { appealStatusLabels, decisionConsequences, decisionLabels, MIN_APPEAL, ruleLabels, targetLabels } from '../lib/dsa';
 import { formatDate, formatDateTime } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
+import { t, tx } from '../i18n';
 
 /** Begründung nach DSA Art. 17 Abs. 3: Maßnahme, Tatsachen, automatisierte Erkennung, Regel, Rechtsbehelf. */
 export function DecisionDetails({ decision }: { decision: DecisionStatement }) {
   const rule = decision.ruleRef ? ruleLabels[decision.ruleRef] : null;
   return (
     <dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[12rem_1fr]">
-      <dt className="font-semibold">Betroffen</dt>
+      <dt className="font-semibold">{t('dsa.affected')}</dt>
       <dd>
         {targetLabels[decision.targetType]}
-        {decision.targetTitle ? ` „${decision.targetTitle}“` : ''}
+        {decision.targetTitle ? ` ${t('common.quoted', { text: decision.targetTitle })}` : ''}
       </dd>
-      <dt className="font-semibold">Entscheidung</dt>
+      <dt className="font-semibold">{t('dsa.decisionLabel')}</dt>
       <dd>
-        {decisionLabels[decision.decision]} am {formatDateTime(decision.decidedAt)}. {decisionConsequences[decision.decision]}
+        {t('dsa.decidedOn', { decision: decisionLabels[decision.decision], date: formatDateTime(decision.decidedAt) })}{' '}
+        {decisionConsequences[decision.decision]}
       </dd>
-      <dt className="font-semibold">Begründung</dt>
+      <dt className="font-semibold">{t('dsa.reason')}</dt>
       <dd className="whitespace-pre-line">{decision.facts}</dd>
       {rule && (
         <>
-          <dt className="font-semibold">Verletzte Regel</dt>
+          <dt className="font-semibold">{t('dsa.violatedRule')}</dt>
           <dd>
             <Link to={rule.href.split('#')[0] as '/'} hash={rule.href.split('#')[1]} className="text-brand-700 underline">
               {rule.label}
@@ -35,11 +37,9 @@ export function DecisionDetails({ decision }: { decision: DecisionStatement }) {
           </dd>
         </>
       )}
-      <dt className="font-semibold">Erkennung</dt>
+      <dt className="font-semibold">{t('dsa.detection')}</dt>
       <dd>
-        {decision.automatedDetection
-          ? 'Automatisch durch die Inhaltsprüfung erkannt, von einem Menschen entschieden.'
-          : 'Auf Meldung hin von einem Menschen geprüft und entschieden.'}
+        {decision.automatedDetection ? t('dsa.detection.automated') : t('dsa.detection.report')}
       </dd>
     </dl>
   );
@@ -55,13 +55,10 @@ function AppealForm({ notice, onDone }: { notice: ModerationNotice; onDone: () =
   const tooShort = reason.trim().length < MIN_APPEAL;
   return (
     <form onSubmit={submit} className="space-y-3">
-      <p className="text-sm">
-        Ein anderes Mitglied des Moderationsteams prüft deinen Widerspruch. Du erhältst das Ergebnis als Mitteilung und per
-        E-Mail.
-      </p>
+      <p className="text-sm">{t('appeal.intro')}</p>
       <TextArea
-        label="Warum ist die Entscheidung aus deiner Sicht falsch?"
-        hint={`Mindestens ${MIN_APPEAL} Zeichen, höchstens 2.000.`}
+        label={t('appeal.reasonLabel')}
+        hint={t('appeal.reasonHint', { min: MIN_APPEAL, max: 2000 })}
         required
         minLength={MIN_APPEAL}
         maxLength={2000}
@@ -71,7 +68,7 @@ function AppealForm({ notice, onDone }: { notice: ModerationNotice; onDone: () =
       />
       <FormError error={appeal.isError ? errorMessage(appeal.error) : null} />
       <Button type="submit" busy={appeal.isPending} disabled={tooShort}>
-        Widerspruch einlegen
+        {t('appeal.submit')}
       </Button>
     </form>
   );
@@ -83,33 +80,33 @@ function NoticeCard({ notice }: { notice: ModerationNotice }) {
   const { appeal } = notice;
   const title =
     notice.kind === 'appeal_result'
-      ? 'Ergebnis deines Widerspruchs'
+      ? t('notices.title.appealResult')
       : notice.recipientRole === 'reporter'
-        ? 'Ergebnis deiner Meldung'
-        : 'Entscheidung der Moderation';
+        ? t('notices.title.reportResult')
+        : t('notices.title.decision');
   return (
     <Card className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="text-lg font-semibold">{title}</h2>
-        {!notice.readAt && <Badge tone="info">neu</Badge>}
+        {!notice.readAt && <Badge tone="info">{t('notices.new')}</Badge>}
         <span className="text-sm text-slate-600">{formatDateTime(notice.createdAt)}</span>
       </div>
       <DecisionDetails decision={notice.decision} />
       {appeal.status && (
-        <Alert tone={appeal.status === 'reversed' ? 'success' : appeal.status === 'open' ? 'info' : 'warning'} title={`Widerspruch: ${appealStatusLabels[appeal.status]}`}>
+        <Alert tone={appeal.status === 'reversed' ? 'success' : appeal.status === 'open' ? 'info' : 'warning'} title={t('notices.appealStatus', { status: appealStatusLabels[appeal.status] })}>
           {appeal.outcomeReason}
         </Alert>
       )}
-      {sent && <Alert tone="success">Dein Widerspruch ist eingegangen.</Alert>}
+      {sent && <Alert tone="success">{t('appeal.received')}</Alert>}
       {appeal.possible && !sent && (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" onClick={() => setOpen(true)}>
-            Widerspruch einlegen
+            {t('appeal.submit')}
           </Button>
-          {appeal.deadline && <span className="text-sm text-slate-600">möglich bis {formatDate(appeal.deadline)}</span>}
+          {appeal.deadline && <span className="text-sm text-slate-600">{t('appeal.possibleUntil', { date: formatDate(appeal.deadline) })}</span>}
         </div>
       )}
-      <Dialog open={open} onClose={() => setOpen(false)} title="Widerspruch einlegen">
+      <Dialog open={open} onClose={() => setOpen(false)} title={t('appeal.submit')}>
         <AppealForm
           notice={notice}
           onDone={() => {
@@ -126,7 +123,7 @@ function NoticeCard({ notice }: { notice: ModerationNotice }) {
 export function NoticesPage() {
   const { data, isPending, isError, error } = useNotices();
   const markRead = useMarkNoticesRead();
-  useDocumentTitle('Mitteilungen');
+  useDocumentTitle(t('nav.notices'));
   const unread = data?.some((n) => !n.readAt) ?? false;
 
   // Beim Öffnen als gelesen markieren; die Kennzeichnung „neu“ bleibt bis zum nächsten Abruf sichtbar
@@ -136,21 +133,22 @@ export function NoticesPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <PageHeader title="Mitteilungen" />
+      <PageHeader title={t('nav.notices')} />
       <p className="text-sm text-slate-700">
-        Hier findest du Entscheidungen der Moderation zu deinen Inhalten und Meldungen mit Begründung. Gegen eine
-        Entscheidung kannst du innerhalb von sechs Monaten Widerspruch einlegen (
-        <Link to="/nutzungsbedingungen" hash="8-melden-moderation-und-widerspruch" className="text-brand-700 underline">
-          Nutzungsbedingungen 8
-        </Link>
-        ).
+        {tx('notices.intro', {
+          link: (chunks) => (
+            <Link to="/nutzungsbedingungen" hash="8-melden-moderation-und-widerspruch" className="text-brand-700 underline">
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
       {isPending ? (
         <Loading />
       ) : isError ? (
         <Alert tone="error">{errorMessage(error)}</Alert>
       ) : data.length === 0 ? (
-        <EmptyState>Keine Mitteilungen.</EmptyState>
+        <EmptyState>{t('notices.empty')}</EmptyState>
       ) : (
         <div className="space-y-4">
           {data.map((n) => (
@@ -167,7 +165,7 @@ export function TokenAppealPage({ token }: { token?: string }) {
   const info = useTokenAppealInfo(token);
   const submit = useTokenAppeal();
   const [reason, setReason] = useState('');
-  useDocumentTitle('Widerspruch');
+  useDocumentTitle(t('appeal.docTitle'));
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -177,33 +175,33 @@ export function TokenAppealPage({ token }: { token?: string }) {
   const tokenProblem = (err: unknown) => {
     if (err instanceof ApiError && (err.code === 'token_used' || err.code === 'token_expired')) {
       return err.code === 'token_used'
-        ? 'Dieser Link wurde bereits verwendet. Ein Widerspruch ist eingegangen.'
-        : 'Dieser Link ist abgelaufen. Die Widerspruchsfrist von sechs Monaten ist vorbei.';
+        ? t('appeal.token.used')
+        : t('appeal.token.expired');
     }
-    return errorMessage(err, 'Der Link ist ungültig.');
+    return errorMessage(err, t('appeal.token.invalid'));
   };
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <PageHeader title="Widerspruch gegen eine Entscheidung" />
+      <PageHeader title={t('appeal.token.title')} />
       {!token ? (
-        <Alert tone="error">Der Link ist unvollständig. Bitte öffne ihn direkt aus der E-Mail.</Alert>
+        <Alert tone="error">{t('appeal.token.incomplete')}</Alert>
       ) : info.isPending ? (
         <Loading />
       ) : info.isError ? (
         <Alert tone="error">{tokenProblem(info.error)}</Alert>
       ) : submit.isSuccess ? (
-        <Alert tone="success" title="Dein Widerspruch ist eingegangen.">
-          Ein anderes Mitglied des Moderationsteams prüft ihn. Das Ergebnis erhältst du per E-Mail.
+        <Alert tone="success" title={t('appeal.received')}>
+          {t('appeal.token.receivedText')}
         </Alert>
       ) : (
         <Card className="space-y-4">
           <DecisionDetails decision={info.data.decision} />
-          <p className="text-sm text-slate-600">Widerspruch möglich bis {formatDate(info.data.deadline)}. Der Link gilt nur einmal.</p>
+          <p className="text-sm text-slate-600">{t('appeal.token.deadline', { date: formatDate(info.data.deadline) })}</p>
           <form onSubmit={onSubmit} className="space-y-3">
             <TextArea
-              label="Warum ist die Entscheidung aus deiner Sicht falsch?"
-              hint={`Mindestens ${MIN_APPEAL} Zeichen, höchstens 2.000.`}
+              label={t('appeal.reasonLabel')}
+              hint={t('appeal.reasonHint', { min: MIN_APPEAL, max: 2000 })}
               required
               minLength={MIN_APPEAL}
               maxLength={2000}
@@ -213,7 +211,7 @@ export function TokenAppealPage({ token }: { token?: string }) {
             />
             <FormError error={submit.isError ? tokenProblem(submit.error) : null} />
             <Button type="submit" busy={submit.isPending} disabled={reason.trim().length < MIN_APPEAL}>
-              Widerspruch einlegen
+              {t('appeal.submit')}
             </Button>
           </form>
         </Card>

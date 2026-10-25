@@ -1,4 +1,5 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { t } from '../i18n';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
@@ -50,7 +51,7 @@ export function Button({
   );
 }
 
-export function Spinner({ small, label = 'Wird geladen …' }: { small?: boolean; label?: string }) {
+export function Spinner({ small, label = t('common.loading') }: { small?: boolean; label?: string }) {
   return (
     <span role="status" className="inline-flex items-center gap-2">
       <span

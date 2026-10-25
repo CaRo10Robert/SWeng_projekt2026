@@ -39,34 +39,8 @@ import {
  * Straftaten mit Beweissicherung (Art. 18, REQ-LEGAL-008).
  */
 
-const MEASURE_LABEL: Record<ModerationDecisionType, Record<ReportTargetType, string>> = {
-  no_action: { listing: 'keine Maßnahme', message: 'keine Maßnahme', user: 'keine Maßnahme' },
-  remove: { listing: 'Anzeige entfernt', message: 'Nachricht entfernt', user: 'Profilinhalt entfernt' },
-  warn: { listing: 'Verwarnung', message: 'Verwarnung', user: 'Verwarnung' },
-  ban: { listing: 'Konto dauerhaft gesperrt', message: 'Konto dauerhaft gesperrt', user: 'Konto dauerhaft gesperrt' },
-};
-
-const TARGET_LABEL: Record<ReportTargetType, string> = {
-  listing: 'einer Anzeige',
-  message: 'einer Chatnachricht',
-  user: 'einem Profil',
-};
-
-/** Verweise auf die Rechtstexte in apps/web/src/content/legal (ADR-0015). */
-export const RULE_LABEL: Record<ModerationRule, string> = {
-  community_prohibited_items: 'Community-Regeln, Abschnitt „Verbotene Artikel und Inhalte“',
-  community_fair_communication: 'Community-Regeln, Abschnitt „Fair kommunizieren“',
-  community_safe_handover: 'Community-Regeln, Abschnitt „Sicher übergeben“',
-  terms_private_only: 'Nutzungsbedingungen, Abschnitt 3 „Nur private Angebote“',
-  terms_member_duties: 'Nutzungsbedingungen, Abschnitt 5 „Pflichten der Mitglieder“',
-  terms_content_rights: 'Nutzungsbedingungen, Abschnitt 6 „Rechte an Inhalten“',
-  illegal_content: 'Rechtswidriger Inhalt (Verstoß gegen geltendes Recht)',
-};
-
-const SUSPICION_LABEL: Record<Exclude<CriminalSuspicion, 'none'>, string> = {
-  suspected: 'Verdacht auf Straftat',
-  imminent_danger: 'Verdacht auf Straftat – Gefahr für Leben oder Sicherheit',
-};
+// Texte für Maßnahme, Ziel, Regel und Kennzeichnung setzt die Mail-Vorlage in der Sprache des Empfängers
+// (modules/notifications/templates.ts, ADR-0016); hier werden nur Codes übergeben.
 
 const DECISION_MESSAGES = {
   reason_too_short: 'Bitte begründe die Entscheidung mit mindestens 20 Zeichen (Tatsachen und Umstände).',
@@ -93,8 +67,6 @@ const DECISION_WITH_CASE = sql`
   SELECT d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.automated_detection, d.created_at,
          d.notified_at, c.target_type, c.target_id, c.subject_user_id
   FROM trust.decision d JOIN trust.moderation_case c ON c.id = d.case_id`;
-
-const date = (d: Date) => d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' });
 
 export interface DsaDeps {
   openCase(tx: Tx, targetType: ReportTargetType, targetId: string, subjectUserId: string | null): Promise<{ id: string }>;
@@ -234,9 +206,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           details: { caseId, decisionId: decision.id, reason: body.reason, ruleRef: body.ruleRef ?? null, criminalSuspicion: suspicion },
         });
 
-        const deadline = date(appealDeadline(new Date(decision.notified_at)));
-        const measure = MEASURE_LABEL[body.decision][kase.target_type];
-        const target = TARGET_LABEL[kase.target_type] + (title ? ` („${title}“)` : '');
+        const deadlineIso = appealDeadline(new Date(decision.notified_at)).toISOString();
 
         // Betroffene (DSA Art. 17); bei „keine Maßnahme“ nur, wenn ein Filter die Anzeige zurückgehalten hatte
         const autoFilterOnly = reporters.length === 0;
@@ -254,12 +224,13 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             appealLink = noticesLink;
           }
           await modules.notifications.email(tx, { userId: kase.subject_user_id }, 'moderation_decision', {
-            measure,
-            target,
+            decision: body.decision,
+            targetType: kase.target_type,
+            ...(title ? { title } : {}),
             facts: body.reason.trim(),
-            ...(body.ruleRef ? { rule: RULE_LABEL[body.ruleRef] } : {}),
-            basis: automated ? 'Hinweis der automatischen Inhaltsprüfung' : 'Meldung eines Mitglieds',
-            deadline,
+            ...(body.ruleRef ? { ruleRef: body.ruleRef } : {}),
+            automated: String(automated),
+            deadlineIso,
             ...(appealLink ? { appealLink } : {}),
           });
         }
@@ -268,9 +239,9 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         for (const reporterId of reporters) {
           await addNotice(tx, { userId: reporterId, kind: 'decision', role: 'reporter', decisionId: decision.id });
           await modules.notifications.email(tx, { userId: reporterId }, 'moderation_report_result', {
-            target: TARGET_LABEL[kase.target_type],
-            result: body.decision === 'no_action' ? 'keine Maßnahme' : measure,
-            deadline,
+            decision: body.decision,
+            targetType: kase.target_type,
+            deadlineIso,
             ...(body.decision === 'no_action' ? { appealLink: noticesLink } : {}),
           });
         }
@@ -291,7 +262,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           for (const adminId of await modules.identity.adminIds()) {
             await modules.notifications.email(tx, { userId: adminId }, 'criminal_suspicion_alert', {
               caseId,
-              label: SUSPICION_LABEL[suspicion],
+              level: suspicion,
               urgent: String(suspicion === 'imminent_danger'),
               link: `${config.publicUrl}/admin`,
             });
@@ -497,12 +468,8 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           details: { appealId, role: appeal.appellant_role, reason: body.reason },
         });
 
-        const outcome =
-          body.outcome === 'reversed'
-            ? appeal.appellant_role === 'subject'
-              ? 'Widerspruch stattgegeben, die Maßnahme wurde aufgehoben'
-              : 'Widerspruch stattgegeben, der Fall wird neu geprüft'
-            : 'Widerspruch zurückgewiesen, die Entscheidung bleibt bestehen';
+        const outcomeCode =
+          body.outcome === 'reversed' ? (appeal.appellant_role === 'subject' ? 'reversed_subject' : 'reversed_reporter') : 'upheld';
         const recipients: { userId: string; role: AppealRole }[] = [];
         if (appeal.appellant_id) recipients.push({ userId: appeal.appellant_id, role: appeal.appellant_role });
         // Stattgabe zugunsten der Betroffenen: begründete Mitteilung an beide Seiten (REQ-LEGAL-007)
@@ -512,8 +479,8 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         for (const r of recipients) {
           await addNotice(tx, { userId: r.userId, kind: 'appeal_result', role: r.role, decisionId: row.id, appealId });
           await modules.notifications.email(tx, { userId: r.userId }, 'appeal_result', {
-            target: TARGET_LABEL[row.target_type],
-            outcome,
+            targetType: row.target_type,
+            outcomeCode,
             reason: body.reason.trim(),
             link: noticesLink,
           });

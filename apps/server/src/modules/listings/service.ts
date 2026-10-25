@@ -473,7 +473,7 @@ export function createListingsService(deps: ModuleDeps) {
       for (const r of reminders) {
         await modules.notifications.email(undefined, { userId: r.owner_id }, 'listing_expiry', {
           listingTitle: r.title,
-          date: new Date(r.expires_at).toLocaleDateString('de-DE'),
+          dateIso: new Date(r.expires_at).toISOString(),
           link: `${deps.config.publicUrl}/listings/${r.id}`,
         });
       }

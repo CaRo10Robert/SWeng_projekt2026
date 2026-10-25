@@ -177,14 +177,14 @@ export function createIdentityService(deps: ModuleDeps) {
         );
         if (existing?.status === 'unverified') {
           const token = await issueToken(tx, existing.id, 'verify', VERIFY_TTL_HOURS);
-          await notify.notifications.email(tx, { address: existing.email }, 'verify', {
+          await notify.notifications.email(tx, { address: existing.email, locale: existing.locale }, 'verify', {
             name: existing.display_name,
             link: link('/verify', token),
           });
           return;
         }
         if (existing) {
-          await notify.notifications.email(tx, { address: existing.email }, 'account_exists', {
+          await notify.notifications.email(tx, { address: existing.email, locale: existing.locale }, 'account_exists', {
             name: existing.display_name,
             loginLink: `${config.publicUrl}/login`,
             resetLink: `${config.publicUrl}/forgot-password`,
@@ -228,7 +228,7 @@ export function createIdentityService(deps: ModuleDeps) {
         );
         if (!user) return;
         const token = await issueToken(tx, user.id, 'verify', VERIFY_TTL_HOURS);
-        await notify.notifications.email(tx, { address: user.email }, 'verify', {
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'verify', {
           name: user.display_name,
           link: link('/verify', token),
         });
@@ -304,7 +304,7 @@ export function createIdentityService(deps: ModuleDeps) {
         );
         if (!user) return;
         const token = await issueToken(tx, user.id, 'reset', RESET_TTL_HOURS);
-        await notify.notifications.email(tx, { address: user.email }, 'password_reset', {
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'password_reset', {
           name: user.display_name,
           link: link('/reset-password', token),
         });
@@ -497,18 +497,18 @@ export function createIdentityService(deps: ModuleDeps) {
           UPDATE identity."user" SET status = 'pending_deletion', deletion_requested_at = now(), updated_at = now()
           WHERE id = ${userId}`);
         await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
-        const date = new Date(Date.now() + DELETION_GRACE_DAYS * 86_400_000).toLocaleDateString('de-DE');
-        await notify.notifications.email(tx, { address: user.email }, 'deletion_scheduled', {
+        const dateIso = new Date(Date.now() + DELETION_GRACE_DAYS * 86_400_000).toISOString();
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_scheduled', {
           name: user.display_name,
-          date,
+          dateIso,
           loginLink: `${config.publicUrl}/login`,
         });
       });
     },
 
-    async dueDeletions(): Promise<{ id: string; email: string; displayName: string }[]> {
+    async dueDeletions(): Promise<{ id: string; email: string; displayName: string; locale: Locale }[]> {
       return db.query(sql`
-        SELECT id, email, display_name AS "displayName" FROM identity."user"
+        SELECT id, email, display_name AS "displayName", locale FROM identity."user"
         WHERE status = 'pending_deletion'
           AND deletion_requested_at < now() - make_interval(days => ${DELETION_GRACE_DAYS})`);
     },

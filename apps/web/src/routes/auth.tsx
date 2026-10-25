@@ -12,15 +12,16 @@ import {
   useVerify,
 } from '../api/auth';
 import { Alert, Button, Card, Checkbox, Field, FormError, Loading } from '../components/ui';
+import { t, tx, type MessageKey } from '../i18n';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const DEMO_PASSWORD = 'CampusMarkt-Demo-2026';
 const demoAccounts = [
-  { email: 'lea@studmail.hwg-lu.de', role: 'Mitglied (Studierende)' },
-  { email: 'ben@studmail.hwg-lu.de', role: 'Mitglied (Studierende)' },
-  { email: 'mod@hwg-lu.de', role: 'Moderator' },
-  { email: 'admin@hwg-lu.de', role: 'Admin' },
-];
+  { email: 'lea@studmail.hwg-lu.de', role: 'auth.demo.roleStudent' },
+  { email: 'ben@studmail.hwg-lu.de', role: 'auth.demo.roleStudent' },
+  { email: 'mod@hwg-lu.de', role: 'auth.demo.roleModerator' },
+  { email: 'admin@hwg-lu.de', role: 'auth.demo.roleAdmin' },
+] as const satisfies readonly { email: string; role: MessageKey }[];
 
 function AuthShell({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -35,8 +36,8 @@ function MailpitHint() {
   const { data: meta } = useMeta();
   if (!meta?.demoMode) return null;
   return (
-    <Alert tone="info" title="Demo-Modus">
-      Alle E-Mails landen in Mailpit:{' '}
+    <Alert tone="info" title={t('auth.demo.mode')}>
+      {t('auth.demo.allMails')}{' '}
       <a href={MAILPIT_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
         {MAILPIT_URL}
       </a>
@@ -78,35 +79,35 @@ export function LoginPage() {
 
   const loginError = login.isError
     ? login.error instanceof ApiError && login.error.code === 'invalid_credentials'
-      ? 'E-Mail-Adresse oder Passwort ist falsch.'
+      ? t('apiError.invalid_credentials')
       : errorMessage(login.error)
     : null;
 
   return (
-    <AuthShell title="Anmelden">
+    <AuthShell title={t('auth.login.title')}>
       <form onSubmit={submit} className="space-y-4" noValidate>
-        <Field label="Hochschul-E-Mail" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Field label="Passwort" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Field label={t('auth.email')} type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field label={t('auth.password')} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         <FormError error={loginError} />
         <Button type="submit" className="w-full" busy={login.isPending}>
-          Anmelden
+          {t('auth.login.submit')}
         </Button>
       </form>
       <div className="flex flex-wrap justify-between gap-2 text-sm">
         <Link to="/register" className="text-brand-700 underline">
-          Konto erstellen
+          {t('auth.login.createAccount')}
         </Link>
         <Link to="/forgot-password" className="text-brand-700 underline">
-          Passwort vergessen?
+          {t('auth.login.forgot')}
         </Link>
       </div>
       {meta?.demoMode && (
         <section aria-labelledby="demo-heading" className="space-y-2 rounded-lg bg-slate-100 p-3 text-sm">
           <h2 id="demo-heading" className="font-semibold">
-            Demo-Konten
+            {t('auth.demo.accounts')}
           </h2>
           <p>
-            Passwort für alle: <code className="rounded bg-white px-1">{DEMO_PASSWORD}</code>
+            {t('auth.demo.passwordForAll')} <code className="rounded bg-white px-1">{DEMO_PASSWORD}</code>
           </p>
           <ul className="space-y-1">
             {demoAccounts.map((a) => (
@@ -121,12 +122,12 @@ export function LoginPage() {
                 >
                   {a.email}
                 </button>{' '}
-                – {a.role}
+                – {t(a.role)}
               </li>
             ))}
           </ul>
           <p>
-            E-Mails (Verifikation, Passwort-Reset) findest du in Mailpit:{' '}
+            {t('auth.demo.mailsInMailpit')}{' '}
             <a href={MAILPIT_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
               {MAILPIT_URL}
             </a>
@@ -153,15 +154,15 @@ export function RegisterPage() {
     setClientError(null);
     const domain = email.trim().toLowerCase().split('@')[1] ?? '';
     if (domains.length && !domains.includes(domain)) {
-      setClientError(`Bitte verwende eine Adresse mit ${domains.map((d) => '@' + d).join(' oder ')}.`);
+      setClientError(t('auth.register.useDomain', { domains: domains.map((d) => '@' + d).join(t('common.or')) }));
       return;
     }
     if (password.length < 12) {
-      setClientError('Das Passwort muss mindestens 12 Zeichen lang sein.');
+      setClientError(t('auth.passwordTooShort'));
       return;
     }
     if (!accept || !meta) {
-      setClientError('Bitte stimme den Nutzungsbedingungen und dem Datenschutzhinweis zu.');
+      setClientError(t('auth.register.acceptRequired'));
       return;
     }
     register.mutate({ email: email.trim(), password, displayName: displayName.trim(), acceptTerms: true, termsVersion: meta.termsVersion });
@@ -169,35 +170,35 @@ export function RegisterPage() {
 
   if (register.isSuccess) {
     return (
-      <AuthShell title="Fast geschafft">
-        <Alert tone="success" title="Bitte bestätige deine E-Mail-Adresse.">
-          Falls die Adresse zugelassen ist, haben wir dir einen Bestätigungslink geschickt. Der Link ist 24 Stunden gültig.
+      <AuthShell title={t('auth.register.almostDone')}>
+        <Alert tone="success" title={t('auth.register.confirmTitle')}>
+          {t('auth.register.confirmText')}
         </Alert>
         <MailpitHint />
         <Link to="/login" search={{}} className="text-brand-700 underline">
-          Zur Anmeldung
+          {t('auth.toLogin')}
         </Link>
       </AuthShell>
     );
   }
 
   return (
-    <AuthShell title="Konto erstellen">
+    <AuthShell title={t('auth.register.title')}>
       <p className="text-sm text-slate-700">
-        Nur für Angehörige der HWG LU. Zugelassen sind Adressen mit{' '}
+        {t('auth.register.intro')}{' '}
         {domains.map((d, i) => (
           <span key={d}>
-            {i > 0 && ' oder '}
+            {i > 0 && t('common.or')}
             <strong>@{d}</strong>
           </span>
         ))}
         .
       </p>
       <form onSubmit={submit} className="space-y-4" noValidate>
-        <Field label="Hochschul-E-Mail" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field label={t('auth.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <Field
-          label="Anzeigename"
-          hint="Wird anderen Mitgliedern angezeigt. Deine E-Mail-Adresse bleibt privat."
+          label={t('auth.displayName')}
+          hint={t('auth.displayNameHint')}
           required
           minLength={2}
           maxLength={40}
@@ -205,10 +206,10 @@ export function RegisterPage() {
           onChange={(e) => setDisplayName(e.target.value)}
         />
         <Field
-          label="Passwort"
+          label={t('auth.password')}
           type="password"
           autoComplete="new-password"
-          hint="Mindestens 12 Zeichen. Ein langer Satz ist sicherer als Sonderzeichen."
+          hint={t('auth.passwordHint')}
           required
           minLength={12}
           value={password}
@@ -219,26 +220,30 @@ export function RegisterPage() {
           onChange={(e) => setAccept(e.target.checked)}
           label={
             // Neuer Tab, damit bereits eingegebene Daten erhalten bleiben (REQ-LEGAL-002/003)
-            <>
-              Ich akzeptiere die{' '}
-              <Link to="/nutzungsbedingungen" target="_blank" rel="noopener" className="text-brand-700 underline">
-                Nutzungsbedingungen<span className="sr-only"> (öffnet in neuem Tab)</span>
-              </Link>{' '}
-              und habe den{' '}
-              <Link to="/datenschutz" target="_blank" rel="noopener" className="text-brand-700 underline">
-                Datenschutzhinweis<span className="sr-only"> (öffnet in neuem Tab)</span>
-              </Link>{' '}
-              gelesen (Version {meta?.termsVersion ?? '…'}).
-            </>
+            tx('auth.register.acceptLabel', {
+              version: meta?.termsVersion ?? '…',
+              terms: (chunks) => (
+                <Link to="/nutzungsbedingungen" target="_blank" rel="noopener" className="text-brand-700 underline">
+                  {chunks}
+                  <span className="sr-only"> {t('common.opensNewTab')}</span>
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link to="/datenschutz" target="_blank" rel="noopener" className="text-brand-700 underline">
+                  {chunks}
+                  <span className="sr-only"> {t('common.opensNewTab')}</span>
+                </Link>
+              ),
+            })
           }
         />
         <FormError error={clientError ?? (register.isError ? errorMessage(register.error) : null)} />
         <Button type="submit" className="w-full" busy={register.isPending}>
-          Registrieren
+          {t('auth.register.submit')}
         </Button>
       </form>
       <Link to="/login" search={{}} className="text-sm text-brand-700 underline">
-        Ich habe schon ein Konto
+        {t('auth.register.haveAccount')}
       </Link>
     </AuthShell>
   );
@@ -247,7 +252,7 @@ export function RegisterPage() {
 function ResendForm() {
   const resend = useResendVerification();
   const [email, setEmail] = useState('');
-  if (resend.isSuccess) return <Alert tone="success">Falls ein unbestätigtes Konto existiert, haben wir einen neuen Link geschickt.</Alert>;
+  if (resend.isSuccess) return <Alert tone="success">{t('auth.verify.resent')}</Alert>;
   return (
     <form
       className="space-y-3"
@@ -256,10 +261,10 @@ function ResendForm() {
         resend.mutate(email.trim());
       }}
     >
-      <Field label="Hochschul-E-Mail" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Field label={t('auth.email')} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
       <FormError error={resend.isError ? errorMessage(resend.error) : null} />
       <Button type="submit" variant="secondary" busy={resend.isPending}>
-        Link erneut senden
+        {t('auth.verify.resend')}
       </Button>
     </form>
   );
@@ -284,8 +289,8 @@ export function VerifyPage() {
 
   if (!token) {
     return (
-      <AuthShell title="E-Mail bestätigen">
-        <Alert tone="error">Der Link ist unvollständig.</Alert>
+      <AuthShell title={t('auth.verify.title')}>
+        <Alert tone="error">{t('auth.linkIncomplete')}</Alert>
         <ResendForm />
       </AuthShell>
     );
@@ -294,11 +299,9 @@ export function VerifyPage() {
   if (verify.isError) {
     const code = verify.error instanceof ApiError ? verify.error.code : undefined;
     return (
-      <AuthShell title="E-Mail bestätigen">
-        <Alert tone="error" title={code === 'token_expired' ? 'Link abgelaufen' : 'Link ungültig'}>
-          {code === 'token_expired'
-            ? 'Dein Bestätigungslink ist älter als 24 Stunden. Fordere einfach einen neuen an.'
-            : 'Dieser Link ist nicht gültig. Fordere bei Bedarf einen neuen an.'}
+      <AuthShell title={t('auth.verify.title')}>
+        <Alert tone="error" title={code === 'token_expired' ? t('auth.verify.expiredTitle') : t('auth.verify.invalidTitle')}>
+          {code === 'token_expired' ? t('auth.verify.expiredText') : t('auth.verify.invalidText')}
         </Alert>
         <ResendForm />
       </AuthShell>
@@ -306,7 +309,7 @@ export function VerifyPage() {
   }
 
   return (
-    <AuthShell title="E-Mail bestätigen">
+    <AuthShell title={t('auth.verify.title')}>
       <Loading />
     </AuthShell>
   );
@@ -316,10 +319,10 @@ export function ForgotPasswordPage() {
   const reset = useResetRequest();
   const [email, setEmail] = useState('');
   return (
-    <AuthShell title="Passwort vergessen">
+    <AuthShell title={t('auth.forgot.title')}>
       {reset.isSuccess ? (
         <>
-          <Alert tone="success">Falls ein Konto mit dieser Adresse existiert, haben wir einen Link geschickt. Er ist 1 Stunde gültig.</Alert>
+          <Alert tone="success">{t('auth.forgot.sent')}</Alert>
           <MailpitHint />
         </>
       ) : (
@@ -330,15 +333,15 @@ export function ForgotPasswordPage() {
             reset.mutate(email.trim());
           }}
         >
-          <Field label="Hochschul-E-Mail" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Field label={t('auth.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <FormError error={reset.isError ? errorMessage(reset.error) : null} />
           <Button type="submit" className="w-full" busy={reset.isPending}>
-            Link anfordern
+            {t('auth.forgot.submit')}
           </Button>
         </form>
       )}
       <Link to="/login" search={{}} className="text-sm text-brand-700 underline">
-        Zur Anmeldung
+        {t('auth.toLogin')}
       </Link>
     </AuthShell>
   );
@@ -353,10 +356,10 @@ export function ResetPasswordPage() {
 
   if (confirm.isSuccess) {
     return (
-      <AuthShell title="Passwort geändert">
-        <Alert tone="success">Dein Passwort wurde geändert. Bitte melde dich neu an.</Alert>
+      <AuthShell title={t('auth.reset.doneTitle')}>
+        <Alert tone="success">{t('auth.reset.doneText')}</Alert>
         <Link to="/login" search={{}} className="text-brand-700 underline">
-          Zur Anmeldung
+          {t('auth.toLogin')}
         </Link>
       </AuthShell>
     );
@@ -364,14 +367,14 @@ export function ResetPasswordPage() {
 
   const serverError = confirm.isError
     ? confirm.error instanceof ApiError && confirm.error.code === 'token_invalid'
-      ? 'Der Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.'
+      ? t('auth.reset.invalidLink')
       : errorMessage(confirm.error)
     : null;
 
   return (
-    <AuthShell title="Neues Passwort setzen">
+    <AuthShell title={t('auth.reset.title')}>
       {!token ? (
-        <Alert tone="error">Der Link ist unvollständig.</Alert>
+        <Alert tone="error">{t('auth.linkIncomplete')}</Alert>
       ) : (
         <form
           className="space-y-4"
@@ -379,21 +382,21 @@ export function ResetPasswordPage() {
           onSubmit={(e) => {
             e.preventDefault();
             setClientError(null);
-            if (password.length < 12) return setClientError('Das Passwort muss mindestens 12 Zeichen lang sein.');
-            if (password !== repeat) return setClientError('Die Passwörter stimmen nicht überein.');
+            if (password.length < 12) return setClientError(t('auth.passwordTooShort'));
+            if (password !== repeat) return setClientError(t('auth.reset.mismatch'));
             confirm.mutate({ token, password });
           }}
         >
-          <Field label="Neues Passwort" type="password" autoComplete="new-password" hint="Mindestens 12 Zeichen." required value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Field label="Passwort wiederholen" type="password" autoComplete="new-password" required value={repeat} onChange={(e) => setRepeat(e.target.value)} />
+          <Field label={t('auth.reset.newPassword')} type="password" autoComplete="new-password" hint={t('auth.reset.minHint')} required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Field label={t('auth.reset.repeat')} type="password" autoComplete="new-password" required value={repeat} onChange={(e) => setRepeat(e.target.value)} />
           <FormError error={clientError ?? serverError} />
           <Button type="submit" className="w-full" busy={confirm.isPending}>
-            Passwort speichern
+            {t('auth.reset.submit')}
           </Button>
         </form>
       )}
       <Link to="/forgot-password" className="text-sm text-brand-700 underline">
-        Neuen Link anfordern
+        {t('auth.reset.newLink')}
       </Link>
     </AuthShell>
   );

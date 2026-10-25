@@ -5,12 +5,13 @@ import { ApiError, errorMessage } from '../api/client';
 import { Dialog } from './Dialog';
 import { Button, FormError } from './ui';
 import { formatDateTime } from '../lib/format';
+import { t } from '../i18n';
 
 const errorText = (err: unknown) => {
   if (err instanceof ApiError) {
-    if (err.code === 'contact_not_possible') return 'Kontakt nicht möglich.';
-    if (err.code === 'contact_request_limit') return 'Eine erneute Anfrage ist derzeit nicht möglich.';
-    if (err.code === 'invalid_contact_action') return 'Diese Aktion ist gerade nicht möglich. Der aktuelle Stand wird geladen.';
+    if (err.code === 'contact_not_possible') return t('apiError.contact_not_possible');
+    if (err.code === 'contact_request_limit') return t('apiError.contact_request_limit');
+    if (err.code === 'invalid_contact_action') return t('contact.invalidAction');
   }
   return errorMessage(err);
 };
@@ -26,13 +27,13 @@ export function ContactShare({ conversation }: { conversation: ConversationSumma
   const open = contact.mine !== 'granted' && contact.theirs === 'granted';
 
   const status = (() => {
-    if (contact.counterpartEmail) return `Kontaktdaten ausgetauscht. Die Hochschul-E-Mail-Adresse von ${name} wird angezeigt.`;
-    if (contact.mine === 'granted') return `Du hast zugestimmt. Warte auf Zustimmung von ${name}.`;
+    if (contact.counterpartEmail) return t('contact.exchanged', { name });
+    if (contact.mine === 'granted') return t('contact.waiting', { name });
     // Gegenüber blockiert, gesperrt oder gelöscht (keine Sperrfrist, Anfragen übrig)
-    if (!contact.canGrant && !contact.retryAfter && contact.requestsLeft > 0) return 'Kontakt nicht möglich.';
-    if (contact.theirs === 'granted') return `${name} möchte Kontaktdaten austauschen.`;
-    if (contact.mine === 'declined') return `${name} möchte keine Kontaktdaten austauschen.`;
-    return 'Kontaktdaten werden erst sichtbar, wenn ihr beide zustimmt.';
+    if (!contact.canGrant && !contact.retryAfter && contact.requestsLeft > 0) return t('apiError.contact_not_possible');
+    if (contact.theirs === 'granted') return t('contact.theyAsk', { name });
+    if (contact.mine === 'declined') return t('contact.theyDeclined', { name });
+    return t('contact.intro');
   })();
 
   // Statusänderungen ansagen, nicht aber den Anfangszustand
@@ -59,7 +60,7 @@ export function ContactShare({ conversation }: { conversation: ConversationSumma
   return (
     <section aria-labelledby={headingId} className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
       <h2 id={headingId} className="text-sm font-bold">
-        Kontaktdaten
+        {t('contact.title')}
       </h2>
       <p ref={statusRef} tabIndex={-1} className="text-sm text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700">
         {status}
@@ -74,47 +75,44 @@ export function ContactShare({ conversation }: { conversation: ConversationSumma
       {(contact.mine === 'declined' || contact.mine === 'withdrawn') && !contact.canGrant && (contact.retryAfter || contact.requestsLeft === 0) && (
         <p className="text-xs text-slate-600">
           {contact.retryAfter
-            ? `Eine erneute Anfrage ist ab ${formatDateTime(contact.retryAfter)} möglich.`
-            : 'Weitere Anfragen sind in dieser Unterhaltung nicht möglich.'}
+            ? t('contact.retryFrom', { date: formatDateTime(contact.retryAfter) })
+            : t('contact.noMoreRequests')}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
         {open && contact.canGrant && (
           <Button busy={action.isPending} onClick={() => setConfirm(true)}>
-            Zustimmen
+            {t('contact.agree')}
           </Button>
         )}
         {open && (
           <Button variant="secondary" busy={action.isPending} onClick={() => run('decline')}>
-            Ablehnen
+            {t('contact.decline')}
           </Button>
         )}
         {contact.mine !== 'granted' && contact.theirs !== 'granted' && contact.canGrant && (
           <Button variant="secondary" busy={action.isPending} onClick={() => setConfirm(true)}>
-            Kontaktdaten teilen
+            {t('contact.share')}
           </Button>
         )}
         {contact.mine === 'granted' && (
           <Button variant="ghost" busy={action.isPending} onClick={() => run('withdraw')}>
-            {contact.counterpartEmail ? 'Zustimmung widerrufen' : 'Zustimmung zurückziehen'}
+            {contact.counterpartEmail ? t('contact.revoke') : t('contact.withdraw')}
           </Button>
         )}
       </div>
       {contact.mine !== 'granted' && contact.theirs !== 'granted' && contact.canGrant && contact.requestsLeft < 3 && (
-        <p className="text-xs text-slate-600">Noch {contact.requestsLeft} Anfrage(n) in dieser Unterhaltung möglich.</p>
+        <p className="text-xs text-slate-600">{t('contact.requestsLeft', { count: contact.requestsLeft })}</p>
       )}
       <FormError error={action.isError ? errorText(action.error) : null} />
       <div aria-live="polite" className="sr-only">
         {announcement}
       </div>
-      <Dialog open={confirm} onClose={() => setConfirm(false)} title="Kontaktdaten teilen?">
-        <p className="text-sm text-slate-700">
-          Deine Hochschul-E-Mail-Adresse wird erst sichtbar, wenn ihr beide zustimmt. Einmal angezeigte Adressen lassen sich nicht
-          zurückholen.
-        </p>
+      <Dialog open={confirm} onClose={() => setConfirm(false)} title={t('contact.confirmTitle')}>
+        <p className="text-sm text-slate-700">{t('contact.confirmText')}</p>
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="secondary" onClick={() => setConfirm(false)}>
-            Abbrechen
+            {t('common.cancel')}
           </Button>
           <Button
             busy={action.isPending}
@@ -123,7 +121,7 @@ export function ContactShare({ conversation }: { conversation: ConversationSumma
               run('grant');
             }}
           >
-            {contact.theirs === 'granted' ? 'Zustimmen' : 'Teilen'}
+            {contact.theirs === 'granted' ? t('contact.agree') : t('contact.shareShort')}
           </Button>
         </div>
       </Dialog>

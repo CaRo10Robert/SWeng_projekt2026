@@ -14,6 +14,13 @@
       "purpose": "App-Shell des Service Workers (PWA)",
       "classification": "unbedingt erforderlich",
       "privacyTerm": "Service Worker"
+    },
+    {
+      "type": "localStorage",
+      "pattern": "^cm_locale$",
+      "purpose": "Ausdrücklich gewählte Sprache (ADR-0016, REQ-UX-007); wird erst nach Klick auf die Sprachwahl gesetzt",
+      "classification": "unbedingt erforderlich (auf ausdrücklichen Wunsch)",
+      "privacyTerm": "cm_locale"
     }
   ]
 }

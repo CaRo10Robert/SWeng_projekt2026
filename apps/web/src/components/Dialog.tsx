@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { t } from '../i18n';
 
 interface DialogProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
           <h2 id={titleId} className="text-lg font-bold">
             {title}
           </h2>
-          <button type="button" onClick={onClose} className="rounded p-1 text-slate-600 hover:bg-slate-100" aria-label="Dialog schließen">
+          <button type="button" onClick={onClose} className="rounded p-1 text-slate-600 hover:bg-slate-100" aria-label={t('dialog.close')}>
             <span aria-hidden="true">✕</span>
           </button>
         </div>

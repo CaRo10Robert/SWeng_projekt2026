@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link } from '@tanstack/react-router';
-import { plainHeading, slugify } from '../lib/content';
+import { headingParts, stripHeadingId } from '../lib/content';
+import { t } from '../i18n';
 
 function textOf(node: ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') return String(node);
@@ -11,19 +12,26 @@ function textOf(node: ReactNode): string {
   return '';
 }
 
-const headingId = (children: ReactNode) => slugify(plainHeading(textOf(children)));
+const headingId = (children: ReactNode) => headingParts(textOf(children)).id;
+
+/** Feste ID `{#…}` aus dem sichtbaren Text der Überschrift entfernen. */
+function headingText(children: ReactNode): ReactNode {
+  if (typeof children === 'string') return stripHeadingId(children);
+  if (Array.isArray(children)) return children.map((c, i) => (i === children.length - 1 ? headingText(c) : c));
+  return children;
+}
 
 const components: Components = {
   // Überschriften der Datei beginnen bei ##; die Seite setzt selbst die h1
   h1: ({ children }) => <h2 className="mt-8 text-xl font-bold">{children}</h2>,
   h2: ({ children }) => (
     <h2 id={headingId(children)} className="mt-8 scroll-mt-20 text-xl font-bold text-slate-900">
-      {children}
+      {headingText(children)}
     </h2>
   ),
   h3: ({ children }) => (
     <h3 id={headingId(children)} className="mt-6 scroll-mt-20 text-lg font-semibold text-slate-900">
-      {children}
+      {headingText(children)}
     </h3>
   ),
   p: ({ children }) => <p className="mt-3 leading-relaxed">{children}</p>,
@@ -34,7 +42,7 @@ const components: Components = {
   ),
   // Breite Tabellen scrollen auf kleinen Bildschirmen; der Bereich ist per Tastatur erreichbar (WCAG 2.1.1)
   table: ({ children }) => (
-    <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Tabelle, bei Bedarf seitlich scrollbar">
+    <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label={t('content.tableRegion')}>
       <table className="w-full border-collapse text-left text-sm">{children}</table>
     </div>
   ),

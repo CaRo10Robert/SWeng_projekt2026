@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import type { ListingCard as Card, ListingStatus } from '@campusmarkt/contracts';
 import { formatDate, formatPrice, kindLabels, statusLabels } from '../lib/format';
 import { Badge, type Tone } from './ui';
+import { t } from '../i18n';
 
 const statusTone: Record<ListingStatus, Tone> = {
   draft: 'neutral',
@@ -23,7 +24,7 @@ export function PriceTag({ listing, className }: { listing: Pick<Card, 'priceTyp
 }
 
 /** Platzhalter ohne Bild. Mit leerem `label` rein dekorativ (vom Screenreader übersprungen). */
-export function ImagePlaceholder({ label = 'Kein Bild' }: { label?: string }) {
+export function ImagePlaceholder({ label = t('listing.noImage') }: { label?: string }) {
   const a11y = label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true as const };
   return (
     <div className="flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-600" {...a11y}>

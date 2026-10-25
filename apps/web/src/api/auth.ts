@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type {
   Accepted,
@@ -10,6 +11,7 @@ import type {
   UpdateMeBody,
 } from '@campusmarkt/contracts';
 import { api, ApiError } from './client';
+import { onLocaleChosen, storedLocale, useLocale } from '../i18n';
 
 export const meQuery = queryOptions({
   queryKey: ['me'],
@@ -100,6 +102,51 @@ export function useAcceptTerms() {
     mutationFn: (version: string) => api<Me>('/me/terms', { method: 'POST', body: { version } }),
     onSuccess: (me) => qc.setQueryData(meQuery.queryKey, me),
   });
+}
+
+/**
+ * Sprache und Konto abgleichen (ADR-0016, REQ-UX-007): Eine ausdrückliche Wahl wird im Profil gespeichert.
+ * Beim Anmelden gilt die Sprache des Kontos; nur wenn auf diesem Gerät ausdrücklich eine andere gewählt wurde
+ * (z. B. vor der Registrierung), wird diese neuere Wahl ins Konto übernommen.
+ */
+let pendingLocale: string | null = null;
+
+export function useAccountLocale() {
+  const qc = useQueryClient();
+  const { data: me } = useMe();
+  const { locale, apply } = useLocale();
+
+  useEffect(
+    () =>
+      onLocaleChosen((chosen) => {
+        if (!qc.getQueryData(meQuery.queryKey)) return;
+        pendingLocale = chosen;
+        api<Me>('/me', { method: 'PATCH', body: { locale: chosen } })
+          .then((updated) => qc.setQueryData(meQuery.queryKey, updated))
+          .catch(() => undefined)
+          .finally(() => {
+            pendingLocale = null;
+          });
+      }),
+    [qc],
+  );
+
+  const accountLocale = me?.locale;
+  useEffect(() => {
+    if (!accountLocale || pendingLocale) return;
+    const stored = storedLocale();
+    if (stored && stored !== accountLocale) {
+      pendingLocale = stored;
+      api<Me>('/me', { method: 'PATCH', body: { locale: stored } })
+        .then((updated) => qc.setQueryData(meQuery.queryKey, updated))
+        .catch(() => undefined)
+        .finally(() => {
+          pendingLocale = null;
+        });
+      return;
+    }
+    if (accountLocale !== locale) apply(accountLocale);
+  }, [accountLocale, locale, apply, qc]);
 }
 
 export function useDeleteAccount() {

@@ -11,14 +11,15 @@ import { ImagePlaceholder, PriceTag, StatusBadge } from '../components/ListingCa
 import { ReportDialog } from '../components/ReportDialog';
 import { Alert, Badge, Button, buttonClass, Card, FormError, Loading, TextArea } from '../components/ui';
 import { conditionLabels, formatDate, kindLabels, newId, userTypeLabels } from '../lib/format';
+import { t, type MessageKey } from '../i18n';
 
-const actionLabels: Record<ListingAction, string> = {
-  pause: 'Pausieren',
-  resume: 'Reaktivieren',
-  reserve: 'Als reserviert markieren',
-  unreserve: 'Reservierung aufheben',
-  complete: 'Als abgegeben markieren',
-  extend: 'Um 60 Tage verlängern',
+const actionLabels: Record<ListingAction, MessageKey> = {
+  pause: 'listing.action.pause',
+  resume: 'listing.action.resume',
+  reserve: 'listing.action.reserve',
+  unreserve: 'listing.action.unreserve',
+  complete: 'listing.action.complete',
+  extend: 'listing.action.extend',
 };
 
 const actionsByStatus: Partial<Record<ListingStatus, ListingAction[]>> = {
@@ -40,21 +41,21 @@ function Gallery({ listing }: { listing: ListingDetail }) {
         {!current ? (
           <ImagePlaceholder />
         ) : current.status === 'ready' ? (
-          <a href={`${current.url}/lg`} target="_blank" rel="noreferrer" aria-label={`Bild ${index + 1} in voller Größe öffnen`}>
-            <img src={`${current.url}/md`} alt={`${listing.title}, Bild ${index + 1} von ${images.length}`} className="h-full w-full object-contain" />
+          <a href={`${current.url}/lg`} target="_blank" rel="noreferrer" aria-label={t('listing.openImage', { n: index + 1 })}>
+            <img src={`${current.url}/md`} alt={t('listing.imageAlt', { title: listing.title, n: index + 1, total: images.length })} className="h-full w-full object-contain" />
           </a>
         ) : (
-          <ImagePlaceholder label={current.status === 'processing' ? 'Bild wird verarbeitet' : 'Bild konnte nicht verarbeitet werden'} />
+          <ImagePlaceholder label={current.status === 'processing' ? t('listing.imageProcessing') : t('listing.imageFailed')} />
         )}
       </div>
       {images.length > 1 && (
-        <ul className="flex gap-2 overflow-x-auto" aria-label="Bilder auswählen">
+        <ul className="flex gap-2 overflow-x-auto" aria-label={t('listing.chooseImage')}>
           {images.map((img, i) => (
             <li key={img.id}>
               <button
                 type="button"
                 onClick={() => setIndex(i)}
-                aria-label={`Bild ${i + 1} anzeigen`}
+                aria-label={t('listing.showImage', { n: i + 1 })}
                 aria-current={i === index}
                 className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${i === index ? 'border-brand-700' : 'border-transparent'}`}
               >
@@ -71,13 +72,13 @@ function Gallery({ listing }: { listing: ListingDetail }) {
 function ContactBox({ listing }: { listing: ListingDetail }) {
   const navigate = useNavigate();
   const start = useStartConversation();
-  const [body, setBody] = useState('Hallo, ist das noch zu haben?');
+  const [body, setBody] = useState(() => t('listing.contact.defaultMessage'));
   const [clientMsgId] = useState(newId);
 
   if (listing.conversationId) {
     return (
       <Link to="/messages/$id" params={{ id: listing.conversationId }} className={buttonClass('primary', 'w-full')}>
-        Zur Unterhaltung
+        {t('listing.contact.toConversation')}
       </Link>
     );
   }
@@ -93,16 +94,16 @@ function ContactBox({ listing }: { listing: ListingDetail }) {
 
   const error = start.isError
     ? start.error instanceof ApiError && start.error.code === 'contact_not_possible'
-      ? 'Kontakt nicht möglich.'
+      ? t('apiError.contact_not_possible')
       : errorMessage(start.error)
     : null;
 
   return (
     <form onSubmit={submit} className="space-y-2">
-      <TextArea label="Nachricht an den Anbieter" rows={3} required maxLength={2000} value={body} onChange={(e) => setBody(e.target.value)} />
+      <TextArea label={t('listing.contact.label')} rows={3} required maxLength={2000} value={body} onChange={(e) => setBody(e.target.value)} />
       <FormError error={error} />
       <Button type="submit" className="w-full" busy={start.isPending} disabled={!body.trim()}>
-        Nachricht schreiben
+        {t('listing.contact.submit')}
       </Button>
     </form>
   );
@@ -117,37 +118,37 @@ function OwnerActions({ listing }: { listing: ListingDetail }) {
 
   return (
     <Card className="space-y-3">
-      <h2 className="font-semibold">Deine Anzeige verwalten</h2>
-      {listing.status === 'in_review' && <Alert tone="warning">Diese Anzeige wird vor der Veröffentlichung von der Moderation geprüft.</Alert>}
-      {listing.status === 'removed' && <Alert tone="error">Diese Anzeige wurde von der Moderation entfernt.</Alert>}
-      {listing.expiresAt && listing.status === 'active' && <p className="text-sm text-slate-600">Läuft ab am {formatDate(listing.expiresAt)}.</p>}
+      <h2 className="font-semibold">{t('listing.owner.manage')}</h2>
+      {listing.status === 'in_review' && <Alert tone="warning">{t('listing.owner.inReview')}</Alert>}
+      {listing.status === 'removed' && <Alert tone="error">{t('listing.owner.removed')}</Alert>}
+      {listing.expiresAt && listing.status === 'active' && <p className="text-sm text-slate-600">{t('listing.owner.expiresOn', { date: formatDate(listing.expiresAt) })}</p>}
       <div className="flex flex-col gap-2">
         {editable.includes(listing.status) && (
           <Link to="/listings/$id/edit" params={{ id: listing.id }} className={buttonClass('secondary')}>
-            Bearbeiten
+            {t('listing.owner.edit')}
           </Link>
         )}
         {actions.map((a) => (
           <Button key={a} variant="secondary" busy={action.isPending && action.variables === a} onClick={() => action.mutate(a)}>
-            {actionLabels[a]}
+            {t(actionLabels[a])}
           </Button>
         ))}
         {listing.status !== 'removed' && (
           <Button variant="danger" onClick={() => setConfirmDelete(true)}>
-            Löschen
+            {t('listing.owner.delete')}
           </Button>
         )}
       </div>
       <FormError error={action.isError ? errorMessage(action.error) : null} />
-      <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Anzeige löschen?">
-        <p>„{listing.title}“ wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.</p>
+      <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} title={t('listing.owner.deleteTitle')}>
+        <p>{t('listing.owner.deleteText', { title: listing.title })}</p>
         <FormError error={remove.isError ? errorMessage(remove.error) : null} />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={() => setConfirmDelete(false)}>
-            Abbrechen
+            {t('common.cancel')}
           </Button>
           <Button variant="danger" busy={remove.isPending} onClick={() => remove.mutate(undefined, { onSuccess: () => void navigate({ to: '/me/listings' }) })}>
-            Endgültig löschen
+            {t('listing.owner.deleteConfirm')}
           </Button>
         </div>
       </Dialog>
@@ -167,8 +168,8 @@ export function ListingPage() {
   if (isPending) return <Loading />;
   if (isError) {
     return (
-      <Alert tone="error" title="Anzeige nicht verfügbar">
-        {error instanceof ApiError && error.status === 404 ? 'Diese Anzeige existiert nicht (mehr).' : errorMessage(error)}
+      <Alert tone="error" title={t('listing.unavailable')}>
+        {error instanceof ApiError && error.status === 404 ? t('listing.notFound') : errorMessage(error)}
       </Alert>
     );
   }
@@ -183,32 +184,32 @@ export function ListingPage() {
         <Gallery listing={listing} />
         <section aria-labelledby="desc-heading" className="space-y-2">
           <h2 id="desc-heading" className="text-lg font-semibold">
-            Beschreibung
+            {t('listing.description')}
           </h2>
           <p className="whitespace-pre-line text-slate-800">{listing.description}</p>
         </section>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           {category && (
             <>
-              <dt className="font-medium text-slate-600">Kategorie</dt>
+              <dt className="font-medium text-slate-600">{t('search.category')}</dt>
               <dd>{category.name}</dd>
             </>
           )}
           {listing.condition && (
             <>
-              <dt className="font-medium text-slate-600">Zustand</dt>
+              <dt className="font-medium text-slate-600">{t('search.condition')}</dt>
               <dd>{conditionLabels[listing.condition]}</dd>
             </>
           )}
           {attrs.studyProgram && (
             <>
-              <dt className="font-medium text-slate-600">Studiengang</dt>
+              <dt className="font-medium text-slate-600">{t('listing.studyProgram')}</dt>
               <dd>{attrs.studyProgram}</dd>
             </>
           )}
           {attrs.module && (
             <>
-              <dt className="font-medium text-slate-600">Modul</dt>
+              <dt className="font-medium text-slate-600">{t('listing.module')}</dt>
               <dd>{attrs.module}</dd>
             </>
           )}
@@ -218,9 +219,9 @@ export function ListingPage() {
               <dd>{attrs.isbn}</dd>
             </>
           )}
-          <dt className="font-medium text-slate-600">Übergabe</dt>
+          <dt className="font-medium text-slate-600">{t('listing.handover')}</dt>
           <dd>{locations.join(', ') || '–'}</dd>
-          <dt className="font-medium text-slate-600">Eingestellt</dt>
+          <dt className="font-medium text-slate-600">{t('listing.posted')}</dt>
           <dd>{formatDate(listing.createdAt)}</dd>
         </dl>
       </div>
@@ -238,10 +239,10 @@ export function ListingPage() {
         </div>
 
         <Card className="space-y-1">
-          <h2 className="font-semibold">Anbieter</h2>
+          <h2 className="font-semibold">{t('listing.seller')}</h2>
           <p>{listing.owner.displayName}</p>
           <p className="text-sm text-slate-600">
-            {userTypeLabels[listing.owner.userType]} · Mitglied seit {formatDate(listing.owner.memberSince)}
+            {userTypeLabels[listing.owner.userType]} · {t('profile.memberSince', { date: formatDate(listing.owner.memberSince) })}
           </p>
         </Card>
 
@@ -252,34 +253,34 @@ export function ListingPage() {
             <ContactBox listing={listing} />
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" aria-pressed={listing.isFavorite} busy={favorite.isPending} onClick={() => favorite.mutate(!listing.isFavorite)}>
-                {listing.isFavorite ? '★ Gemerkt' : '☆ Merken'}
+                {listing.isFavorite ? t('listing.saved') : t('listing.save')}
               </Button>
               <Button variant="ghost" onClick={() => setReportOpen(true)}>
-                Melden
+                {t('listing.report')}
               </Button>
               <Button variant="ghost" onClick={() => setBlockOpen(true)}>
-                Anbieter blockieren
+                {t('listing.blockSeller')}
               </Button>
             </div>
             <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="listing" targetId={listing.id} />
-            <Dialog open={blockOpen} onClose={() => setBlockOpen(false)} title={`${listing.owner.displayName} blockieren?`}>
+            <Dialog open={blockOpen} onClose={() => setBlockOpen(false)} title={t('listing.block.title', { name: listing.owner.displayName })}>
               {block.isSuccess ? (
                 <>
-                  <Alert tone="success">Blockiert. Du siehst keine Anzeigen und Nachrichten dieser Person mehr.</Alert>
+                  <Alert tone="success">{t('listing.block.done')}</Alert>
                   <Link to="/" className={buttonClass('primary')}>
-                    Zur Suche
+                    {t('listing.block.toSearch')}
                   </Link>
                 </>
               ) : (
                 <>
-                  <p>Ihr könnt euch dann keine Nachrichten mehr schreiben und du siehst keine Anzeigen dieser Person. Du kannst das im Profil rückgängig machen.</p>
+                  <p>{t('listing.block.text')}</p>
                   <FormError error={block.isError ? errorMessage(block.error) : null} />
                   <div className="flex justify-end gap-2">
                     <Button variant="secondary" onClick={() => setBlockOpen(false)}>
-                      Abbrechen
+                      {t('common.cancel')}
                     </Button>
                     <Button variant="danger" busy={block.isPending} onClick={() => block.mutate({ userId: listing.owner.id, blocked: true })}>
-                      Blockieren
+                      {t('listing.block.submit')}
                     </Button>
                   </div>
                 </>

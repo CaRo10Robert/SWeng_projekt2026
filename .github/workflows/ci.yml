@@ -29,6 +29,10 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm lint:deps
+      - name: Übersetzungen Deutsch/Englisch (REQ-UX-007, ADR-0016)
+        run: |
+          node scripts/check-i18n.mjs
+          node --test tests/i18n/i18n.test.mjs
       - name: Nachverfolgbarkeit Anforderung → Nachweis → Test (CTRL-TRACE)
         run: node scripts/trace.mjs --report
 

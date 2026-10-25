@@ -5,6 +5,7 @@ import { loadContent, type ContentName, type LegalPageName } from '../lib/conten
 import { Alert, Badge, Loading } from '../components/ui';
 import { formatDate } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
+import { t, tx, useLocale } from '../i18n';
 
 export const legalPageNames: LegalPageName[] = [
   'impressum',
@@ -15,9 +16,9 @@ export const legalPageNames: LegalPageName[] = [
   'kontakt',
 ];
 
-const contentQuery = (name: ContentName) => ({
-  queryKey: ['content', name],
-  queryFn: () => loadContent(name),
+const contentQuery = (name: ContentName, locale: string) => ({
+  queryKey: ['content', name, locale],
+  queryFn: () => loadContent(name, locale),
   staleTime: Infinity,
 });
 
@@ -43,34 +44,35 @@ function ScrollToHash() {
 }
 
 function ContentPage({ name }: { name: ContentName }) {
-  const { data, isPending, isError } = useQuery(contentQuery(name));
+  const { locale } = useLocale();
+  const { data, isPending, isError } = useQuery(contentQuery(name, locale));
   useDocumentTitle(data?.title);
 
   if (isPending) return <Loading />;
-  if (isError) return <Alert tone="error" title="Der Text konnte nicht geladen werden.">Bitte lade die Seite neu.</Alert>;
+  if (isError) return <Alert tone="error" title={t('content.loadFailed')}>{t('content.reload')}</Alert>;
 
   const sections = data.headings.filter((h) => h.level === 2);
   const tocEntries = name === 'help/faq' ? data.headings : sections;
   return (
-    <article className="mx-auto max-w-3xl rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 print:shadow-none print:ring-0 sm:p-8">
+    <article lang={data.lang} className="mx-auto max-w-3xl rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 print:shadow-none print:ring-0 sm:p-8">
       <header className="space-y-2 border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold sm:text-3xl">{data.title}</h1>
         <p className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
-          {data.sample && <Badge tone="warning">Muster</Badge>}
-          <span>Version {data.version}</span>
+          {data.sample && <Badge tone="warning">{t('content.sample')}</Badge>}
+          <span>{t('content.version', { version: data.version })}</span>
           {data.lastUpdated && (
             <>
               <span aria-hidden="true">·</span>
               <span>
-                Stand <time dateTime={data.lastUpdated}>{formatDate(data.lastUpdated)}</time>
+                {tx('content.lastUpdated', { date: <time dateTime={data.lastUpdated}>{formatDate(data.lastUpdated)}</time> })}
               </span>
             </>
           )}
         </p>
       </header>
       {sections.length >= TOC_MIN_SECTIONS && (
-        <nav aria-label="Inhaltsverzeichnis" className="mt-4 rounded-lg bg-slate-50 p-4 print:hidden">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Inhalt</h2>
+        <nav aria-label={t('content.toc')} className="mt-4 rounded-lg bg-slate-50 p-4 print:hidden">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">{t('content.tocHeading')}</h2>
           <ul className="mt-2 space-y-1 text-sm">
             {tocEntries.map((h) => (
               <li key={h.id} className={h.level === 3 ? 'pl-4' : undefined}>

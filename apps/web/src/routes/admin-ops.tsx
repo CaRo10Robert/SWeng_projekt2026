@@ -5,6 +5,7 @@ import { ApiError, errorMessage } from '../api/client';
 import { Alert, Badge, Button, buttonClass, EmptyState, Field, FormError, Loading, Select, TextArea } from '../components/ui';
 import { formatDateTime, formatMoney } from '../lib/format';
 import { targetLabels } from '../lib/dsa';
+import { t } from '../i18n';
 
 /** `datetime-local` (lokale Zeit) ↔ ISO-Zeitstempel. */
 const toIso = (local: string) => (local ? new Date(local).toISOString() : null);
@@ -18,20 +19,16 @@ export function Dac7() {
   const years = [currentYear, currentYear - 1, currentYear - 2].filter((y) => y >= 2023);
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-700">
-        Verkäufer mit mindestens 30 abgeschlossenen Verkäufen oder 2.000 € Umsatz im Kalenderjahr sind nach dem
-        Plattformen-Steuertransparenzgesetz meldepflichtig. Die Auswertung bereitet die Meldung vor; sie wird im Beispiel nicht
-        übermittelt. Jeder Abruf wird protokolliert.
-      </p>
+      <p className="text-sm text-slate-700">{t('dac7.intro')}</p>
       <div className="flex flex-wrap items-end gap-3">
         <Select
-          label="Kalenderjahr"
+          label={t('dac7.year')}
           value={String(year)}
           onChange={(e) => setYear(Number(e.target.value))}
           options={years.map((y) => ({ value: String(y), label: String(y) }))}
         />
         <a href={dac7CsvUrl(year)} download={`dac7-${year}.csv`} className={buttonClass('secondary')}>
-          Als CSV herunterladen
+          {t('dac7.csv')}
         </a>
       </div>
       {isPending ? (
@@ -42,18 +39,18 @@ export function Dac7() {
         <>
           {data.note && <Alert tone="info">{data.note}</Alert>}
           {data.sellers.length === 0 ? (
-            <EmptyState>Keine meldepflichtigen Verkäufer im Jahr {data.year}.</EmptyState>
+            <EmptyState>{t('dac7.none', { year: data.year })}</EmptyState>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <caption className="sr-only">Meldepflichtige Verkäufer {data.year}</caption>
+                <caption className="sr-only">{t('dac7.caption', { year: data.year })}</caption>
                 <thead className="border-b border-slate-300">
                   <tr>
-                    <th scope="col" className="p-2">Name</th>
-                    <th scope="col" className="p-2">E-Mail</th>
-                    <th scope="col" className="p-2 text-right">Verkäufe</th>
-                    <th scope="col" className="p-2 text-right">Umsatz</th>
-                    <th scope="col" className="p-2">Quartale (Verkäufe / Umsatz)</th>
+                    <th scope="col" className="p-2">{t('admin.col.name')}</th>
+                    <th scope="col" className="p-2">{t('admin.col.email')}</th>
+                    <th scope="col" className="p-2 text-right">{t('dac7.sales')}</th>
+                    <th scope="col" className="p-2 text-right">{t('dac7.amount')}</th>
+                    <th scope="col" className="p-2">{t('dac7.quarters')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -101,28 +98,29 @@ export function Operations() {
     <div className="grid gap-6 lg:grid-cols-2">
       <section aria-labelledby="ops-maintenance" className="space-y-3">
         <h3 id="ops-maintenance" className="text-lg font-semibold">
-          Wartungsmodus
+          {t('ops.maintenance.title')}
         </h3>
         <p className="flex items-center gap-2 text-sm">
-          Aktuell:{' '}
+          {t('ops.current')}{' '}
           {status.maintenance.active ? (
-            <Badge tone="danger">aktiv{status.maintenance.until ? ` bis ${formatDateTime(status.maintenance.until)}` : ''}</Badge>
+            <Badge tone="danger">
+              {status.maintenance.until
+                ? t('ops.activeUntil', { date: formatDateTime(status.maintenance.until) })
+                : t('ops.active')}
+            </Badge>
           ) : (
-            <Badge tone="success">aus</Badge>
+            <Badge tone="success">{t('ops.off')}</Badge>
           )}
         </p>
-        <p className="text-sm text-slate-700">
-          Im Wartungsmodus antworten Seiten und API mit 503; Status, Gesundheitsprüfung, Rechtsseiten und die Administration bleiben
-          erreichbar.
-        </p>
+        <p className="text-sm text-slate-700">{t('ops.maintenance.text')}</p>
         {!status.maintenance.active && (
-          <Field label="Voraussichtliches Ende (optional)" type="datetime-local" value={until} onChange={(e) => setUntil(e.target.value)} />
+          <Field label={t('ops.maintenance.until')} type="datetime-local" value={until} onChange={(e) => setUntil(e.target.value)} />
         )}
         <div aria-live="polite">
           <FormError
             error={
               envLocked
-                ? 'Der Wartungsmodus ist über die Konfiguration (MAINTENANCE_MODE) gesetzt und lässt sich hier nicht ändern.'
+                ? t('apiError.maintenance_env')
                 : maintenance.isError
                   ? errorMessage(maintenance.error)
                   : null
@@ -134,25 +132,25 @@ export function Operations() {
           busy={maintenance.isPending}
           onClick={() => maintenance.mutate({ on: !status.maintenance.active, until: status.maintenance.active ? null : toIso(until) })}
         >
-          {status.maintenance.active ? 'Wartungsmodus beenden' : 'Wartungsmodus einschalten'}
+          {status.maintenance.active ? t('ops.maintenance.stop') : t('ops.maintenance.start')}
         </Button>
       </section>
 
       <section aria-labelledby="ops-announcement" className="space-y-3">
         <h3 id="ops-announcement" className="text-lg font-semibold">
-          Ankündigung
+          {t('notice.announcement')}
         </h3>
         {status.announcement ? (
-          <Alert tone="info" title="Aktuelle Ankündigung">
+          <Alert tone="info" title={t('ops.announcement.current')}>
             {status.announcement.text}
           </Alert>
         ) : (
-          <p className="text-sm text-slate-700">Keine aktive Ankündigung.</p>
+          <p className="text-sm text-slate-700">{t('ops.announcement.none')}</p>
         )}
         <form onSubmit={saveAnnouncement} className="space-y-3">
           <TextArea
-            label="Text"
-            hint="Erscheint als Hinweis oben auf jeder Seite, 3 bis 300 Zeichen."
+            label={t('ops.announcement.text')}
+            hint={t('ops.announcement.hint')}
             required
             minLength={3}
             maxLength={300}
@@ -161,17 +159,17 @@ export function Operations() {
             onChange={(e) => setText(e.target.value)}
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Anzeigen ab (optional)" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
-            <Field label="Anzeigen bis (optional)" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+            <Field label={t('ops.announcement.from')} type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+            <Field label={t('ops.announcement.to')} type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
           </div>
           <FormError error={announcement.isError ? errorMessage(announcement.error) : null} />
           <div className="flex flex-wrap gap-2">
             <Button type="submit" busy={announcement.isPending} disabled={text.trim().length < 3}>
-              Ankündigung speichern
+              {t('ops.announcement.save')}
             </Button>
             {status.announcement && (
               <Button variant="secondary" onClick={() => announcement.mutate(null)}>
-                Ankündigung entfernen
+                {t('ops.announcement.remove')}
               </Button>
             )}
           </div>
@@ -190,31 +188,28 @@ export function EvidenceHolds() {
   if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-700">
-        Bei Verdacht auf eine Straftat bleiben die betroffenen Inhalte höchstens sechs Monate gesichert, auch wenn sie sonst gelöscht
-        würden. Gib sie frei, sobald sie nicht mehr gebraucht werden.
-      </p>
+      <p className="text-sm text-slate-700">{t('evidence.intro')}</p>
       <FormError error={release.isError ? errorMessage(release.error) : null} />
       {data.length === 0 ? (
-        <EmptyState>Keine Beweissicherungen.</EmptyState>
+        <EmptyState>{t('evidence.none')}</EmptyState>
       ) : (
         <ul className="space-y-2">
           {data.map((h) => (
             <li key={h.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-white p-3 text-sm ring-1 ring-slate-200">
               <span className="space-x-2">
-                <Badge tone={h.urgent ? 'danger' : 'warning'}>{h.urgent ? 'Gefahr' : 'Verdacht'}</Badge>
+                <Badge tone={h.urgent ? 'danger' : 'warning'}>{h.urgent ? t('evidence.danger') : t('evidence.suspicion')}</Badge>
                 <span>
                   {targetLabels[h.targetType]} <span className="font-mono text-xs">{h.targetId}</span>
                 </span>
                 <span className="text-slate-600">
-                  seit {formatDateTime(h.createdAt)}, gesichert bis {formatDateTime(h.heldUntil)}
+                  {t('evidence.period', { from: formatDateTime(h.createdAt), until: formatDateTime(h.heldUntil) })}
                 </span>
               </span>
               {h.releasedAt ? (
-                <Badge>freigegeben {formatDateTime(h.releasedAt)}</Badge>
+                <Badge>{t('evidence.released', { date: formatDateTime(h.releasedAt) })}</Badge>
               ) : (
                 <Button variant="secondary" busy={release.isPending && release.variables === h.id} onClick={() => release.mutate(h.id)}>
-                  Freigeben
+                  {t('evidence.release')}
                 </Button>
               )}
             </li>

@@ -14,6 +14,8 @@ export interface ContentDocument {
   sample: boolean;
   body: string;
   headings: { id: string; text: string; level: 2 | 3 }[];
+  /** Sprache der geladenen Fassung (fehlt die Übersetzung, die deutsche). */
+  lang: string;
 }
 
 /** Front Matter im Format `schlüssel: wert` zwischen `---`-Zeilen (wie scripts/legal-manifest.mjs). */
@@ -45,29 +47,42 @@ export function slugify(text: string): string {
 /** Markdown-Formatierung aus Überschriften entfernen, damit Anker und Inhaltsverzeichnis den Klartext nutzen. */
 export const plainHeading = (text: string) => text.replace(/[*_`]/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').trim();
 
+const EXPLICIT_ID = /\s*\{#([a-z0-9-]+)\}\s*$/;
+
+/**
+ * Überschrift mit optionaler fester ID: Übersetzungen tragen die ID der deutschen Fassung (`{#3-nur-private-angebote}`),
+ * damit Regel-Links, E-Mails und security.txt in jeder Sprache auf denselben Abschnitt zeigen.
+ */
+export function headingParts(text: string): { id: string; text: string } {
+  const m = EXPLICIT_ID.exec(text);
+  const clean = plainHeading(m ? text.slice(0, m.index) : text);
+  return { id: m ? m[1]! : slugify(clean), text: clean };
+}
+
+/** Feste ID am Ende einer Überschrift entfernen (für die Anzeige). */
+export const stripHeadingId = (text: string) => text.replace(EXPLICIT_ID, '');
+
 export function extractHeadings(body: string): ContentDocument['headings'] {
   const headings: ContentDocument['headings'] = [];
   let inCode = false;
   for (const line of body.split(/\r?\n/)) {
     if (line.startsWith('```')) inCode = !inCode;
     const m = !inCode && /^(#{2,3})\s+(.+?)\s*#*$/.exec(line);
-    if (m) {
-      const text = plainHeading(m[2]!);
-      headings.push({ id: slugify(text), text, level: m[1]!.length as 2 | 3 });
-    }
+    if (m) headings.push({ ...headingParts(m[2]!), level: m[1]!.length as 2 | 3 });
   }
   return headings;
 }
 
 export async function loadContent(name: ContentName, lang = 'de'): Promise<ContentDocument> {
   const load = loaders[`../content/${name}.${lang}.md`] ?? loaders[`../content/${name}.de.md`];
-  if (!load) throw new Error(`Inhalt ${name} fehlt`);
+  if (!load) throw new Error(`Content ${name} missing`);
   const { data, body } = parseFrontMatter(await load());
   return {
     title: data.title ?? name,
     version: data.version ?? '',
     lastUpdated: data.last_updated ?? '',
-    sample: data.sample === 'true' || body.includes('Muster im Rahmen einer Übungsaufgabe'),
+    sample: data.sample === 'true' || body.includes('Muster im Rahmen einer Übungsaufgabe') || body.includes('course exercise'),
+    lang: load === loaders[`../content/${name}.${lang}.md`] ? lang : 'de',
     body,
     headings: extractHeadings(body),
   };

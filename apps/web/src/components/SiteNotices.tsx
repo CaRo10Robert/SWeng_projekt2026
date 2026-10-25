@@ -8,6 +8,7 @@ import { useSystemStatus } from '../api/ops';
 import { formatDateTime } from '../lib/format';
 import { Dialog } from './Dialog';
 import { Button, FormError } from './ui';
+import { t } from '../i18n';
 
 // ------------------------------------------------------------------ Globale Fehlerreaktionen
 
@@ -56,20 +57,20 @@ export function AnnouncementBanner() {
   if ((a.startsAt && Date.parse(a.startsAt) > now) || (a.endsAt && Date.parse(a.endsAt) < now)) return null;
   if (dismissed === a.text) return null;
   return (
-    <div role="region" aria-label="Ankündigung" className="border-b border-amber-300 bg-amber-50 print:hidden">
+    <div role="region" aria-label={t('notice.announcement')} className="border-b border-amber-300 bg-amber-50 print:hidden">
       <div className="mx-auto flex max-w-6xl items-start justify-between gap-3 px-4 py-2 text-sm text-amber-950">
         <p>
-          <strong>Hinweis: </strong>
+          <strong>{t('notice.announcementPrefix')} </strong>
           {a.text}
-          {a.endsAt && <span> (bis {formatDateTime(a.endsAt)})</span>}
+          {a.endsAt && <span> {t('notice.announcementUntil', { date: formatDateTime(a.endsAt) })}</span>}
         </p>
         <button
           type="button"
           onClick={() => setDismissed(a.text)}
           className="shrink-0 rounded px-2 py-0.5 font-medium underline"
-          aria-label="Ankündigung ausblenden"
+          aria-label={t('notice.hideAnnouncement')}
         >
-          Ausblenden
+          {t('notice.hide')}
         </button>
       </div>
     </div>
@@ -82,10 +83,9 @@ export function MaintenanceBanner() {
   const minutes = retryAfter > 0 ? Math.ceil(retryAfter / 60) : null;
   return (
     <div role="alert" className="border-b border-red-300 bg-red-50 px-4 py-2 text-center text-sm text-red-900">
-      CampusMarkt wird gerade gewartet. Änderungen sind vorübergehend nicht möglich
-      {minutes ? `, voraussichtlich für etwa ${minutes} Minute${minutes === 1 ? '' : 'n'}` : ''}.{' '}
+      {minutes ? t('notice.maintenanceFor', { minutes }) : t('notice.maintenance')}{' '}
       <Link to="/status" className="font-medium underline">
-        Zum Status
+        {t('notice.toStatus')}
       </Link>
     </div>
   );
@@ -107,32 +107,32 @@ export function TermsDialog() {
 
   if (!me?.termsRequired || !meta) return null;
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} title="Neue Nutzungsbedingungen">
+    <Dialog open={open} onClose={() => setOpen(false)} title={t('terms.dialogTitle')}>
       <div className="space-y-3 text-sm">
         <p>
-          Die Nutzungsbedingungen haben sich geändert (Version {meta.termsVersion}
-          {me.termsAcceptedVersion ? `, bisher ${me.termsAcceptedVersion}` : ''}). Lesen und Suchen geht weiter; um Anzeigen
-          zu erstellen oder Nachrichten zu senden, stimme bitte der neuen Fassung zu.
+          {me.termsAcceptedVersion
+            ? t('terms.changedSince', { version: meta.termsVersion, previous: me.termsAcceptedVersion })
+            : t('terms.changed', { version: meta.termsVersion })}
         </p>
         <ul className="list-disc pl-5">
           <li>
             <Link to="/nutzungsbedingungen" target="_blank" rel="noopener" className="text-brand-700 underline">
-              Nutzungsbedingungen lesen (öffnet in neuem Tab)
+              {t('terms.readTerms')}
             </Link>
           </li>
           <li>
             <Link to="/datenschutz" target="_blank" rel="noopener" className="text-brand-700 underline">
-              Datenschutzerklärung lesen (öffnet in neuem Tab)
+              {t('terms.readPrivacy')}
             </Link>
           </li>
         </ul>
         <FormError error={accept.isError ? errorMessage(accept.error) : null} />
         <div className="flex flex-wrap gap-2">
           <Button busy={accept.isPending} onClick={() => accept.mutate(meta.termsVersion, { onSuccess: () => setOpen(false) })}>
-            Zustimmen
+            {t('terms.accept')}
           </Button>
           <Button variant="secondary" onClick={() => setOpen(false)}>
-            Später
+            {t('terms.later')}
           </Button>
         </div>
       </div>

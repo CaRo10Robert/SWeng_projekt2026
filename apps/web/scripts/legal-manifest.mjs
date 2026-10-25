@@ -32,8 +32,9 @@ export function buildLegalManifest(dir) {
         title: data.title ?? name,
         version: data.version,
         lastUpdated: data.last_updated ?? '',
-        sample: data.sample === 'true' || /Muster im Rahmen einer Übungsaufgabe/.test(body),
-        placeholders: (body.match(/\[Platzhalter:/g) ?? []).length,
+        // Deutsche Rechtstexte und englische Lesefassungen (ADR-0016) markieren Muster und Platzhalter je in ihrer Sprache
+        sample: data.sample === 'true' || /Muster im Rahmen einer Übungsaufgabe|course exercise/.test(body),
+        placeholders: (body.match(/\[(?:Platzhalter|Placeholder):/g) ?? []).length,
         sha256: createHash('sha256').update(source).digest('hex'),
       };
     });
