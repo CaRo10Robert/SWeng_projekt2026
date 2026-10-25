@@ -217,7 +217,20 @@ export function RegisterPage() {
         <Checkbox
           checked={accept}
           onChange={(e) => setAccept(e.target.checked)}
-          label={<>Ich akzeptiere die Nutzungsbedingungen und habe den Datenschutzhinweis gelesen (Version {meta?.termsVersion ?? '…'}).</>}
+          label={
+            // Neuer Tab, damit bereits eingegebene Daten erhalten bleiben (REQ-LEGAL-002/003)
+            <>
+              Ich akzeptiere die{' '}
+              <Link to="/nutzungsbedingungen" target="_blank" rel="noopener" className="text-brand-700 underline">
+                Nutzungsbedingungen<span className="sr-only"> (öffnet in neuem Tab)</span>
+              </Link>{' '}
+              und habe den{' '}
+              <Link to="/datenschutz" target="_blank" rel="noopener" className="text-brand-700 underline">
+                Datenschutzhinweis<span className="sr-only"> (öffnet in neuem Tab)</span>
+              </Link>{' '}
+              gelesen (Version {meta?.termsVersion ?? '…'}).
+            </>
+          }
         />
         <FormError error={clientError ?? (register.isError ? errorMessage(register.error) : null)} />
         <Button type="submit" className="w-full" busy={register.isPending}>

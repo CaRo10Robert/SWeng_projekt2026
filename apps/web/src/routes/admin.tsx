@@ -5,6 +5,7 @@ import { useAdminUsers, useAudit, useJobs, useRunDueJobs, useSetRole } from '../
 import { errorMessage } from '../api/client';
 import { Alert, Button, Card, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
 import { formatDate, formatDateTime, roleLabels } from '../lib/format';
+import { Dac7, EvidenceHolds, Operations } from './admin-ops';
 
 const roles: Role[] = ['member', 'moderator', 'admin'];
 
@@ -174,7 +175,14 @@ function Jobs() {
   );
 }
 
-const tabs = { users: 'Nutzer & Rollen', audit: 'Audit-Log', jobs: 'Jobs' } as const;
+const tabs = {
+  users: 'Nutzer & Rollen',
+  audit: 'Audit-Log',
+  jobs: 'Jobs',
+  operations: 'Wartung & Ankündigung',
+  dac7: 'DAC7-Auswertung',
+  evidence: 'Beweissicherung',
+} as const;
 
 export function AdminPage() {
   const [tab, setTab] = useState<keyof typeof tabs>('users');
@@ -200,6 +208,9 @@ export function AdminPage() {
           {tab === 'users' && <Users />}
           {tab === 'audit' && <Audit />}
           {tab === 'jobs' && <Jobs />}
+          {tab === 'operations' && <Operations />}
+          {tab === 'dac7' && <Dac7 />}
+          {tab === 'evidence' && <EvidenceHolds />}
         </div>
       </Card>
     </div>

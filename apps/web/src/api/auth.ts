@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type {
   Accepted,
   DeleteAccountBody,
@@ -33,14 +33,21 @@ export const metaQuery = queryOptions({
 export const useMe = () => useQuery(meQuery);
 export const useMeta = () => useQuery(metaQuery);
 
+/**
+ * Daten des vorherigen Kontos verwerfen, die `me`-Abfrage aber behalten und nur aktualisieren:
+ * `clear()` würde sie entfernen, und Komponenten wie das Layout hingen dann an der entfernten Abfrage
+ * (z. B. kein Zustimmungsdialog und keine Echtzeitverbindung bis zum Neuladen).
+ */
+function switchAccount(qc: QueryClient, me: Me | null) {
+  qc.removeQueries({ predicate: (q) => q.queryKey[0] !== meQuery.queryKey[0] });
+  qc.setQueryData(meQuery.queryKey, me);
+}
+
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: LoginBody) => api<Me>('/auth/login', { method: 'POST', body }),
-    onSuccess: (me) => {
-      qc.clear();
-      qc.setQueryData(meQuery.queryKey, me);
-    },
+    onSuccess: (me) => switchAccount(qc, me),
   });
 }
 
@@ -48,10 +55,7 @@ export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => api<void>('/auth/logout', { method: 'POST' }),
-    onSettled: () => {
-      qc.clear();
-      qc.setQueryData(meQuery.queryKey, null);
-    },
+    onSettled: () => switchAccount(qc, null),
   });
 }
 
@@ -89,13 +93,19 @@ export function useUpdateMe() {
   });
 }
 
+/** Erneute Zustimmung zu einer neuen Fassung der Nutzungsbedingungen (REQ-LEGAL-003). */
+export function useAcceptTerms() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (version: string) => api<Me>('/me/terms', { method: 'POST', body: { version } }),
+    onSuccess: (me) => qc.setQueryData(meQuery.queryKey, me),
+  });
+}
+
 export function useDeleteAccount() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: DeleteAccountBody) => api<Accepted>('/me/delete', { method: 'POST', body }),
-    onSuccess: () => {
-      qc.clear();
-      qc.setQueryData(meQuery.queryKey, null);
-    },
+    onSuccess: () => switchAccount(qc, null),
   });
 }

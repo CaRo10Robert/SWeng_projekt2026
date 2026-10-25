@@ -32,6 +32,7 @@ Passwort für alle Konten: `CampusMarkt-Demo-2026`
 | `lea@studmail.hwg-lu.de` | Mitglied (Studierende) | Chat mit Ben zum Statistik-Buch (reserviert), eigene Anzeigen |
 | `ben@studmail.hwg-lu.de` | Mitglied (Studierende) | Hat eine verdächtige Nachricht von Sara gemeldet |
 | `mia@studmail.hwg-lu.de`, `sara@studmail.hwg-lu.de` | Mitglieder | Weitere Anzeigen und Chats |
+| `tim@studmail.hwg-lu.de` | Mitglied | Hat einer älteren Version der Nutzungsbedingungen zugestimmt: Nach der Anmeldung erscheint der Dialog zur erneuten Zustimmung (REQ-LEGAL-003) |
 | `jonas.weber@hwg-lu.de` | Mitglied (Beschäftigte) | Beschäftigten-Konto |
 | `mod@hwg-lu.de` | Moderator | Moderations-Queue: Meldung + vom Wortfilter angehaltene Anzeige |
 | `admin@hwg-lu.de` | Admin | Rollen, Audit-Log, Jobs/Dead-Letter-Queue, „Fällige Jobs jetzt ausführen“ |

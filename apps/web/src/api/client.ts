@@ -9,6 +9,10 @@ export class ApiError extends Error {
     readonly code: string | undefined,
     readonly detail: string | undefined,
     readonly errors: { path: string; message: string }[] = [],
+    /** Request-ID des Servers zum Melden eines Fehlers (REQ-UX-003). */
+    readonly requestId?: string,
+    /** Sekunden aus `Retry-After`, z. B. im Wartungsmodus (REQ-OPS-006). */
+    readonly retryAfter?: number,
   ) {
     super(detail ?? `Fehler ${status}`);
     this.name = 'ApiError';
@@ -55,10 +59,25 @@ export async function api<T>(path: string, { method = 'GET', body, signal }: Req
   const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
   if (!res.ok) {
     const p = (data ?? {}) as Partial<Problem>;
-    throw new ApiError(res.status, p.code, p.detail ?? p.title, p.errors ?? []);
+    const retryAfter = Number(res.headers.get('retry-after')) || undefined;
+    const error = new ApiError(res.status, p.code, p.detail ?? p.title, p.errors ?? [], p.requestId, retryAfter);
+    for (const listener of errorListeners) listener(error);
+    throw error;
   }
   return data as T;
 }
+
+type ErrorListener = (error: ApiError) => void;
+const errorListeners = new Set<ErrorListener>();
+
+/** Globale Reaktion auf bestimmte Fehler (z. B. `terms_required`, `maintenance`), unabhängig vom Aufrufer. */
+export function onApiError(listener: ErrorListener): () => void {
+  errorListeners.add(listener);
+  return () => errorListeners.delete(listener);
+}
+
+export const isMaintenance = (err: unknown): err is ApiError =>
+  err instanceof ApiError && err.status === 503 && err.code === 'maintenance';
 
 export function qs(params: Record<string, string | number | undefined | null>): string {
   const sp = new URLSearchParams();
@@ -72,6 +91,7 @@ export function qs(params: Record<string, string | number | undefined | null>): 
 export function errorMessage(err: unknown, fallback = 'Es ist ein Fehler aufgetreten.'): string {
   if (err instanceof ApiError) {
     if (err.status === 429) return 'Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.';
+    if (err.status === 503 && err.code === 'maintenance') return 'CampusMarkt wird gerade gewartet. Bitte versuche es später erneut.';
     return err.detail ?? fallback;
   }
   if (err instanceof NetworkError) return err.message;

@@ -59,6 +59,7 @@ Die EU-Richtlinie 2021/514 (DAC7) wurde in Deutschland mit dem **Plattformen-Ste
 | Erhebung von Name, Anschrift, Geburtsdatum, Steuer-ID | nicht umgesetzt | Datenminimierung; erst sinnvoll mit echter Meldepflicht |
 | Elektronische Meldung an das BZSt | nicht umgesetzt | keine externen Konten im Beispiel (C-06); im Echtbetrieb über das BZSt-Portal [Platzhalter] |
 | Vorabhinweis an Anbieter | nicht umgesetzt | Echtbetrieb |
+| Deals gelöschter Konten | **Lücke**: Löscht ein Mitglied sein Konto, werden seine Deals mit den Konversationen gelöscht und fehlen in der Auswertung | Im Echtbetrieb müssen die meldepflichtigen Angaben vor der Löschung gesichert werden; die Aufbewahrungspflicht (§ 22 PStTG, 10 Jahre) geht dem Löschanspruch vor (Art. 17 Abs. 3 lit. b DSGVO). Offener Punkt für EPIC-12 |
 
 ## Datenschutz
 

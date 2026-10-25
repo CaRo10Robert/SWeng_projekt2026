@@ -2,13 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   Accepted,
   AdminUser,
+  Appeal,
+  AppealDecisionBody,
+  AppealReceipt,
   AuditEntry,
   BlockedUser,
   CreateReportBody,
+  Dac7Report,
   DecisionBody,
+  EvidenceHold,
   JobOverview,
   ModerationCase,
+  ModerationNotice,
   Role,
+  TokenAppealInfo,
 } from '@campusmarkt/contracts';
 import { api, qs } from './client';
 
@@ -71,5 +78,81 @@ export function useRunDueJobs() {
   return useMutation({
     mutationFn: () => api<Accepted>('/admin/demo/run-due-jobs', { method: 'POST' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin', 'jobs'] }),
+  });
+}
+
+// ------------------------------------------------------------------ DSA: Mitteilungen und Widerspruch (REQ-LEGAL-006/007)
+
+export const useNotices = (enabled = true) =>
+  useQuery({
+    queryKey: ['notices'],
+    queryFn: () => api<ModerationNotice[]>('/me/notices'),
+    enabled,
+    refetchInterval: 60_000,
+  });
+
+export function useMarkNoticesRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<void>('/me/notices/read', { method: 'POST' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['notices'] }),
+  });
+}
+
+export function useAppeal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ decisionId, reason }: { decisionId: string; reason: string }) =>
+      api<AppealReceipt>(`/moderation/decisions/${decisionId}/appeal`, { method: 'POST', body: { reason } }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['notices'] }),
+  });
+}
+
+export const useTokenAppealInfo = (token: string | undefined) =>
+  useQuery({
+    queryKey: ['appeal-token', token],
+    queryFn: () => api<TokenAppealInfo>(`/appeals/token${qs({ token })}`),
+    enabled: !!token,
+    retry: false,
+  });
+
+export const useTokenAppeal = () =>
+  useMutation({
+    mutationFn: (body: { token: string; reason: string }) => api<AppealReceipt>('/appeals/token', { method: 'POST', body }),
+  });
+
+export const useAppeals = (status: 'open' | 'decided') =>
+  useQuery({
+    queryKey: ['moderation', 'appeals', status],
+    queryFn: () => api<Appeal[]>(`/moderation/appeals${qs({ status })}`),
+  });
+
+export function useDecideAppeal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: AppealDecisionBody }) =>
+      api<void>(`/moderation/appeals/${id}/decision`, { method: 'POST', body }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['moderation'] }),
+  });
+}
+
+// ------------------------------------------------------------------ Administration (REQ-LEGAL-008/009)
+
+export const dac7CsvUrl = (year: number) => `/api/v1/admin/reports/dac7${qs({ year, format: 'csv' })}`;
+
+export const useDac7 = (year: number) =>
+  useQuery({
+    queryKey: ['admin', 'dac7', year],
+    queryFn: () => api<Dac7Report>(`/admin/reports/dac7${qs({ year, format: 'json' })}`),
+  });
+
+export const useEvidenceHolds = () =>
+  useQuery({ queryKey: ['admin', 'evidence-holds'], queryFn: () => api<EvidenceHold[]>('/admin/evidence-holds') });
+
+export function useReleaseHold() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/admin/evidence-holds/${id}/release`, { method: 'POST' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin', 'evidence-holds'] }),
   });
 }

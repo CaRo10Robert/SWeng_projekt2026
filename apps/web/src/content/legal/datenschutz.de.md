@@ -53,15 +53,19 @@ E-Mail: [Platzhalter: datenschutz@hochschule.example]
 - **Auftragsverarbeiter:** [Platzhalter: Rechenzentrum der Hochschule bzw. Hosting-Dienstleister in der EU], [Platzhalter: E-Mail-Versanddienst in der EU]. Mit allen besteht ein Vertrag nach Art. 28 DSGVO.
 - **Behörden** nur, wenn eine gesetzliche Pflicht besteht (z. B. Art. 18 DSA bei Verdacht auf schwere Straftaten gegen Leib und Leben, Meldung an das Bundeszentralamt für Steuern nach PStTG).
 
-## 6. Pflicht zur Bereitstellung
+## 6. Übermittlung in Drittländer
+
+Eine Übermittlung in Länder außerhalb der EU bzw. des EWR findet nicht statt. Die Plattform lädt keine Inhalte, Schriften oder Skripte von fremden Servern nach und setzt keine Analyse- oder Werbedienste ein. Auftragsverarbeiter werden nur mit Sitz und Verarbeitung in der EU beauftragt [Platzhalter: Bestätigung durch den Betreiber].
+
+## 7. Pflicht zur Bereitstellung
 
 Ohne Hochschul-E-Mail-Adresse und Passwort ist keine Registrierung möglich, weil die Plattform nur Hochschulangehörigen offensteht. Alle weiteren Profilangaben sind freiwillig.
 
-## 7. Automatisierte Entscheidungen
+## 8. Automatisierte Entscheidungen
 
 Es gibt keine automatisierte Entscheidung im Sinne von Art. 22 DSGVO. Ein Wortfilter prüft neue Anzeigen auf eindeutig verbotene Begriffe. Trifft er zu, wird die Anzeige zunächst nicht veröffentlicht, sondern von einem Menschen geprüft. Erst diese Person entscheidet.
 
-## 8. Cookies und lokale Speicherung
+## 9. Cookies und lokale Speicherung
 
 Wir speichern nur, was technisch unbedingt erforderlich ist (§ 25 Abs. 2 Nr. 2 TDDDG). Deshalb fragen wir keine Einwilligung ab und zeigen kein Cookie-Banner.
 
@@ -72,7 +76,7 @@ Wir speichern nur, was technisch unbedingt erforderlich ist (§ 25 Abs. 2 Nr. 2 
 
 Es werden kein `localStorage`, kein `sessionStorage` und keine IndexedDB genutzt. Sollte später eine Speicherung hinzukommen, die nicht unbedingt erforderlich ist, fragen wir vorher Ihre Einwilligung ab.
 
-## 9. Ihre Rechte
+## 10. Ihre Rechte
 
 Sie haben das Recht auf
 
@@ -85,13 +89,13 @@ Sie haben das Recht auf
 
 Eine erteilte Einwilligung (Kontaktfreigabe) können Sie jederzeit mit Wirkung für die Zukunft in der Konversation zurückziehen. Für alle anderen Anliegen schreiben Sie an [Platzhalter: datenschutz@hochschule.example].
 
-## 10. Beschwerderecht
+## 11. Beschwerderecht
 
 Sie können sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere beim
 
 Landesbeauftragten für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz
 [Platzhalter: Anschrift und Kontaktdaten der Aufsichtsbehörde]
 
-## 11. Änderungen
+## 12. Änderungen
 
 Ändert sich diese Erklärung wesentlich, erhält sie eine neue Version. Sie werden beim nächsten Anmelden darauf hingewiesen.

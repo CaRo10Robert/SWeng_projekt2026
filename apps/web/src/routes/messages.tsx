@@ -123,7 +123,10 @@ function MessageBubble({ message, mine, onReport }: { message: Message; mine: bo
       </div>
       {message.safetyHint && !mine && (
         <p className="mt-1 max-w-[85%] rounded bg-amber-50 px-2 py-1 text-xs text-amber-900" role="note">
-          ⚠ Vorsicht bei Links, Bankdaten oder Telefonnummern. Übergib Dinge am besten persönlich auf dem Campus und zahle nie im Voraus.
+          ⚠ Vorsicht bei Links, Bankdaten oder Telefonnummern. Übergib Dinge am besten persönlich auf dem Campus und zahle nie im Voraus.{' '}
+          <Link to="/hilfe" hash="welche-betrugsmaschen-gibt-es" className="font-medium underline">
+            Mehr zu Betrugsmaschen
+          </Link>
         </p>
       )}
       <div className="mt-0.5 flex gap-2 text-xs text-slate-600">

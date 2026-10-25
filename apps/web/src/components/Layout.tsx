@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Outlet, useNavigate, useRouterState, type ErrorComponentProps } from '@tanstack/react-router';
 import { useLogout, useMe } from '../api/auth';
 import { useUnread } from '../api/messaging';
+import { useNotices } from '../api/trust';
 import { useRealtime, useRealtimeDegraded } from '../lib/realtime';
-import { errorMessage } from '../api/client';
-import { Alert, Button, cx } from './ui';
+import { useDocumentTitle } from '../lib/title';
+import { ApiError, errorMessage, isMaintenance, NetworkError } from '../api/client';
+import { Footer } from './Footer';
+import { AnnouncementBanner, MaintenanceBanner, TermsDialog, useGlobalApiErrors } from './SiteNotices';
+import { Alert, Button, buttonClass, cx } from './ui';
 
 const navLinkClass =
   'block rounded-lg px-3 py-2 text-sm font-medium text-slate-800 hover:bg-brand-50 [&.active]:bg-brand-100 [&.active]:text-brand-800';
@@ -18,6 +22,42 @@ function UnreadBadge() {
       {count > 99 ? '99+' : count}
       <span className="sr-only"> ungelesene Nachrichten</span>
     </span>
+  );
+}
+
+function NoticesBadge() {
+  const { data } = useNotices();
+  const count = data?.filter((n) => !n.readAt).length ?? 0;
+  if (!count) return null;
+  return (
+    <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-700 px-1.5 text-xs font-bold text-white">
+      {count}
+      <span className="sr-only"> ungelesene Mitteilungen</span>
+    </span>
+  );
+}
+
+function GuestNav() {
+  return (
+    <nav aria-label="Hauptnavigation">
+      <ul className="flex items-center gap-1 sm:gap-2">
+        <li className="hidden sm:block">
+          <Link to="/hilfe" className={navLinkClass}>
+            Hilfe
+          </Link>
+        </li>
+        <li>
+          <Link to="/login" search={{}} className={navLinkClass}>
+            Anmelden
+          </Link>
+        </li>
+        <li>
+          <Link to="/register" className={buttonClass('primary', 'min-h-9 px-3 py-1.5')}>
+            Registrieren
+          </Link>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
@@ -35,7 +75,7 @@ function Header() {
     logout.mutate(undefined, { onSettled: () => void navigate({ to: '/login', search: {} }) });
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white print:static">
       <a href="#main" className="sr-only-focusable absolute left-2 top-2 z-30 rounded bg-white px-3 py-2 text-brand-700">
         Zum Inhalt springen
       </a>
@@ -44,6 +84,7 @@ function Header() {
           <img src="/icon.svg" alt="" className="h-8 w-8" />
           CampusMarkt
         </Link>
+        {me === null && <GuestNav />}
         {me && (
           <button
             type="button"
@@ -92,6 +133,12 @@ function Header() {
                 </Link>
               </li>
               <li>
+                <Link to="/me/notices" className={navLinkClass}>
+                  Mitteilungen
+                  <NoticesBadge />
+                </Link>
+              </li>
+              <li>
                 <Link to="/profile" className={navLinkClass}>
                   Profil
                 </Link>
@@ -131,39 +178,129 @@ function Header() {
 export function Layout() {
   const { data: me } = useMe();
   useRealtime(!!me);
+  useGlobalApiErrors();
   return (
     <div className="flex min-h-screen flex-col">
+      <MaintenanceBanner />
+      <AnnouncementBanner />
       <Header />
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         <Outlet />
       </main>
-      <footer className="border-t border-slate-200 bg-white px-4 py-4 text-center text-sm text-slate-600">
-        Demo-Version – kein Echtbetrieb · CampusMarkt HWG LU
-      </footer>
+      <Footer />
+      {me && <TermsDialog />}
     </div>
   );
 }
 
-export function RouteError({ error, reset }: ErrorComponentProps) {
+function HelpLinks() {
   return (
-    <div className="space-y-4">
-      <Alert tone="error" title="Diese Seite konnte nicht geladen werden.">
-        {errorMessage(error)}
+    <ul className="flex flex-wrap gap-x-4 gap-y-2">
+      <li>
+        <Link to="/" className="text-brand-700 underline">
+          Zur Startseite
+        </Link>
+      </li>
+      <li>
+        <Link to="/hilfe" className="text-brand-700 underline">
+          Hilfe und häufige Fragen
+        </Link>
+      </li>
+      <li>
+        <Link to="/kontakt" className="text-brand-700 underline">
+          Kontakt
+        </Link>
+      </li>
+      <li>
+        <Link to="/status" className="text-brand-700 underline">
+          Systemstatus
+        </Link>
+      </li>
+    </ul>
+  );
+}
+
+/** Unerwartete Fehler, Offline und Wartung (REQ-UX-003, REQ-OPS-006): verständlich, ohne Interna, mit Request-ID zum Melden. */
+export function RouteError({ error, reset }: ErrorComponentProps) {
+  useDocumentTitle('Fehler');
+  if (isMaintenance(error)) {
+    const minutes = error.retryAfter ? Math.ceil(error.retryAfter / 60) : null;
+    return (
+      <section className="mx-auto max-w-2xl space-y-4" aria-labelledby="error-title">
+        <h1 id="error-title" className="text-2xl font-bold">
+          Wartungsarbeiten
+        </h1>
+        <p>
+          CampusMarkt wird gerade gewartet
+          {minutes ? ` und ist voraussichtlich in etwa ${minutes} Minute${minutes === 1 ? '' : 'n'} wieder erreichbar` : ''}.
+          Deine Daten bleiben erhalten.
+        </p>
+        <Button variant="secondary" onClick={reset}>
+          Erneut versuchen
+        </Button>
+        <HelpLinks />
+      </section>
+    );
+  }
+  const offline = error instanceof NetworkError;
+  const requestId = error instanceof ApiError ? error.requestId : undefined;
+  return (
+    <section className="mx-auto max-w-2xl space-y-4" aria-labelledby="error-title">
+      <h1 id="error-title" className="text-2xl font-bold">
+        {offline ? 'Keine Verbindung' : 'Diese Seite konnte nicht geladen werden'}
+      </h1>
+      <Alert tone="error">
+        {offline ? 'Bitte prüfe deine Internetverbindung und versuche es erneut.' : errorMessage(error)}
       </Alert>
+      {requestId && (
+        <p className="text-sm text-slate-700">
+          Wenn der Fehler bleibt, melde ihn bitte über die{' '}
+          <Link to="/kontakt" className="text-brand-700 underline">
+            Kontaktseite
+          </Link>{' '}
+          und nenne diese Fehlernummer: <code className="rounded bg-slate-100 px-1 font-mono">{requestId}</code>
+        </p>
+      )}
       <Button variant="secondary" onClick={reset}>
         Erneut versuchen
       </Button>
-    </div>
+      <HelpLinks />
+    </section>
   );
 }
 
 export function NotFound() {
+  const { data: me } = useMe();
+  const navigate = useNavigate();
+  const [q, setQ] = useState('');
+  useDocumentTitle('Seite nicht gefunden');
+  const search = (e: FormEvent) => {
+    e.preventDefault();
+    void navigate({ to: '/', search: { q: q.trim() || undefined } });
+  };
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Seite nicht gefunden</h1>
-      <Link to="/" className="text-brand-700 underline">
-        Zur Startseite
-      </Link>
-    </div>
+    <section className="mx-auto max-w-2xl space-y-4" aria-labelledby="notfound-title">
+      <h1 id="notfound-title" className="text-2xl font-bold">
+        Seite nicht gefunden
+      </h1>
+      <p>Diese Adresse gibt es nicht (mehr). Vielleicht wurde die Anzeige gelöscht oder der Link ist unvollständig.</p>
+      {me && (
+        <form role="search" onSubmit={search} className="flex gap-2">
+          <label htmlFor="notfound-q" className="sr-only">
+            Anzeigen durchsuchen
+          </label>
+          <input
+            id="notfound-q"
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Anzeigen durchsuchen"
+            className="flex-1 rounded-lg border border-slate-400 px-3 py-2"
+          />
+          <Button type="submit">Suchen</Button>
+        </form>
+      )}
+      <HelpLinks />
+    </section>
   );
 }

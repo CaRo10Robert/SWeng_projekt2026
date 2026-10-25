@@ -54,11 +54,28 @@ test('[AT-A11Y-001] Übrige Seiten ohne critical; serious nur mit dokumentierter
 
   const contexts = await Promise.all([1, 2, 3, 4].map(() => browser.newContext({ locale: 'de-DE' })));
   const guest = await contexts[0]!.newPage();
-  for (const path of ['/forgot-password', '/verify?token=ungueltig-0123456789', '/reset-password?token=ungueltig-0123456789']) await check(guest, path);
+  for (const path of [
+    '/forgot-password',
+    '/verify?token=ungueltig-0123456789',
+    '/reset-password?token=ungueltig-0123456789',
+    // Rechtsseiten, Hilfe, Status, Widerspruch und 404 (REQ-LEGAL-001…005, REQ-UX-003/005, REQ-OPS-007)
+    '/',
+    '/impressum',
+    '/datenschutz',
+    '/nutzungsbedingungen',
+    '/community-regeln',
+    '/barrierefreiheit',
+    '/kontakt',
+    '/hilfe',
+    '/status',
+    '/widerspruch?token=ungueltig-0123456789',
+    '/gibt-es-nicht',
+  ])
+    await check(guest, path);
 
   const member = await contexts[1]!.newPage();
   await keyboardLogin(member, DEMO.lea);
-  for (const path of ['/me/favorites', '/me/listings']) await check(member, path);
+  for (const path of ['/me/favorites', '/me/listings', '/me/notices']) await check(member, path);
 
   const mod = await contexts[2]!.newPage();
   await keyboardLogin(mod, DEMO.mod);

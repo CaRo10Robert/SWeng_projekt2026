@@ -6,6 +6,8 @@ export const DEMO = {
   lea: 'lea@studmail.hwg-lu.de',
   ben: 'ben@studmail.hwg-lu.de',
   mia: 'mia@studmail.hwg-lu.de',
+  /** Hat im Seed einer älteren Fassung der Nutzungsbedingungen zugestimmt (REQ-LEGAL-003). */
+  tim: 'tim@studmail.hwg-lu.de',
   mod: 'mod@hwg-lu.de',
   admin: 'admin@hwg-lu.de',
 };
