@@ -1,7 +1,7 @@
 ---
 title: Legal notice
 version: 2026-10
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
@@ -26,9 +26,9 @@ The university is a corporation under public law and at the same time a state in
 
 ## Contact {#kontakt}
 
-- Email: [Placeholder: campusmarkt@hochschule.example]
+- Email: [Placeholder: campusmarkt@hwg-lu.example]
 - Phone: [Placeholder: +49 000 000000]
-- Contact form and other ways to reach us: see the "Contact" page
+- Other ways to reach us: see the "Contact" page
 
 ## Supervisory authority {#zustaendige-aufsichtsbehoerde}
 

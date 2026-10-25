@@ -3,9 +3,9 @@ id: UC-MODEL
 type: requirements
 status: in-review
 owner: team-produkt
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Use-Case-Modell
@@ -603,18 +603,18 @@ stateDiagram-v2
 
 **Hauptszenario**
 1. Mitglied öffnet „Meine Mitteilungen“ und wählt bei der Entscheidung „Widerspruch einlegen“.
-2. System zeigt Entscheidung, Begründung und Frist und fragt eine Begründung des Widerspruchs ab (20–2.000 Zeichen).
+2. System zeigt Entscheidung, Begründung und Frist und fragt eine Begründung des Widerspruchs ab (20–2.000 Zeichen, ohne Leerzeichen am Rand gezählt).
 3. Mitglied sendet den Widerspruch ab.
-4. System legt einen Fall „Widerspruch“ an, sperrt ihn für den ursprünglichen Entscheider und bestätigt den Eingang.
-5. Ein anderer Moderator entscheidet (UC-36): *stattgeben* oder *zurückweisen*, jeweils mit Begründung.
-6. System setzt die Entscheidung um (bei Stattgeben: Inhalt wiederherstellen bzw. Konto entsperren), protokolliert sie und teilt beiden Seiten das Ergebnis mit.
+4. System legt einen Fall „Widerspruch“ an, sperrt ihn für den ursprünglichen Entscheider sowie für Widersprechende, Betroffene und Meldende des Falls (Vier-Augen-Prinzip) und bestätigt den Eingang.
+5. Eine andere, unbeteiligte Person aus der Moderation entscheidet (UC-36): *stattgeben* oder *zurückweisen*, jeweils mit Begründung.
+6. System setzt die Entscheidung um (bei Stattgeben: Inhalt mit vorherigem Status wiederherstellen bzw. Konto entsperren, sofern keine andere Sperre besteht), protokolliert sie und teilt beiden Seiten das Ergebnis mit.
 
 **Erweiterungen**
-- 1a. *Konto gesperrt:* Die Person öffnet den einmaligen Link aus der E-Mail (gültig 6 Monate ab Mitteilung); das System zeigt das Widerspruchsformular ohne Anmeldung. Weiter mit 2.
+- 1a. *Konto gesperrt:* Die Person öffnet den einmaligen Link aus der E-Mail (gültig 6 Monate ab Mitteilung; das Token steht nur im URL-Fragment und wird per POST übermittelt); das System zeigt das Widerspruchsformular ohne Anmeldung. Weiter mit 2.
 - 1b. *Link ungültig, benutzt oder abgelaufen:* System zeigt „Dieser Link ist nicht mehr gültig“ und den Hinweis auf die Kontaktstelle (REQ-LEGAL-005). Ende.
 - 3a. *Frist abgelaufen oder bereits widersprochen:* System lehnt ab und nennt den Grund. Ende.
 - 5a. *Nur ein Moderator vorhanden:* Ein Administrator entscheidet.
-- 6a. *Inhalt inzwischen vom Anbieter gelöscht:* Stattgeben wird mitgeteilt, eine Wiederherstellung entfällt.
+- 6a. *Inhalt nicht mehr vorhanden (z. B. vom Anbieter gelöscht oder Aufbewahrungsfrist abgelaufen):* System lehnt das Stattgeben mit 409 `restore_impossible` ab, statt einen falschen Erfolg zu melden; der Moderator weist den Widerspruch mit entsprechender Begründung zurück. Originaltexte werden nicht gelöscht, solange ein Widerspruch offen ist.
 
 ```mermaid
 sequenceDiagram
@@ -653,7 +653,7 @@ sequenceDiagram
 | UC-24 | Opt-out pro Kategorie (Nachrichten, Erinnerungen; Suchaufträge ab UC-16). Sicherheitsrelevante Mails sind nicht abwählbar |
 | UC-31 | Nach dem Blockieren können beide einander keine Nachrichten mehr senden und sehen die Anzeigen des anderen nicht mehr in der Suche (gegenseitig, REQ-MOD-005, REQ-SRCH-006) |
 | UC-33 | Verwarnung oder dauerhafte Sperre, mit Begründung nach DSA Art. 17 (REQ-LEGAL-006). Die Sperre gilt für die **E-Mail-Adresse**, damit sich der Nutzer nicht erneut registrieren kann. Befristete Sperren laufen nicht im System (Q-15); der Widerspruch läuft im System über einen einmaligen Link aus der E-Mail (UC-35, Q-22) |
-| UC-36 | Moderator öffnet einen Fall „Widerspruch“ mit ursprünglicher Entscheidung, Begründung und Widerspruchsbegründung. Der ursprüngliche Entscheider kann ihn nicht bearbeiten. Entscheidung *stattgeben* (Maßnahme wird rückgängig gemacht) oder *zurückweisen*, jeweils mit Begründung; beide Seiten erhalten das Ergebnis (REQ-LEGAL-007) |
+| UC-36 | Moderator öffnet einen Fall „Widerspruch“ mit ursprünglicher Entscheidung, Begründung und Widerspruchsbegründung. Weder der ursprüngliche Entscheider noch Widersprechende, Betroffene oder Meldende des Falls können ihn bearbeiten (403 `four_eyes`). Bei entfernten Nachrichten sieht der Prüfende den Originaltext; der Zugriff wird im Audit-Log protokolliert. Entscheidung *stattgeben* (Maßnahme wird rückgängig gemacht) oder *zurückweisen*, jeweils mit Begründung; beide Seiten erhalten das Ergebnis (REQ-LEGAL-007) |
 | UC-40 | Domain hinzufügen, deaktivieren und dem Nutzertyp zuordnen (`studmail.` → Studierende). MVP: per Konfiguration bzw. Datenbank-Seed |
 | UC-42 | Rollen Mitglied, Moderator und Administrator vergeben bzw. entziehen. Wird protokolliert |
 | UC-43 | Administrator wählt ein Kalenderjahr; System zeigt die Anbieter, die 30 Verkäufe oder 2.000 € erreichen, mit Summen je Quartal, und bietet einen CSV-Export an. Jeder Abruf wird protokolliert (REQ-LEGAL-009, Q-26) |

@@ -35,7 +35,7 @@ Diese Erklärung wurde am 24.10.2026 erstellt und zuletzt am 24.10.2026 überpr�
 
 Sind Ihnen Mängel aufgefallen, oder benötigen Sie Inhalte in einer anderen Form? Schreiben Sie uns:
 
-- E-Mail: [Platzhalter: barrierefreiheit@hochschule.example]
+- E-Mail: [Platzhalter: barrierefreiheit@hwg-lu.example]
 - Telefon: [Platzhalter: +49 000 000000]
 - Post: [Platzhalter: Anschrift der Hochschule, Organisationseinheit]
 

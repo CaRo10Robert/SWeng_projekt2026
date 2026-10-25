@@ -3,7 +3,7 @@ id: REQ-LEGAL-001
 title: Impressum
 type: business-rule
 class: constraint
-status: approved
+status: implemented
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: basis
 epic: EPIC-13
 source: DDG § 5, MStV § 18 Abs. 2, Q-23
 use_cases: [UC-08]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE]
 ---
 
@@ -26,7 +26,7 @@ Das System muss ein Impressum mit den Pflichtangaben des Betreibers bereitstelle
 > Übungsaufgabe: Inhalte mit Betreiberbezug stehen als Platzhalter `[Platzhalter: …]` (Q-23). Kein Rechtsrat; im Echtbetrieb prüft die/der Datenschutzbeauftragte bzw. das Justiziariat der Hochschule.
 
 ## Begründung
-Telemedien mit redaktionellen Inhalten brauchen eine Anbieterkennzeichnung (DDG § 5, für journalistisch-redaktionelle Inhalte zusätzlich MStV § 18 Abs. 2). Fehlende Angaben sind abmahn- und bußgeldbewehrt und wirken unprofessionell.
+Digitale Dienste brauchen eine Anbieterkennzeichnung. § 5 DDG gilt für geschäftsmäßige, in der Regel gegen Entgelt angebotene digitale Dienste; ob ein kostenloses Angebot einer öffentlichen Stelle darunter fällt, ist **offener Prüfpunkt für das Justiziariat**. Als Auffangnorm gilt § 18 Abs. 1 MStV (Name und Anschrift auch bei nicht geschäftsmäßigen Angeboten), für journalistisch-redaktionelle Inhalte zusätzlich § 18 Abs. 2 MStV. Der Begriff „Telemedien“ ist im Bundesrecht durch „digitale Dienste“ (DDG) ersetzt. Fehlende Angaben sind abmahn- und bußgeldbewehrt und wirken unprofessionell.
 
 ## Akzeptanzkriterien
 | Pflichtangabe (Muster: Hochschule als öffentliche Stelle) | Inhalt im Beispiel |
@@ -64,3 +64,4 @@ Szenario: Impressum ohne Anmeldung
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-22): Anwendbarkeit § 5 DDG als offener Prüfpunkt, § 18 Abs. 1 MStV als Auffangnorm, Begriff digitale Dienste; Status nach Umsetzung |

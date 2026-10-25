@@ -3,7 +3,7 @@ id: REQ-OPS-006
 title: Wartungsmodus und Ankündigungen
 type: operational
 class: quality
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,15 +13,15 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 11, Q-27
 use_cases: [UC-44]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-OPS-006, AT-OPS-006-2]
 ---
 
 # REQ-OPS-006 Wartungsmodus und Ankündigungen
 ## Anforderung
-Der Betrieb muss das System in einen Wartungsmodus versetzen können, in dem alle Anfragen außer Gesundheitsprüfung, Statusseite und Rechtsseiten mit einer Wartungsseite beantwortet werden. Administratoren müssen eine Ankündigung (z. B. geplante Wartung) setzen können, die allen Besuchern als Banner angezeigt wird.
+Der Betrieb muss das System in einen Wartungsmodus versetzen können, in dem alle Anfragen außer den Ausnahmen mit einer Wartungsseite (HTML) bzw. 503 `maintenance` mit `Retry-After` (API) beantwortet werden. Ausnahmen: Gesundheitsprüfung (`/health/*`), Metriken, Statusseite und Status-API, `robots.txt` und `/.well-known/`, statische Dateien der App, Rechtsseiten, Anmeldung und Abmeldung, `GET /meta` und `GET /me` sowie **alle Anfragen von Administratoren**, damit sie den Modus wieder ausschalten können. Der Modus lässt sich über `MAINTENANCE_MODE=true` (Neustart nötig) oder als weicher Modus über die Admin-Oberfläche (`platform.setting`) schalten. Administratoren müssen eine Ankündigung (z. B. geplante Wartung) setzen können, die allen Besuchern als Banner angezeigt wird.
 
 ## Begründung
 Wartungen ohne Ankündigung und mit kryptischen Fehlern schaden dem Vertrauen; Health-Endpunkte müssen für Orchestrierung und Monitoring erreichbar bleiben.
@@ -53,3 +53,4 @@ Szenario: Ankündigung
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-14): Ausnahmen vollständig inkl. Administratoren, beide Schaltwege; Status nach Umsetzung |

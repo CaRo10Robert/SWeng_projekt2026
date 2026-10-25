@@ -3,7 +3,7 @@ id: REQ-LEGAL-013
 title: Prozess für Datenschutzverletzungen
 type: operational
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -13,9 +13,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 33, Art. 34, Q-23
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [CTRL-DOC-DATENPANNE, MAN-LEGAL-013]
 ---
 
@@ -45,3 +45,4 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-12): Status nach Umsetzung; Datenpannen-Prozess um Risikomatrix, Dokumentationsvorlage, Rollen, Erreichbarkeit und Art. 33 Abs. 2 ergänzt |

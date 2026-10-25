@@ -3,9 +3,9 @@ id: LEGAL-TOM
 type: privacy
 status: in-review
 owner: security-lead
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Technische und organisatorische Maßnahmen (Art. 32 DSGVO)
@@ -29,8 +29,10 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 | Autorisierung | Prüfung je Ressource, standardmäßig verweigern; Fremde erhalten 404 | REQ-SEC-006 | umgesetzt |
 | Rollenkonzept | Mitglied, Moderator, Administrator; Rollenwechsel nur durch Administration, im Audit-Log | REQ-MOD-007 | umgesetzt |
 | Datenminimierung im Chat | E-Mail-Adresse nur nach beidseitiger Zustimmung sichtbar; Moderation sieht nur gemeldeten Ausschnitt (± 5 Nachrichten) | REQ-CHAT-010, REQ-PRIV-004 | umgesetzt |
-| Pseudonymisierung | IP-Adressen nur als HMAC-SHA256 mit täglich wechselndem Schlüssel | ADR-0014, REQ-PRIV-002 | im Beispiel (Schlüsselrotation geplant B-35) |
-| Protokolle ohne Personenbezug | Schwärzung (`redact`) von Cookies, Passwörtern, E-Mail in Logs | REQ-OPS-002 | umgesetzt |
+| Pseudonymisierung | IP- und E-Mail-Adressen in Rate-Limit-Schlüsseln nur als HMAC-SHA256 mit zufälligem, täglich rotiertem Schlüssel (`platform.ip_pepper`, Vorgänger nach 1 h gelöscht, kein Standardschlüssel) | ADR-0014, REQ-PRIV-002 | umgesetzt |
+| Protokolle ohne Personenbezug | eigener Request-Log-Eintrag (Methode, Route ohne Query, Status, Dauer, Request-ID) ohne IP-Adresse und Port; Schwärzung (`redact`) von Cookies, Passwörtern, E-Mail; Einmal-Tokens nur im URL-Fragment bzw. im POST-Body | REQ-OPS-002 | umgesetzt (Unit-Test AT-OPS-002) |
+| Beweissicherung datensparsam | bei Straftatverdacht nur pseudonymisierte Kopie mit Kontext, Originale werden fristgerecht gelöscht | REQ-LEGAL-008 | umgesetzt |
+| Vier-Augen-Prinzip | Widersprüche entscheidet eine unbeteiligte Person (nicht Entscheider, Widersprechende, Betroffene oder Meldende); Zugriff auf Originaltexte nur im Widerspruch und protokolliert | REQ-LEGAL-007 | umgesetzt |
 | Bilder ohne Metadaten | Neukodierung entfernt EXIF/GPS | REQ-SEC-007 | umgesetzt |
 | Transportverschlüsselung | TLS ≥ 1.2 und HSTS am Reverse Proxy | REQ-OPS-009 | im Beispiel (Profil `proxy`, interne CA) |
 | Verschlüsselung der Datensicherungen | Backup-Archive verschlüsselt ablegen | REQ-AVAIL-003 | Echtbetrieb |
@@ -61,7 +63,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 
 | Maßnahme | Umsetzung | Bezug | Stand |
 |---|---|---|---|
-| Wiederherstellung | `node scripts/restore.mjs`; Restore-Test automatisiert | REQ-AVAIL-003 | im Beispiel |
+| Wiederherstellung | `node scripts/restore.mjs`: Einspielen in temporäre Datenbank und temporäres Bildverzeichnis, erst danach Tausch (Rückfall auf den alten Stand bei Fehler); Löschjournal wird danach erneut abgespielt (Art. 17); Restore-Test automatisiert | REQ-AVAIL-003, ADR-0018 | im Beispiel |
 | Ziele | RPO 24 h, RTO 4 h (Beispielwerte) | REQ-AVAIL-002 | Echtbetrieb |
 | Notfallprozess | Incident-Prozess mit Schweregraden und Postmortem | REQ-OPS-011 | im Beispiel (Dokument) |
 
@@ -72,7 +74,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 | Automatisierte Prüfungen | CI bei jeder Änderung: Unit-, E2E-, Smoke-Tests, Modulgrenzen, Nachverfolgbarkeit | REQ-OPS-004 | umgesetzt |
 | Threat Model | Registrierung, Chat, Upload | REQ-SEC-009 | geplant |
 | Penetrationstest | vor dem Go-live nach ASVS L2 | REQ-SEC-013 | Echtbetrieb ([Plan](../07-betrieb/pentest-plan.md)) |
-| Löschkonzept | täglicher Lauf löscht nach Fristen | REQ-PRIV-003 | umgesetzt (Fristen teilweise geplant) |
+| Löschkonzept | täglicher Lauf löscht nach Fristen; Löschjournal außerhalb der Datenbank für Wiederherstellungen | REQ-PRIV-003, ADR-0018 | umgesetzt (Löschläufe für Meldungen, Widersprüche und Mitteilungen geplant) |
 | Jährliche Überprüfung | VVT, TOMs, Rechtstexte durch DSB | REQ-LEGAL-011 | Echtbetrieb |
 
 ## 6. Organisatorische Maßnahmen

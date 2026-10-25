@@ -54,7 +54,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-009` | automatisiert | REQ-AUTH-009 | (neu) Test des Anmelde-Anwendungsfalls mit einem simulierten zweiten Verfahren: Kontoverknüpfung, Neuanlage, Ablehnung fremder bzw. fehlender Adresse. |
 | `AT-AVAIL-001` | automatisiert | REQ-AVAIL-001 | Auswertung der Fehlerquote in den k6-Lasttests (neu zu schreiben). |
 | `MAN-AVAIL-002` | manuell | REQ-AVAIL-002 | Protokoll der Restore-Übung (erst im Echtbetrieb). |
-| `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test `tests/ops/restore-test.mjs` in CI (Job `compose`) – Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich, Anzeige mit Bild wieder da, Dauer ≤ 15 min. |
+| `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test `tests/ops/restore-test.mjs` in CI (Job `compose`) – Teil 1: Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich, Anzeige mit Bild wieder da, Dauer ≤ 15 min. Teil 2: eine nach der Sicherung gelöschte Anzeige bleibt nach der Wiederherstellung gelöscht (Löschjournal). Dazu Unit-Test des Löschjournals (`deletion-journal.test.ts`). |
 | `CTRL-DOC-BACKUP` | Kontrolle | REQ-AVAIL-003 | Kontrolle `docs/07-betrieb/backup-restore.md` – Ablauf, Aufbewahrung, Verschlüsselung, Zuständigkeiten. |
 | `AT-CHAT-001` | automatisiert | REQ-CHAT-001 | Smoke-Test – Konversation starten, Anbieter erhält die Nachricht. |
 | `AT-CHAT-001-2` | automatisiert | REQ-CHAT-001 | API-Test – Antworten zu Konversation und Nachrichten enthalten keine E-Mail-Adressen (neu). |
@@ -83,16 +83,17 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `CTRL-DOC-LEGAL-TEXTE` | Kontrolle | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005 | Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als `[Platzhalter: …]` markiert, Version und Datum im Front Matter, Review protokolliert. |
 | `AT-LEGAL-002` | automatisiert | REQ-LEGAL-002 | E2E-Test – Datenschutzerklärung ohne Anmeldung erreichbar, aus dem Registrierungsformular verlinkt, Abschnitte 1–12 und Version vorhanden. |
 | `AT-LEGAL-002-2` | automatisiert | REQ-LEGAL-002 | E2E-Test – jede nach den Kernabläufen vorhandene Speicherung im Browser steht im Abschnitt „Cookies und lokale Speicherung“. |
+| `AT-LEGAL-002-3` | automatisiert | REQ-LEGAL-002 | E2E-Test – bei neuer Fassung der Datenschutzerklärung erscheint für Mitglieder mit älterer Kenntnisnahme ein Hinweis mit Link; „Zur Kenntnis genommen“ per Tastatur speichert die Version im Konto, der Hinweis verschwindet. |
 | `AT-LEGAL-003` | automatisiert | REQ-LEGAL-003 | E2E-Test – Nutzungsbedingungen und Community-Regeln ohne Anmeldung erreichbar, Version sichtbar, aus dem Registrierungsformular verlinkt. |
 | `AT-LEGAL-003-2` | automatisiert | REQ-LEGAL-003 | Smoke- oder Unit-Test – Mitglied mit älterer Zustimmung muss erneut zustimmen; schreibende Anfrage vorher 403 `terms_required`; danach Version gespeichert. |
 | `AT-LEGAL-004` | automatisiert | REQ-LEGAL-004 | E2E-Test – Erklärung von jeder Seite per Tastatur erreichbar, 5 Pflichtabschnitte und Kontaktmöglichkeit vorhanden. |
 | `AT-LEGAL-005` | automatisiert | REQ-LEGAL-005 | E2E-Test – Kontaktseite ohne Anmeldung erreichbar, alle 7 Anliegen mit Weg sichtbar. |
-| `AT-LEGAL-006` | automatisiert | REQ-LEGAL-006 | Smoke-Test – Entfernen einer gemeldeten Anzeige erzeugt für die Betroffene eine Mitteilung und eine E-Mail mit den Angaben 1–5, ohne Identität des Meldenden. |
-| `AT-LEGAL-006-2` | automatisiert | REQ-LEGAL-006 | Smoke-Test – der Meldende erhält das Ergebnis; Entscheidung ohne Regel oder mit zu kurzer Begründung ergibt 422. |
+| `AT-LEGAL-006` | automatisiert | REQ-LEGAL-006 | Smoke-Test – Entfernen einer gemeldeten Anzeige erzeugt für die Betroffene eine Mitteilung und eine E-Mail mit den Angaben 1–5, ohne Identität des Meldenden; bei „rechtswidriger Inhalt“ ohne Rechtsgrundlage 422 `legal_ground_required`, sonst erscheint die Rechtsgrundlage in Mitteilung und E-Mail. |
+| `AT-LEGAL-006-2` | automatisiert | REQ-LEGAL-006 | Smoke-Test und Unit-Test – der Meldende erhält das Ergebnis mit Begründung und Rechtsbehelfen; Entscheidung ohne Regel, mit zu kurzer Begründung oder ohne Rechtsgrundlage ergibt 422. |
 | `AT-LEGAL-007` | automatisiert | REQ-LEGAL-007 | Smoke-Test – Widerspruch aus der Mitteilung erzeugt einen Fall „Widerspruch“; zweiter Widerspruch 409. |
-| `AT-LEGAL-007-2` | automatisiert | REQ-LEGAL-007 | Smoke-Test – der ursprüngliche Entscheider kann den Widerspruch nicht entscheiden (403). |
-| `AT-LEGAL-007-3` | automatisiert | REQ-LEGAL-007 | Smoke-Test – Stattgeben stellt die Anzeige wieder her bzw. entsperrt das Konto; beide Seiten erhalten eine Mitteilung; Audit-Log-Einträge vorhanden. |
-| `AT-LEGAL-007-4` | automatisiert | REQ-LEGAL-007 | Smoke-Test – gesperrtes Konto widerspricht über den Link aus der E-Mail ohne Anmeldung; zweite Nutzung des Links schlägt fehl. |
+| `AT-LEGAL-007-2` | automatisiert | REQ-LEGAL-007 | Smoke-Test und Unit-Test – weder der ursprüngliche Entscheider noch Widersprechende, Betroffene oder Meldende können den Widerspruch entscheiden (403 `four_eyes`); Meldende entscheiden ihren Fall nicht (422). |
+| `AT-LEGAL-007-3` | automatisiert | REQ-LEGAL-007 | Smoke-Test – Stattgeben stellt die Anzeige wieder her bzw. entsperrt das Konto (Anmeldung danach wieder möglich); beide Seiten erhalten eine Mitteilung; Audit-Log-Einträge vorhanden. |
+| `AT-LEGAL-007-4` | automatisiert | REQ-LEGAL-007 | Smoke-Test – gesperrtes Konto widerspricht über den Link aus der E-Mail ohne Anmeldung; das Token steht nur im Fragment (`#token=`) und wird per POST übermittelt; unbekanntes Token 404, zweite Nutzung 410. Ein abgelaufenes Token (410 `token_expired`) ist nur per Unit-Test der Frist geprüft. |
 | `AT-LEGAL-008` | automatisiert | REQ-LEGAL-008 | Smoke-Test – Entscheidung mit Kennzeichnung „Verdacht auf Straftat“ erzeugt Audit-Log-Eintrag und E-Mail an Administratoren; ohne Begründung 422; Mitteilung an Betroffene enthält die Kennzeichnung nicht. |
 | `CTRL-DOC-DSA` | Kontrolle | REQ-LEGAL-008 | Kontrolle `docs/06-recht/dsa-prozesse.md` – Melde- und Abhilfeverfahren, Begründung, Widerspruch, Art. 18 und Kontaktstellen beschrieben, Zuständigkeiten als Platzhalter markiert. |
 | `AT-LEGAL-009` | automatisiert | REQ-LEGAL-009 | Unit-Test – Schwellenfunktion mit den Grenzfällen der Tabelle. |
@@ -132,7 +133,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-MOD-002-3` | automatisiert | REQ-MOD-002 | Smoke-Test – eine über die API erstellte Meldung ist innerhalb von 10 s in der Queue (neu). |
 | `AT-MOD-003` | automatisiert | REQ-MOD-003 | Smoke-Test – nach der Entscheidung enthält das Audit-Log `moderation.remove` (bestehend: „Audit-Log protokolliert Entscheidung“) und Mailpit die Mitteilung an Betroffene. |
 | `AT-MOD-003-2` | automatisiert | REQ-MOD-003 | Integrationstest – Änderung eines Eintrags in Entscheidungs- und Audit-Protokoll schlägt fehl. |
-| `AT-MOD-004` | automatisiert | REQ-MOD-004 | Smoke-Test – drei Mitglieder melden eine Anzeige, sie verschwindet aus der Suche. |
+| `AT-MOD-004` | automatisiert | REQ-MOD-004 | Smoke-Test – drei Mitglieder melden eine Anzeige, sie verschwindet aus der Suche; die Betroffene erhält eine Mitteilung und eine E-Mail „vorläufig ausgeblendet, Prüfung läuft“ mit Hinweis auf die automatische Auslösung, ohne Namen der Meldenden. |
 | `AT-MOD-005` | automatisiert | REQ-MOD-005 | Smoke-Test – nach Blockierung liefert das Senden 403 `contact_not_possible` und die Suche blendet die Anzeigen aus. |
 | `AT-MOD-006` | automatisiert | REQ-MOD-006 | Smoke-Test – Bewertung nach abgeschlossenem Deal. Umsetzungsstand ⬜ (Could für R1). |
 | `AT-MOD-007` | automatisiert | REQ-MOD-007 | Smoke-Test – Admin vergibt eine Rolle, das Audit-Log enthält `role.changed`. |
@@ -149,7 +150,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-NOTI-007` | automatisiert | REQ-NOTI-007 | Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu). |
 | `AT-OPS-001` | automatisiert | REQ-OPS-001 | Smoke-Test „Readiness /health/ready“ (bestehend). |
 | `AT-OPS-001-2` | automatisiert | REQ-OPS-001 | Resilienztest – Stopp unter Last ohne abgebrochene Anfragen (neu zu schreiben). |
-| `AT-OPS-002` | automatisiert | REQ-OPS-002 | Smoke-Test `/metrics` (bestehend) plus Protokollsuche nach personenbezogenen Daten (Protokollsuche neu). |
+| `AT-OPS-002` | automatisiert | REQ-OPS-002 | Smoke-Test `/metrics` (bestehend) plus Unit-Test des Request-Logs (`apps/server/src/platform/http/server.test.ts`): Eintrag enthält Methode, Route ohne Query, Status, Dauer und Request-ID, aber keine IP-Adresse, keinen Port und keine Query-Werte wie `token=`. |
 | `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder. |
 | `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests. |
 | `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24). |
@@ -173,7 +174,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-PORT-001` | manuell | REQ-PORT-001 | Protokoll des Onboarding-Tests. |
 | `CTRL-CI-MULTIARCH` | Kontrolle | REQ-PORT-002 | Multi-Arch-Build mit Smoke-Test in der CI (neu einzurichten; Umsetzungsstand ⬜). |
 | `AT-PRIV-001` | automatisiert | REQ-PRIV-001 | (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel. |
-| `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | (neu) nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung. |
+| `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt. |
 | `AT-PRIV-002` | automatisiert | REQ-PRIV-002 | Smoke-Test, (neu) erweitert – Antworten zu Anzeige, Konversation, Suche und Moderationsfall enthalten keine fremde E-Mail-Adresse; nach beidseitiger Freigabe nur das Gegenüber. |
 | `AT-PRIV-002-2` | automatisiert | REQ-PRIV-002 | (neu) Daten zum Missbrauchsschutz älter als 7 Tage werden vom täglichen Löschjob entfernt. |
 | `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | (neu) Szenario-Test mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |

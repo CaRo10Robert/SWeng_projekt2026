@@ -14,9 +14,9 @@ kano: basis
 epic: EPIC-07
 source: FS-C1
 depends_on: [REQ-CHAT-010]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-25
 verification: [AT-PRIV-002, AT-PRIV-002-2]
 ---
 
@@ -53,7 +53,7 @@ Datenminimierung (DSGVO Art. 5) und Constraint FS-C1 der Fallstudie: Kontaktdate
 ## Nachweis
 - `AT-PRIV-002`: Smoke-Test, (neu) erweitert – Antworten zu Anzeige, Konversation, Suche und Moderationsfall enthalten keine fremde E-Mail-Adresse; nach beidseitiger Freigabe nur das Gegenüber.
 - `AT-PRIV-002-2`: (neu) Daten zum Missbrauchsschutz älter als 7 Tage werden vom täglichen Löschjob entfernt.
-- Teilweise umgesetzt: Nichtöffentlichkeit umgesetzt; die Ausnahme der beidseitigen Freigabe (REQ-CHAT-010) und der wechselnde Schlüssel fehlen noch.
+- Umgesetzt: Nichtöffentlichkeit, beidseitige Freigabe (REQ-CHAT-010) und Pseudonymisierung nach ADR-0014 – HMAC-SHA256 mit zufälligem, täglich rotiertem Schlüssel (`platform.ip_pepper`, `platform/pseudonym.ts`); auch E-Mail-Adressen in Rate-Limit-Schlüsseln (`login-fail`, `register-addr`) sind pseudonymisiert. Request-Logs enthalten keine IP-Adresse (REQ-OPS-002).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -61,3 +61,4 @@ Datenminimierung (DSGVO Art. 5) und Constraint FS-C1 der Fallstudie: Kontaktdate
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Ausnahme beidseitige Kontaktfreigabe (FS-C1, REQ-CHAT-010); Prüftabelle ergänzt |
 | 3.0 | 2026-10-23 | Review v0.2: R-10/R-27 eingegebene Adresse, nie als Nachrichtentext, Moderator sieht sie nicht (Q-2); R-26 Pseudonymisierung mit wechselndem Schlüssel statt „nicht umkehrbar gehasht“, Abuse Case Rückrechnung; R-15 moscow_reason |
+| 3.1 | 2026-10-25 | Review v1.3 (RV-R-02): Stand der Pseudonymisierung nach ADR-0014 umgesetzt (6e6fe40), Adressen in Rate-Limit-Schlüsseln, Logs ohne IP |

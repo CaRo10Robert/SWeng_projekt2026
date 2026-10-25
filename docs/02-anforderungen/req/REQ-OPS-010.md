@@ -3,7 +3,7 @@ id: REQ-OPS-010
 title: Zustellbarkeit der E-Mails
 type: operational
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: n/a
 epic: EPIC-13
 source: RFC 7208, RFC 6376, RFC 7489, RFC 8058
 depends_on: [REQ-NOTI-001, REQ-NOTI-003]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-OPS-010, CTRL-DOC-MAIL]
 ---
 
@@ -40,3 +40,4 @@ N/A – Risiko niedrig; die Abmeldelinks sind bereits signiert (REQ-NOTI-003).
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-13): Status nach Umsetzung; List-Unsubscribe ist erst mit HTTPS-PUBLIC_URL RFC-8058-konform |

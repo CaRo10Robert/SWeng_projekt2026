@@ -3,7 +3,7 @@ id: REQ-OPS-011
 title: Betriebshandbuch, Störungs- und Notfallprozess
 type: operational
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 11, Q-23
 depends_on: [REQ-OPS-003]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [CTRL-DOC-BETRIEB, MAN-OPS-011]
 ---
 
@@ -46,3 +46,4 @@ REQ-OPS-003 deckt den Schnellstart ab, nicht den laufenden Betrieb. Ohne Prozess
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-A-10): Status nach Umsetzung; Betriebshandbuch und Go-live-Checkliste vervollständigt |

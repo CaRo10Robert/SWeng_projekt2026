@@ -3,9 +3,9 @@ id: OPS-TLS
 type: operational
 status: in-review
 owner: security-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # TLS und Reverse Proxy
@@ -24,7 +24,7 @@ flowchart LR
 - Caddy terminiert TLS und leitet an `app` weiter; HTTP wird dauerhaft auf HTTPS umgeleitet (308).
 - Konfiguration: `docker/caddy/Caddyfile` (`caddy:2.11.6-alpine`, `tls internal`, `admin off`).
 - `/metrics` ist am Proxy gesperrt (404); Prometheus liest es intern.
-- `app` soll den Kopfzeilen `X-Forwarded-*` nur vom Proxy vertrauen (`TRUST_PROXY=true`, B-41), damit Rate-Limits die echte Client-IP sehen. *Stand 2026-10-24:* Compose reicht `TRUST_PROXY` durch, die App wertet die Variable noch nicht aus.
+- `app` vertraut den Kopfzeilen `X-Forwarded-*` nur bei `TRUST_PROXY=true` und nur für **genau einen** Proxy-Hop (Fastify `trustProxy: 1`), damit Rate-Limits die echte Client-IP sehen und gefälschte Ketten in `X-Forwarded-For` wirkungslos sind. Ohne die Variable sähe die App nur die IP des Proxys; die Registrierungsgrenze je IP träfe dann alle gemeinsam.
 - WebSockets (`/ws`) werden durchgereicht.
 
 ## Einstellungen
@@ -36,16 +36,16 @@ flowchart LR
 | HSTS | `Strict-Transport-Security: max-age=31536000` | zusätzlich `includeSubDomains` nach Prüfung aller Subdomains; Preload nur nach Abstimmung |
 | Weitere Kopfzeilen | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `X-Robots-Tag` setzt die App | wie Beispiel |
 | Cookie | `Secure` (Standard `COOKIE_SECURE=true`) | wie Beispiel |
-| Domain | `campusmarkt.localhost` (eigener Hostname, damit HSTS keine anderen Dienste auf `localhost` betrifft; Browser lösen `*.localhost` ohne Hosts-Datei auf) | [Platzhalter: campusmarkt.hochschule.example] |
+| Domain | `campusmarkt.localhost` (eigener Hostname, damit HSTS keine anderen Dienste auf `localhost` betrifft; Browser lösen `*.localhost` ohne Hosts-Datei auf) | [Platzhalter: campusmarkt.hwg-lu.example] |
 | Ports | `PROXY_HTTPS_PORT` (Standard 8443), `PROXY_HTTP_PORT` (Standard 8088) | 443 / 80 |
 
 ## Starten im Beispiel
 
 ```bash
-PUBLIC_URL=https://campusmarkt.localhost:8443 TRUST_PROXY=true docker compose --profile proxy up -d
+docker compose --env-file .env.proxy.example --profile proxy up -d
 ```
 
-Danach `https://campusmarkt.localhost:8443` öffnen; `http://campusmarkt.localhost:8088` leitet mit 308 dorthin um. `PUBLIC_URL` muss zur genutzten Adresse passen, damit Links in E-Mails stimmen.
+Die mitgelieferte Datei `.env.proxy.example` setzt `TRUST_PROXY=true`, `PUBLIC_URL=https://campusmarkt.localhost:8443` und die Proxy-Ports. Danach `https://campusmarkt.localhost:8443` öffnen; `http://campusmarkt.localhost:8088` leitet mit 308 dorthin um. `PUBLIC_URL` muss zur genutzten Adresse passen, damit Links in E-Mails stimmen.
 
 Für den Test ohne Warnung das Root-Zertifikat der lokalen CA auslesen und im Browser als vertrauenswürdig importieren (nur auf dem eigenen Testrechner):
 

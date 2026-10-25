@@ -3,9 +3,9 @@ id: LEGAL-BREACH
 type: process
 status: in-review
 owner: security-lead
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Prozess bei Verletzungen des Schutzes personenbezogener Daten (Art. 33/34 DSGVO)
@@ -21,6 +21,32 @@ Jede Verletzung der Sicherheit, die zur Vernichtung, zum Verlust, zur Veränderu
 - Ein Backup-Archiv gelangt unverschlüsselt an Unbefugte.
 - Ein Moderations- oder Admin-Konto wird übernommen.
 - Ein Datenverlust, der nicht aus der Sicherung wiederhergestellt werden kann.
+
+## Rollen und Erreichbarkeit
+
+| Rolle | Aufgabe | Erreichbarkeit |
+|---|---|---|
+| Meldende Person (Team, Betrieb, Mitglied) | Hinweis sofort weitergeben | – |
+| Betrieb / `security-lead` | Sofortmaßnahmen, Beweissicherung, technische Bewertung, Vorfallprotokoll | Rufbereitschaft laut [Betriebshandbuch](../07-betrieb/betriebshandbuch.md) und [Incident-Prozess](../07-betrieb/incident-prozess.md), auch am Wochenende [Platzhalter: Bereitschaftsregelung] |
+| Datenschutzbeauftragte/r (DSB) | Risikobewertung, Beratung, Kontakt zur Aufsichtsbehörde | [Platzhalter: datenschutz@hwg-lu.example, Vertretung] |
+| Hochschulleitung (Verantwortlicher) | entscheidet über Meldung und Benachrichtigung, zeichnet die Meldung | [Platzhalter: Präsidium, Vertretungsregelung] |
+| Pressestelle | Kommunikation bei öffentlichem Interesse | [Platzhalter] |
+
+Die 72-Stunden-Frist läuft ab Kenntnis auch am Wochenende und an Feiertagen. Ist die Hochschulleitung nicht erreichbar, entscheidet die Vertretung [Platzhalter: Regelung].
+
+**Auftragsverarbeiter (Art. 33 Abs. 2):** Auftragsverarbeiter (Hosting, E-Mail-Versand) melden Verletzungen unverzüglich an [Platzhalter: Meldeadresse]; die Pflicht steht in jedem AV-Vertrag (siehe [Auftragsverarbeitung](auftragsverarbeitung.md)). Mit Eingang der Meldung beginnt die 72-Stunden-Frist des Verantwortlichen.
+
+## Risikobewertung
+
+Eintrittswahrscheinlichkeit eines Schadens für die Betroffenen × Schwere des möglichen Schadens:
+
+| Wahrscheinlichkeit ↓ / Schwere → | gering (z. B. Anzeigentexte) | mittel (z. B. E-Mail-Adressen, Chatausschnitte) | hoch (z. B. vollständige Chats, Passwort-Hashes, Beweissicherung) |
+|---|---|---|---|
+| gering | kein Risiko → nur dokumentieren | Risiko → melden | Risiko → melden |
+| mittel | Risiko → melden | Risiko → melden | hohes Risiko → melden und benachrichtigen |
+| hoch | Risiko → melden | hohes Risiko → melden und benachrichtigen | hohes Risiko → melden und benachrichtigen |
+
+Ist unklar, ob personenbezogene Daten betroffen sind, wird der Vorfall als Verletzung behandelt, bis das Gegenteil feststeht.
 
 ## Ablauf
 
@@ -63,6 +89,21 @@ flowchart TD
 | Ergriffene und geplante Maßnahmen | |
 | Benachrichtigung der Betroffenen | ja (Datum) / nein (Begründung) |
 
+## Vorlage: Dokumentation jeder Verletzung (Art. 33 Abs. 5)
+
+Pflicht auch dann, wenn nicht gemeldet wird.
+
+| Feld | Inhalt |
+|---|---|
+| Vorfallnummer, Zeitpunkt der Kenntnis, Erfasst von | |
+| Fakten: Was ist passiert, seit wann, wie entdeckt? | |
+| Betroffene Daten und Personen (Kategorien, ungefähre Zahl) | |
+| Auswirkungen und Risikoeinstufung (Matrix oben) mit Begründung | |
+| Ergriffene Abhilfemaßnahmen | |
+| Meldung an die Aufsicht: ja (Datum, Aktenzeichen) / nein (Begründung) | |
+| Benachrichtigung der Betroffenen: ja (Datum) / nein (Begründung nach Art. 34 Abs. 3) | |
+| Freigabe durch die Hochschulleitung, Stellungnahme DSB | |
+
 ## Vorlage: Benachrichtigung Betroffener (Art. 34)
 
 > Betreff: Wichtiger Hinweis zur Sicherheit Ihrer Daten bei CampusMarkt
@@ -71,4 +112,4 @@ flowchart TD
 
 ## Übung
 
-Mindestens einmal je Semester wird ein Szenario (z. B. „Backup-Archiv auf öffentlichem Laufwerk“) als Planspiel durchgespielt und protokolliert [Platzhalter: Termin].
+Vor dem Echtbetrieb wird mindestens eine Übung (Planspiel) mit einem Szenario, z. B. „Datensicherung unverschlüsselt in falschem Speicher“, durchgespielt und protokolliert (Nachweis MAN-LEGAL-013, REQ-LEGAL-013) [Platzhalter: Termin]. Danach empfohlen: einmal je Jahr.

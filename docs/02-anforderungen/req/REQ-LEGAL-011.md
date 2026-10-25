@@ -3,7 +3,7 @@ id: REQ-LEGAL-011
 title: Verzeichnis der Verarbeitungstätigkeiten und TOMs
 type: privacy
 class: constraint
-status: approved
+status: implemented
 owner: team-produkt
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 5 Abs. 2, Art. 30, Art. 32, Q-23
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [CTRL-DOC-VVT, CTRL-DOC-TOM]
 ---
 
@@ -45,3 +45,4 @@ Rechenschaftspflicht (Art. 5 Abs. 2), Verzeichnis (Art. 30) und Sicherheit der V
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-01, RV-R-02, RV-R-06): Status nach Umsetzung; VVT und TOMs an Ist-Stand (Logs ohne IP, Pseudonymisierung, Löschjournal, Deals) angeglichen |

@@ -1,7 +1,7 @@
 ---
 title: Terms of use
-version: 2026-10
-last_updated: 2026-10-24
+version: 2026-10-25
+last_updated: 2026-10-25
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
@@ -14,7 +14,7 @@ These terms govern the use of CampusMarkt HWG LU (the "platform"). The provider 
 
 ## 2. Who may take part {#2-wer-mitmachen-darf}
 
-1. The platform is only open to members of the university: students and staff with an email address of an approved university domain [Placeholder: e.g. studmail.hochschule.example, hochschule.example].
+1. The platform is only open to members of the university: students and staff with an email address of an approved university domain [Placeholder: e.g. studmail.hwg-lu.example, hwg-lu.example].
 2. Each person may only have one account. The account is not transferable.
 3. When membership of the university ends, the right to use the platform also ends.
 
@@ -37,7 +37,7 @@ Members
 
 ## 6. Rights to content {#6-rechte-an-inhalten}
 
-You keep all rights to your texts and images. You grant the university a simple, free right, limited to the duration of the listing, to store the content on the platform, adapt it technically (e.g. image size) and show it to members.
+You keep all rights to your texts and images. You grant the university a simple, free right to store the content on the platform, adapt it technically (e.g. image size) and show it to members. The right applies as long as the content is stored under the deletion concept (see the privacy notice): for the duration of the listing, after removal by moderation up to 12 months as evidence, and in backups up to 28 days. The content is only shown while the listing runs.
 
 ## 7. Contact sharing {#7-kontaktfreigabe}
 
@@ -47,9 +47,11 @@ Your email address is not visible to other members. In a conversation, both side
 
 1. **Reporting:** Every member can report listings, messages and profiles that violate the law or these terms (notice and action procedure under Art. 16 DSA).
 2. **Decision:** The university's moderation reviews every report by a human. It can remove content, warn members or permanently suspend accounts.
-3. **Statement of reasons:** Affected persons receive a statement of reasons with the rule violated, the facts, the type of measure and information about the appeal (Art. 17 DSA).
-4. **Appeal:** Affected persons and reporters can appeal against a decision within **six months** of being notified (Art. 20(1) DSA), in their account or via the point of contact. Another moderator who was not involved in the first decision decides again (internal complaint-handling system under Art. 20 DSA). The result is communicated with reasons.
+3. **Statement of reasons:** Affected persons receive a statement of reasons with the rule violated, for illegal content also the legal ground, the facts, the type of measure and information about the appeal (Art. 17 DSA). Reporters receive the result with reasons and information about their remedies.
+4. **Appeal:** Affected persons and reporters can appeal against a decision within **six months** of being notified (Art. 20(1) DSA), in their account under "My notices"; for suspended accounts via the link in the email containing the statement of reasons. Another moderator who was not involved in the first decision and who neither reported the case nor appealed themselves decides again (internal complaint-handling system under Art. 20 DSA). The result is communicated to both sides with reasons.
 5. **Criminal offences:** If there are indications of a criminal offence involving a threat to the life or safety of persons, the university informs the competent authorities (Art. 18 DSA).
+6. **Automated aids (Art. 14 DSA):** A word filter holds new listings with clearly prohibited terms for review before publication. Once three members have reported a listing, it is provisionally hidden until moderation has decided; the affected person is informed. A human always makes the final decision.
+7. **Out-of-court dispute settlement and courts:** Independently of the appeal, you can turn to a certified out-of-court dispute settlement body (Art. 21 DSA, [Placeholder: body]) or go to court.
 
 ## 9. Suspensions {#9-sperren}
 

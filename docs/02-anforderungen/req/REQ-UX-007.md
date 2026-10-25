@@ -3,7 +3,7 @@ id: REQ-UX-007
 title: Englische Oberfläche
 type: user-story
 class: functional
-status: approved
+status: implemented
 owner: team-produkt
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-13
 source: BG-2, REQ-UX-002, Q-25
 depends_on: [REQ-UX-002]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-UX-007, AT-UX-007-2, AT-UX-007-3]
 ---
 
@@ -29,7 +29,8 @@ Austauschstudierende und internationale Beschäftigte gehören zur Zielgruppe (R
 - Sprachwahl Deutsch/Englisch im Seitenkopf jeder Seite, per Tastatur bedienbar; Voreinstellung aus der Browsersprache; die Wahl bleibt erhalten (Allowlist REQ-LEGAL-010) und wird für Mitglieder im Profil gespeichert.
 - `<html lang>` folgt der Sprache; Datums-, Zahlen- und Preisformate folgen der Sprache.
 - Alle sichtbaren Texte der Oberfläche liegen in beiden Sprachen vor; fehlende Schlüssel fallen auf Deutsch zurück und werden im Test erkannt.
-- E-Mails werden in der im Profil gespeicherten Sprache versendet.
+- E-Mails werden in der im Profil gespeicherten Sprache versendet; die Bestätigungsmail nach der Registrierung in der dabei gewählten Sprache (`locale` im Registrierungsformular).
+- Reihenfolge der Sprachwahl: Kontosprache vor der Wahl auf dem Gerät; eine Wahl auf dem Gerät wird nur dann ins Konto übernommen, wenn sie in derselben Sitzung vor der Anmeldung getroffen wurde (geteilte Geräte überschreiben so keine fremde Kontosprache).
 - Englische Rechtstexte tragen oben den Hinweis „This translation is provided for convenience. Only the German version is legally binding.“
 
 ```gherkin
@@ -59,3 +60,4 @@ I: setzt auf der Auslagerung der Texte (REQ-UX-002) auf · N: Umfang der Rechtst
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-A-08, RV-C-08): Bestätigungsmail in gewählter Sprache, Reihenfolge Konto vor Gerät; Status nach Umsetzung |

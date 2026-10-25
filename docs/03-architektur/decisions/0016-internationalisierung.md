@@ -21,15 +21,15 @@ Eine gespeicherte Sprachwahl im Browser ist eine Speicherung auf dem Endgerät (
 
 ## Entscheidung
 **Option A: react-intl.**
-1. **Sprachen:** BCP-47-Codes `de` (Quellsprache, Standard) und `en`. Kataloge liegen in `apps/web/src/i18n/messages/de.json` und `en.json`, mit flachen Schlüsseln nach dem Muster `bereich.seite.element` (z. B. `listing.form.title.label`) und Texten in ICU-Syntax.
+1. **Sprachen:** BCP-47-Codes `de` (Quellsprache, Standard) und `en`. Kataloge liegen in `apps/web/src/i18n/de.json` und `en.json`, mit flachen Schlüsseln nach dem Muster `bereich.seite.element` (z. B. `listing.form.title.label`) und Texten in ICU-Syntax.
 2. **Sprachermittlung, in dieser Reihenfolge:**
    1. angemeldet: die Konto-Einstellung `locale`, gespeichert in `identity.user` und änderbar per `PATCH /me` (Vertrag in `packages/contracts`);
-   2. Gast mit ausdrücklicher Wahl über den Sprachschalter: Schlüssel `cm_locale` im `localStorage`. Er wird **nur nach Klick** gesetzt, nie automatisch. Das ist eine vom Nutzer ausdrücklich gewünschte Funktion und damit unbedingt erforderlich nach TDDDG § 25 Abs. 2 Nr. 2; Datenschutzerklärung und REQ-LEGAL-002 führen den Eintrag auf;
+   2. Gast mit ausdrücklicher Wahl über den Sprachschalter: Schlüssel `cm_locale` im `localStorage`. Meldet sich jemand an, gilt die Kontosprache; eine Gerätewahl wird **nur dann** ins Konto übernommen, wenn sie in derselben Sitzung vor der Anmeldung getroffen wurde (nur im Arbeitsspeicher vermerkt, keine weitere Speicherung). So überschreibt ein geteiltes Gerät keine fremde Kontosprache. Der Schlüssel `cm_locale` wird **nur nach Klick** gesetzt, nie automatisch. Das ist eine vom Nutzer ausdrücklich gewünschte Funktion und damit unbedingt erforderlich nach TDDDG § 25 Abs. 2 Nr. 2; Datenschutzerklärung und REQ-LEGAL-002 führen den Eintrag auf;
    3. sonst `navigator.languages`: `en*` → `en`, alles andere → `de`.
 3. **Barrierefreiheit:** `<html lang>` folgt der gewählten Sprache (WCAG 3.1.1). Fremdsprachige Textstellen bekommen `lang` (WCAG 3.1.2). Der Sprachschalter ist ein beschrifteter Button, in seiner eigenen Sprache benannt („English“, „Deutsch“).
 4. **Formatierung:** Datum, Zahlen und Preise über `Intl` bzw. `FormattedNumber`/`FormattedDate`. Währung bleibt EUR, nur das Format folgt der Sprache.
 5. **Fehlermeldungen:** Die API liefert weiter Problem Details mit einem stabilen `code`. Die Web-App übersetzt nach `code`; der deutsche `title` des Servers dient nur als Rückfall. Der Vertrag ändert sich dadurch nicht.
-6. **E-Mails:** in der Konto-Sprache. Die Vorlagen in `notifications` bekommen je Sprache einen Text mit denselben Parametern. Mails, die vor der Kontoanlage verschickt werden (Bestätigung), gehen in der Sprache, die bei der Registrierung gewählt war.
+6. **E-Mails:** in der Konto-Sprache. Die Vorlagen in `notifications` bekommen je Sprache einen Text mit denselben Parametern. Mails, die vor der Kontoanlage verschickt werden (Bestätigung), gehen in der Sprache, die bei der Registrierung gewählt war: Die Registrierung sendet dazu das optionale Feld `locale` (`RegisterBody`).
 7. **Rechtstexte:** Englische Fassungen nach ADR-0015 (`<name>.en.md`) zeigen oben den Hinweis „The German version is legally binding.“ Fehlt eine englische Fassung, erscheint die deutsche mit Hinweis.
 8. **Qualitätssicherung:**
    - `scripts/check-i18n.mjs` läuft in CI und prüft, dass beide Kataloge dieselben Schlüssel haben, dass jeder Text gültige ICU-Syntax hat und dass dieselben Platzhalter vorkommen.
@@ -45,3 +45,4 @@ Eine gespeicherte Sprachwahl im Browser ist eine Speicherung auf dem Endgerät (
 - (−) Die Bundle-Größe wächst um etwa 15–20 KB gzip (react-intl) plus den deutschen Katalog.
 - (−) Testselektoren, die auf deutsche Texte zielen, bleiben auf die deutsche Oberfläche festgelegt. Neue Tests sollen Rollen und Labels aus dem Katalog verwenden.
 - Umsetzung: Backlog B-51.
+- *Nachtrag 2026-10-25 (Review v1.3, RV-A-08, RV-C-08):* Katalogpfad korrigiert; Reihenfolge präzisiert (Konto vor Gerät, Übernahme nur aus derselben Sitzung); `RegisterBody.locale` ergänzt. Die zunächst umgesetzte Übernahme jeder gespeicherten Gerätewahl beim Login ist entfernt.

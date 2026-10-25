@@ -3,9 +3,9 @@ id: OPS-GOLIVE
 type: checklist
 status: in-review
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Go-live-Checkliste
@@ -18,19 +18,20 @@ last_updated: 2026-10-24
 - [ ] Hinweis „Muster im Rahmen einer Übungsaufgabe“ aus allen Rechtstexten entfernt
 - [ ] Impressum, Datenschutzerklärung, Nutzungsbedingungen, Community-Regeln vom Justiziariat und DSB freigegeben
 - [ ] Erklärung zur Barrierefreiheit nach manueller Prüfung (MAN-A11Y-001) aktualisiert, Durchsetzungsstelle eingetragen
-- [ ] VVT und TOMs freigegeben, DSFA-Schwellwertanalyse unterschrieben
+- [ ] VVT und TOMs freigegeben, DSFA-Schwellwertanalyse unterschrieben; **DSFA durchgeführt** (nach der Schwellwertanalyse erforderlich, Kriterien 4 und 7)
 - [ ] Auftragsverarbeitungsverträge abgeschlossen
 - [ ] Rechtsgrundlagen im LDSG/Hochschulgesetz geprüft
 - [ ] DAC7: Einstufung als meldender Plattformbetreiber geklärt; Zugang zum BZSt-Portal
 - [ ] DSA: Kontaktstelle besetzt, Moderationsteam geschult, Bereitschaft für Art. 18 geregelt
-- [ ] `TERMS_VERSION` auf die freigegebene Version gesetzt
+- [ ] `version` im Front Matter der freigegebenen Rechtstexte gesetzt; `TERMS_VERSION` **nicht** gesetzt (nur Override)
+- [ ] `LEGAL_STRICT=true` – die App startet erst, wenn keine Platzhalter mehr in den Rechtstexten stehen
 
 ## Sicherheit
 
 - [ ] Penetrationstest durchgeführt, keine offenen kritischen/hohen Befunde ([Plan](pentest-plan.md))
 - [ ] Sicherheitsscans in CI aktiv (B-06), keine offenen kritischen Funde
-- [ ] `security.txt` mit echter Kontaktadresse und gültigem `Expires`
-- [ ] Geheimnisse (DB-Passwort, SMTP, `IP_HASH_SALT`) im Secret-Store, nicht im Repo
+- [ ] `security.txt` mit echter Kontaktadresse (`SECURITY_CONTACT`) und gültigem `Expires`; `Policy` und `Canonical` erscheinen nur mit HTTPS-`PUBLIC_URL`
+- [ ] Datenbankpasswort aus `compose.yaml` ersetzt; Geheimnisse (DB-Passwort, SMTP, ggf. `UNSUBSCRIBE_SECRET`) im Secret-Store, nicht im Repo
 - [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden
 - [ ] Admin- und Moderationskonten personalisiert, Rollenliste geprüft
 
@@ -39,11 +40,12 @@ last_updated: 2026-10-24
 - [ ] Domain und DNS eingerichtet; TLS-Zertifikat, HSTS ([TLS](tls-reverse-proxy.md))
 - [ ] SPF, DKIM, DMARC eingerichtet; Testmails an Hochschul-Postfächer kommen an ([Zustellbarkeit](mail-zustellbarkeit.md))
 - [ ] Backups täglich, verschlüsselt, an zweitem Standort; Restore-Übung erfolgreich protokolliert ([Backup](backup-restore.md))
-- [ ] Monitoring und Alarmierung aktiv, Rufbereitschaft benannt ([Monitoring](monitoring-alarmierung.md))
+- [ ] Monitoring und Alarmierung aktiv, echte Empfänger in `ops/alertmanager/alertmanager.yml`, Rufbereitschaft benannt ([Monitoring](monitoring-alarmierung.md))
 - [ ] Statusseite erreichbar, externe Spiegelung eingerichtet
 - [ ] Betriebshandbuch und Incident-Prozess dem Betriebsteam bekannt
 - [ ] Renovate aktiv, Verantwortliche für Updates benannt
-- [ ] `api` und `worker` ggf. getrennt, `TRUST_PROXY` gesetzt (B-41)
+- [ ] `api` und `worker` ggf. getrennt; hinter dem Proxy `TRUST_PROXY=true` und `PUBLIC_URL` mit `https://`
+- [ ] Weicher Wartungsmodus und Ankündigung in der Admin-Oberfläche erprobt; `MAINTENANCE_UNTIL` für geplante Wartungen bekannt
 - [ ] Lasttest gegen die Produktivumgebung (QS-7, QS-12)
 
 ## Produkt

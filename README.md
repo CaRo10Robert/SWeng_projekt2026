@@ -32,7 +32,7 @@ Passwort für alle Konten: `CampusMarkt-Demo-2026`
 | `lea@studmail.hwg-lu.de` | Mitglied (Studierende) | Chat mit Ben zum Statistik-Buch (reserviert), eigene Anzeigen |
 | `ben@studmail.hwg-lu.de` | Mitglied (Studierende) | Hat eine verdächtige Nachricht von Sara gemeldet |
 | `mia@studmail.hwg-lu.de`, `sara@studmail.hwg-lu.de` | Mitglieder | Weitere Anzeigen und Chats |
-| `tim@studmail.hwg-lu.de` | Mitglied | Hat einer älteren Version der Nutzungsbedingungen zugestimmt: Nach der Anmeldung erscheint der Dialog zur erneuten Zustimmung (REQ-LEGAL-003) |
+| `tim@studmail.hwg-lu.de` | Mitglied | Hat einer älteren Version der Nutzungsbedingungen zugestimmt und eine ältere Fassung der Datenschutzerklärung zur Kenntnis genommen: Nach der Anmeldung erscheinen der Dialog zur erneuten Zustimmung (REQ-LEGAL-003) und der Hinweis auf die neue Datenschutzerklärung (REQ-LEGAL-002). Die Zustimmung lässt sich je Stack nur einmal vorführen; danach mit `docker compose down -v` neu aufsetzen |
 | `jonas.weber@hwg-lu.de` | Mitglied (Beschäftigte) | Beschäftigten-Konto |
 | `mod@hwg-lu.de` | Moderator | Moderations-Queue: Meldung + vom Wortfilter angehaltene Anzeige |
 | `admin@hwg-lu.de` | Admin | Rollen, Audit-Log, Jobs/Dead-Letter-Queue, „Fällige Jobs jetzt ausführen“ |
@@ -77,6 +77,8 @@ pnpm dev                                       # Server :8080 (tsx watch) + Vite
 | `node scripts/check-diagrams.mjs` | Alle Mermaid-Diagramme der Doku rendern (Syntaxprüfung; lokal mit `CHROME_PATH` auf einen installierten Browser) |
 | `node scripts/trace.mjs --report` | Nachverfolgbarkeit Anforderung → Nachweis → Test prüfen, Status aggregieren (`--write` aktualisiert den Katalog-Index) |
 | `node scripts/smoke-test.mjs [app-url] [mailpit-url]` | End-to-End-Smoke-Test gegen ein laufendes Compose-Setup |
+| `node scripts/backup.mjs` / `node scripts/restore.mjs backups/<Zeitstempel>` | Sicherung und Wiederherstellung inkl. Löschjournal ([Backup](docs/07-betrieb/backup-restore.md)) |
+| `node tests/ops/restore-test.mjs [app-url] [--project <name>]` | Restore-Test (**zerstört die Daten des Stacks**); bei eigenem Compose-Projekt dieselben `APP_PORT`/`MAILPIT_PORT` wie beim Start setzen |
 
 ### Struktur
 
@@ -103,7 +105,8 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 4a | [Nachweiskatalog](docs/02-anforderungen/nachweise.md) | Tests, manuelle Prüfungen und Kontrollen je Anforderung | Reference |
 | 5 | [Product Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, Backlog mit Kano, Risiko, Story Points, WSJF; Sprint-Plan | Reference |
 | 5a | [Vorgehen](docs/02-anforderungen/04-vorgehen.md) | Scrum, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management | Explanation |
-| 5b | [Entscheidungslog](docs/02-anforderungen/05-entscheidungen.md) | Fachliche Entscheidungen Q-1 … Q-19 (vorläufig, zu bestätigen) | Reference |
+| 5b | [Entscheidungslog](docs/02-anforderungen/05-entscheidungen.md) | Fachliche Entscheidungen Q-1 … Q-27 (vorläufig, zu bestätigen) | Reference |
+| 5c | [Abgleich Recht, Auftritt und Betrieb](docs/02-anforderungen/06-abgleich-recht-betrieb.md) | Ist/Soll, Rechtskataster, offene Prüfpunkte (EPIC-13, Übung mit Platzhaltern) | Explanation |
 | 6 | [Architekturdokumentation (arc42 + C4)](docs/03-architektur/architektur.md) | C4-Systemkontext, -Container, -Komponenten und -Verteilung (Mermaid-C4), Laufzeitsicht, Konzepte | Explanation |
 | 7 | [Architekturentscheidungen (ADRs)](docs/03-architektur/decisions/) | Eine Datei pro Entscheidung | Explanation |
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
@@ -111,7 +114,10 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 8b | [Architektur-Review v1.0](docs/04-review/review-v1.0-architektur.md) | 23 Befunde zur C4-Architektur und ihre Behebung | – |
 | 8c | [Code-Review v1.1](docs/04-review/review-v1.1-code.md) | 15 Befunde zum Sprint-1-Code und ihre Behebung | – |
 | 8d | [Testbericht Sprint 1](docs/05-umsetzung/testbericht-2026-10-24.md) | Finaler Lauf: Build, Smoke, E2E, Unit-Tests, Statusänderungen | – |
+| 8e | [Review v1.3 Recht, Auftritt und Betrieb](docs/04-review/review-v1.3-recht-betrieb.md) | 63 Befunde aus drei unabhängigen Reviews (Anforderungen/Recht, Architektur/Betrieb, Code) und ihre Behebung | – |
 | 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | abgelöst durch den generierten Katalog-Index | – |
+| 10 | [Recht und Datenschutz](docs/06-recht/README.md) | VVT, TOMs, Auftragsverarbeitung, DSFA-Schwellwertanalyse, Datenpannen-, DSA- und DAC7-Prozess, Rechtskataster (Muster mit Platzhaltern) | Reference |
+| 11 | [Betrieb](docs/07-betrieb/README.md) | Betriebshandbuch, Backup, Monitoring, Incident, Wartung/Status, TLS, Mail-Zustellbarkeit, Updates, Pentest-Plan, Go-live-Checkliste | How-to |
 
 ## Änderungshistorie
 

@@ -3,7 +3,7 @@ id: REQ-UX-005
 title: Hilfe, FAQ und Sicherheitstipps
 type: user-story
 class: functional
-status: approved
+status: implemented
 owner: team-produkt
 risk: low
 release: R1
@@ -13,9 +13,9 @@ epic: EPIC-13
 source: BG-1, BG-2
 use_cases: [UC-08]
 depends_on: [REQ-CHAT-006]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-UX-005]
 ---
 
@@ -41,3 +41,4 @@ I: unabhängig · N: Themen verhandelbar · V: Sicherheit und Selbsthilfe · E: 
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung |

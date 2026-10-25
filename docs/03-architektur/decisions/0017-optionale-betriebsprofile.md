@@ -30,7 +30,7 @@ Zwei Besonderheiten:
    - `Strict-Transport-Security: max-age=31536000` im Beispiel ohne `includeSubDomains` und ohne `preload`; im Echtbetrieb mit beidem, siehe docs/07-betrieb/tls-reverse-proxy.md;
    - Weiterleitung http → https;
    - WebSocket-Weiterleitung für `/ws`;
-   - `X-Forwarded-For` an die App, mit `TRUST_PROXY=true` im Profil (B-41). *Stand 2026-10-24:* Compose reicht `TRUST_PROXY` an die App durch, die App wertet die Variable aber noch nicht aus (Fastify `trustProxy`); bis dahin sehen Rate-Limits hinter dem Proxy die IP des Proxys.
+   - `X-Forwarded-For` an die App, mit `TRUST_PROXY=true`; die App vertraut genau einem Hop (Fastify `trustProxy`). Start mit `docker compose --env-file .env.proxy.example --profile proxy up -d`, die Datei setzt `TRUST_PROXY` und `PUBLIC_URL=https://campusmarkt.localhost:8443`.
 5. **`/metrics`** wird am Proxy gesperrt (404). Erreichbar ist es nur im internen Compose-Netz (Abschnitt 7.2 der Architektur).
 
 **Profil `monitoring` (REQ-OPS-008):**
@@ -44,12 +44,12 @@ Zwei Besonderheiten:
    |---|---|---|---|
    | `AppDown` | `up == 0` | 2 min | SEV-1 |
    | `NotReady` | `app_ready == 0` (z. B. Datenbank nicht erreichbar) | 5 min | SEV-1 |
-   | `HighErrorRate` | Anteil 5xx > 5 % | 5 min | SEV-2 |
+   | `HighErrorRate` | Anteil 5xx > 5 %, ab 0,1 Anfragen/s, nicht im Wartungsmodus | 5 min | SEV-2 |
    | `SlowSearch` | p95 von `GET /api/v1/listings` > 500 ms (REQ-PERF-001) | 10 min | SEV-3 |
-   | `JobFailures` | fehlgeschlagene Jobs in 15 min > 0 | sofort | SEV-3 |
+   | `JobFailures` | endgültig gescheiterte Jobs (`outcome="dead"`) in 15 min > 0 | sofort | SEV-3 |
    | `WebSocketDrop` | `ws_connections` < 20 % des Werts vor 5 min, nur wenn vorher ≥ 5 Verbindungen | sofort | SEV-2 |
    | `MaintenanceModeOn` | `campusmarkt_maintenance_mode == 1` | 2 h | SEV-3 |
-   | `BackupMissing` | letzte erfolgreiche Sicherung (`campusmarkt_backup_last_success_timestamp_seconds`) älter als 26 h; 0 = nie gesichert | sofort | SEV-2 |
+   | `BackupMissing` | letzte erfolgreiche Sicherung (`campusmarkt_backup_last_success_timestamp_seconds`) älter als 26 h; 0 = nie gesichert (Alarm erst nach 26 h Laufzeit), NaN = nicht lesbar (kein Alarm) | sofort | SEV-2 |
 
 4. **Kein Grafana:** Es bleibt Could. Die Prometheus-Oberfläche reicht für die Übung.
 
@@ -68,3 +68,4 @@ Zwei Besonderheiten:
 - (−) Im Echtbetrieb ersetzen ein zentraler Proxy bzw. Load Balancer und das Monitoring der Hochschule diese Profile. Die Konfigurationen dienen dann als Vorlage.
 - Umsetzung: Backlog B-54 (Monitoring), B-55 (Proxy).
 - *Angleichung 2026-10-24 an die Umsetzung:* Pfad `docker/caddy/Caddyfile`, exakte Image-Versionen, Alarmnamen, Bedingungen und Dauern wie in `monitoring-alarmierung.md`, konfigurierbare Ports, zwei Alarm-Empfänger nach Schweregrad, Teststufen in CI.
+- *Nachtrag 2026-10-25 (Review v1.3, RV-A-04/05/07/18):* `TRUST_PROXY` wird ausgewertet (ein Hop), `.env.proxy.example` mitgeliefert; `HighErrorRate` mit Wartungsausschluss und Mindestlast, `BackupMissing` ohne Fehlalarme, `JobFailures` nur für `dead`; Alertmanager unterdrückt Folgealarme, solange `AppDown` oder `NotReady` feuern (`inhibit_rules`).

@@ -7,7 +7,7 @@ last_updated: 2026-10-24
 ## Registrieren und Anmelden
 
 ### Wer kann sich registrieren?
-Alle Studierenden und Beschäftigten der Hochschule mit einer Adresse einer zugelassenen Hochschul-Domain [Platzhalter: z. B. @studmail.hochschule.example, @hochschule.example]. Private Adressen (z. B. Freemail) sind nicht möglich.
+Alle Studierenden und Beschäftigten der Hochschule mit einer Adresse einer zugelassenen Hochschul-Domain [Platzhalter: z. B. @studmail.hwg-lu.example, @hwg-lu.example]. Private Adressen (z. B. Freemail) sind nicht möglich.
 
 ### Die Bestätigungsmail kommt nicht an. Was tun?
 1. Warten Sie einige Minuten und prüfen Sie den Spam-Ordner Ihres Hochschul-Postfachs.

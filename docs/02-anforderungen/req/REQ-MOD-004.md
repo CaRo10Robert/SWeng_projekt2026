@@ -13,9 +13,9 @@ epic: EPIC-06
 source: BG-1
 use_cases: [UC-30]
 depends_on: [REQ-MOD-001]
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-25
 verification: [AT-MOD-004]
 ---
 
@@ -38,10 +38,11 @@ Mehrfachmeldungen desselben Mitglieds zählen einmal; Systemmeldungen (Wortfilte
 ## Fehler- und Missbrauchsfälle
 | Fall | Verhalten |
 |---|---|
+| Betroffene erfährt nichts vom Ausblenden | Mitteilung `provisional_hide` im Konto und E-Mail (Kategorie „Dienst“, nicht abbestellbar), Hinweis auf automatische Auslösung und laufende Prüfung (DSA Art. 14/17, RV-R-04); offengelegt in Nutzungsbedingungen, Community-Regeln und Datenschutzerklärung |
 | Absprache mehrerer Mitglieder zum Ausblenden | Ausblenden ist vorläufig; der Fall ist in der Queue als „ausgeblendet“ markiert und wird vorrangig entschieden |
 
 ## Nachweis
-- `AT-MOD-004`: Smoke-Test – drei Mitglieder melden eine Anzeige, sie verschwindet aus der Suche.
+- `AT-MOD-004`: Smoke-Test – drei Mitglieder melden eine Anzeige, sie verschwindet aus der Suche; die Betroffene erhält eine Mitteilung und eine E-Mail „vorläufig ausgeblendet, Prüfung läuft“ mit Hinweis auf die automatische Auslösung, ohne Namen der Meldenden.
 - Umsetzungsstand 🟡: für Anzeigen umgesetzt; für Nachrichten und Profile wird bisher nur der Fall markiert.
 
 
@@ -52,3 +53,4 @@ Mehrfachmeldungen desselben Mitglieds zählen einmal; Systemmeldungen (Wortfilte
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: Status nach Review |
 | 1.3 | 2026-10-23 | Sprintplanung nach Architektur-Review: Ausblenden für Nachrichten und Profile in R2 verschoben (Backlog B-15); für Anzeigen bereits umgesetzt |
+| 1.4 | 2026-10-25 | Review v1.3 (RV-R-04): Mitteilung und E-Mail an Betroffene beim vorläufigen Ausblenden; Offenlegung in den Rechtstexten; Nachweis erweitert |

@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSA Art. 17, BG-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-MOD-003, AT-MOD-003-2]
 ---
 
@@ -31,7 +31,7 @@ DSA Art. 17 (Begründungspflicht) und Nachvollziehbarkeit bei Widerspruch (DSA A
 ## Akzeptanzkriterien
 | Fall | Entscheidung | Mitteilung an Betroffene | Mitteilung an Meldende | Protokoll |
 |---|---|---|---|---|
-| Meldung durch Mitglieder | *entfernen*, *verwarnen*, *sperren* | ja: Entscheidung, Begründung, Hinweis auf Widerspruch im System (REQ-LEGAL-006/007) | ja: Entscheidung und Begründung | ja |
+| Meldung durch Mitglieder | *entfernen*, *verwarnen*, *sperren* | ja: Entscheidung, Begründung, Hinweis auf Widerspruch im System (REQ-LEGAL-006/007) | ja: Entscheidung, Begründung und Rechtsbehelfe (Widerspruch nach DSA Art. 20, außergerichtliche Streitbeilegung nach Art. 21, Rechtsweg; DSA Art. 16 Abs. 5) | ja |
 | Meldung durch Mitglieder | *keine Maßnahme* | nein (Betroffene wurden nicht belastet) | ja | ja |
 | vom System angehaltener Inhalt (Inhaltsprüfung, REQ-LST-010) | *keine Maßnahme* (Freigabe) | ja: Inhalt ist veröffentlicht | – (keine Meldenden) | ja |
 | vom System angehaltener Inhalt | *entfernen*, *verwarnen*, *sperren* | ja | – | ja |
@@ -56,3 +56,4 @@ DSA Art. 17 (Begründungspflicht) und Nachvollziehbarkeit bei Widerspruch (DSA A
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 2.0 | 2026-10-23 | Review v0.2: R-08 (Entscheidungstabelle mit Betroffenen und Meldenden), R-15, R-16 |
 | 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Hinweis auf Widerspruch im System statt per E-Mail (Q-22); Pflichtangaben der Begründung und Mitteilung im Konto in REQ-LEGAL-006 |
+| 2.2 | 2026-10-25 | Review v1.3 (RV-R-09): Mitteilung an Meldende mit Begründung und Rechtsbehelfen (umgesetzt in 6e6fe40) |

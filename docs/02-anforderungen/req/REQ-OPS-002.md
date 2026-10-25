@@ -13,9 +13,9 @@ moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 11, REQ-PRIV-002
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-25
 verification: [AT-OPS-002, MAN-OPS-002]
 ---
 
@@ -37,7 +37,7 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | Verhalten bei Verfehlung | Release-Blocker bei personenbezogenen Daten im Protokoll |
 
 ## Nachweis
-- `AT-OPS-002`: Smoke-Test `/metrics` (bestehend) plus Protokollsuche nach personenbezogenen Daten (Protokollsuche neu).
+- `AT-OPS-002`: Smoke-Test `/metrics` (bestehend) plus Unit-Test des Request-Logs (`apps/server/src/platform/http/server.test.ts`): Eintrag enthält Methode, Route ohne Query, Status, Dauer und Request-ID, aber keine IP-Adresse, keinen Port und keine Query-Werte wie `token=`.
 - `MAN-OPS-002`: Review der Protokollfelder.
 - Umsetzungsstand 🟡: verteiltes Tracing (z. B. OpenTelemetry) noch nicht zuschaltbar; Backlog.
 
@@ -48,3 +48,4 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15 |
+| 2.2 | 2026-10-25 | Review v1.3 (RV-R-01, RV-C-07): Request-Log ohne IP und Query umgesetzt (6e6fe40), Nachweis um den Unit-Test ergänzt |

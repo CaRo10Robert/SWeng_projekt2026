@@ -3,9 +3,9 @@ id: LEGAL-DSFA
 type: privacy
 status: in-review
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Schwellwertanalyse zur Datenschutz-Folgenabschätzung (Art. 35 DSGVO)
@@ -28,8 +28,8 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 |---|---|---|
 | 1. Bewerten oder Einstufen | nein | keine Bewertungsfunktion im MVP (REQ-MOD-006 ist „Could“) |
 | 2. automatisierte Entscheidung mit Rechtswirkung | nein | Wortfilter setzt nur „in Prüfung“; ein Mensch entscheidet |
-| 3. systematische Überwachung | nein | kein Tracking; Logs ohne Personenbezug |
-| 4. vertrauliche oder höchstpersönliche Daten | eher nein | Chatnachrichten sind vertraulich, aber ohne besonderen Schutzbedarf; Moderation nur bei Meldung |
+| 3. systematische Überwachung | nein | kein Tracking; Request-Logs ohne IP-Adresse und ohne Query-Werte; Rate-Limit-Zähler nur mit HMAC-Pseudonymen (Schlüssel täglich neu); keine Auswertung von Nutzungsverhalten |
+| 4. vertrauliche oder höchstpersönliche Daten | **ja** (neu bewertet, Review v1.3 RV-R-16) | Chatnachrichten sind private Kommunikation zwischen Mitgliedern; die Moderation liest bei Meldungen Ausschnitte und im Widerspruch Originaltexte entfernter Nachrichten, bei Straftatverdacht wird eine Kopie gesichert |
 | 5. Verarbeitung in großem Umfang | nein | eine Hochschule, [Platzhalter: ca. 5.000] potenzielle Nutzer |
 | 6. Abgleichen oder Zusammenführen von Datensätzen | nein | einzige Verknüpfung: Domain → Nutzertyp |
 | 7. Daten schutzbedürftiger Betroffener | teilweise | Studierende stehen in einem Abhängigkeitsverhältnis zur Hochschule; daher keine Verwendung der Daten für andere Hochschulzwecke |
@@ -38,11 +38,14 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 
 ## Ergebnis
 
-Höchstens ein Kriterium (Nr. 7) ist teilweise erfüllt. Nach WP 248 ist eine DSFA in der Regel erst ab zwei Kriterien nötig; die Verarbeitung steht nicht auf der Muss-Liste. **Eine vollständige DSFA ist nach dieser Analyse nicht erforderlich.**
+Zwei Kriterien sind erfüllt bzw. teilweise erfüllt (Nr. 4 und Nr. 7). Nach WP 248 ist ab zwei Kriterien **in der Regel eine DSFA erforderlich**. Ergebnis dieser Analyse: **Eine DSFA ist vor einem Echtbetrieb durchzuführen**, sofern der DSB nicht begründet zu einem anderen Ergebnis kommt [Platzhalter: Stellungnahme DSB]. Die Verarbeitung steht nach erster Prüfung nicht auf der Muss-Liste [Platzhalter: prüfen].
 
-Ausgleichende Maßnahmen für Kriterium 7:
+Konsequenz: Die DSFA (Beschreibung, Notwendigkeit und Verhältnismäßigkeit, Risiken, Abhilfemaßnahmen nach Art. 35 Abs. 7) wird als Vorbedingung für den Echtbetrieb in die Go-live-Checkliste aufgenommen (`docs/07-betrieb/go-live-checkliste.md`); REQ-PRIV-007 bleibt bis dahin ohne `verified`. Für das Docker-Beispiel ohne echte Daten ist sie nicht nötig.
+
+Schon umgesetzte Abhilfemaßnahmen für die Kriterien 4 und 7:
 - Zweckbindung: keine Weitergabe an andere Stellen der Hochschule (z. B. Prüfungsamt).
-- Moderation sieht nur Gemeldetes.
+- Moderation sieht nur Gemeldetes (± 5 Nachrichten); Originaltexte entfernter Nachrichten nur im Widerspruch, jeder Zugriff im Audit-Log.
+- Beweissicherung nur als pseudonymisierte Kopie, höchstens 6 Monate.
 - Begründung und Widerspruch bei jeder Maßnahme (REQ-LEGAL-006/007).
 
 ## Neu bewerten, wenn …

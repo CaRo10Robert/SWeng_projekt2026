@@ -1,7 +1,7 @@
 ---
 title: Community rules
-version: 2026-10
-last_updated: 2026-10-24
+version: 2026-10-25
+last_updated: 2026-10-25
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
@@ -43,4 +43,4 @@ A filter recognises clear terms from this list. Such listings are not published 
 
 ## Violations {#verstoesse}
 
-Violations can lead to content being removed and the account being suspended. Every decision can be appealed (see terms of use, section 8).
+Violations can lead to content being removed and the account being suspended. A word filter holds listings with clearly prohibited terms for review before publication; listings with three reports are provisionally hidden until moderation has decided. Every decision can be appealed (see terms of use, section 8).

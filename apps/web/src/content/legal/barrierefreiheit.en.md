@@ -37,7 +37,7 @@ This statement was prepared on 24 October 2026 and last reviewed on 24 October 2
 
 Have you noticed any shortcomings, or do you need content in a different format? Write to us:
 
-- Email: [Placeholder: barrierefreiheit@hochschule.example]
+- Email: [Placeholder: barrierefreiheit@hwg-lu.example]
 - Phone: [Placeholder: +49 000 000000]
 - Post: [Placeholder: address of the university, organisational unit]
 

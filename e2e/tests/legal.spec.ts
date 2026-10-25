@@ -98,7 +98,7 @@ test('[AT-LEGAL-003-2] Mitglied mit alter Zustimmung sieht den Dialog zu neuen N
 });
 
 // RV-R-08: neue Fassung der Datenschutzerklärung → Hinweis (keine Einwilligung); „zur Kenntnis genommen“ speichert die Version
-test('Neue Fassung der Datenschutzerklärung: Hinweis mit Link, Kenntnisnahme per Tastatur wird im Konto gespeichert', async ({ browser }) => {
+test('[AT-LEGAL-002-3] Neue Fassung der Datenschutzerklärung: Hinweis mit Link, Kenntnisnahme per Tastatur wird im Konto gespeichert', async ({ browser }) => {
   const context = await browser.newContext({ locale: 'de-DE' });
   const page = await context.newPage();
   await keyboardLogin(page, DEMO.tim);

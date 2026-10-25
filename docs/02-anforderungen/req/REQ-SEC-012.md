@@ -3,7 +3,7 @@ id: REQ-SEC-012
 title: Meldeweg für Sicherheitslücken
 type: security
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: n/a
 epic: EPIC-13
 source: RFC 9116, BSI CVD
 review_due: 2027-10-24
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-SEC-012, CTRL-DOC-BETRIEB]
 ---
 
@@ -26,7 +26,7 @@ Das System muss unter `/.well-known/security.txt` einen maschinenlesbaren Kontak
 Koordinierte Offenlegung (Coordinated Vulnerability Disclosure) braucht einen auffindbaren Kontakt; ohne ihn gehen Hinweise verloren oder werden öffentlich.
 
 ## Akzeptanzkriterien
-- Felder: `Contact: mailto:[Platzhalter: security@hwg-lu.example]`, `Expires` höchstens 12 Monate in der Zukunft, `Preferred-Languages: de, en`, `Policy` (Link auf die Kontaktseite, Abschnitt Sicherheitslücken), `Canonical`.
+- Felder: `Contact: mailto:[Platzhalter: security@hwg-lu.example]`, `Expires` höchstens 12 Monate in der Zukunft, `Preferred-Languages: de, en`, `Policy` (Link auf die Kontaktseite, Abschnitt Sicherheitslücken) und `Canonical` – beide nur, wenn `PUBLIC_URL` mit `https://` beginnt (RFC 9116 verlangt HTTPS für Web-URIs); im lokalen Standardstart über HTTP entfallen sie.
 - Prozess: Eingangsbestätigung binnen 3 Werktagen, Bewertung, Behebung, Rückmeldung an die meldende Person (`docs/07-betrieb/betriebshandbuch.md`).
 
 ## Fehler- und Missbrauchsfälle
@@ -40,3 +40,4 @@ N/A – Risiko niedrig; `Expires` wird über `review_due` überwacht.
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-A-17): Policy und Canonical nur bei HTTPS; Status nach Umsetzung |

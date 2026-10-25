@@ -3,9 +3,9 @@ id: LEGAL-INDEX
 type: index
 status: in-review
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Recht und Datenschutz (Übungsaufgabe)
@@ -64,3 +64,11 @@ flowchart LR
 ## Vor einem Echtbetrieb
 
 Alle Platzhalter ersetzen und die Texte prüfen lassen: siehe [Go-live-Checkliste](../07-betrieb/go-live-checkliste.md).
+
+## Platzhalter-Domains
+
+Einheitlich im ganzen Repository (Review v1.3, RV-R-10):
+
+- **`hwg-lu.example`** für Postfächer und Stellen der Hochschule (z. B. `kontakt@hwg-lu.example`, `datenschutz@hwg-lu.example`, `security@hwg-lu.example`); passt zum Standardwert `SECURITY_CONTACT` im Code.
+- **`campusmarkt.example`** für die Plattform selbst (Absenderdomain der E-Mails, öffentliche URL, Betriebs-Postfächer im Alarmierungsbeispiel).
+- Echte Domains stehen nur in der Whitelist der Registrierung (`hwg-lu.de`, `studmail.hwg-lu.de`).

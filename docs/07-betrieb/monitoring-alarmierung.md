@@ -3,9 +3,9 @@ id: OPS-MONITORING
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Überwachung und Alarmierung
@@ -30,14 +30,18 @@ Die Regeln liegen in `ops/prometheus/alerts.yml` (Tests: `ops/prometheus/alerts.
 |---|---|---|---|---|
 | `AppDown` | `up{job="campusmarkt"} == 0` | 2 min | SEV-1 | REQ-OPS-001 |
 | `NotReady` | `app_ready == 0` (Readiness meldet „nicht bereit“) | 5 min | SEV-1 | REQ-OPS-001 |
-| `HighErrorRate` | Anteil 5xx an allen Anfragen > 5 % | 5 min | SEV-2 | REQ-AVAIL-001 |
+| `HighErrorRate` | Anteil 5xx an allen Anfragen > 5 %, nur bei mindestens 0,1 Anfragen/s und **nicht** im Wartungsmodus (`campusmarkt_maintenance_mode == 1` schließt aus) | 5 min | SEV-2 | REQ-AVAIL-001 |
 | `SlowSearch` | p95 von `GET /api/v1/listings` > 500 ms | 10 min | SEV-3 | QS-7, REQ-PERF-001 |
-| `JobFailures` | fehlgeschlagene Jobs > 0 in den letzten 15 min (z. B. Mailversand) | sofort | SEV-3 | QS-3, REQ-NOTI-005 |
+| `JobFailures` | endgültig gescheiterte Jobs (`jobs_processed_total{outcome="dead"}`) > 0 in den letzten 15 min (z. B. Mailversand nach allen Wiederholungen); erfolgreiche Wiederholungen (`retry`) alarmieren nicht. Die Ausgänge `ok`, `retry`, `dead` sind mit 0 vorbelegt | sofort | SEV-3 | QS-3, REQ-NOTI-005 |
 | `WebSocketDrop` | `ws_connections` fällt um > 80 % gegenüber vor 5 min; nur wenn vorher ≥ 5 Verbindungen bestanden (sonst alarmiert die Demo dauernd) | sofort | SEV-2 | QS-4, REQ-CHAT-003 |
 | `MaintenanceModeOn` | `campusmarkt_maintenance_mode == 1` | 2 h | SEV-3 | REQ-OPS-006 |
-| `BackupMissing` | letzte erfolgreiche Sicherung älter als 26 h (bzw. noch nie gesichert) | sofort | SEV-2 | REQ-AVAIL-003 |
+| `BackupMissing` | letzte erfolgreiche Sicherung älter als 26 h; Wert 0 (noch nie gesichert) erst, wenn die App länger als 26 h läuft; nicht lesbarer Wert (NaN, z. B. Datenbank weg) löst nichts aus, dafür sorgt `NotReady` | sofort | SEV-2 | REQ-AVAIL-003 |
 
 Schwellwerte sind Beispielwerte und werden nach den ersten Betriebswochen angepasst.
+
+**Unterdrückung von Folgealarmen (`inhibit_rules`):** Solange `AppDown` oder `NotReady` feuern, unterdrückt Alertmanager `HighErrorRate`, `BackupMissing`, `JobFailures`, `SlowSearch` und `WebSocketDrop` desselben Jobs. So kommt bei einem Ausfall nur eine Mail.
+
+**Zeit bis zur Mail:** Dauer der Regel (`for`) + Abfrage- und Auswertungsintervall (15 s) + `group_wait` (30 s). Für `AppDown` ergibt das etwa 3 min; das Ziel ist **≤ 5 min** (REQ-OPS-008, QS-16).
 
 ## Eskalation
 

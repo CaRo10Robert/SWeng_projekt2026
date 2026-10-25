@@ -1,7 +1,7 @@
 ---
 title: Impressum
 version: 2026-10
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 > **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Alle Angaben in eckigen Klammern sind Platzhalter und vor einem Echtbetrieb durch die Hochschule zu ersetzen und vom Justiziariat bzw. der/dem Datenschutzbeauftragten der Hochschule zu prüfen.
@@ -24,9 +24,9 @@ Die Hochschule ist eine Körperschaft des öffentlichen Rechts und zugleich staa
 
 ## Kontakt
 
-- E-Mail: [Platzhalter: campusmarkt@hochschule.example]
+- E-Mail: [Platzhalter: campusmarkt@hwg-lu.example]
 - Telefon: [Platzhalter: +49 000 000000]
-- Kontaktformular und weitere Kontaktwege: siehe Seite „Kontakt“
+- Weitere Kontaktwege: siehe Seite „Kontakt“
 
 ## Zuständige Aufsichtsbehörde
 

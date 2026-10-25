@@ -3,7 +3,7 @@ id: REQ-LEGAL-008
 title: Verdacht auf Straftaten kennzeichnen und eskalieren
 type: business-rule
 class: functional
-status: approved
+status: implemented
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ epic: EPIC-13
 source: DSA Art. 18, Q-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-LEGAL-008, CTRL-DOC-DSA]
 ---
 
@@ -27,6 +27,8 @@ Das System muss Moderatoren erlauben, eine Entscheidung als „Verdacht auf Stra
 ## Begründung
 DSA Art. 18 verpflichtet zur unverzüglichen Information der Strafverfolgungsbehörden bei Verdacht auf Straftaten, die eine Gefahr für Leben oder Sicherheit darstellen. Die Meldung selbst ist ein organisatorischer Prozess außerhalb des Systems (Q-4); das System liefert Kennzeichnung, Eskalation und Beweissicherung.
 
+**Warum Should, obwohl Art. 18 eine Pflicht ist:** Die Pflicht trifft den Betreiber und wird durch den organisatorischen Prozess in `docs/06-recht/dsa-prozesse.md` erfüllt (Meldung per Telefon oder E-Mail an die Polizei). Die Systemunterstützung erleichtert und protokolliert die Meldung, ist aber nicht Voraussetzung, um die Pflicht zu erfüllen.
+
 ## Akzeptanzkriterien
 | Einschätzung des Moderators | Kennzeichnung | System | Prozess (`docs/06-recht/dsa-prozesse.md`) |
 |---|---|---|---|
@@ -34,7 +36,7 @@ DSA Art. 18 verpflichtet zur unverzüglichen Information der Strafverfolgungsbeh
 | Verdacht auf Straftat ohne Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat“ | Audit-Log, E-Mail an Administratoren, Inhalt gesichert | Prüfung durch `[Platzhalter: Justiziariat der Hochschule]` |
 | Verdacht mit Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat – Gefahr“ | wie oben, Kennzeichnung „dringend“ | unverzügliche Information der Polizei `[Platzhalter: zuständige Polizeidienststelle]` |
 
-Beweissicherung: Gekennzeichnete Inhalte (Anzeige mit Bildern, Nachrichtenkontext ± 5) werden von automatischen Löschfristen ausgenommen, bis ein Administrator die Sicherung freigibt, höchstens 6 Monate.
+Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopie** angelegt (Anzeige: Titel, Beschreibung, Preis, Zeitpunkt; Nachricht: die gemeldete Nachricht mit ± 5 Nachrichten Kontext, Absender nur als Rolle; Profil: Anzeigename). Die Kopie bleibt bis zur Freigabe durch einen Administrator erhalten, höchstens 6 Monate. Löschfristen und Kontolöschungen der Originale werden **nicht** zurückgestellt (Datenminimierung, Art. 5 Abs. 1 lit. c und e DSGVO). Bilder werden im Beispiel nicht mitkopiert (offener Punkt). Die Admin-Übersicht zeigt je Sicherung die Zahl der gesicherten Elemente (`preservedItems`).
 
 ## Fehler- und Missbrauchsfälle
 | Fall | Verhalten |
@@ -42,7 +44,7 @@ Beweissicherung: Gekennzeichnete Inhalte (Anzeige mit Bildern, Nachrichtenkontex
 | Kennzeichnung ohne Begründung | 422 |
 | Mitglied ohne Moderationsrolle setzt die Kennzeichnung | 403 |
 | Betroffene/r fordert Auskunft über die Kennzeichnung | Auskunft nach Prüfung durch den DSB; die Kennzeichnung erscheint nicht in der Mitteilung an Betroffene |
-| Automatische Löschfrist trifft gesicherten Inhalt | Inhalt bleibt erhalten, Löschung nach Freigabe |
+| Automatische Löschfrist oder Kontolöschung trifft gesicherten Inhalt | Original wird fristgerecht gelöscht; die Kopie bleibt bis Freigabe bzw. Fristende |
 
 ## Nachweis
 - `AT-LEGAL-008`: Smoke-Test – Entscheidung mit Kennzeichnung „Verdacht auf Straftat“ erzeugt Audit-Log-Eintrag und E-Mail an Administratoren; ohne Begründung 422; Mitteilung an Betroffene enthält die Kennzeichnung nicht.
@@ -52,3 +54,4 @@ Beweissicherung: Gekennzeichnete Inhalte (Anzeige mit Bildern, Nachrichtenkontex
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-15, RV-R-20, RV-C-05): Beweissicherung als pseudonymisierte Kopie mit Kontext, keine Zurückstellung von Löschungen, preservedItems; Begründung der Einstufung Should; Status nach Umsetzung |

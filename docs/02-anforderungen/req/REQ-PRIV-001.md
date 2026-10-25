@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 7
 use_cases: [UC-01, UC-02]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-PRIV-001, AT-PRIV-001-2]
 ---
 
@@ -28,7 +28,7 @@ verification: [AT-PRIV-001, AT-PRIV-001-2]
 4. Optionale Einwilligungen werden getrennt erfasst und sind einzeln widerrufbar – **ab REQ-SRCH-005** (Suchauftrags-Mails, Could). In R1 gibt es keine optionale Einwilligung.
 
 ## Begründung
-Nachweispflicht der Einwilligung (DSGVO Art. 7 Abs. 1); Kopplungsverbot für optionale Einwilligungen.
+Nachweis der Zustimmung zu den Nutzungsbedingungen und der Kenntnisnahme des Datenschutzhinweises (Rechenschaftspflicht, DSGVO Art. 5 Abs. 2); für echte Einwilligungen (optional, ab REQ-SRCH-005, sowie die Kontaktfreigabe REQ-CHAT-010) Nachweispflicht nach Art. 7 Abs. 1 und Kopplungsverbot. Die Zustimmung zu den Nutzungsbedingungen ist **keine** Einwilligung im Sinne der DSGVO; die Verarbeitung für das Konto stützt sich auf Art. 6 Abs. 1 lit. e (öffentliche Stelle, Platzhalter für die Norm in der Datenschutzerklärung). Der Titel bleibt aus Gründen der Stabilität unverändert.
 
 ## Akzeptanzkriterien
 | Situation | Erwartung |
@@ -47,8 +47,8 @@ Nachweispflicht der Einwilligung (DSGVO Art. 7 Abs. 1); Kopplungsverbot für opt
 
 ## Nachweis
 - `AT-PRIV-001`: (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel.
-- `AT-PRIV-001-2`: (neu) nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung.
-- Teilweise umgesetzt: Punkte 1 und 2 sind umgesetzt; Punkt 3 (erneute Zustimmung bestehender Mitglieder) fehlt.
+- `AT-PRIV-001-2`: nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt.
+- Umgesetzt: Punkte 1 bis 3. Eine neue Fassung der Datenschutzerklärung löst einen Hinweis zur Kenntnisnahme aus (keine Zustimmung, REQ-LEGAL-002).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -57,3 +57,4 @@ Nachweispflicht der Einwilligung (DSGVO Art. 7 Abs. 1); Kopplungsverbot für opt
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien |
 | 2.0 | 2026-10-23 | Review v0.2: R-14 Status `approved` statt `implemented`; optionale Einwilligungen „ab REQ-SRCH-005“; neue Version → Zustimmung bei nächster Anmeldung; R-04 Fehler- und Missbrauchsfälle |
 | 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Texte der Nutzungsbedingungen und der Datenschutzerklärung, Ablauf der erneuten Zustimmung und Fehlercode `terms_required` in REQ-LEGAL-003 bzw. REQ-LEGAL-002 |
+| 2.2 | 2026-10-25 | Review v1.3 (RV-R-08, RV-R-10): Zustimmung zu Nutzungsbedingungen ist keine DSGVO-Einwilligung; Punkt 3 umgesetzt (REQ-LEGAL-003); AT-PRIV-001-2 durch AT-LEGAL-003-2 belegt |

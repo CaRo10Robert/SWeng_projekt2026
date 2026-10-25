@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSA Art. 16/17, BG-4
 use_cases: [UC-32, UC-33, UC-34]
 depends_on: [REQ-MOD-001, REQ-SEC-006]
-version: 1.4
+version: 1.5
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3]
 ---
 
@@ -68,7 +68,7 @@ Szenario: Fall erscheint in der Queue
 | Mitglied ohne Moderatorrolle ruft die Queue auf | 403 |
 | Fall wurde parallel bereits entschieden | 409, keine zweite Entscheidung |
 | Moderator ist selbst betroffen | Entscheidung abgelehnt |
-| Begründung fehlt oder kürzer als 5 Zeichen | Validierungsfehler |
+| Begründung fehlt oder kürzer als 20 Zeichen (nach Entfernen von Leerzeichen am Rand), Regel fehlt, bei „rechtswidriger Inhalt“ Rechtsgrundlage fehlt | 422 (`reason_too_short`, `rule_required`, `legal_ground_required`; REQ-LEGAL-006) |
 | Widerspruch gegen eine Entscheidung | im System als Fall „Widerspruch“, ein anderer Moderator entscheidet (REQ-LEGAL-007, Q-22) |
 
 ## INVEST
@@ -88,3 +88,4 @@ I: setzt REQ-MOD-001 voraus · N: Darstellung verhandelbar · V: Rechtspflicht �
 | 1.2 | 2026-10-23 | Review v0.2: R-08 (nur dauerhafte Sperre, Widerspruch per E-Mail, „zeitnah“ → ≤ 10 s), R-15, R-16 |
 | 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3 bestanden bzw. ausgeführt); Status → verified |
 | 1.4 | 2026-10-24 | Abgleich Recht und Betrieb: Widerspruch läuft jetzt im System (Q-22, REQ-LEGAL-007), Begründung an Betroffene nach REQ-LEGAL-006, Kennzeichnung Straftatverdacht (REQ-LEGAL-008); geprüftes Verhalten der Queue unverändert, Status bleibt |
+| 1.5 | 2026-10-25 | Review v1.3 (RV-R-10): Mindestlänge der Begründung 20 Zeichen wie REQ-LEGAL-006 und Code; Regel und Rechtsgrundlage als Pflichtangaben |

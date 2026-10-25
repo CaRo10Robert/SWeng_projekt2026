@@ -3,7 +3,7 @@ id: REQ-OPS-012
 title: Automatisierte Aktualisierung von Abhängigkeiten
 type: operational
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 09, OWASP A06
 depends_on: [REQ-OPS-004]
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [CTRL-RENOVATE]
 ---
 
@@ -39,3 +39,4 @@ N/A – Risiko niedrig; jede Aktualisierung durchläuft die CI.
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
+| 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-A-16): Status nach Umsetzung; Automerge für Dev-Patches, zentrale Tool-Versionen in CI per Regex-Manager |

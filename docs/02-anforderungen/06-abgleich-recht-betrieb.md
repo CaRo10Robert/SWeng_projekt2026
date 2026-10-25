@@ -3,9 +3,9 @@ id: GAP-RECHT-BETRIEB
 type: requirements
 status: in-review
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 ---
 
 # Abgleich Recht, Auftritt und Betrieb (EPIC-13)
@@ -76,7 +76,7 @@ Zuordnung der Normen zu Pflichten und zu ihrer Umsetzung. Die Prozessdokumente l
 | DSA Art. 18 | Meldung von Straftatverdacht | REQ-LEGAL-008 | `docs/06-recht/dsa-prozesse.md` |
 | DSA Art. 20, 21 | Internes Beschwerdemanagement, außergerichtliche Streitbeilegung | REQ-LEGAL-007 | `docs/06-recht/dsa-prozesse.md` |
 | DSA Art. 23 | Maßnahmen gegen missbräuchliche Meldungen und Widersprüche | REQ-LEGAL-007, REQ-MOD-001 | `docs/06-recht/dsa-prozesse.md` |
-| BITV 2.0, LBGG RLP, RL (EU) 2016/2102 | Barrierefreiheit, Erklärung, Feedback | REQ-A11Y-001/002, REQ-LEGAL-004 | `apps/web/src/content/legal/barrierefreiheit.de.md` |
+| LGGBehM RLP mit Landesverordnung [Platzhalter], RL (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523 (BITV 2.0 nur als fachliche Orientierung) | Barrierefreiheit, Erklärung, Feedback | REQ-A11Y-001/002, REQ-LEGAL-004 | `apps/web/src/content/legal/barrierefreiheit.de.md` |
 | PStTG (DAC7) | Meldung von Anbietern über der Bagatellgrenze | REQ-LEGAL-009 | `docs/06-recht/dac7-konzept.md` |
 | BGB §§ 305 ff. | Einbeziehung und Transparenz von Bedingungen | REQ-LEGAL-003 | Nutzungsbedingungen |
 | UWG § 7, RFC 8058 | Keine unerwünschte Werbung; einfache Abmeldung | REQ-NOTI-003, REQ-OPS-010 | `docs/07-betrieb/mail-zustellbarkeit.md` |
@@ -84,15 +84,21 @@ Zuordnung der Normen zu Pflichten und zu ihrer Umsetzung. Die Prozessdokumente l
 | ZAG, GwG | Zahlungsdienste, Geldwäsche | REQ-ARCH-001/002 (Constraint C-07) | erst mit EPIC-09; Zahlungsdienstleister hinter dem PaymentPort (ADR-0006) |
 
 **Nicht anwendbar oder bewusst ausgelassen (mit Begründung):**
-- **Barrierefreiheitsstärkungsgesetz (BFSG):** gilt für Wirtschaftsakteure; für die Hochschule als öffentliche Stelle gilt BITV 2.0 bzw. Landesrecht.
-- **Befreiung kleiner Unternehmen nach DSA Art. 19:** Ob eine Hochschule darunter fällt, ist ungeklärt. Wir setzen Art. 20 trotzdem um (Q-22); das ist der sichere Weg.
+- **Barrierefreiheitsstärkungsgesetz (BFSG):** gilt für Wirtschaftsakteure; für die Hochschule als öffentliche Stelle gilt das Landesrecht (LGGBehM RLP).
+- **Befreiung kleiner Unternehmen nach DSA Art. 19:** setzt ein Unternehmen voraus; eine öffentliche Stelle ist kein KMU. Wir setzen Art. 20 um (Q-22); das ist der sichere Weg.
+
+**Offene Prüfpunkte (Review v1.3, RV-R-07, RV-R-22):**
+- **Anwendbarkeit des DSA:** Der DSA erfasst „Dienste der Informationsgesellschaft“, die in der Regel gegen Entgelt erbracht werden; ob ein kostenloses Angebot einer öffentlichen Stelle darunter fällt, prüft das Justiziariat. Davon hängt ab, ob für Moderation und Beschwerden Art. 6 Abs. 1 lit. c oder lit. e DSGVO die Rechtsgrundlage ist.
+- **Anwendbarkeit des PStTG:** Ausnahme nach § 3 PStTG für reine Inseratsplattformen und Einordnung von Tausch; prüft die Steuerabteilung.
+- **§ 5 DDG** setzt einen geschäftsmäßigen, in der Regel entgeltlichen digitalen Dienst voraus; Auffangnorm § 18 Abs. 1 MStV.
+- **DSFA:** Die Schwellwertanalyse ergibt nach Neubewertung (Kriterien 4 und 7) eine DSFA vor dem Echtbetrieb; Bestätigung durch den DSB offen.
 - **Rückverfolgbarkeit von Unternehmern (DSA Art. 30):** entfällt, weil gewerbliche Anbieter ausgeschlossen sind (REQ-LEGAL-003).
 - **Verbraucherinformationen für Fernabsatz:** Die Plattform ist nicht Vertragspartei; die Geschäfte schließen Privatpersonen untereinander.
 
 ## 4. Grenzen der Übung
 
 - Alle Betreiberangaben sind Platzhalter. Die Go-live-Checkliste (`docs/07-betrieb/go-live-checkliste.md`) verlangt, dass vor einem Echtbetrieb kein `[Platzhalter:` mehr vorkommt.
-- Nicht ausgeführt werden: Meldungen an BZSt, Polizei oder Aufsichtsbehörde, Abschluss von AV-Verträgen, Penetrationstest, DSFA (falls erforderlich). Diese Schritte stehen in EPIC-12 und in der Go-live-Checkliste.
+- Nicht ausgeführt werden: Meldungen an BZSt, Polizei oder Aufsichtsbehörde, Abschluss von AV-Verträgen, Penetrationstest, DSFA (nach der Schwellwertanalyse vor dem Echtbetrieb erforderlich). Diese Schritte stehen in EPIC-12 und in der Go-live-Checkliste.
 - Die Widerspruchsfrist beträgt **6 Monate** (DSA Art. 20 Abs. 1). Eine kürzere Frist ist rechtlich nicht zulässig.
 
 ## 5. Entscheidungen

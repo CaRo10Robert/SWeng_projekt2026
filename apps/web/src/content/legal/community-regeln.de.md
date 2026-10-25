@@ -1,7 +1,7 @@
 ---
 title: Community-Regeln
-version: 2026-10
-last_updated: 2026-10-24
+version: 2026-10-25
+last_updated: 2026-10-25
 ---
 
 > **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.**
@@ -41,4 +41,4 @@ Eindeutige Begriffe aus dieser Liste erkennt ein Filter. Solche Anzeigen werden 
 
 ## Verstöße
 
-Verstöße können zur Entfernung von Inhalten und zur Sperre des Kontos führen. Gegen jede Entscheidung ist ein Widerspruch möglich (siehe Nutzungsbedingungen, Abschnitt 8).
+Verstöße können zur Entfernung von Inhalten und zur Sperre des Kontos führen. Ein Wortfilter hält Anzeigen mit eindeutig verbotenen Begriffen vor der Veröffentlichung zur Prüfung an; Anzeigen mit drei Meldungen werden vorläufig ausgeblendet, bis die Moderation entschieden hat. Gegen jede Entscheidung ist ein Widerspruch möglich (siehe Nutzungsbedingungen, Abschnitt 8).

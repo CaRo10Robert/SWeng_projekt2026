@@ -1,7 +1,7 @@
 ---
 title: Nutzungsbedingungen
-version: 2026-10
-last_updated: 2026-10-24
+version: 2026-10-25
+last_updated: 2026-10-25
 ---
 
 > **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Vom Justiziariat und der/dem Datenschutzbeauftragten der Hochschule zu prüfen. Angaben in eckigen Klammern sind Platzhalter.
@@ -12,7 +12,7 @@ Diese Bedingungen regeln die Nutzung von CampusMarkt HWG LU (im Folgenden „Pla
 
 ## 2. Wer mitmachen darf
 
-1. Die Plattform steht nur Angehörigen der Hochschule offen: Studierenden und Beschäftigten mit einer E-Mail-Adresse einer zugelassenen Hochschul-Domain [Platzhalter: z. B. studmail.hochschule.example, hochschule.example].
+1. Die Plattform steht nur Angehörigen der Hochschule offen: Studierenden und Beschäftigten mit einer E-Mail-Adresse einer zugelassenen Hochschul-Domain [Platzhalter: z. B. studmail.hwg-lu.example, hwg-lu.example].
 2. Jede Person darf nur ein Konto haben. Das Konto ist nicht übertragbar.
 3. Endet die Zugehörigkeit zur Hochschule, endet auch die Berechtigung zur Nutzung.
 
@@ -35,7 +35,7 @@ Mitglieder
 
 ## 6. Rechte an Inhalten
 
-Sie behalten alle Rechte an Ihren Texten und Bildern. Sie räumen der Hochschule ein einfaches, unentgeltliches, auf die Laufzeit der Anzeige beschränktes Recht ein, die Inhalte auf der Plattform zu speichern, technisch anzupassen (z. B. Bildgröße) und Mitgliedern anzuzeigen.
+Sie behalten alle Rechte an Ihren Texten und Bildern. Sie räumen der Hochschule ein einfaches, unentgeltliches Recht ein, die Inhalte auf der Plattform zu speichern, technisch anzupassen (z. B. Bildgröße) und Mitgliedern anzuzeigen. Das Recht gilt, solange die Inhalte nach dem Löschkonzept gespeichert werden (siehe Datenschutzerklärung): für die Laufzeit der Anzeige, nach einer Entfernung durch die Moderation zum Nachweis bis zu 12 Monate und in Datensicherungen bis zu 28 Tage. Angezeigt werden die Inhalte nur während der Laufzeit der Anzeige.
 
 ## 7. Kontaktfreigabe
 
@@ -45,9 +45,11 @@ Ihre E-Mail-Adresse ist für andere Mitglieder nicht sichtbar. In einer Konversa
 
 1. **Melden:** Jedes Mitglied kann Anzeigen, Nachrichten und Profile melden, die gegen Gesetze oder diese Bedingungen verstoßen (Melde- und Abhilfeverfahren nach Art. 16 DSA).
 2. **Entscheidung:** Die Moderation der Hochschule prüft jede Meldung durch einen Menschen. Sie kann Inhalte entfernen, Mitglieder verwarnen oder Konten dauerhaft sperren.
-3. **Begründung:** Betroffene erhalten eine Begründung mit der verletzten Regel, den Tatsachen, der Art der Maßnahme und dem Hinweis auf den Widerspruch (Art. 17 DSA).
-4. **Widerspruch:** Gegen eine Entscheidung können Betroffene und Meldende innerhalb von **sechs Monaten** nach der Mitteilung (Art. 20 Abs. 1 DSA) in ihrem Konto bzw. über die Kontaktstelle Widerspruch einlegen. Eine andere Moderatorin oder ein anderer Moderator, die/der an der ersten Entscheidung nicht beteiligt war, entscheidet erneut (internes Beschwerdemanagement nach Art. 20 DSA). Das Ergebnis wird begründet mitgeteilt.
+3. **Begründung:** Betroffene erhalten eine Begründung mit der verletzten Regel, bei rechtswidrigen Inhalten auch der Rechtsgrundlage, den Tatsachen, der Art der Maßnahme und dem Hinweis auf den Widerspruch (Art. 17 DSA). Meldende erhalten das Ergebnis mit Begründung und Hinweis auf ihre Rechtsbehelfe.
+4. **Widerspruch:** Gegen eine Entscheidung können Betroffene und Meldende innerhalb von **sechs Monaten** nach der Mitteilung (Art. 20 Abs. 1 DSA) in ihrem Konto unter „Meine Mitteilungen“ Widerspruch einlegen; bei gesperrten Konten über den Link aus der E-Mail mit der Begründung. Eine andere Moderatorin oder ein anderer Moderator, die/der an der ersten Entscheidung nicht beteiligt war und den Fall weder gemeldet noch selbst widersprochen hat, entscheidet erneut (internes Beschwerdemanagement nach Art. 20 DSA). Das Ergebnis wird beiden Seiten begründet mitgeteilt.
 5. **Straftaten:** Bei Hinweisen auf eine Straftat, die eine Gefahr für Leben oder Sicherheit von Personen darstellt, informiert die Hochschule die zuständigen Behörden (Art. 18 DSA).
+6. **Automatische Hilfsmittel (Art. 14 DSA):** Ein Wortfilter hält neue Anzeigen mit eindeutig verbotenen Begriffen vor der Veröffentlichung zur Prüfung an. Haben drei Mitglieder eine Anzeige gemeldet, wird sie vorläufig ausgeblendet, bis die Moderation entschieden hat; die Betroffenen werden darüber informiert. Endgültig entscheidet immer ein Mensch.
+7. **Außergerichtliche Streitbeilegung und Rechtsweg:** Unabhängig vom Widerspruch können Sie eine zertifizierte außergerichtliche Streitbeilegungsstelle anrufen (Art. 21 DSA, [Platzhalter: Stelle]) oder den Rechtsweg beschreiten.
 
 ## 9. Sperren
 
