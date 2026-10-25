@@ -3,7 +3,7 @@ id: REQ-LEGAL-006
 title: Begründung an Betroffene bei Moderationsentscheidungen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,7 +15,7 @@ epic: EPIC-13
 source: DSA Art. 16 Abs. 5, Art. 17, Q-22
 use_cases: [UC-32, UC-33, UC-34]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-006, AT-LEGAL-006-2]
@@ -75,3 +75,4 @@ I: setzt auf der bestehenden Moderation auf · N: Darstellung der Mitteilungen v
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-03, RV-R-09): Pflichtangaben nach Art. 17 Abs. 3 lit. d und e getrennt, `legalGround` bei rechtswidrigen Inhalten; Meldende erhalten Begründung und Rechtsbehelfe; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-006, AT-LEGAL-006-2 bestanden bzw. ausgeführt); Status → verified |

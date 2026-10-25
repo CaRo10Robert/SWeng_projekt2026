@@ -3,7 +3,7 @@ id: REQ-LEGAL-003
 title: Nutzungsbedingungen und Community-Regeln
 type: business-rule
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -14,7 +14,7 @@ epic: EPIC-13
 source: DSA Art. 14, BGB §§ 305 ff., Q-23
 use_cases: [UC-01, UC-08]
 depends_on: [REQ-PRIV-001]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE]
@@ -74,3 +74,4 @@ Szenario: Erneute Zustimmung nach Versionswechsel
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-06): Status nach Umsetzung; Schutzrechte (Melden, Blockieren, Kontaktfreigabe widerrufen/ablehnen, Benachrichtigungen, Sprache) bleiben ohne aktuelle Zustimmung möglich |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-LEGAL-009
 title: Auswertung meldepflichtiger Anbieter (DAC7)
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-13
 source: PStTG (DAC7), Q-26
 use_cases: [UC-43]
 depends_on: [REQ-CHAT-011]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7]
@@ -59,3 +59,4 @@ I: nur lesend auf vorhandenen Deals · N: Zählregeln für Tausch verhandelbar �
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-C-12, RV-R-17): JSON ohne E-Mail-Adresse, nur CSV; Tausch als offener Prüfpunkt; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7 bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-LEGAL-004
 title: Erklärung zur Barrierefreiheit
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 reviewers: [qa-lead]
@@ -16,7 +16,7 @@ source: LGGBehM RLP, Landesverordnung zur Barrierefreiheit [Platzhalter], Richtl
 use_cases: [UC-08]
 depends_on: [REQ-A11Y-001]
 review_due: 2027-10-24
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE]
@@ -59,3 +59,4 @@ Szenario: Barriere melden
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-18): Rechtsquelle LGGBehM RLP und RL (EU) 2016/2102 statt BITV 2.0/LBGG; Methode ehrlich (manuelle Prüfung offen); Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |

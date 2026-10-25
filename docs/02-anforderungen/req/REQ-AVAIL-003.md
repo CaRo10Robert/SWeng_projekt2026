@@ -3,7 +3,7 @@ id: REQ-AVAIL-003
 title: Datensicherung und getestete Wiederherstellung im Docker-Beispiel
 type: operational
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, qa-lead]
@@ -14,7 +14,7 @@ kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 32 Abs. 1 lit. c, Guideline Kap. 11, Q-23
 use_cases: [UC-45]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-AVAIL-003, CTRL-DOC-BACKUP]
@@ -57,3 +57,4 @@ REQ-AVAIL-002 legt die Ziele für den Echtbetrieb fest (Won't in R1). Ein ungete
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-24 | Angleichung an die Umsetzung (B-56): Dauer ≤ 15 min wie QS-15 und ADR-0018 statt 10 min, Bestätigung per Rückfrage oder `--yes`, Prüfsummen- und Migrationsprüfung, Aufbewahrung höchstens 28 Tage, Testskript benannt |
 | 1.2 | 2026-10-25 | Review v1.3 (RV-A-01, RV-A-02, RV-A-13, RV-A-14, RV-R-13): Löschjournal, Restore über temporäre DB mit Rückfall, .partial-Sicherungen, strenge 28 Tage; Nachweis um Teil 2 erweitert; Status nach Umsetzung |
+| 1.3 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AVAIL-003, CTRL-DOC-BACKUP bestanden bzw. ausgeführt); Status → verified |

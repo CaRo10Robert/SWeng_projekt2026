@@ -3,7 +3,7 @@ id: REQ-LEGAL-005
 title: Zentrale Kontaktstelle
 type: business-rule
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: low
 release: R1
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: DSA Art. 11, Art. 12, Q-23
 use_cases: [UC-08]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE]
@@ -51,3 +51,4 @@ N/A – reine Informationsseite; Risiko niedrig.
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-10): Status nach Umsetzung; Kontaktseite nennt jetzt Widerspruch und eigene Behördenadresse |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |

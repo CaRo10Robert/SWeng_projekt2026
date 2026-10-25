@@ -3,7 +3,7 @@ id: REQ-UX-007
 title: Englische Oberfläche
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -12,7 +12,7 @@ kano: leistung
 epic: EPIC-13
 source: BG-2, REQ-UX-002, Q-25
 depends_on: [REQ-UX-002]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-UX-007, AT-UX-007-2, AT-UX-007-3]
@@ -61,3 +61,4 @@ I: setzt auf der Auslagerung der Texte (REQ-UX-002) auf · N: Umfang der Rechtst
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-A-08, RV-C-08): Bestätigungsmail in gewählter Sprache, Reihenfolge Konto vor Gerät; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-UX-007, AT-UX-007-2, AT-UX-007-3 bestanden bzw. ausgeführt); Status → verified |

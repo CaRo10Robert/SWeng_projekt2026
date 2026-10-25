@@ -3,7 +3,7 @@ id: REQ-LEGAL-001
 title: Impressum
 type: business-rule
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: DDG § 5, MStV § 18 Abs. 2, Q-23
 use_cases: [UC-08]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE]
@@ -65,3 +65,4 @@ Szenario: Impressum ohne Anmeldung
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-22): Anwendbarkeit § 5 DDG als offener Prüfpunkt, § 18 Abs. 1 MStV als Auffangnorm, Begriff digitale Dienste; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |

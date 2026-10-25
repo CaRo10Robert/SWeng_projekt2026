@@ -3,7 +3,7 @@ id: REQ-UX-003
 title: Fehlerseiten und korrekte HTTP-Statuscodes
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: BG-2, Guideline Kap. 05
 depends_on: [REQ-UX-006]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-UX-003, AT-UX-003-2]
@@ -61,3 +61,4 @@ I: unabhängig · N: Gestaltung verhandelbar · V: Orientierung, Betreibbarkeit 
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-A-20): Status nach Umsetzung; HEAD wird wie GET behandelt |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-UX-003, AT-UX-003-2 bestanden bzw. ausgeführt); Status → verified |

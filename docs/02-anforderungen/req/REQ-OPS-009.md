@@ -3,7 +3,7 @@ id: REQ-OPS-009
 title: Verschlüsselte Verbindung mit HSTS über Reverse Proxy
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ epic: EPIC-13
 source: BSI TR-02102-2, OWASP ASVS V9, Q-27
 depends_on: [REQ-SEC-004]
 review_due: 2027-10-24
-version: 1.3
+version: 1.4
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-OPS-009]
@@ -50,3 +50,4 @@ Sitzungscookies sind `Secure` (REQ-SEC-004) und werden ohne TLS nicht übertrage
 | 1.1 | 2026-10-24 | Nachweis an die Umsetzung (B-55) angeglichen: Testskript, Hostname `campusmarkt.localhost`, geprüfte Punkte. Offen: App wertet `TRUST_PROXY` noch nicht aus; App-Port ist auch im Profil `proxy` veröffentlicht |
 | 1.2 | 2026-10-24 | App- und Mailpit-Port nur an 127.0.0.1 gebunden; Kriterium „Direktzugriff“ entsprechend präzisiert |
 | 1.3 | 2026-10-25 | Review v1.3 (RV-A-07, RV-R-10): TRUST_PROXY wird ausgewertet (ein Hop), mitgelieferte Datei .env.proxy.example; offener Vermerk aus 1.1 erledigt |
+| 1.4 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-OPS-009 bestanden bzw. ausgeführt); Status → verified |

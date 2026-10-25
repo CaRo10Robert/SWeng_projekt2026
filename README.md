@@ -115,6 +115,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 8c | [Code-Review v1.1](docs/04-review/review-v1.1-code.md) | 15 Befunde zum Sprint-1-Code und ihre Behebung | – |
 | 8d | [Testbericht Sprint 1](docs/05-umsetzung/testbericht-2026-10-24.md) | Finaler Lauf: Build, Smoke, E2E, Unit-Tests, Statusänderungen | – |
 | 8e | [Review v1.3 Recht, Auftritt und Betrieb](docs/04-review/review-v1.3-recht-betrieb.md) | 63 Befunde aus drei unabhängigen Reviews (Anforderungen/Recht, Architektur/Betrieb, Code) und ihre Behebung | – |
+| 8f | [Testbericht EPIC-13](docs/05-umsetzung/testbericht-2026-10-25.md) | Finaler Lauf nach Review v1.3: Build, E2E, Smoke, Restore, Proxy, Statusänderungen | – |
 | 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | abgelöst durch den generierten Katalog-Index | – |
 | 10 | [Recht und Datenschutz](docs/06-recht/README.md) | VVT, TOMs, Auftragsverarbeitung, DSFA-Schwellwertanalyse, Datenpannen-, DSA- und DAC7-Prozess, Rechtskataster (Muster mit Platzhaltern) | Reference |
 | 11 | [Betrieb](docs/07-betrieb/README.md) | Betriebshandbuch, Backup, Monitoring, Incident, Wartung/Status, TLS, Mail-Zustellbarkeit, Updates, Pentest-Plan, Go-live-Checkliste | How-to |

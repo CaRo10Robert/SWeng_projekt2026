@@ -3,7 +3,7 @@ id: REQ-UX-006
 title: Rechtliche Links auf jeder Seite und in jeder E-Mail
 type: business-rule
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: DDG § 5, DSGVO Art. 12, Q-23
 depends_on: [REQ-LEGAL-001, REQ-NOTI-001]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-UX-006, AT-UX-006-2]
@@ -49,3 +49,4 @@ Links sind per Tastatur erreichbar und haben eindeutige Namen (REQ-A11Y-001).
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-UX-006, AT-UX-006-2 bestanden bzw. ausgeführt); Status → verified |

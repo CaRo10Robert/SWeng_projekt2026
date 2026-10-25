@@ -3,7 +3,7 @@ id: REQ-LEGAL-010
 title: Einwilligung vor nicht notwendiger Speicherung auf Endgeräten
 type: privacy
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: TDDDG § 25, Q-24
 depends_on: [REQ-PRIV-006]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-010]
@@ -55,3 +55,4 @@ Zulässige Speicherungen (Allowlist, abgelegt als `e2e/storage-allowlist.json` u
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-18): Status nach Umsetzung; Test prüft, dass `cm_locale` vor der ausdrücklichen Wahl fehlt |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-010 bestanden bzw. ausgeführt); Status → verified |

@@ -29,7 +29,7 @@ const accounts = new Map<string, LoginAccount>([
 ]);
 const deps = { rules, findByCanonical: async (c: string) => accounts.get(c) };
 
-describe('AT-AUTH-009 Anmeldeverfahren austauschbar (REQ-AUTH-009, ADR-0013)', () => {
+describe('[AT-AUTH-009] Anmeldeverfahren austauschbar (REQ-AUTH-009, ADR-0013)', () => {
   const sso = fakeSso({
     ok: { email: 'Lea+markt@studmail.hwg-lu.de', attributes: { affiliation: 'staff' } },
     fremd: { email: 'lea@uni-mannheim.de', attributes: {} },

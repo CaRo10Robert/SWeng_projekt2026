@@ -3,7 +3,7 @@ id: REQ-LEGAL-002
 title: Datenschutzerklärung
 type: privacy
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,7 +15,7 @@ epic: EPIC-13
 source: DSGVO Art. 12–14, LDSG RLP, TDDDG § 25, Q-23
 use_cases: [UC-01, UC-08]
 depends_on: [REQ-PRIV-003, REQ-LEGAL-010]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-002, AT-LEGAL-002-2, AT-LEGAL-002-3, CTRL-DOC-LEGAL-TEXTE]
@@ -79,3 +79,4 @@ Szenario: Jede Speicherung ist erklärt
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-08, RV-R-01, RV-R-02, RV-R-04, RV-R-06): Hinweis bei neuer Fassung (Kenntnisnahme statt Zustimmung); Inhalte der Erklärung an Ist-Stand angeglichen (Logs, Pseudonymisierung, Deals, automatisches Ausblenden, Beweissicherung); Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Nachweis AT-LEGAL-002-3 vergeben; Rechtstexte Datenschutz, Nutzungsbedingungen und Community-Regeln wegen inhaltlicher Änderung auf Version 2026-10-25 |
+| 1.3 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-002, AT-LEGAL-002-2, AT-LEGAL-002-3, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |

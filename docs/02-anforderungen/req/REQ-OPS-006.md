@@ -3,7 +3,7 @@ id: REQ-OPS-006
 title: Wartungsmodus und Ankündigungen
 type: operational
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,7 +13,7 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 11, Q-27
 use_cases: [UC-44]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-OPS-006, AT-OPS-006-2]
@@ -54,3 +54,4 @@ Szenario: Ankündigung
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-14): Ausnahmen vollständig inkl. Administratoren, beide Schaltwege; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-OPS-006, AT-OPS-006-2 bestanden bzw. ausgeführt); Status → verified |

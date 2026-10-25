@@ -3,7 +3,7 @@ id: REQ-LEGAL-007
 title: Widerspruch gegen Moderationsentscheidungen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,7 +15,7 @@ epic: EPIC-13
 source: DSA Art. 20, Q-22
 use_cases: [UC-35, UC-36]
 depends_on: [REQ-LEGAL-006]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4]
@@ -91,3 +91,4 @@ I: braucht REQ-LEGAL-006 (Mitteilung als Einstieg) · N: Fristen und Darstellung
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-C-01, RV-C-03, RV-C-04, RV-C-09, RV-C-11, RV-R-09, RV-R-19): Vier-Augen vollständig, Ergebnis an beide Seiten, Begründung 20 Zeichen nach Trimmen, restore_impossible, Bearbeitungsziel mit Platzhalter, Token im Fragment; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4 bestanden bzw. ausgeführt); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-LEGAL-008
 title: Verdacht auf Straftaten kennzeichnen und eskalieren
 type: business-rule
 class: functional
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,7 +14,7 @@ epic: EPIC-13
 source: DSA Art. 18, Q-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-008, CTRL-DOC-DSA]
@@ -55,3 +55,4 @@ Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopi
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-15, RV-R-20, RV-C-05): Beweissicherung als pseudonymisierte Kopie mit Kontext, keine Zurückstellung von Löschungen, preservedItems; Begründung der Einstufung Should; Status nach Umsetzung |
+| 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-008, CTRL-DOC-DSA bestanden bzw. ausgeführt); Status → verified |

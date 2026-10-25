@@ -3,7 +3,7 @@ id: REQ-OPS-004
 title: Reproduzierbarer, versionierter Image-Build
 type: operational
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,9 +13,9 @@ moscow_reason: [3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 10
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 verification: [CTRL-CI-IMAGE]
 ---
 
@@ -48,3 +48,4 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | 2.1 | 2026-10-23 | Review v0.2: R-32 (Registry optional, Abgabe als Quellcode bzw. Archiv; Q-19), R-15 |
 | 2.2 | 2026-10-23 | Umgesetzt (Schritt 6): GitHub-Actions-Workflow .github/workflows/ci.yml (Prüfungen, Diagramme, Compose mit E2E und Smoke); Status → implemented |
 | 2.3 | 2026-10-24 | Nachweis CTRL-CI-IMAGE im CI-Workflow umgesetzt (Tag aus package.json, Archiv als Artefakt) |
+| 2.4 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-CI-IMAGE bestanden bzw. ausgeführt); Status → verified |
