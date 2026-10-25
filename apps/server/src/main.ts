@@ -9,12 +9,14 @@ import { createPgRateLimit } from './platform/adapters/pg-rate-limit.js';
 import { createPgSearch } from './platform/adapters/pg-search.js';
 import { createSmtpMail } from './platform/adapters/smtp-mail.js';
 import { createDatabase, createPool } from './platform/db.js';
+import { createDeletionJournal, parseJournal } from './platform/deletion-journal.js';
 import { createHttpServer } from './platform/http/server.js';
 import { createLogger } from './platform/logger.js';
 import { createMetrics } from './platform/metrics.js';
 import { strictLegalProblems } from './platform/legal.js';
 import { migrate } from './platform/migrate.js';
 import { createOps } from './platform/ops.js';
+import { createPseudonymizer, ensureSecret } from './platform/pseudonym.js';
 import { createSettings } from './platform/settings.js';
 import type { JobQueue } from './platform/ports/index.js';
 import { adminRoutes } from './modules/admin.js';
@@ -30,6 +32,20 @@ import { createTrustModule } from './modules/trust/index.js';
 import { seedBaseData, seedDemoData } from './seed/seed.js';
 
 /** Composition Root: verdrahtet Adapter mit Ports und Modulen. Startmodi all | api | worker (ADR-0001). */
+/**
+ * Befehle neben dem Serverstart:
+ *   node dist/main.js replay-deletions --since <ISO>   Löschjournal nach einer Wiederherstellung erneut anwenden (ADR-0018).
+ *     Liest zusätzliche Journal-Einträge (NDJSON) von stdin, z. B. die Kopie neben den Sicherungen.
+ */
+const command = process.argv[2] === 'replay-deletions' ? 'replay-deletions' : 'serve';
+
+async function readStdin(): Promise<string> {
+  if (process.stdin.isTTY) return '';
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
+  return Buffer.concat(chunks).toString('utf8');
+}
+
 async function main() {
   const config = loadConfig();
   const logger = createLogger(config.logLevel);
@@ -47,10 +63,16 @@ async function main() {
   await migrate(pool, resolve(APP_ROOT, 'migrations'), logger);
 
   let jobs: JobQueue | undefined;
-  const database = createDatabase(pool, () => jobs!);
+  const database = createDatabase(pool, () => jobs!, (error) => logger.error({ err: error }, 'Nachlauf nach COMMIT fehlgeschlagen'));
   jobs = await createPgBossQueue(config.databaseUrl, logger);
 
   await mkdir(config.uploadsDir, { recursive: true });
+  // Kein öffentlich bekannter Standardwert für das Geheimnis der Abmeldelinks (RV-C-02)
+  if (!config.unsubscribeSecret) config.unsubscribeSecret = await ensureSecret(database.db, 'secret.unsubscribe');
+  const journal = createDeletionJournal(config.journalDir, {
+    recording: command === 'serve',
+    onError: (error) => logger.error({ err: error }, 'Löschjournal konnte nicht geschrieben werden'),
+  });
   const mail = createSmtpMail(config.smtp);
   const settings = createSettings(database.db);
   const ops = createOps({
@@ -77,6 +99,8 @@ async function main() {
     rateLimit: createPgRateLimit(database.db),
     settings,
     ops,
+    pseudonym: createPseudonymizer(database.db),
+    journal,
     modules,
   };
 
@@ -96,6 +120,20 @@ async function main() {
     messaging: messaging.api,
     trust: trust.api,
   } satisfies Modules);
+
+  if (command === 'replay-deletions') {
+    // Nach einer Wiederherstellung: Löschungen seit dem Sicherungszeitpunkt erneut ausführen (idempotent)
+    for (const module of [notifications, listings, messaging, privacy]) await module.registerJobs?.(false);
+    const sinceArg = process.argv[process.argv.indexOf('--since') + 1];
+    const since = new Date(sinceArg ?? '');
+    if (Number.isNaN(since.getTime())) throw new Error('replay-deletions: --since <ISO-Zeitpunkt> fehlt');
+    const merged = await journal.merge(parseJournal(await readStdin()));
+    const replayed = await privacy.api.replayDeletions(merged, since);
+    logger.info({ since: since.toISOString(), journal: merged.length, replayed }, 'Löschjournal angewendet');
+    await jobs.stop();
+    await pool.end();
+    process.exit(0);
+  }
 
   const withWorkers = config.mode !== 'api';
   for (const module of [notifications, listings, messaging, privacy]) await module.registerJobs?.(withWorkers);

@@ -31,6 +31,11 @@ export const Me = Type.Object({
   termsAcceptedVersion: Type.Union([Type.String(), Type.Null()]),
   /** true, wenn eine neuere Fassung gilt: schreibende Aktionen erst nach erneuter Zustimmung (403 terms_required). */
   termsRequired: Type.Boolean(),
+  /**
+   * Neue Fassung der Datenschutzerklärung, die das Mitglied noch nicht zur Kenntnis genommen hat (nur Information,
+   * keine Einwilligung; REQ-LEGAL-002, RV-R-08); `null`, wenn die aktuelle Fassung bekannt ist.
+   */
+  privacyNoticeVersion: Type.Union([Type.String(), Type.Null()]),
   createdAt: Timestamp,
   /** Gesetzt, wenn eine Kontolöschung beim Login abgebrochen wurde (Karenzzeit). */
   deletionCancelled: Type.Optional(Type.Boolean()),
@@ -54,6 +59,8 @@ export const RegisterBody = Type.Object({
   displayName: Type.String({ minLength: 2, maxLength: 40 }),
   acceptTerms: Type.Literal(true),
   termsVersion: Type.String(),
+  /** Gewählte Sprache: Bestätigungsmail und Konto in dieser Sprache (ADR-0016). */
+  locale: Type.Optional(Locale),
 });
 export type RegisterBody = Static<typeof RegisterBody>;
 
@@ -86,3 +93,7 @@ export type DeleteAccountBody = Static<typeof DeleteAccountBody>;
 /** Erneute Zustimmung zu einer neuen Fassung der Nutzungsbedingungen (REQ-LEGAL-003). */
 export const AcceptTermsBody = Type.Object({ version: Type.String({ minLength: 1, maxLength: 20 }) });
 export type AcceptTermsBody = Static<typeof AcceptTermsBody>;
+
+/** Kenntnisnahme einer neuen Datenschutzerklärung (RV-R-08). */
+export const PrivacyAckBody = Type.Object({ version: Type.String({ minLength: 1, maxLength: 20 }) });
+export type PrivacyAckBody = Static<typeof PrivacyAckBody>;

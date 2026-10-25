@@ -83,7 +83,7 @@ test('[AT-LEGAL-003] Nutzungsbedingungen und Community-Regeln ohne Anmeldung, Ve
   await expectHeadings(page, ['Verbotene Artikel und Inhalte', 'Fair kommunizieren', 'Sicher übergeben']);
 });
 
-test('[AT-LEGAL-003] Mitglied mit alter Zustimmung sieht den Dialog zu neuen Nutzungsbedingungen', async ({ browser }) => {
+test('[AT-LEGAL-003-2] Mitglied mit alter Zustimmung sieht den Dialog zu neuen Nutzungsbedingungen', async ({ browser }) => {
   // Tim hat im Seed einer älteren Fassung zugestimmt. Nicht zustimmen: der Smoke-Test prüft danach AT-LEGAL-003-2.
   const context = await browser.newContext({ locale: 'de-DE' });
   const page = await context.newPage();
@@ -94,6 +94,26 @@ test('[AT-LEGAL-003] Mitglied mit alter Zustimmung sieht den Dialog zu neuen Nut
   await expect(dialog.getByRole('button', { name: 'Zustimmen' })).toBeVisible();
   await activate(page, dialog.getByRole('button', { name: 'Später' }));
   await expect(dialog).toBeHidden();
+  await context.close();
+});
+
+// RV-R-08: neue Fassung der Datenschutzerklärung → Hinweis (keine Einwilligung); „zur Kenntnis genommen“ speichert die Version
+test('Neue Fassung der Datenschutzerklärung: Hinweis mit Link, Kenntnisnahme per Tastatur wird im Konto gespeichert', async ({ browser }) => {
+  const context = await browser.newContext({ locale: 'de-DE' });
+  const page = await context.newPage();
+  await keyboardLogin(page, DEMO.tim);
+  // Der Dialog zu den Nutzungsbedingungen liegt darüber; erst schließen
+  const terms = page.getByRole('dialog', { name: 'Neue Nutzungsbedingungen' });
+  if (await terms.isVisible()) await activate(page, terms.getByRole('button', { name: 'Später' }));
+  const banner = page.getByRole('region', { name: 'Neue Fassung der Datenschutzerklärung' });
+  await expect(banner).toBeVisible();
+  await expect(banner.getByRole('link', { name: 'Datenschutzerklärung lesen' })).toHaveAttribute('href', '/datenschutz');
+  await activate(page, banner.getByRole('button', { name: 'Zur Kenntnis genommen' }));
+  await expect(banner).toBeHidden();
+  const me = await (await page.request.get('/api/v1/me')).json();
+  expect(me.privacyNoticeVersion).toBeNull();
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Neue Fassung der Datenschutzerklärung' })).toHaveCount(0);
   await context.close();
 });
 

@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Me } from '@campusmarkt/contracts';
-import { meQuery, useAcceptTerms, useMe, useMeta } from '../api/auth';
+import { meQuery, useAcceptTerms, useAcknowledgePrivacy, useMe, useMeta } from '../api/auth';
 import { errorMessage, isMaintenance, onApiError } from '../api/client';
 import { useSystemStatus } from '../api/ops';
 import { formatDateTime } from '../lib/format';
@@ -73,6 +73,35 @@ export function AnnouncementBanner() {
           {t('notice.hide')}
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Hinweis auf eine neue Fassung der Datenschutzerklärung (RV-R-08): nur Information, „gelesen“ wird im Konto gespeichert. */
+export function PrivacyNoticeBanner() {
+  const { data: me } = useMe();
+  const ack = useAcknowledgePrivacy();
+  const version = me?.privacyNoticeVersion;
+  if (!version) return null;
+  return (
+    <div role="region" aria-label={t('privacyNotice.title')} className="border-b border-sky-300 bg-sky-50 print:hidden">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-2 text-sm text-sky-950">
+        <p>
+          <strong>{t('privacyNotice.title')}: </strong>
+          {t('privacyNotice.text', { version })}{' '}
+          <Link to="/datenschutz" className="font-medium underline">
+            {t('privacyNotice.link')}
+          </Link>
+        </p>
+        <Button variant="secondary" busy={ack.isPending} onClick={() => ack.mutate(version)}>
+          {t('privacyNotice.ack')}
+        </Button>
+      </div>
+      {ack.isError && (
+        <div className="mx-auto max-w-6xl px-4 pb-2">
+          <FormError error={errorMessage(ack.error)} />
+        </div>
+      )}
     </div>
   );
 }

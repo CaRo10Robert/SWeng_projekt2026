@@ -13,6 +13,7 @@ import {
   ModerationNotice,
   TokenAppealBody,
   TokenAppealInfo,
+  TokenInfoBody,
 } from '@campusmarkt/contracts';
 import { requireAuth, requireRole } from '../../platform/http/auth.js';
 import type { Module, ModuleDeps } from '../shared.js';
@@ -84,11 +85,11 @@ export function createTrustModule(deps: ModuleDeps): Module<TrustApi> {
       async (req, reply) => reply.status(201).send(await service.appeal(requireAuth(req), req.params.id, req.body.reason)),
     );
 
-    const tokenQuery = Type.Object({ token: Type.String({ minLength: 10, maxLength: 200 }) });
-    app.get(
-      '/appeals/token',
-      { schema: { tags, security: [], querystring: tokenQuery, response: { 200: TokenAppealInfo } } },
-      async (req) => service.tokenAppealInfo(req.query.token),
+    // Token im Body, nicht in der URL: so steht es in keinem Zugriffsprotokoll (RV-C-07)
+    app.post(
+      '/appeals/token/info',
+      { schema: { tags, security: [], body: TokenInfoBody, response: { 200: TokenAppealInfo } } },
+      async (req) => service.tokenAppealInfo(req.body.token),
     );
 
     app.post(

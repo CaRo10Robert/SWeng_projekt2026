@@ -47,7 +47,6 @@ export function Dac7() {
                 <thead className="border-b border-slate-300">
                   <tr>
                     <th scope="col" className="p-2">{t('admin.col.name')}</th>
-                    <th scope="col" className="p-2">{t('admin.col.email')}</th>
                     <th scope="col" className="p-2 text-right">{t('dac7.sales')}</th>
                     <th scope="col" className="p-2 text-right">{t('dac7.amount')}</th>
                     <th scope="col" className="p-2">{t('dac7.quarters')}</th>
@@ -57,7 +56,6 @@ export function Dac7() {
                   {data.sellers.map((s) => (
                     <tr key={s.userId} className="border-b border-slate-200 align-top">
                       <td className="p-2">{s.displayName}</td>
-                      <td className="p-2 break-all">{s.email}</td>
                       <td className="p-2 text-right">{s.sales}</td>
                       <td className="p-2 text-right">{formatMoney(s.amountCents)}</td>
                       <td className="p-2">

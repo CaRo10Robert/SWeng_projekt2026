@@ -30,6 +30,8 @@ export function visibleAnnouncement(value: Announcement | null, now = new Date()
 export function createOps(options: OpsOptions) {
   const cacheMs = options.statusCacheMs ?? 15_000;
   let checks: { at: number; db: boolean; mail: boolean } | null = null;
+  // Laufende Prüfung teilen: viele gleichzeitige Abrufe erzeugen nur eine DB- und eine SMTP-Prüfung (RV-A-11)
+  let inFlight: Promise<{ at: number; db: boolean; mail: boolean }> | null = null;
 
   async function maintenance(): Promise<MaintenanceState> {
     if (options.maintenanceFromEnv) return { active: true, until: options.maintenanceUntilFromEnv, source: 'env' };
@@ -43,12 +45,19 @@ export function createOps(options: OpsOptions) {
 
   async function runChecks() {
     if (checks && Date.now() - checks.at < cacheMs) return checks;
-    const [db, mail] = await Promise.all([
-      options.checkDatabase().catch(() => false),
-      options.checkMail().catch(() => false),
-    ]);
-    checks = { at: Date.now(), db, mail };
-    return checks;
+    inFlight ??= (async () => {
+      try {
+        const [db, mail] = await Promise.all([
+          options.checkDatabase().catch(() => false),
+          options.checkMail().catch(() => false),
+        ]);
+        checks = { at: Date.now(), db, mail };
+        return checks;
+      } finally {
+        inFlight = null;
+      }
+    })();
+    return inFlight;
   }
 
   return {

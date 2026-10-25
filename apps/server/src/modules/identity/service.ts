@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { hash as argonHash, verify as argonVerify } from '@node-rs/argon2';
 import type { AdminUser, Locale, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
@@ -33,6 +32,7 @@ interface UserRow {
   locale: Locale;
   created_at: string;
   deletion_requested_at: string | null;
+  privacy_ack_version: string | null;
 }
 
 export interface Contact {
@@ -43,7 +43,7 @@ export interface Contact {
   locale: Locale;
 }
 
-const toMe = (u: UserRow, terms: { accepted: string | null; current: string }): Me => ({
+const toMe = (u: UserRow, terms: { accepted: string | null; current: string }, privacyVersion: string): Me => ({
   id: u.id,
   email: u.email,
   displayName: u.display_name,
@@ -55,6 +55,7 @@ const toMe = (u: UserRow, terms: { accepted: string | null; current: string }): 
   locale: u.locale,
   termsAcceptedVersion: terms.accepted,
   termsRequired: terms.accepted !== terms.current,
+  privacyNoticeVersion: u.privacy_ack_version === privacyVersion ? null : privacyVersion,
   createdAt: u.created_at,
 });
 
@@ -70,13 +71,14 @@ export function createIdentityService(deps: ModuleDeps) {
   // Für gleiche Antwortzeiten, wenn ein Konto nicht existiert (REQ-AUTH-004)
   const dummyHash = argonHash('timing-equalizer-not-a-password', ARGON);
 
-  const ipKey = (ip: string) => createHash('sha256').update(config.ipHashSalt + ip).digest('hex').slice(0, 32);
+  // ADR-0014: Rate-Limit-Schlüssel ohne Klartext-IP und ohne Klartext-Adresse (HMAC mit rotiertem Schlüssel)
+  const pseudo = (value: string) => deps.pseudonym.pseudonymize(value);
   const link = (path: string, token: string) => `${config.publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const notify = deps.modules;
 
   async function meOf(executor: Db, user: UserRow): Promise<Me> {
     const terms = await executor.one<{ version: string }>(LATEST_TERMS(user.id));
-    return toMe(user, { accepted: terms?.version ?? null, current: config.termsVersion });
+    return toMe(user, { accepted: terms?.version ?? null, current: config.termsVersion }, config.privacyVersion);
   }
 
   /** Passwortverfahren als interner Adapter des IdentityProviderPort (ADR-0013 Nr. 2). */
@@ -145,9 +147,9 @@ export function createIdentityService(deps: ModuleDeps) {
   return {
     async register(body: RegisterBody, ip: string): Promise<void> {
       // REQ-SEC-005 / Q-18: großzügig je IP (Campus-NAT), streng je Adresse
-      await limit(`register-ip:${ipKey(ip)}`, 30, 3600);
+      await limit(`register-ip:${await pseudo(ip)}`, 30, 3600);
       const normalized = normalizeEmail(body.email);
-      if (normalized) await limit(`register-addr:${normalized.canonical}`, 3, 3600);
+      if (normalized) await limit(`register-addr:${await pseudo(normalized.canonical)}`, 3, 3600);
       const check = checkRegistrationEmail(body.email, await domainRules());
       if (!check.ok) {
         throw unprocessable(
@@ -193,13 +195,15 @@ export function createIdentityService(deps: ModuleDeps) {
         }
 
         const user = await tx.db.one<{ id: string }>(sql`
-          INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type)
-          VALUES (${check.institutionId}, ${email}, ${canonical}, ${passwordHash}, ${body.displayName.trim()}, ${check.userType})
+          INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type,
+                                       locale, privacy_ack_version)
+          VALUES (${check.institutionId}, ${email}, ${canonical}, ${passwordHash}, ${body.displayName.trim()}, ${check.userType},
+                  ${body.locale ?? 'de'}, ${config.privacyVersion})
           RETURNING id`);
         await tx.db.exec(sql`
           INSERT INTO identity.consent (user_id, kind, version) VALUES (${user!.id}, 'terms_privacy', ${body.termsVersion})`);
         const token = await issueToken(tx, user!.id, 'verify', VERIFY_TTL_HOURS);
-        await notify.notifications.email(tx, { address: email }, 'verify', {
+        await notify.notifications.email(tx, { address: email, locale: body.locale ?? 'de' }, 'verify', {
           name: body.displayName.trim(),
           link: link('/verify', token),
         });
@@ -237,7 +241,7 @@ export function createIdentityService(deps: ModuleDeps) {
 
     async login(rawEmail: string, password: string, ip: string): Promise<{ me: Me; sessionToken: string }> {
       const email = normalizeEmail(rawEmail);
-      const failKey = `login-fail:${email?.canonical ?? rawEmail.toLowerCase()}:${ipKey(ip)}`;
+      const failKey = `login-fail:${await pseudo(email?.canonical ?? rawEmail.toLowerCase())}:${await pseudo(ip)}`;
       // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP. Erst atomar zählen, dann prüfen, damit parallele
       // Versuche das Limit nicht gemeinsam unterlaufen; eine erfolgreiche Anmeldung setzt den Zähler zurück.
       const attempt = await rateLimit.hit(failKey, 5, 900);
@@ -266,6 +270,7 @@ export function createIdentityService(deps: ModuleDeps) {
           await tx.db.exec(sql`
             UPDATE identity."user" SET status = 'active', deletion_requested_at = NULL, updated_at = now()
             WHERE id = ${user.id}`);
+          deps.journal.record(tx, 'account_deletion_cancelled', user.id);
           deletionCancelled = true;
         }
         const sessionToken = await createSession(tx, user.id);
@@ -343,6 +348,17 @@ export function createIdentityService(deps: ModuleDeps) {
         await db.exec(sql`
           INSERT INTO identity.consent (user_id, kind, version) VALUES (${userId}, 'terms_privacy', ${version})`);
       }
+      return meOf(db, user);
+    },
+
+    /** RV-R-08: Kenntnisnahme der aktuellen Datenschutzerklärung (keine Einwilligung). */
+    async acknowledgePrivacy(userId: string, version: string): Promise<Me> {
+      if (version !== config.privacyVersion) {
+        throw conflict('privacy_outdated', 'Diese Fassung ist nicht mehr aktuell. Bitte lade die Seite neu.');
+      }
+      const user = await db.one<UserRow>(sql`
+        UPDATE identity."user" SET privacy_ack_version = ${version} WHERE id = ${userId} RETURNING *`);
+      if (!user) throw notFound();
       return meOf(db, user);
     },
 
@@ -497,6 +513,7 @@ export function createIdentityService(deps: ModuleDeps) {
           UPDATE identity."user" SET status = 'pending_deletion', deletion_requested_at = now(), updated_at = now()
           WHERE id = ${userId}`);
         await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
+        deps.journal.record(tx, 'account_deletion_requested', userId);
         const dateIso = new Date(Date.now() + DELETION_GRACE_DAYS * 86_400_000).toISOString();
         await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_scheduled', {
           name: user.display_name,
@@ -516,7 +533,32 @@ export function createIdentityService(deps: ModuleDeps) {
     async deleteUser(tx: Tx, userId: string): Promise<void> {
       // Sessions, Tokens und Einwilligungen werden per ON DELETE CASCADE entfernt
       await tx.db.exec(sql`DELETE FROM identity."user" WHERE id = ${userId}`);
+      deps.journal.record(tx, 'account_deleted', userId);
     },
+
+    // ------------------------------------------------------------ Löschjournal nach Wiederherstellung (ADR-0018)
+    /** Löschantrag erneut setzen, mit dem ursprünglichen Zeitpunkt (Karenzzeit läuft weiter). Idempotent. */
+    async replayDeletionRequest(tx: Tx, userId: string, at: string): Promise<boolean> {
+      const changed = await tx.db.exec(sql`
+        UPDATE identity."user" SET status = 'pending_deletion', deletion_requested_at = ${at}, updated_at = now()
+        WHERE id = ${userId} AND status IN ('active', 'suspended')`);
+      if (changed) await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
+      return changed > 0;
+    },
+
+    async replayDeletionCancel(tx: Tx, userId: string): Promise<boolean> {
+      return (await tx.db.exec(sql`
+        UPDATE identity."user" SET status = 'active', deletion_requested_at = NULL, updated_at = now()
+        WHERE id = ${userId} AND status = 'pending_deletion'`)) > 0;
+    },
+
+    async deletionCandidate(userId: string): Promise<{ id: string; email: string; displayName: string; locale: Locale } | null> {
+      return (
+        (await db.one<{ id: string; email: string; displayName: string; locale: Locale }>(sql`
+          SELECT id, email, display_name AS "displayName", locale FROM identity."user" WHERE id = ${userId}`)) ?? null
+      );
+    },
+
 
     async exportData(userId: string) {
       const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
@@ -536,15 +578,17 @@ export function createIdentityService(deps: ModuleDeps) {
       role: Role;
       studyProgram?: string;
       termsVersion?: string;
+      privacyAckVersion?: string;
     }): Promise<string> {
       const check = checkRegistrationEmail(input.email, await domainRules());
       if (!check.ok) throw new Error(`Seed-Adresse ${input.email} nicht zugelassen`);
       const passwordHash = await argonHash(input.password, ARGON);
       const row = await tx.db.one<{ id: string }>(sql`
         INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type,
-                                     role, status, verified_at, study_program)
+                                     role, status, verified_at, study_program, privacy_ack_version)
         VALUES (${check.institutionId}, ${check.email.email}, ${check.email.canonical}, ${passwordHash},
-                ${input.displayName}, ${check.userType}, ${input.role}, 'active', now(), ${input.studyProgram ?? null})
+                ${input.displayName}, ${check.userType}, ${input.role}, 'active', now(), ${input.studyProgram ?? null},
+                ${input.privacyAckVersion ?? config.privacyVersion})
         RETURNING id`);
       await tx.db.exec(sql`
         INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${input.termsVersion ?? config.termsVersion})`);

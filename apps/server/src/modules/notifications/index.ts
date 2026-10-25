@@ -27,17 +27,38 @@ const SEND_EMAIL = 'send-email';
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-/** Kleine HTML-Seite für die Abmeldung, ohne Skripte und externe Ressourcen. */
-const page = (title: string, body: string) => `<!doctype html><html lang="de"><head><meta charset="utf-8">
+/** Kleine HTML-Seite für die Abmeldung, ohne Skripte und externe Ressourcen; in der Sprache des Kontos (ADR-0016). */
+const page = (lang: Locale, title: string, body: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
 <title>${escapeHtml(title)} – CampusMarkt HWG LU</title>
 <style>body{font-family:system-ui,sans-serif;color:#1f2937;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5}
 h1{color:#0b4884}button{background:#0b4884;color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:1rem}
 button:focus-visible,a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}a{color:#0b4884}</style></head>
 <body><main><h1>${escapeHtml(title)}</h1>${body}</main>
-<p><a href="/">Zur Startseite</a> · <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a></p></body></html>`;
+<p><a href="/">${lang === 'en' ? 'Home' : 'Zur Startseite'}</a> · <a href="/impressum">Impressum</a> · <a href="/datenschutz">${lang === 'en' ? 'Privacy' : 'Datenschutz'}</a></p></body></html>`;
 
-const CATEGORY_LABEL = { newMessage: 'Benachrichtigungen über neue Nachrichten', listingExpiry: 'Erinnerungen an ablaufende Anzeigen' };
+const UNSUBSCRIBE_TEXTS = {
+  de: {
+    category: { newMessage: 'Benachrichtigungen über neue Nachrichten', listingExpiry: 'Erinnerungen an ablaufende Anzeigen' },
+    invalidTitle: 'Link ungültig / Invalid link',
+    invalid: '<p>Dieser Abmeldelink ist ungültig.</p><p lang="en">This unsubscribe link is invalid.</p>',
+    confirmTitle: 'Benachrichtigungen abbestellen',
+    confirm: (label: string) => `Möchtest du die ${label} abbestellen? Du kannst sie jederzeit im Profil wieder einschalten.`,
+    button: 'Abbestellen',
+    doneTitle: 'Abbestellt',
+    done: (label: string) => `Die ${label} sind abbestellt.`,
+  },
+  en: {
+    category: { newMessage: 'notifications about new messages', listingExpiry: 'reminders about expiring listings' },
+    invalidTitle: 'Link ungültig / Invalid link',
+    invalid: '<p>Dieser Abmeldelink ist ungültig.</p><p lang="en">This unsubscribe link is invalid.</p>',
+    confirmTitle: 'Unsubscribe from notifications',
+    confirm: (label: string) => `Do you want to unsubscribe from ${label}? You can switch them back on in your profile at any time.`,
+    button: 'Unsubscribe',
+    doneTitle: 'Unsubscribed',
+    done: (label: string) => `You have unsubscribed from ${label}.`,
+  },
+} as const;
 
 /** Modul notifications: Templates, Präferenzen, Versand über den MailPort. */
 export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Module<NotificationsApi> {
@@ -92,13 +113,16 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
     app.get('/notifications/unsubscribe', { schema: { tags, security: [], querystring: query } }, async (req, reply) => {
       const parsed = verifyUnsubscribeToken(config.unsubscribeSecret, req.query.token);
       reply.type('text/html; charset=utf-8').header('cache-control', 'no-store');
-      if (!parsed) return reply.status(404).send(page('Link ungültig', '<p>Dieser Abmeldelink ist ungültig.</p>'));
+      if (!parsed) return reply.status(404).send(page('de', UNSUBSCRIBE_TEXTS.de.invalidTitle, UNSUBSCRIBE_TEXTS.de.invalid));
+      const lang = (await deps.modules.identity.getContact(parsed.userId))?.locale ?? 'de';
+      const t = UNSUBSCRIBE_TEXTS[lang];
       return reply.send(
         page(
-          'Benachrichtigungen abbestellen',
-          `<p>Möchtest du die ${escapeHtml(CATEGORY_LABEL[parsed.category])} abbestellen? Du kannst sie jederzeit im Profil wieder einschalten.</p>
+          lang,
+          t.confirmTitle,
+          `<p>${escapeHtml(t.confirm(t.category[parsed.category]))}</p>
 <form method="post" action="/api/v1/notifications/unsubscribe?token=${encodeURIComponent(req.query.token)}">
-<input type="hidden" name="List-Unsubscribe" value="One-Click"><button type="submit">Abbestellen</button></form>`,
+<input type="hidden" name="List-Unsubscribe" value="One-Click"><button type="submit">${t.button}</button></form>`,
         ),
       );
     });
@@ -108,11 +132,11 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
       const parsed = verifyUnsubscribeToken(config.unsubscribeSecret, req.query.token);
       reply.type('text/html; charset=utf-8').header('cache-control', 'no-store');
       if (!parsed || !(await deps.modules.identity.disableNotification(parsed.userId, parsed.category))) {
-        return reply.status(404).send(page('Link ungültig', '<p>Dieser Abmeldelink ist ungültig.</p>'));
+        return reply.status(404).send(page('de', UNSUBSCRIBE_TEXTS.de.invalidTitle, UNSUBSCRIBE_TEXTS.de.invalid));
       }
-      return reply.send(
-        page('Abbestellt', `<p>Die ${escapeHtml(CATEGORY_LABEL[parsed.category])} sind abbestellt.</p>`),
-      );
+      const lang = (await deps.modules.identity.getContact(parsed.userId))?.locale ?? 'de';
+      const t = UNSUBSCRIBE_TEXTS[lang];
+      return reply.send(page(lang, t.doneTitle, `<p>${escapeHtml(t.done(t.category[parsed.category]))}</p>`));
     });
   };
 
@@ -129,12 +153,14 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
         deadLetter: true,
       });
       if (withWorkers) {
-        await deps.jobs.work<SendEmailJob>(SEND_EMAIL, async (job) => {
+        // Zähler vorbelegen, damit increase() auch die erste Fehlerserie erkennt (RV-A-18)
+        for (const outcome of ['ok', 'retry', 'dead']) deps.metrics.jobsProcessed.labels(SEND_EMAIL, outcome).inc(0);
+        await deps.jobs.work<SendEmailJob>(SEND_EMAIL, async (job, ctx) => {
           try {
             await handle(job);
             deps.metrics.jobsProcessed.labels(SEND_EMAIL, 'ok').inc();
           } catch (error) {
-            deps.metrics.jobsProcessed.labels(SEND_EMAIL, 'error').inc();
+            deps.metrics.jobsProcessed.labels(SEND_EMAIL, ctx.finalAttempt ? 'dead' : 'retry').inc();
             throw error;
           }
         }, { batchSize: 5 });

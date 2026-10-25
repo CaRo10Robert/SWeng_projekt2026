@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { Role } from '@campusmarkt/contracts';
@@ -78,7 +79,16 @@ const tokenAppealRoute = createRoute({
   path: '/widerspruch',
   validateSearch: (s: Record<string, unknown>): { token?: string } => ({ token: optionalString(s.token) }),
   component: function TokenAppealRoute() {
-    const { token } = tokenAppealRoute.useSearch();
+    const search = tokenAppealRoute.useSearch();
+    // Der Link trägt das Token im Fragment (#token=…): Es wird nie an den Server gesendet und steht in keinem
+    // Zugriffsprotokoll (RV-C-07). Ältere Links mit ?token= funktionieren weiter. Danach aus der Adresszeile entfernen.
+    const [token] = useState(() => {
+      const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token') ?? undefined;
+      return fromHash ?? search.token;
+    });
+    useEffect(() => {
+      if (window.location.hash || window.location.search) window.history.replaceState(null, '', '/widerspruch');
+    }, []);
     return <TokenAppealPage token={token} />;
   },
 });

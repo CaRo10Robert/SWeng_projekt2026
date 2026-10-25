@@ -15,6 +15,19 @@
     "minimumReleaseAge": null,
     "labels": ["sicherheit"]
   },
+  "customManagers": [
+    {
+      "description": "Werkzeug-Versionen im env-Block der CI (RV-A-16)",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/ci\\.yml$/"
+      ],
+      "matchStrings": [
+        "[A-Z_]+_IMAGE: (?<depName>[^:\\s]+):(?<currentValue>[^\\s#]+) # renovate: datasource=(?<datasource>\\S+)",
+        "RENOVATE_VERSION: (?<currentValue>\\S+) # renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)"
+      ]
+    }
+  ],
   "packageRules": [
     {
       "description": "Kleine Updates von Entwicklungswerkzeugen gebündelt",

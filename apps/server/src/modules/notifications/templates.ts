@@ -16,6 +16,7 @@ export type EmailTemplate =
   | 'listing_expiry'
   | 'moderation_decision'
   | 'moderation_report_result'
+  | 'provisional_hide'
   | 'appeal_result'
   | 'criminal_suspicion_alert'
   | 'deletion_scheduled'
@@ -39,6 +40,7 @@ export const templateCategory: Record<EmailTemplate, EmailCategory> = {
   listing_expiry: 'listingExpiry',
   moderation_decision: 'service',
   moderation_report_result: 'service',
+  provisional_hide: 'service',
   appeal_result: 'service',
   criminal_suspicion_alert: 'service',
   deletion_scheduled: 'security',
@@ -207,6 +209,7 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Maßnahme: ${p.measure} (${p.target}).`,
       `Begründung: ${p.facts}`,
       ...(p.rule ? [`Verletzte Regel: ${p.rule}`] : []),
+      ...(p.legalGround ? [`Rechtsgrundlage: ${p.legalGround}`] : []),
       `Grundlage: ${p.basis}. Geprüft und entschieden hat ein Mensch aus der Moderation.`,
       ...(p.appealLink
         ? [
@@ -222,11 +225,24 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
     paragraphs: [
       `Hallo ${p.name},`,
       `wir haben deine Meldung zu ${p.targetPlain ?? p.target} geprüft. Ergebnis: ${p.result}.`,
+      ...(p.facts ? [`Begründung: ${p.facts}`] : []),
+      ...(p.rule ? [`Regel: ${p.rule}`] : []),
       ...(p.appealLink
-        ? [`Wenn du mit dem Ergebnis nicht einverstanden bist, kannst du bis zum ${p.deadline} Widerspruch einlegen (DSA Art. 20).`]
-        : ['Danke, dass du hilfst, CampusMarkt sicher zu halten.']),
+        ? [`Wenn du mit dem Ergebnis nicht einverstanden bist, kannst du bis zum ${p.deadline} kostenlos Widerspruch einlegen (DSA Art. 20).`]
+        : []),
+      'Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen. Danke, dass du hilfst, CampusMarkt sicher zu halten.',
     ],
     action: p.appealLink ? { label: 'Mitteilung ansehen', url: p.appealLink } : undefined,
+  }),
+  // REQ-MOD-004, RV-R-04: automatisch vorläufig ausgeblendet, noch keine Entscheidung
+  provisional_hide: (p) => ({
+    subject: 'Deine Anzeige ist vorläufig ausgeblendet',
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `${p.target} wurde von mehreren Mitgliedern gemeldet und deshalb automatisch vorläufig ausgeblendet. Das ist noch keine Entscheidung.`,
+      'Eine Person aus der Moderation prüft den Fall. Über das Ergebnis informieren wir dich mit Begründung; dann kannst du auch Widerspruch einlegen.',
+    ],
+    action: p.link ? { label: 'Mitteilung ansehen', url: p.link } : undefined,
   }),
   appeal_result: (p) => ({
     subject: 'Ergebnis des Widerspruchs',
@@ -316,6 +332,7 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Measure: ${p.measure} (${p.target}).`,
       `Reasons: ${p.facts}`,
       ...(p.rule ? [`Rule violated: ${p.rule}`] : []),
+      ...(p.legalGround ? [`Legal ground: ${p.legalGround}`] : []),
       `Basis: ${p.basis}. The case was reviewed and decided by a human moderator.`,
       ...(p.appealLink
         ? [
@@ -330,11 +347,23 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
     paragraphs: [
       `Hi ${p.name},`,
       `we have reviewed your report about ${p.targetPlain ?? p.target}. Result: ${p.result}.`,
+      ...(p.facts ? [`Reasons: ${p.facts}`] : []),
+      ...(p.rule ? [`Rule: ${p.rule}`] : []),
       ...(p.appealLink
-        ? [`If you disagree with the result, you can appeal until ${p.deadline} (DSA Art. 20).`]
-        : ['Thank you for helping to keep CampusMarkt safe.']),
+        ? [`If you disagree with the result, you can appeal free of charge until ${p.deadline} (DSA Art. 20).`]
+        : []),
+      'You can also turn to an out-of-court dispute settlement body ([Placeholder: body under DSA Art. 21]) or the courts. Thank you for helping to keep CampusMarkt safe.',
     ],
     action: p.appealLink ? { label: 'View notice', url: p.appealLink } : undefined,
+  }),
+  provisional_hide: (p) => ({
+    subject: 'Your listing is temporarily hidden',
+    paragraphs: [
+      `Hi ${p.name},`,
+      `${p.target} was reported by several members and has therefore been hidden automatically for the time being. This is not a decision yet.`,
+      'A moderator is reviewing the case. We will inform you of the result with reasons; you can then also file an appeal.',
+    ],
+    action: p.link ? { label: 'View notice', url: p.link } : undefined,
   }),
   appeal_result: (p) => ({
     subject: 'Result of the appeal',

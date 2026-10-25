@@ -94,7 +94,30 @@ describe('[AT-LEGAL-003-2] Neue Nutzungsbedingungen sperren schreibende Aktionen
     ['POST', '/api/v1/auth/logout', false],
     ['POST', '/api/v1/moderation/decisions/abc/appeal', false],
     ['POST', '/api/v1/notifications/unsubscribe?token=x', false],
+    ['POST', '/api/v1/me/privacy-ack', false],
+    ['POST', '/api/v1/appeals/token/info', false],
+    // RV-C-06: Schutzrechte bleiben ohne aktuelle Zustimmung möglich
+    ['POST', '/api/v1/reports', false],
+    ['PUT', '/api/v1/users/abc/block', false],
+    ['DELETE', '/api/v1/users/abc/block', false],
   ])('%s %s → Zustimmung nötig=%s', (method, url, required) => {
     expect(requiresCurrentTerms({ method, url })).toBe(required);
+  });
+
+  it.each([
+    [{ notificationPrefs: { newMessage: false, listingExpiry: true } }, false],
+    [{ locale: 'en' }, false],
+    [{ locale: 'en', displayName: 'Neu' }, true],
+    [{}, true],
+  ])('PATCH /me %j → Zustimmung nötig=%s', (body, required) => {
+    expect(requiresCurrentTerms({ method: 'PATCH', url: '/api/v1/me', body })).toBe(required);
+  });
+
+  it.each([
+    ['withdraw', false],
+    ['decline', false],
+    ['grant', true],
+  ])('Kontaktfreigabe %s → Zustimmung nötig=%s', (action, required) => {
+    expect(requiresCurrentTerms({ method: 'POST', url: '/api/v1/conversations/abc/contact', body: { action } })).toBe(required);
   });
 });

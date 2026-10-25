@@ -470,21 +470,60 @@ export function createMessagingService(deps: ModuleDeps) {
         UPDATE messaging.message SET original_body = body, original_kind = kind, removed_at = now(),
           body = '[Nachricht wurde von der Moderation entfernt]', kind = 'system'
         WHERE id = ${messageId} AND removed_at IS NULL`);
+      deps.journal.record(tx, 'message_removed', messageId);
     },
 
-    async restoreByModeration(tx: Tx, messageId: string): Promise<void> {
-      await tx.db.exec(sql`
+    /** Liefert false, wenn der Originaltext nicht mehr vorhanden ist (RV-C-03): Die Stattgabe meldet dann einen Konflikt. */
+    async restoreByModeration(tx: Tx, messageId: string): Promise<boolean> {
+      const restored = await tx.db.exec(sql`
         UPDATE messaging.message SET body = original_body, kind = original_kind,
           removed_at = NULL, original_body = NULL, original_kind = NULL
         WHERE id = ${messageId} AND removed_at IS NOT NULL AND original_body IS NOT NULL`);
+      if (restored) deps.journal.record(tx, 'message_restored', messageId);
+      return restored > 0;
     },
 
-    /** Gespeicherte Originaltexte nach Ende der Widerspruchsfrist leeren, außer bei Beweissicherung. */
-    async purgeRemovedOriginals(heldMessageIds: string[]): Promise<number> {
+    /** Originaltext einer entfernten Nachricht, nur für die Prüfung eines Widerspruchs (RV-C-10). */
+    async originalBody(messageId: string): Promise<string | null> {
+      const row = await db.one<{ text: string | null }>(sql`
+        SELECT COALESCE(original_body, CASE WHEN removed_at IS NULL THEN body END) AS text
+        FROM messaging.message WHERE id = ${messageId}`);
+      return row?.text ?? null;
+    },
+
+    /**
+     * Beweissicherung (REQ-LEGAL-008, RV-R-15): gemeldete Nachricht mit +-5 Nachrichten Kontext als Kopie mit
+     * Originaltexten; Absender nur als Rolle (gemeldete Person / Gegenüber), keine Kontaktdaten.
+     */
+    async evidenceSnapshot(messageId: string): Promise<Record<string, unknown> | null> {
+      const target = await db.one<MessageRow>(sql`SELECT * FROM messaging.message WHERE id = ${messageId}`);
+      if (!target) return null;
+      const rows = await db.query<MessageRow & { original_body: string | null }>(sql`
+        (SELECT * FROM messaging.message WHERE conversation_id = ${target.conversation_id}
+          AND (created_at, id) < (${target.created_at}::timestamptz, ${target.id}::uuid) ORDER BY created_at DESC, id DESC LIMIT 5)
+        UNION ALL (SELECT * FROM messaging.message WHERE id = ${target.id})
+        UNION ALL
+        (SELECT * FROM messaging.message WHERE conversation_id = ${target.conversation_id}
+          AND (created_at, id) > (${target.created_at}::timestamptz, ${target.id}::uuid) ORDER BY created_at ASC, id ASC LIMIT 5)`);
+      rows.sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+      return {
+        kind: 'message',
+        messageId,
+        messages: rows.map((m) => ({
+          reported: m.id === messageId,
+          sender: m.sender_id === target.sender_id ? 'gemeldete Person' : 'Gegenüber',
+          body: m.original_body ?? m.body,
+          createdAt: m.created_at,
+        })),
+      };
+    },
+
+    /** Gespeicherte Originaltexte nach Ende der Widerspruchsfrist leeren, außer bei Beweissicherung oder offenem Widerspruch. */
+    async purgeRemovedOriginals(protectedMessageIds: string[]): Promise<number> {
       return db.exec(sql`
         UPDATE messaging.message SET original_body = NULL
         WHERE original_body IS NOT NULL AND removed_at < now() - interval '6 months'
-          AND id <> ALL(${heldMessageIds}::uuid[])`);
+          AND id <> ALL(${protectedMessageIds}::uuid[])`);
     },
 
     /** DAC7 (REQ-LEGAL-009): abgeschlossene Deals mit Gegenleistung je Anbieter in einem Kalenderjahr. */

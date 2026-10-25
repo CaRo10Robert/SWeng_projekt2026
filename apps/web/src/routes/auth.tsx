@@ -12,7 +12,7 @@ import {
   useVerify,
 } from '../api/auth';
 import { Alert, Button, Card, Checkbox, Field, FormError, Loading } from '../components/ui';
-import { t, tx, type MessageKey } from '../i18n';
+import { currentLocale, t, tx, type MessageKey } from '../i18n';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const DEMO_PASSWORD = 'CampusMarkt-Demo-2026';
@@ -165,7 +165,7 @@ export function RegisterPage() {
       setClientError(t('auth.register.acceptRequired'));
       return;
     }
-    register.mutate({ email: email.trim(), password, displayName: displayName.trim(), acceptTerms: true, termsVersion: meta.termsVersion });
+    register.mutate({ email: email.trim(), password, displayName: displayName.trim(), acceptTerms: true, termsVersion: meta.termsVersion, locale: currentLocale() });
   };
 
   if (register.isSuccess) {

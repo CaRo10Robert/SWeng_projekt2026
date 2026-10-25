@@ -114,11 +114,13 @@ check('[AT-PRIV-008] robots.txt sperrt alles, X-Robots-Tag auf Start- und Rechts
 const securityTxt = await fetch(`${BASE}/.well-known/security.txt`);
 const securityText = await securityTxt.text();
 const securityExpires = new Date(/^Expires: (.+)$/m.exec(securityText)?.[1] ?? 0);
-check('[AT-SEC-012] security.txt nach RFC 9116: Contact, Expires in der Zukunft, Sprachen, Policy, Canonical',
+// Policy und Canonical (Web-URIs) nur bei HTTPS, RFC 9116 (RV-A-17)
+const httpsBase = BASE.startsWith('https://');
+check('[AT-SEC-012] security.txt nach RFC 9116: Contact, Expires in der Zukunft, Sprachen; Policy und Canonical nur über HTTPS',
   securityTxt.status === 200 && (securityTxt.headers.get('content-type') ?? '').startsWith('text/plain') &&
   /^Contact: mailto:/m.test(securityText) && securityExpires > new Date() &&
   securityExpires.getTime() - Date.now() <= 366 * 86_400_000 && /^Preferred-Languages: de, en$/m.test(securityText) &&
-  /^Policy: /m.test(securityText) && /^Canonical: /m.test(securityText), securityText);
+  /^Policy: /m.test(securityText) === httpsBase && /^Canonical: /m.test(securityText) === httpsBase, securityText);
 const statusRes = await anon.call('GET', '/status');
 const statusPage = await fetch(`${BASE}/status`);
 check('[AT-OPS-007] Statusseite und Status-API ohne Anmeldung, je Dienst mit Zeitpunkt, ohne interne Details',
@@ -221,10 +223,12 @@ check('[AT-SEC-007-2] Bildabruf ohne Sitzung → 401', (await anon.call('GET', `
 const tim = await login('tim@studmail.hwg-lu.de');
 const timMe = await tim.call('GET', '/me');
 const timWrite = await tim.call('PATCH', '/me', { studyProgram: 'BWL' });
+// Benachrichtigungen und Sprache bleiben ohne neue Zustimmung änderbar (RV-C-06)
+const timLocale = await tim.call('PATCH', '/me', { locale: 'de' });
 const timAccept = await tim.call('POST', '/me/terms', { version: meta.termsVersion });
 const timAfter = await tim.call('PATCH', '/me', { studyProgram: 'BWL (B.Sc.)' });
 check('[AT-LEGAL-003-2] Ältere Zustimmung: schreibend 403 terms_required, nach erneuter Zustimmung Version gespeichert',
-  timMe.data?.termsRequired === true && timWrite.status === 403 && timWrite.data?.code === 'terms_required' &&
+  timMe.data?.termsRequired === true && timWrite.status === 403 && timWrite.data?.code === 'terms_required' && timLocale.status === 200 &&
   timAccept.status === 200 && timAccept.data?.termsRequired === false && timAccept.data?.termsAcceptedVersion === meta.termsVersion &&
   timAfter.status === 200,
   timMe.data?.termsRequired === false ? 'Tim hat bereits zugestimmt (Stack wiederverwendet): docker compose down -v' : [timMe.data?.termsRequired, timWrite.status, timAccept.status, timAfter.status]);
@@ -399,8 +403,13 @@ const reportTitle = `Smoketest Meldeobjekt ${TS}`;
 const reported = await user.call('POST', '/listings', listingBody({ title: reportTitle }));
 const visibleBefore = (await searchIds(lea, reportTitle)).includes(reported.data?.id);
 for (const s of [lea, ben, mia]) await s.call('POST', '/reports', { targetType: 'listing', targetId: reported.data?.id, reason: 'other', details: 'Smoketest' });
-check('[AT-MOD-004] Drei Meldungen blenden die Anzeige aus der Suche aus',
-  reported.status === 201 && visibleBefore && !(await searchIds(lea, reportTitle)).includes(reported.data.id));
+const provisionalNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.kind === 'provisional_hide' && n.provisional?.targetTitle === reportTitle);
+const provisionalMail = (await waitForMails(email, 'vorläufig ausgeblendet')).find((m) => m.Text.includes(reportTitle));
+check('[AT-MOD-004] Drei Meldungen blenden die Anzeige aus der Suche aus; Betroffene erhält Mitteilung und Mail „vorläufig, automatisch“ (RV-R-04)',
+  reported.status === 201 && visibleBefore && !(await searchIds(lea, reportTitle)).includes(reported.data.id) &&
+  provisionalNotice?.decision === null && provisionalNotice.provisional.automated === true && !!provisionalMail &&
+  !/\b(Lea|Ben|Mia)\b/.test(provisionalMail.Text),
+  { provisionalNotice, mail: !!provisionalMail });
 
 // Rollen (REQ-MOD-007)
 const admin = await login('admin@hwg-lu.de');
@@ -417,7 +426,7 @@ const reportedCase = (await mod.call('GET', '/moderation/cases?status=open')).da
 const removeReported = await mod.call('POST', `/moderation/cases/${reportedCase?.id}/decision`, {
   decision: 'remove', reason: 'Die Anzeige verstößt nach Prüfung gegen die Community-Regeln.', ruleRef: 'community_prohibited_items',
 });
-const subjectNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.decision.targetTitle === reportTitle);
+const subjectNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.decision?.targetTitle === reportTitle);
 const decisionMails = await waitForMails(email, 'Entscheidung der Moderation', 2);
 const decisionMail = decisionMails.find((m) => m.Text.includes(reportTitle));
 const reporterIdentity = /\b(Lea|Ben|Mia)\b|(lea|ben|mia)@/;
@@ -428,14 +437,17 @@ check('[AT-LEGAL-006] Betroffene erhält Mitteilung und Mail mit Maßnahme, Tats
   ['Anzeige entfernt', 'Verletzte Regel', 'Meldung eines Mitglieds', 'Widerspruch', 'DSA Art. 21'].every((t) => decisionMail.Text.includes(t)) &&
   !reporterIdentity.test(decisionMail.Text) && !reporterIdentity.test(JSON.stringify(subjectNotice)),
   { status: removeReported.status, subjectNotice, mail: !!decisionMail });
-const leaNotice = (await lea.call('GET', '/me/notices')).data?.find((n) => n.decision.id === subjectNotice?.decision.id);
+const leaNotice = (await lea.call('GET', '/me/notices')).data?.find((n) => n.decision?.id === subjectNotice?.decision.id);
 const leaResult = await waitForMails('lea@studmail.hwg-lu.de', 'Ergebnis deiner Meldung');
-check('[AT-LEGAL-006-2] Meldende erhalten das Ergebnis; ohne Regel oder mit zu kurzer Begründung 422',
-  leaNotice?.recipientRole === 'reporter' && leaNotice.appeal.possible === false && leaResult.length >= 1 &&
+const leaResultMail = leaResult.find((m) => m.Text.includes('Begründung'));
+check('[AT-LEGAL-006-2] Meldende erhalten das Ergebnis mit Begründung und Rechtsbehelfen; ohne Regel oder mit zu kurzer Begründung 422',
+  leaNotice?.recipientRole === 'reporter' && leaNotice.appeal.possible === false && !!leaResultMail &&
+  ['Begründung', 'DSA Art. 21', 'Rechtsweg'].every((t) => leaResultMail.Text.includes(t)) &&
   withoutRule.status === 422 && withoutRule.data.code === 'rule_required' && tooShort.status === 422,
   { leaNotice, mails: leaResult.length, withoutRule: withoutRule.status, tooShort: tooShort.status });
 
 const appealReason = 'Das ist ein normales Lehrbuch ohne Prüfungslösungen.';
+const appealBlank = await user.call('POST', `/moderation/decisions/${subjectNotice?.decision.id}/appeal`, { reason: ' '.repeat(25) });
 const appealOne = await user.call('POST', `/moderation/decisions/${subjectNotice?.decision.id}/appeal`, { reason: appealReason });
 const appealTwo = await user.call('POST', `/moderation/decisions/${subjectNotice?.decision.id}/appeal`, { reason: appealReason });
 // Mias alte Sitzung endete mit dem Rollenwechsel (AT-MOD-007)
@@ -443,15 +455,16 @@ const foreignAppeal = await (await login('mia@studmail.hwg-lu.de')).call('POST',
 const queuedAppeal = (await mod.call('GET', '/moderation/appeals?status=open')).data?.find((a) => a.id === appealOne.data?.id);
 check('[AT-LEGAL-007] Widerspruch aus der Mitteilung erzeugt einen Fall „Widerspruch“; zweiter 409, Fremde 404',
   appealOne.status === 201 && appealOne.data.status === 'open' && appealTwo.status === 409 && appealTwo.data.code === 'appeal_exists' &&
-  foreignAppeal.status === 404 && queuedAppeal?.reason === appealReason && queuedAppeal.canDecide === false,
-  [appealOne.status, appealTwo.status, foreignAppeal.status, queuedAppeal?.canDecide]);
+  foreignAppeal.status === 404 && queuedAppeal?.reason === appealReason && queuedAppeal.canDecide === false &&
+  appealBlank.status === 422 && appealBlank.data.code === 'reason_too_short',
+  [appealOne.status, appealTwo.status, foreignAppeal.status, queuedAppeal?.canDecide, appealBlank.status]);
 const ownReview = await mod.call('POST', `/moderation/appeals/${appealOne.data?.id}/decision`, { outcome: 'reversed', reason: 'Ich prüfe meine eigene Entscheidung noch einmal.' });
 check('[AT-LEGAL-007-2] Der ursprüngliche Entscheider kann den Widerspruch nicht entscheiden (403)',
   ownReview.status === 403 && ownReview.data.code === 'four_eyes');
 const reversal = await admin.call('POST', `/moderation/appeals/${appealOne.data?.id}/decision`, { outcome: 'reversed', reason: 'Lehrbuch ohne Lösungen, kein Verstoß erkennbar.' });
 const restored = await user.call('GET', `/listings/${reported.data?.id}`);
-const userResult = (await user.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision.id === subjectNotice?.decision.id);
-const leaAppealResult = (await lea.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision.id === subjectNotice?.decision.id);
+const userResult = (await user.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision?.id === subjectNotice?.decision.id);
+const leaAppealResult = (await lea.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision?.id === subjectNotice?.decision.id);
 const appealAudit = (await admin.call('GET', '/admin/audit')).data;
 check('[AT-LEGAL-007-3] Stattgeben stellt die Anzeige wieder her; beide Seiten erhalten eine Mitteilung; Audit-Log',
   reversal.status === 204 && restored.data?.status === 'active' && userResult?.appeal.status === 'reversed' &&
@@ -463,13 +476,15 @@ const crimeTitle = `Smoketest Beweissicherung ${TS}`;
 const crimeListing = await user.call('POST', '/listings', listingBody({ title: crimeTitle }));
 await ben.call('POST', '/reports', { targetType: 'listing', targetId: crimeListing.data?.id, reason: 'fraud', details: 'Smoketest Straftat' });
 const crimeCase = (await mod.call('GET', '/moderation/cases?status=open')).data.find((c) => c.targetId === crimeListing.data?.id);
-const crimeBody = { decision: 'remove', reason: 'Betrugsversuch mit Vorkasse und gefälschten Belegen.', ruleRef: 'illegal_content', criminalSuspicion: 'suspected' };
+const crimeGround = '§ 263 StGB (Betrug): Vorkasse ohne Absicht zu liefern, gefälschte Zahlungsbelege.';
+const crimeBody = { decision: 'remove', reason: 'Betrugsversuch mit Vorkasse und gefälschten Belegen.', ruleRef: 'illegal_content', criminalSuspicion: 'suspected', legalGround: crimeGround };
+const crimeNoGround = await mod.call('POST', `/moderation/cases/${crimeCase?.id}/decision`, { ...crimeBody, legalGround: undefined, criminalSuspicionReason: 'Mehrere Mitglieder berichten von Vorkasse ohne Ware.' });
 const crimeNoReason = await mod.call('POST', `/moderation/cases/${crimeCase?.id}/decision`, crimeBody);
 const memberFlag = await lea.call('POST', `/moderation/cases/${crimeCase?.id}/decision`, { ...crimeBody, criminalSuspicionReason: 'Mehrere Mitglieder berichten von Vorkasse ohne Ware.' });
 const crimeDecision = await mod.call('POST', `/moderation/cases/${crimeCase?.id}/decision`, { ...crimeBody, criminalSuspicionReason: 'Mehrere Mitglieder berichten von Vorkasse ohne Ware.' });
 const crimeAlert = await waitForMails('admin@hwg-lu.de', 'Verdacht auf Straftat');
 const crimeSubjectMail = (await waitForMails(email, 'Entscheidung der Moderation', 3)).find((m) => m.Text.includes(crimeTitle));
-const crimeNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.decision.targetTitle === crimeTitle);
+const crimeNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.decision?.targetTitle === crimeTitle);
 const hold = (await admin.call('GET', '/admin/evidence-holds')).data?.find((h) => h.targetId === crimeListing.data?.id);
 const crimeAudit = (await admin.call('GET', '/admin/audit')).data;
 const holdRelease = await admin.call('POST', `/admin/evidence-holds/${hold?.id}/release`);
@@ -477,10 +492,20 @@ check('[AT-LEGAL-008] Kennzeichnung „Verdacht auf Straftat“: Audit-Log, Mail
   crimeNoReason.status === 422 && crimeNoReason.data.code === 'criminal_reason_required' && memberFlag.status === 403 &&
   crimeDecision.status === 204 && crimeAlert.length >= 1 && !!hold && hold.releasedAt === null && holdRelease.status === 204 &&
   crimeAudit.some((a) => a.action === 'moderation.criminal_suspicion' && a.targetId === crimeListing.data?.id) &&
-  !!crimeSubjectMail && !/Straftat/.test(crimeSubjectMail.Text) && !!crimeNotice && !/Straftat|criminal/i.test(JSON.stringify(crimeNotice)),
+  !!crimeSubjectMail && !/Straftat/.test(crimeSubjectMail.Text) && !!crimeNotice && !/Straftat|criminal/i.test(JSON.stringify(crimeNotice)) &&
+  hold.preservedItems >= 1,
   { noReason: crimeNoReason.status, member: memberFlag.status, decision: crimeDecision.status, alert: crimeAlert.length, hold, release: holdRelease.status });
+check('[AT-LEGAL-006] Rechtswidriger Inhalt nur mit Rechtsgrundlage (422 legal_ground_required); Rechtsgrundlage in Mitteilung und Mail (RV-R-03)',
+  crimeNoGround.status === 422 && crimeNoGround.data.code === 'legal_ground_required' &&
+  crimeNotice?.decision.legalGround === crimeGround && !!crimeSubjectMail && crimeSubjectMail.Text.includes('Rechtsgrundlage'),
+  { noGround: crimeNoGround.status, legalGround: crimeNotice?.decision.legalGround });
 
 // ------------------------------------------------------------------ DAC7 (REQ-LEGAL-009)
+// Ein meldepflichtiger Verkauf (≥ 2.000 €) mit einem Anzeigenamen, der wie eine Formel aussieht (CSV-Injektion, RV-C-19)
+await user.call('PATCH', '/me', { displayName: '=SUMME(1+1)' });
+const bigSale = await user.call('POST', '/listings', listingBody({ title: `Smoketest Verkauf ${TS}`, priceCents: 250_000 }));
+const saleStart = await ben.call('POST', '/conversations', { listingId: bigSale.data?.id, body: 'Ich nehme es.', clientMsgId: crypto.randomUUID() });
+const saleDone = await user.call('POST', `/conversations/${saleStart.data?.conversationId}/deal`, { action: 'complete' });
 const year = new Date().getFullYear();
 const dac7 = await admin.call('GET', `/admin/reports/dac7?year=${year}`);
 const dac7Csv = await admin.call('GET', `/admin/reports/dac7?year=${year}&format=csv`, undefined, { raw: true });
@@ -493,8 +518,12 @@ check('[AT-LEGAL-009-2] DAC7-Auswertung als JSON und CSV nur für Admins, Mitgli
   dac7.headers.get('cache-control') === 'no-store' &&
   dac7Csv.status === 200 && (dac7Csv.headers.get('content-type') ?? '').startsWith('text/csv') && dac7CsvText.includes('Konto-ID;') &&
   dac7Member.status === 403 && dac7Future.status === 422 &&
-  dac7Audit.filter((a) => a.action === 'report.dac7').length >= 2,
-  [dac7.status, dac7Csv.status, dac7Member.status, dac7Future.status]);
+  dac7Audit.filter((a) => a.action === 'report.dac7').length >= 2 &&
+  saleDone.status === 200 && dac7.data.sellers.some((s) => s.displayName === '=SUMME(1+1)' && s.amountCents >= 250_000) &&
+  !JSON.stringify(dac7.data).includes('@') && dac7CsvText.includes(email) && dac7CsvText.includes("'=SUMME(1+1)") &&
+  !/;=SUMME/.test(dac7CsvText),
+  [dac7.status, dac7Csv.status, dac7Member.status, dac7Future.status, saleDone.status, dac7.data?.sellers?.length]);
+await user.call('PATCH', '/me', { displayName: 'Testi' });
 
 // Demo-Werkzeug (REQ-DEMO-002): Erinnerung für die bald ablaufende Seed-Anzeige von Lea
 const due = await admin.call('POST', '/admin/demo/run-due-jobs');
@@ -504,6 +533,13 @@ const reminderHeaders = await headersOf(reminder.at(-1));
 const [verifyMail] = await waitForMails(email, 'bestätige');
 const verifyHeaders = await headersOf(verifyMail);
 const unsubscribeUrl = /<([^>]+)>/.exec(reminderHeaders['List-Unsubscribe']?.[0] ?? '')?.[1];
+const leaPrefsBefore = (await lea.call('GET', '/me')).data.notificationPrefs;
+const getOnly = unsubscribeUrl ? await fetch(unsubscribeUrl) : null;
+const leaPrefsAfterGet = (await lea.call('GET', '/me')).data.notificationPrefs;
+const leaId = (await lea.call('GET', '/me')).data.id;
+const forged = await fetch(`${API}/notifications/unsubscribe?token=${encodeURIComponent(`${leaId}.listingExpiry.gefälscht`)}`, {
+  method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click',
+});
 const oneClick = unsubscribeUrl
   ? await fetch(unsubscribeUrl, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' })
   : null;
@@ -512,6 +548,7 @@ await lea.call('PATCH', '/me', { notificationPrefs: { ...leaPrefs, listingExpiry
 check('[AT-OPS-010] Benachrichtigung mit List-Unsubscribe und One-Click (ohne CSRF-Header), Bestätigungsmail ohne',
   !!unsubscribeUrl && reminderHeaders['List-Unsubscribe-Post']?.[0] === 'List-Unsubscribe=One-Click' &&
   !verifyHeaders['List-Unsubscribe'] && oneClick?.status === 200 && leaPrefs.listingExpiry === false &&
+  getOnly?.status === 200 && leaPrefsBefore.listingExpiry === true && leaPrefsAfterGet.listingExpiry === true && forged.status === 404 &&
   reminder.at(-1)?.Text.includes('/impressum') && verifyMail?.Text.includes('/datenschutz'),
   { reminderHeaders, oneClick: oneClick?.status, leaPrefs });
 
@@ -571,19 +608,57 @@ check('[AT-SEC-011-2] Nach Sperre: Anlegen, Upload und Bearbeiten mit alter Sitz
   [ban.status, bannedCreate.status, bannedUpload.status, bannedEdit.status]);
 const banMail = (await waitForMails(email, 'Konto dauerhaft gesperrt')).at(-1);
 const appealToken = tokenOf(banMail);
-const tokenInfo = await anon.call('GET', `/appeals/token?token=${encodeURIComponent(appealToken)}`);
+const tokenInfo = await anon.call('POST', '/appeals/token/info', { token: appealToken });
+const tokenUnknown = await anon.call('POST', '/appeals/token/info', { token: 'unbekanntes-token-0000000000' });
 const tokenAppeal = await anon.call('POST', '/appeals/token', { token: appealToken, reason: 'Ich habe nicht gegen die Regeln verstoßen.' });
 const tokenAgain = await anon.call('POST', '/appeals/token', { token: appealToken, reason: 'Ich habe nicht gegen die Regeln verstoßen.' });
-check('[AT-LEGAL-007-4] Gesperrtes Konto widerspricht über den Link aus der Mail ohne Anmeldung; zweite Nutzung 410',
-  !!banMail && banMail.Text.includes('/widerspruch?token=') && tokenInfo.status === 200 && tokenInfo.data.decision.decision === 'ban' &&
-  tokenAppeal.status === 201 && tokenAgain.status === 410 && tokenAgain.data.code === 'token_used',
-  [!!banMail, tokenInfo.status, tokenAppeal.status, tokenAgain.status]);
+const tokenInfoAfter = await anon.call('POST', '/appeals/token/info', { token: appealToken });
+check('[AT-LEGAL-007-4] Gesperrtes Konto widerspricht über den Link aus der Mail ohne Anmeldung; Token nur im Fragment; unbekannt 404, zweite Nutzung 410',
+  !!banMail && banMail.Text.includes('/widerspruch#token=') && tokenInfo.status === 200 && tokenInfo.data.decision.decision === 'ban' &&
+  tokenUnknown.status === 404 && tokenAppeal.status === 201 && tokenAgain.status === 410 && tokenAgain.data.code === 'token_used' &&
+  tokenInfoAfter.status === 410,
+  [!!banMail, tokenInfo.status, tokenUnknown.status, tokenAppeal.status, tokenAgain.status, tokenInfoAfter.status]);
 const alias = email.replace('@', '+neu@');
 const aliasReg = await register(alias);
 const aliasMails = await waitForMails(alias, 'bestätige', 1, 30);
 check('[AT-AUTH-008] Gesperrte Adresse (auch mit +Alias): neutrale Antwort, kein neues Konto, keine Mail',
   aliasReg.status === 202 && aliasMails.length === 0,
   aliasReg.status === 429 ? 'Registrierungsgrenze je IP erreicht (Q-18): Stack mit „docker compose down -v“ neu starten oder eine Stunde warten' : aliasReg.status);
+
+// Stattgabe des Widerspruchs gegen die Sperre: Konto entsperrt, Anmeldung wieder möglich; Meldende informiert (RV-R-14)
+const banAppeal = (await admin.call('GET', '/moderation/appeals?status=open')).data?.find((a) => a.id === tokenAppeal.data?.id);
+const unban = await admin.call('POST', `/moderation/appeals/${tokenAppeal.data?.id}/decision`, {
+  outcome: 'reversed', reason: 'Die Sperre war nicht ausreichend begründet und wird aufgehoben.',
+});
+const loginAfterUnban = await anon.call('POST', '/auth/login', { email, password: 'ganz-neues-passwort-2026' });
+const leaUnbanNotice = (await lea.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision?.decision === 'ban');
+check('[AT-LEGAL-007-3] Stattgabe gegen eine Sperre: Konto entsperrt, Anmeldung wieder möglich, Meldende erhält das Ergebnis',
+  banAppeal?.canDecide === true && unban.status === 204 && loginAfterUnban.status === 200 && leaUnbanNotice?.appeal.status === 'reversed',
+  { canDecide: banAppeal?.canDecide, unban: unban.status, login: loginAfterUnban.status, leaUnbanNotice: !!leaUnbanNotice });
+
+// Vier-Augen-Prinzip vollständig (RV-C-01, RV-C-14): Meldende entscheiden nicht, Widersprechende nicht über sich selbst
+const adminListing = await admin.call('POST', '/listings', listingBody({ title: `Smoketest Vier-Augen ${TS}` }));
+await mod.call('POST', '/reports', { targetType: 'listing', targetId: adminListing.data?.id, reason: 'other', details: 'Smoketest Vier-Augen' });
+const fourCase = (await mod.call('GET', '/moderation/cases?status=open')).data?.find((c) => c.targetId === adminListing.data?.id);
+const reporterDecides = await mod.call('POST', `/moderation/cases/${fourCase?.id}/decision`, {
+  decision: 'remove', reason: 'Ich entscheide über meine eigene Meldung.', ruleRef: 'terms_member_duties',
+});
+await admin.call('POST', `/admin/users/${miaId}/role`, { role: 'moderator' });
+const miaMod = await login('mia@studmail.hwg-lu.de');
+const miaDecides = await miaMod.call('POST', `/moderation/cases/${fourCase?.id}/decision`, {
+  decision: 'remove', reason: 'Prüfung durch eine unbeteiligte Person: Verstoß.', ruleRef: 'terms_member_duties',
+});
+const adminNotice = (await admin.call('GET', '/me/notices')).data?.find((n) => n.decision?.targetTitle === `Smoketest Vier-Augen ${TS}`);
+const adminAppeal = await admin.call('POST', `/moderation/decisions/${adminNotice?.decision.id}/appeal`, { reason: 'Ich halte die Entfernung für unbegründet.' });
+const selfDecide = await admin.call('POST', `/moderation/appeals/${adminAppeal.data?.id}/decision`, { outcome: 'reversed', reason: 'Ich gebe meinem eigenen Widerspruch statt.' });
+const reporterAppealDecide = await mod.call('POST', `/moderation/appeals/${adminAppeal.data?.id}/decision`, { outcome: 'upheld', reason: 'Ich habe gemeldet und entscheide trotzdem.' });
+const adminQueue = (await admin.call('GET', '/moderation/appeals?status=open')).data?.find((a) => a.id === adminAppeal.data?.id);
+await admin.call('POST', `/admin/users/${miaId}/role`, { role: 'member' });
+check('[AT-LEGAL-007-2] Vier-Augen: Meldende entscheiden den Fall nicht (422), Widersprechende und Meldende nicht den Widerspruch (403)',
+  reporterDecides.status === 422 && reporterDecides.data.code === 'own_case' && miaDecides.status === 204 &&
+  adminAppeal.status === 201 && selfDecide.status === 403 && selfDecide.data.code === 'four_eyes' &&
+  reporterAppealDecide.status === 403 && adminQueue?.canDecide === false,
+  [reporterDecides.status, miaDecides.status, adminAppeal.status, selfDecide.status, reporterAppealDecide.status, adminQueue?.canDecide]);
 
 // ------------------------------------------------------------------ Betrieb
 const metrics = await fetch(`${BASE}/metrics`);

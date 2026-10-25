@@ -4,7 +4,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { createReadStream, createWriteStream, readdirSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -70,8 +70,8 @@ export function composeToFile(project, args, file) {
   });
 }
 
-/** Streamt eine Datei in stdin eines Compose-Befehls. */
-export function composeFromFile(project, args, file) {
+/** Streamt eine Datei (oder mit `inputIsText` einen Text) in stdin eines Compose-Befehls. */
+export function composeFromFile(project, args, file, { inputIsText = false } = {}) {
   return new Promise((resolvePromise, reject) => {
     const child = spawn('docker', composeArgs(project, args), { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'] });
     let stderr = '';
@@ -80,7 +80,8 @@ export function composeFromFile(project, args, file) {
     child.stderr.on('data', (d) => (stderr += d));
     child.on('error', reject);
     child.on('close', (code) => (code === 0 ? resolvePromise(stdout) : reject(new Error(`docker ${args.join(' ')} → Exit ${code}\n${stderr}`))));
-    createReadStream(file).pipe(child.stdin);
+    if (inputIsText) child.stdin.end(file);
+    else createReadStream(file).pipe(child.stdin);
   });
 }
 
@@ -135,15 +136,16 @@ const DAY = 86_400_000;
 
 /**
  * Aufbewahrung (docs/07-betrieb/backup-restore.md, ADR-0018): alle Sicherungen der letzten 7 Tage,
- * danach je Kalenderwoche (endet Sonntag) die neueste für 4 Wochen; ältere werden gelöscht (höchstens 30 Tage).
- * Die neueste Sicherung bleibt immer erhalten. Liefert die Namen der zu löschenden Verzeichnisse.
+ * danach je Kalenderwoche die neueste bis zum Alter von 28 Tagen; ältere werden gelöscht – auch die neueste, damit
+ * keine Sicherung länger als im Verzeichnis der Verarbeitungstätigkeiten angegeben aufbewahrt wird (RV-R-13). Fehlt
+ * dadurch eine aktuelle Sicherung, meldet der Alarm BackupMissing das. Liefert die Namen der zu löschenden Verzeichnisse.
  */
 export function selectForDeletion(names, now = new Date(), { dailyDays = 7, weeklyWeeks = 4 } = {}) {
   const backups = names
     .map((name) => ({ name, at: parseTimestamp(name) }))
     .filter((b) => b.at)
     .sort((a, b) => b.at - a.at);
-  const keep = new Set(backups.slice(0, 1).map((b) => b.name));
+  const keep = new Set();
   const weeks = new Set();
   for (const b of backups) {
     const age = now - b.at;
@@ -162,4 +164,30 @@ export function selectForDeletion(names, now = new Date(), { dailyDays = 7, week
     }
   }
   return backups.filter((b) => !keep.has(b.name)).map((b) => b.name);
+}
+
+/** Löschjournal (NDJSON) zweier Quellen vereinigen: gültige Zeilen ohne Duplikate, nach Zeitpunkt sortiert. */
+export function mergeJournalText(...texts) {
+  const lines = new Map();
+  for (const text of texts) {
+    for (const line of String(text ?? '').split('\n')) {
+      try {
+        const e = JSON.parse(line);
+        if (typeof e.at === 'string' && typeof e.kind === 'string' && typeof e.id === 'string') lines.set(`${e.at}|${e.kind}|${e.id}`, e);
+      } catch {
+        // leere oder abgeschnittene Zeile
+      }
+    }
+  }
+  const sorted = [...lines.values()].sort((a, b) => a.at.localeCompare(b.at));
+  return sorted.map((e) => JSON.stringify({ at: e.at, kind: e.kind, id: e.id })).join('\n') + (sorted.length ? '\n' : '');
+}
+
+/** Gültige Sicherungen (mit manifest.json) in einem Verzeichnis, neueste zuerst. */
+export function validBackups(outRoot) {
+  if (!existsSync(outRoot)) return [];
+  return readdirSync(outRoot)
+    .filter((name) => TIMESTAMP_RE.test(name) && existsSync(join(outRoot, name, 'manifest.json')))
+    .map((name) => ({ name, manifest: JSON.parse(readFileSync(join(outRoot, name, 'manifest.json'), 'utf8')) }))
+    .sort((a, b) => b.name.localeCompare(a.name));
 }

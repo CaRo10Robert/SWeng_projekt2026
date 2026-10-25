@@ -96,6 +96,16 @@ export function useLocale(): LocaleContextValue {
   return ctx;
 }
 
+/**
+ * In dieser Sitzung (seit dem Laden der Seite) ausdrücklich gewählte Sprache, nur im Speicher. Beim Anmelden wird nur sie
+ * ins Konto übernommen; eine früher auf dem Gerät gespeicherte Wahl überschreibt die Kontosprache nicht (RV-C-08).
+ */
+let sessionChoice: Locale | null = null;
+export const localeChosenThisSession = (): Locale | null => sessionChoice;
+export const clearSessionLocaleChoice = () => {
+  sessionChoice = null;
+};
+
 type ChooseListener = (locale: Locale) => void;
 const chooseListeners = new Set<ChooseListener>();
 /** Das Konto-Modul meldet sich hier an, um die Wahl im Profil zu speichern (PATCH /me). */
@@ -120,6 +130,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   const choose = useCallback(
     (next: Locale) => {
+      sessionChoice = next;
       try {
         window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
       } catch {

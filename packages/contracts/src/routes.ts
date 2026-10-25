@@ -28,6 +28,7 @@ export const ROUTES = {
   exportMe: 'GET /me/export → JSON-Datei (Content-Disposition attachment)',
   deleteMe: 'POST /me/delete DeleteAccountBody → 202 Accepted (14 Tage Karenz, Abbruch durch Login)',
   acceptTerms: 'POST /me/terms AcceptTermsBody → Me | 409 terms_outdated (Version ist nicht die aktuelle)',
+  acknowledgePrivacy: 'POST /me/privacy-ack PrivacyAckBody → Me | 409 privacy_outdated (Kenntnisnahme, keine Einwilligung)',
   unsubscribe: 'GET|POST /notifications/unsubscribe?token= → Abmeldung einer Kategorie (One-Click, RFC 8058, ohne CSRF-Header)',
 
   // listings
@@ -65,7 +66,7 @@ export const ROUTES = {
   decide: 'POST /moderation/cases/:id/decision DecisionBody → 204 | 422 rule_required | criminal_reason_required',
   notices: 'GET /me/notices → ModerationNotice[] (REQ-LEGAL-006)',
   appeal: 'POST /moderation/decisions/:id/appeal AppealBody → 201 AppealReceipt | 409 appeal_exists | appeal_expired | 404',
-  tokenAppealInfo: 'GET /appeals/token?token= → TokenAppealInfo | 410 token_used | token_expired | 404 (ohne Anmeldung)',
+  tokenAppealInfo: 'POST /appeals/token/info TokenInfoBody → TokenAppealInfo | 410 token_used | token_expired | 404 (ohne Anmeldung, Token nie in der URL)',
   tokenAppeal: 'POST /appeals/token TokenAppealBody → 201 AppealReceipt (ohne Anmeldung, Einmal-Link)',
   appeals: 'GET /moderation/appeals?status=open|decided → Appeal[] (Rolle moderator/admin)',
   decideAppeal: 'POST /moderation/appeals/:id/decision AppealDecisionBody → 204 | 403 four_eyes | 409 already_decided',

@@ -5,3 +5,7 @@
 .git
 .env
 docs
+# Sicherungen enthalten personenbezogene Daten und gehören nie in den Build-Kontext (RV-A-15)
+backups
+caddy-root.crt
+.env.*

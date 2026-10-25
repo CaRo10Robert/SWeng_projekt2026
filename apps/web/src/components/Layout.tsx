@@ -8,7 +8,7 @@ import { useDocumentTitle } from '../lib/title';
 import { ApiError, errorMessage, isMaintenance, NetworkError } from '../api/client';
 import { Footer } from './Footer';
 import { LanguageSwitch } from './LanguageSwitch';
-import { AnnouncementBanner, MaintenanceBanner, TermsDialog, useGlobalApiErrors } from './SiteNotices';
+import { AnnouncementBanner, MaintenanceBanner, PrivacyNoticeBanner, TermsDialog, useGlobalApiErrors } from './SiteNotices';
 import { Alert, Button, buttonClass, cx } from './ui';
 import { t, tx } from '../i18n';
 
@@ -189,6 +189,7 @@ export function Layout() {
     <div className="flex min-h-screen flex-col">
       <MaintenanceBanner />
       <AnnouncementBanner />
+      {me && <PrivacyNoticeBanner />}
       <Header />
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         <Outlet />

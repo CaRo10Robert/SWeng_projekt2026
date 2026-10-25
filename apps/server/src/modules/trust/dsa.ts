@@ -24,11 +24,14 @@ import {
   APPEAL_WINDOW_MONTHS,
   appealDeadline,
   appealRole,
+  canDecideCase,
   canReviewAppeal,
   checkAppeal,
   checkDecision,
   EVIDENCE_HOLD_MONTHS,
   hashAppealToken,
+  hasMinLength,
+  MIN_APPEAL_REASON_LENGTH,
   newAppealToken,
   type AppealRole,
 } from './domain.js';
@@ -46,7 +49,10 @@ const DECISION_MESSAGES = {
   reason_too_short: 'Bitte begründe die Entscheidung mit mindestens 20 Zeichen (Tatsachen und Umstände).',
   rule_required: 'Bitte wähle die verletzte Regel aus.',
   criminal_reason_required: 'Bitte begründe die Kennzeichnung „Verdacht auf Straftat“ mit mindestens 20 Zeichen.',
+  legal_ground_required: 'Bitte nenne bei rechtswidrigen Inhalten die verletzte Norm und erläutere sie (mindestens 20 Zeichen).',
 };
+
+const APPEAL_REASON_SHORT = `Bitte begründe mit mindestens ${MIN_APPEAL_REASON_LENGTH} Zeichen.`;
 
 interface DecisionRow {
   id: string;
@@ -55,6 +61,7 @@ interface DecisionRow {
   decision: ModerationDecisionType;
   reason: string;
   rule_ref: ModerationRule | null;
+  legal_ground: string | null;
   automated_detection: boolean;
   created_at: string;
   notified_at: string | null;
@@ -64,8 +71,8 @@ interface DecisionRow {
 }
 
 const DECISION_WITH_CASE = sql`
-  SELECT d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.automated_detection, d.created_at,
-         d.notified_at, c.target_type, c.target_id, c.subject_user_id
+  SELECT d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.legal_ground, d.automated_detection,
+         d.created_at, d.notified_at, c.target_type, c.target_id, c.subject_user_id
   FROM trust.decision d JOIN trust.moderation_case c ON c.id = d.case_id`;
 
 export interface DsaDeps {
@@ -90,6 +97,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
       targetTitle: title,
       facts: row.reason,
       ruleRef: row.rule_ref,
+      legalGround: row.legal_ground,
       automatedDetection: row.automated_detection,
       decidedAt: row.created_at,
     };
@@ -99,6 +107,29 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
     const rows = await executor.query<{ reporter_id: string }>(sql`
       SELECT DISTINCT reporter_id FROM trust.report WHERE case_id = ${caseId} AND reporter_id IS NOT NULL`);
     return rows.map((r) => r.reporter_id);
+  }
+
+  async function reportersByCase(caseIds: string[]): Promise<Map<string, string[]>> {
+    const map = new Map<string, string[]>();
+    if (caseIds.length === 0) return map;
+    const rows = await db.query<{ case_id: string; reporter_id: string }>(sql`
+      SELECT DISTINCT case_id, reporter_id FROM trust.report WHERE case_id = ANY(${caseIds}::uuid[]) AND reporter_id IS NOT NULL`);
+    for (const r of rows) map.set(r.case_id, [...(map.get(r.case_id) ?? []), r.reporter_id]);
+    return map;
+  }
+
+  /** Beweissicherung (REQ-LEGAL-008, RV-R-15): Kopie der gekennzeichneten Inhalte samt Kontext, unabhängig von Löschungen. */
+  async function preserveEvidence(tx: Tx, holdId: string, targetType: ReportTargetType, targetId: string) {
+    let content: Record<string, unknown> | null = null;
+    if (targetType === 'listing') content = await modules.listings.evidenceSnapshot(targetId);
+    else if (targetType === 'message') content = await modules.messaging.evidenceSnapshot(targetId);
+    else {
+      const user = (await modules.identity.getPublicUsers([targetId])).get(targetId);
+      content = user ? { kind: 'user', displayName: user.displayName, memberSince: user.memberSince } : null;
+    }
+    if (content) {
+      await tx.db.exec(sql`INSERT INTO trust.evidence_copy (hold_id, content) VALUES (${holdId}, ${JSON.stringify(content)}::jsonb)`);
+    }
   }
 
   async function addNotice(
@@ -114,6 +145,9 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
     tx: Tx,
     input: { decisionId: string; appellantId: string; role: AppealRole; reason: string },
   ): Promise<AppealReceipt> {
+    if (!hasMinLength(input.reason, MIN_APPEAL_REASON_LENGTH)) {
+      throw unprocessable('reason_too_short', APPEAL_REASON_SHORT, [{ path: 'reason', message: APPEAL_REASON_SHORT }]);
+    }
     try {
       const row = await tx.db.one<{ id: string; status: 'open'; created_at: string }>(sql`
         INSERT INTO trust.appeal (decision_id, appellant_id, appellant_role, reason)
@@ -167,21 +201,26 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           SELECT * FROM trust.moderation_case WHERE id = ${caseId} FOR UPDATE`);
         if (!kase) throw notFound();
         if (kase.status !== 'open') throw conflict('already_decided', 'Dieser Fall wurde bereits entschieden.');
-        if (kase.subject_user_id === auth.userId) throw unprocessable('own_case', 'Eigene Fälle dürfen nicht entschieden werden.');
+        const reporters = await reporterIds(tx.db, caseId);
+        // Wer betroffen ist oder selbst gemeldet hat, entscheidet nicht (RV-C-01)
+        if (!canDecideCase({ moderatorId: auth.userId, subjectUserId: kase.subject_user_id, reporterIds: reporters })) {
+          throw unprocessable('own_case', 'Fälle, die dich betreffen oder die du selbst gemeldet hast, entscheidet eine andere Person.');
+        }
 
         const automated = !!(await tx.db.one(sql`
           SELECT 1 FROM trust.report WHERE case_id = ${caseId} AND reason = 'auto_filter'`));
-        const reporters = await reporterIds(tx.db, caseId);
         const title =
           kase.target_type === 'listing' ? ((await modules.listings.summary(kase.target_id))?.title ?? null) : null;
 
         // notified_at = jetzt: Mitteilung und Mails werden in derselben Transaktion eingereiht (decision ist append-only)
         const decision = (await tx.db.one<{ id: string; notified_at: string }>(sql`
-          INSERT INTO trust.decision (case_id, moderator_id, decision, reason, rule_ref, criminal_suspicion,
+          INSERT INTO trust.decision (case_id, moderator_id, decision, reason, rule_ref, legal_ground, criminal_suspicion,
                                       criminal_suspicion_reason, automated_detection, notified_at)
-          VALUES (${caseId}, ${auth.userId}, ${body.decision}, ${body.reason.trim()}, ${body.ruleRef ?? null}, ${suspicion},
+          VALUES (${caseId}, ${auth.userId}, ${body.decision}, ${body.reason.trim()}, ${body.ruleRef ?? null},
+                  ${body.ruleRef === 'illegal_content' && body.legalGround ? body.legalGround.trim() : null}, ${suspicion},
                   ${suspicion === 'none' ? null : body.criminalSuspicionReason!.trim()}, ${automated}, now())
           RETURNING id, notified_at`))!;
+        const legalGround = body.ruleRef === 'illegal_content' && body.legalGround ? body.legalGround.trim() : null;
         await tx.db.exec(sql`UPDATE trust.moderation_case SET status = 'decided', decided_at = now() WHERE id = ${caseId}`);
 
         const removeContent = body.decision === 'remove' || body.decision === 'ban';
@@ -219,7 +258,8 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             await tx.db.exec(sql`
               INSERT INTO trust.appeal_token (token_hash, decision_id, user_id, expires_at)
               VALUES (${hash}, ${decision.id}, ${kase.subject_user_id}, ${addMonths(new Date(decision.notified_at), APPEAL_WINDOW_MONTHS)})`);
-            appealLink = `${config.publicUrl}/widerspruch?token=${encodeURIComponent(token)}`;
+            // Token im Fragment: Browser senden es nie an den Server, kein Eintrag in Zugriffsprotokollen (RV-C-07)
+            appealLink = `${config.publicUrl}/widerspruch#token=${encodeURIComponent(token)}`;
           } else if (body.decision !== 'no_action') {
             appealLink = noticesLink;
           }
@@ -229,6 +269,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             ...(title ? { title } : {}),
             facts: body.reason.trim(),
             ...(body.ruleRef ? { ruleRef: body.ruleRef } : {}),
+            ...(legalGround ? { legalGround } : {}),
             automated: String(automated),
             deadlineIso,
             ...(appealLink ? { appealLink } : {}),
@@ -238,9 +279,12 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         // Meldende (DSA Art. 16 Abs. 5): Ergebnis, bei „keine Maßnahme“ mit Widerspruchsmöglichkeit; nie die Identität
         for (const reporterId of reporters) {
           await addNotice(tx, { userId: reporterId, kind: 'decision', role: 'reporter', decisionId: decision.id });
+          // Begründung und Rechtsbehelfe auch an Meldende (DSA Art. 16 Abs. 5, Art. 20/21; RV-R-09)
           await modules.notifications.email(tx, { userId: reporterId }, 'moderation_report_result', {
             decision: body.decision,
             targetType: kase.target_type,
+            facts: body.reason.trim(),
+            ...(body.ruleRef ? { ruleRef: body.ruleRef } : {}),
             deadlineIso,
             ...(body.decision === 'no_action' ? { appealLink: noticesLink } : {}),
           });
@@ -248,10 +292,12 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
 
         // DSA Art. 18 (REQ-LEGAL-008): Kennzeichnung, Beweissicherung, Eskalation an die Administration
         if (suspicion !== 'none') {
-          await tx.db.exec(sql`
+          const hold = (await tx.db.one<{ id: string }>(sql`
             INSERT INTO trust.evidence_hold (decision_id, target_type, target_id, subject_user_id, urgent, held_until)
             VALUES (${decision.id}, ${kase.target_type}, ${kase.target_id}, ${kase.subject_user_id},
-                    ${suspicion === 'imminent_danger'}, ${addMonths(new Date(), EVIDENCE_HOLD_MONTHS)})`);
+                    ${suspicion === 'imminent_danger'}, ${addMonths(new Date(), EVIDENCE_HOLD_MONTHS)})
+            RETURNING id`))!;
+          await preserveEvidence(tx, hold.id, kase.target_type, kase.target_id);
           await audit(tx.db, {
             actorId: auth.userId,
             action: 'moderation.criminal_suspicion',
@@ -271,11 +317,26 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
       });
     },
 
+    /** RV-R-04 (REQ-MOD-004): Betroffene über das automatische vorläufige Ausblenden informieren. */
+    async provisionalHide(tx: Tx, kase: { id: string; target_type: ReportTargetType; target_id: string; subject_user_id: string | null }) {
+      if (!kase.subject_user_id) return;
+      await tx.db.exec(sql`
+        INSERT INTO trust.notice (user_id, kind, recipient_role, case_id)
+        VALUES (${kase.subject_user_id}, 'provisional_hide', 'subject', ${kase.id})`);
+      const title = kase.target_type === 'listing' ? ((await modules.listings.summary(kase.target_id))?.title ?? null) : null;
+      await modules.notifications.email(tx, { userId: kase.subject_user_id }, 'provisional_hide', {
+        targetType: kase.target_type,
+        ...(title ? { title } : {}),
+        link: noticesLink,
+      });
+    },
+
     /** „Meine Mitteilungen“ (REQ-LEGAL-006): ohne Identität der Meldenden und ohne Art.-18-Kennzeichnung. */
     async notices(auth: AuthContext): Promise<ModerationNotice[]> {
-      const rows = await db.query<DecisionRow & {
+      const rows = await db.query<Omit<DecisionRow, 'id'> & {
+        id: string | null;
         notice_id: string;
-        kind: 'decision' | 'appeal_result';
+        kind: 'decision' | 'appeal_result' | 'provisional_hide';
         recipient_role: AppealRole;
         notice_created_at: string;
         read_at: string | null;
@@ -285,20 +346,33 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         result_outcome: string | null;
       }>(sql`
         SELECT n.id AS notice_id, n.kind, n.recipient_role, n.created_at AS notice_created_at, n.read_at,
-               d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.automated_detection, d.created_at,
-               d.notified_at, c.target_type, c.target_id, c.subject_user_id,
+               d.id, c.id AS case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.legal_ground, d.automated_detection,
+               d.created_at, d.notified_at, c.target_type, c.target_id, c.subject_user_id,
                own.status AS own_status, own.outcome_reason AS own_outcome,
                res.status AS result_status, res.outcome_reason AS result_outcome
         FROM trust.notice n
-        JOIN trust.decision d ON d.id = n.decision_id
-        JOIN trust.moderation_case c ON c.id = d.case_id
+        LEFT JOIN trust.decision d ON d.id = n.decision_id
+        JOIN trust.moderation_case c ON c.id = COALESCE(d.case_id, n.case_id)
         LEFT JOIN trust.appeal own ON own.decision_id = d.id AND own.appellant_id = ${auth.userId}
         LEFT JOIN trust.appeal res ON res.id = n.appeal_id
         WHERE n.user_id = ${auth.userId}
         ORDER BY n.created_at DESC LIMIT 100`);
       const listingTitles = await titles(rows);
       const now = new Date();
-      return rows.map((r) => {
+      return rows.map((r): ModerationNotice => {
+        if (r.kind === 'provisional_hide' || !r.id) {
+          return {
+            id: r.notice_id,
+            kind: 'provisional_hide',
+            recipientRole: r.recipient_role,
+            createdAt: r.notice_created_at,
+            readAt: r.read_at,
+            decision: null,
+            provisional: { targetType: r.target_type, targetTitle: listingTitles.get(r.target_id)?.title ?? null, automated: true },
+            appeal: { possible: false, deadline: null, status: null, outcomeReason: null },
+          };
+        }
+        const row = r as DecisionRow & typeof r;
         const deadline = appealDeadline(new Date(r.notified_at ?? r.created_at));
         const role = appealRole({
           userId: auth.userId,
@@ -315,7 +389,8 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           recipientRole: r.recipient_role,
           createdAt: r.notice_created_at,
           readAt: r.read_at,
-          decision: statement(r, listingTitles.get(r.target_id)?.title ?? null),
+          decision: statement(row, listingTitles.get(r.target_id)?.title ?? null),
+          provisional: null,
           appeal: {
             possible,
             deadline: role ? deadline.toISOString() : null,
@@ -388,6 +463,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
     async appeals(auth: AuthContext, status: 'open' | 'decided'): Promise<Appeal[]> {
       const rows = await db.query<DecisionRow & {
         appeal_id: string;
+        appellant_id: string | null;
         status: Appeal['status'];
         appellant_role: AppealRole;
         appeal_reason: string;
@@ -395,10 +471,10 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         decided_at: string | null;
         outcome_reason: string | null;
       }>(sql`
-        SELECT a.id AS appeal_id, a.status, a.appellant_role, a.reason AS appeal_reason, a.created_at AS appeal_created_at,
-               a.decided_at, a.outcome_reason,
-               d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.automated_detection, d.created_at,
-               d.notified_at, c.target_type, c.target_id, c.subject_user_id
+        SELECT a.id AS appeal_id, a.appellant_id, a.status, a.appellant_role, a.reason AS appeal_reason,
+               a.created_at AS appeal_created_at, a.decided_at, a.outcome_reason,
+               d.id, d.case_id, d.moderator_id, d.decision, d.reason, d.rule_ref, d.legal_ground, d.automated_detection,
+               d.created_at, d.notified_at, c.target_type, c.target_id, c.subject_user_id
         FROM trust.appeal a JOIN trust.decision d ON d.id = a.decision_id JOIN trust.moderation_case c ON c.id = d.case_id
         WHERE ${status === 'open' ? sql`a.status = 'open'` : sql`a.status <> 'open'`}
         ORDER BY ${status === 'open' ? sql`a.created_at ASC` : sql`a.decided_at DESC`} LIMIT 100`);
@@ -406,6 +482,14 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
       const subjects = await modules.identity.getPublicUsers(
         rows.map((r) => r.subject_user_id).filter((id): id is string => !!id),
       );
+      const reporters = await reportersByCase([...new Set(rows.map((r) => r.case_id))]);
+      // Originaltext entfernter Nachrichten nur für offene Widersprüche; jeder Zugriff wird protokolliert (RV-C-10)
+      const originals = new Map<string, string | null>();
+      for (const r of rows) {
+        if (status !== 'open' || r.target_type !== 'message' || r.decision === 'no_action') continue;
+        originals.set(r.appeal_id, await modules.messaging.originalBody(r.target_id));
+        await audit(db, { actorId: auth.userId, action: 'appeal.original_viewed', targetType: 'appeal', targetId: r.appeal_id });
+      }
       return rows.map((r) => {
         const subject = r.subject_user_id ? subjects.get(r.subject_user_id) : undefined;
         return {
@@ -416,8 +500,15 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           createdAt: r.appeal_created_at,
           decidedAt: r.decided_at,
           outcomeReason: r.outcome_reason,
-          canDecide: canReviewAppeal(auth.userId, r.moderator_id),
+          canDecide: canReviewAppeal({
+            reviewerId: auth.userId,
+            originalModeratorId: r.moderator_id,
+            appellantId: r.appellant_id,
+            subjectUserId: r.subject_user_id,
+            reporterIds: reporters.get(r.case_id) ?? [],
+          }),
           decision: statement(r, listingTitles.get(r.target_id)?.title ?? null),
+          originalContent: originals.get(r.appeal_id) ?? null,
           subject: subject ? { id: subject.id, displayName: subject.displayName } : null,
         };
       });
@@ -431,8 +522,17 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         if (!appeal) throw notFound();
         if (appeal.status !== 'open') throw conflict('already_decided', 'Dieser Widerspruch wurde bereits entschieden.');
         const row = (await tx.db.one<DecisionRow>(sql`${DECISION_WITH_CASE} WHERE d.id = ${appeal.decision_id}`))!;
-        if (!canReviewAppeal(auth.userId, row.moderator_id)) {
-          throw new AppError(403, 'four_eyes', 'Ein anderer Moderator muss über diesen Widerspruch entscheiden.');
+        const reporters = await reporterIds(tx.db, row.case_id);
+        const fourEyes = canReviewAppeal({
+          reviewerId: auth.userId,
+          originalModeratorId: row.moderator_id,
+          appellantId: appeal.appellant_id,
+          subjectUserId: row.subject_user_id,
+          reporterIds: reporters,
+        });
+        if (!fourEyes) throw new AppError(403, 'four_eyes', 'Eine andere, unbeteiligte Person aus der Moderation muss über diesen Widerspruch entscheiden.');
+        if (!hasMinLength(body.reason, MIN_APPEAL_REASON_LENGTH)) {
+          throw unprocessable('reason_too_short', APPEAL_REASON_SHORT, [{ path: 'reason', message: APPEAL_REASON_SHORT }]);
         }
 
         await tx.db.exec(sql`
@@ -440,15 +540,26 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             decided_at = now()
           WHERE id = ${appealId}`);
 
-        const reporters = await reporterIds(tx.db, row.case_id);
         if (body.outcome === 'reversed') {
           if (appeal.appellant_role === 'subject') {
             const removed = row.decision === 'remove' || row.decision === 'ban';
-            if (row.target_type === 'listing' && removed) await modules.listings.restoreByModeration(tx, row.target_id);
-            if (row.target_type === 'message' && removed) await modules.messaging.restoreByModeration(tx, row.target_id);
+            let restored = true;
+            if (row.target_type === 'listing' && removed) restored = await modules.listings.restoreByModeration(tx, row.target_id);
+            if (row.target_type === 'message' && removed) restored = await modules.messaging.restoreByModeration(tx, row.target_id);
+            // Nichts melden, was nicht stimmt (RV-C-03): Inhalt nicht mehr vorhanden → Konflikt, nichts wird gespeichert
+            if (!restored) {
+              throw conflict('restore_impossible', 'Der Inhalt ist nicht mehr vorhanden und kann nicht wiederhergestellt werden. Bitte stattdessen zurückweisen und das begründen.');
+            }
             if (row.decision === 'ban' && row.subject_user_id) {
-              await modules.identity.unsuspend(tx, row.subject_user_id);
-              await modules.listings.setOwnerSuspended(tx, row.subject_user_id, false);
+              // Nur entsperren, wenn keine weitere Sperr-Entscheidung gilt (RV-C-04)
+              const otherBan = await tx.db.one(sql`
+                SELECT 1 FROM trust.decision d JOIN trust.moderation_case c ON c.id = d.case_id
+                WHERE c.subject_user_id = ${row.subject_user_id} AND d.decision = 'ban' AND d.id <> ${row.id}
+                  AND NOT EXISTS (SELECT 1 FROM trust.appeal a WHERE a.decision_id = d.id AND a.status = 'reversed')`);
+              if (!otherBan) {
+                await modules.identity.unsuspend(tx, row.subject_user_id);
+                await modules.listings.setOwnerSuspended(tx, row.subject_user_id, false);
+              }
             }
           } else {
             // Meldende/r hatte Recht: Der Fall wird neu geöffnet und von der Moderation neu entschieden
@@ -470,11 +581,13 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
 
         const outcomeCode =
           body.outcome === 'reversed' ? (appeal.appellant_role === 'subject' ? 'reversed_subject' : 'reversed_reporter') : 'upheld';
+        // Ergebnis mit Begründung an beide Seiten (UC-36, REQ-LEGAL-007, RV-R-09)
         const recipients: { userId: string; role: AppealRole }[] = [];
         if (appeal.appellant_id) recipients.push({ userId: appeal.appellant_id, role: appeal.appellant_role });
-        // Stattgabe zugunsten der Betroffenen: begründete Mitteilung an beide Seiten (REQ-LEGAL-007)
-        if (body.outcome === 'reversed' && appeal.appellant_role === 'subject') {
+        if (appeal.appellant_role === 'subject') {
           for (const reporterId of reporters) recipients.push({ userId: reporterId, role: 'reporter' });
+        } else if (row.subject_user_id) {
+          recipients.push({ userId: row.subject_user_id, role: 'subject' });
         }
         for (const r of recipients) {
           await addNotice(tx, { userId: r.userId, kind: 'appeal_result', role: r.role, decisionId: row.id, appealId });
@@ -499,7 +612,10 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         held_until: string;
         released_at: string | null;
         created_at: string;
-      }>(sql`SELECT * FROM trust.evidence_hold ORDER BY released_at NULLS FIRST, created_at DESC LIMIT 200`);
+        preserved: number;
+      }>(sql`
+        SELECT h.*, (SELECT count(*) FROM trust.evidence_copy e WHERE e.hold_id = h.id) AS preserved
+        FROM trust.evidence_hold h ORDER BY released_at NULLS FIRST, created_at DESC LIMIT 200`);
       return rows.map((r) => ({
         id: r.id,
         decisionId: r.decision_id,
@@ -509,6 +625,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         heldUntil: r.held_until,
         releasedAt: r.released_at,
         createdAt: r.created_at,
+        preservedItems: Number(r.preserved),
       }));
     },
 
@@ -530,9 +647,23 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
       return rows.map((r) => r.target_id);
     },
 
-    async hasActiveHoldForUser(userId: string): Promise<boolean> {
-      return !!(await db.one(sql`
-        SELECT 1 FROM trust.evidence_hold WHERE subject_user_id = ${userId} AND released_at IS NULL AND held_until > now()`));
+    /** Nachrichten, deren Originaltext noch gebraucht wird: Beweissicherung oder offener Widerspruch (RV-C-03). */
+    async protectedMessageIds(): Promise<string[]> {
+      const rows = await db.query<{ target_id: string }>(sql`
+        SELECT target_id FROM trust.evidence_hold
+        WHERE target_type = 'message' AND released_at IS NULL AND held_until > now()
+        UNION
+        SELECT c.target_id FROM trust.appeal a JOIN trust.decision d ON d.id = a.decision_id
+          JOIN trust.moderation_case c ON c.id = d.case_id
+        WHERE c.target_type = 'message' AND a.status = 'open'`);
+      return rows.map((r) => r.target_id);
+    },
+
+    /** Gesicherte Kopien nach Freigabe oder Fristende löschen (höchstens 6 Monate, REQ-LEGAL-008). */
+    async purgeExpiredEvidence(): Promise<number> {
+      return db.exec(sql`
+        DELETE FROM trust.evidence_copy e USING trust.evidence_hold h
+        WHERE e.hold_id = h.id AND (h.released_at IS NOT NULL OR h.held_until <= now())`);
     },
   };
 }

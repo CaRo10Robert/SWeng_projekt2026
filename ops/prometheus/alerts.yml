@@ -25,9 +25,15 @@ groups:
           runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md
 
       - alert: HighErrorRate
+        # Nicht während des Wartungsmodus (503 sind dann gewollt) und erst ab Mindestlast von 0,1 Anfragen/s,
+        # damit wenige Fehler bei kaum Verkehr nicht alarmieren (RV-A-04)
         expr: |
-          sum(rate(http_request_duration_seconds_count{job="campusmarkt",status=~"5.."}[5m]))
-            / sum(rate(http_request_duration_seconds_count{job="campusmarkt"}[5m])) > 0.05
+          (
+            sum(rate(http_request_duration_seconds_count{job="campusmarkt",status=~"5.."}[5m]))
+              / sum(rate(http_request_duration_seconds_count{job="campusmarkt"}[5m])) > 0.05
+          )
+          and on() sum(rate(http_request_duration_seconds_count{job="campusmarkt"}[5m])) > 0.1
+          unless on() max(campusmarkt_maintenance_mode{job="campusmarkt"}) == 1
         for: 5m
         labels:
           severity: SEV-2
@@ -50,12 +56,13 @@ groups:
           runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/monitoring-alarmierung.md
 
       - alert: JobFailures
-        expr: increase(jobs_processed_total{job="campusmarkt",outcome="error"}[15m]) > 0
+        # Nur endgültig gescheiterte Jobs (Dead-Letter-Queue); Wiederholungen nach kurzen Ausfällen sind normal (RV-A-18)
+        expr: increase(jobs_processed_total{job="campusmarkt",outcome="dead"}[15m]) > 0
         labels:
           severity: SEV-3
         annotations:
-          summary: 'Fehlgeschlagene Jobs in Queue {{ $labels.queue }}'
-          description: 'In den letzten 15 Minuten sind Jobs fehlgeschlagen, z. B. Mailversand (QS-3, REQ-NOTI-005).'
+          summary: 'Endgültig gescheiterte Jobs in Queue {{ $labels.queue }}'
+          description: 'In den letzten 15 Minuten sind Jobs nach allen Wiederholungen gescheitert und liegen in der Dead-Letter-Queue, z. B. Mailversand (QS-3, REQ-NOTI-005).'
           runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md
 
       - alert: WebSocketDrop
@@ -79,11 +86,21 @@ groups:
           runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/wartung-statusseite.md
 
       - alert: BackupMissing
-        # 0 = noch nie gesichert
-        expr: time() - campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} > 26 * 3600
+        # Wert 0 = noch nie gesichert: erst alarmieren, wenn die App länger als 26 h läuft (kein Alarm direkt nach dem
+        # Start). NaN = nicht lesbar (Datenbank weg): kein Alarm, dafür sorgt NotReady (RV-A-05).
+        expr: |
+          (
+            time() - campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} > 26 * 3600
+            and campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} > 0
+          )
+          or
+          (
+            time() - process_start_time_seconds{job="campusmarkt"} > 26 * 3600
+            and on(job, instance) campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} == 0
+          )
         labels:
           severity: SEV-2
         annotations:
-          summary: Letzte erfolgreiche Sicherung älter als 26 Stunden
-          description: 'Die letzte Sicherung ist {{ $value | humanizeDuration }} alt (REQ-AVAIL-003).'
+          summary: Seit mehr als 26 Stunden keine erfolgreiche Sicherung
+          description: 'Seit {{ $value | humanizeDuration }} keine erfolgreiche Sicherung (REQ-AVAIL-003).'
           runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/backup-restore.md

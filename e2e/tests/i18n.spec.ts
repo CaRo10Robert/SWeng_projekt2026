@@ -17,6 +17,8 @@ const GERMAN = /\b(Anmelden|Registrieren|Suchen|Nachrichten|Anzeige|Merkliste|Pr
 test('[AT-UX-007] Sprachwechsel auf Englisch ändert Texte, lang und Formate; die Wahl bleibt nach Neuladen erhalten', async ({ page }) => {
   await gotoTop(page, '/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+  // Vor der ausdrücklichen Wahl wird nichts gespeichert (REQ-LEGAL-010, RV-C-18)
+  expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kaufen, verkaufen und tauschen – direkt auf dem Campus');
 
   // Sprachwahl im Seitenkopf per Tastatur; jede Sprache ist in sich selbst benannt
@@ -65,8 +67,9 @@ test('[AT-UX-007] Registrierung auf Englisch: Wahl geht ins Konto, Formate und E
   await page.getByRole('button', { name: 'Sign up' }).click();
   await expect(page.getByRole('heading', { name: 'Almost done' })).toBeVisible();
 
-  // Die Bestätigungsmail entsteht vor jeder Sprachwahl im Konto und ist deshalb deutsch (bekannte Grenze)
-  const verify = await waitForMail(request, user.email, 'bestätige');
+  // Die gewählte Sprache wird bei der Registrierung mitgeschickt: Bestätigungsmail auf Englisch (ADR-0016)
+  const verify = await waitForMail(request, user.email, 'Please confirm');
+  expect(verify.Text).not.toMatch(/Hallo|bestätige/);
   await page.goto(linkFrom(verify.Text, '/verify'));
   await expect(page.getByRole('button', { name: 'Log out' }).or(page.getByRole('button', { name: 'Menu' }))).toBeVisible();
 

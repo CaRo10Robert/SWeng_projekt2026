@@ -89,6 +89,11 @@ export const DecisionBody = Type.Object({
   ruleRef: Type.Optional(ModerationRule),
   criminalSuspicion: Type.Optional(CriminalSuspicion),
   criminalSuspicionReason: Type.Optional(Type.String({ maxLength: 1000 })),
+  /**
+   * Pflicht bei `illegal_content`: verletzte Norm und Erläuterung, warum der Inhalt rechtswidrig ist
+   * (DSA Art. 17 Abs. 3 lit. d, mindestens 20 Zeichen; RV-R-03).
+   */
+  legalGround: Type.Optional(Type.String({ maxLength: 1000 })),
 });
 export type DecisionBody = Static<typeof DecisionBody>;
 
@@ -104,6 +109,8 @@ export const DecisionStatement = Type.Object({
   targetTitle: Type.Union([Type.String(), Type.Null()]),
   facts: Type.String(),
   ruleRef: Type.Union([ModerationRule, Type.Null()]),
+  /** Rechtsgrundlage bei rechtswidrigen Inhalten (Art. 17 Abs. 3 lit. d). */
+  legalGround: Type.Union([Type.String(), Type.Null()]),
   automatedDetection: Type.Boolean(),
   decidedAt: Timestamp,
 });
@@ -112,11 +119,21 @@ export type DecisionStatement = Static<typeof DecisionStatement>;
 /** Mitteilung im Konto (REQ-LEGAL-006) mit Einstieg in den Widerspruch (REQ-LEGAL-007). */
 export const ModerationNotice = Type.Object({
   id: Uuid,
-  kind: Type.Union([Type.Literal('decision'), Type.Literal('appeal_result')]),
+  kind: Type.Union([Type.Literal('decision'), Type.Literal('appeal_result'), Type.Literal('provisional_hide')]),
   recipientRole: Type.Union([Type.Literal('subject'), Type.Literal('reporter')]),
   createdAt: Timestamp,
   readAt: Type.Union([Timestamp, Type.Null()]),
-  decision: DecisionStatement,
+  /** `null` bei `provisional_hide`: noch keine Entscheidung, nur vorläufig ausgeblendet (REQ-MOD-004, RV-R-04). */
+  decision: Type.Union([DecisionStatement, Type.Null()]),
+  provisional: Type.Union([
+    Type.Object({
+      targetType: ReportTargetType,
+      targetTitle: Type.Union([Type.String(), Type.Null()]),
+      /** Immer true: Ausblenden erfolgt automatisch ab drei Meldungen. */
+      automated: Type.Boolean(),
+    }),
+    Type.Null(),
+  ]),
   appeal: Type.Object({
     /** Widerspruch ist möglich (Frist läuft, noch keiner eingelegt, Rolle berechtigt). */
     possible: Type.Boolean(),
@@ -127,14 +144,19 @@ export const ModerationNotice = Type.Object({
 });
 export type ModerationNotice = Static<typeof ModerationNotice>;
 
-export const AppealBody = Type.Object({ reason: Type.String({ minLength: 10, maxLength: 2000 }) });
+/** Begründung des Widerspruchs, mindestens 20 Zeichen ohne führende und folgende Leerzeichen (UC-35, RV-C-11). */
+export const AppealBody = Type.Object({ reason: Type.String({ minLength: 20, maxLength: 2000 }) });
 export type AppealBody = Static<typeof AppealBody>;
 
 export const TokenAppealBody = Type.Object({
   token: Type.String({ minLength: 10, maxLength: 200 }),
-  reason: Type.String({ minLength: 10, maxLength: 2000 }),
+  reason: Type.String({ minLength: 20, maxLength: 2000 }),
 });
 export type TokenAppealBody = Static<typeof TokenAppealBody>;
+
+/** Token im Body statt in der URL: erscheint so in keinem Zugriffsprotokoll (RV-C-07). */
+export const TokenInfoBody = Type.Object({ token: Type.String({ minLength: 10, maxLength: 200 }) });
+export type TokenInfoBody = Static<typeof TokenInfoBody>;
 
 /** Angaben für das Widerspruchsformular über den Einmal-Link (gesperrte Konten). */
 export const TokenAppealInfo = Type.Object({ decision: DecisionStatement, deadline: Timestamp });
@@ -155,6 +177,8 @@ export const Appeal = Type.Object({
   /** false, wenn die anfragende Person die ursprüngliche Entscheidung getroffen hat (Vier-Augen-Prinzip). */
   canDecide: Type.Boolean(),
   decision: DecisionStatement,
+  /** Originaltext einer entfernten Nachricht, nur für die Prüfung (Zugriff wird protokolliert, RV-C-10). */
+  originalContent: Type.Union([Type.String(), Type.Null()]),
   subject: Type.Union([Type.Object({ id: Uuid, displayName: Type.String() }), Type.Null()]),
 });
 export type Appeal = Static<typeof Appeal>;
@@ -175,6 +199,8 @@ export const EvidenceHold = Type.Object({
   heldUntil: Timestamp,
   releasedAt: Type.Union([Timestamp, Type.Null()]),
   createdAt: Timestamp,
+  /** Anzahl gesicherter Kopien (Inhalt und Kontext), unabhängig von späteren Löschungen (RV-R-15). */
+  preservedItems: Type.Integer(),
 });
 export type EvidenceHold = Static<typeof EvidenceHold>;
 
@@ -193,7 +219,6 @@ export const Dac7Report = Type.Object({
     Type.Object({
       userId: Uuid,
       displayName: Type.String(),
-      email: Type.String(),
       sales: Type.Integer(),
       amountCents: Type.Integer(),
       quarters: Type.Array(Type.Object({ quarter: Type.Integer(), sales: Type.Integer(), amountCents: Type.Integer() })),

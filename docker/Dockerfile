@@ -29,11 +29,12 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=8080 \
     UPLOADS_DIR=/data/uploads \
+    JOURNAL_DIR=/data/journal \
     WEB_DIST_DIR=/app/web/dist
 WORKDIR /app
 COPY --from=build --chown=root:root /out ./server
 COPY --from=build --chown=root:root /repo/apps/web/dist ./web/dist
-RUN mkdir -p /data/uploads && chown node:node /data/uploads
+RUN mkdir -p /data/uploads /data/journal && chown node:node /data/uploads /data/journal
 # Non-root, Code gehört root und ist damit für den Prozess schreibgeschützt (REQ-SEC-010)
 USER node
 EXPOSE 8080

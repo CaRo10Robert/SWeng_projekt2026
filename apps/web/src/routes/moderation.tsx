@@ -40,8 +40,11 @@ function DecisionForm({ c }: { c: ModerationCase }) {
   const [reason, setReason] = useState('');
   const [suspicion, setSuspicion] = useState<CriminalSuspicion>('none');
   const [suspicionReason, setSuspicionReason] = useState('');
+  const [legalGround, setLegalGround] = useState('');
   const autoFilter = c.reports.some((r) => r.reason === 'auto_filter');
   const needsRule = decision !== 'no_action';
+  // DSA Art. 17 Abs. 3 lit. d: bei rechtswidrigen Inhalten Norm und Erläuterung (RV-R-03)
+  const needsLegalGround = needsRule && ruleRef === 'illegal_content';
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -51,13 +54,17 @@ function DecisionForm({ c }: { c: ModerationCase }) {
         decision,
         reason: reason.trim(),
         ...(needsRule && ruleRef ? { ruleRef } : {}),
+        ...(needsLegalGround ? { legalGround: legalGround.trim() } : {}),
         ...(suspicion !== 'none' ? { criminalSuspicion: suspicion, criminalSuspicionReason: suspicionReason.trim() } : {}),
       },
     });
   };
 
   const invalid =
-    reason.trim().length < MIN_REASON || (needsRule && !ruleRef) || (suspicion !== 'none' && suspicionReason.trim().length < MIN_REASON);
+    reason.trim().length < MIN_REASON ||
+    (needsRule && !ruleRef) ||
+    (needsLegalGround && legalGround.trim().length < MIN_REASON) ||
+    (suspicion !== 'none' && suspicionReason.trim().length < MIN_REASON);
 
   return (
     <form onSubmit={submit} className="space-y-3 border-t border-slate-200 pt-3">
@@ -80,6 +87,9 @@ function DecisionForm({ c }: { c: ModerationCase }) {
           placeholder={t('form.pleaseChoose')}
           options={(Object.keys(ruleLabels) as ModerationRule[]).map((r) => ({ value: r, label: ruleLabels[r].label }))}
         />
+      )}
+      {needsLegalGround && (
+        <ReasonField label={t('mod.legalGround.label')} hint={t('mod.legalGround.hint')} value={legalGround} onChange={setLegalGround} />
       )}
       <ReasonField
         label={t('mod.reasonLabel')}
@@ -197,6 +207,12 @@ function AppealCard({ appeal }: { appeal: Appeal }) {
       <section aria-label={t('mod.appeal.original')} className="rounded-lg bg-slate-50 p-3">
         <DecisionDetails decision={appeal.decision} />
       </section>
+      {appeal.originalContent && (
+        <section aria-labelledby={`original-${appeal.id}`} className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <h3 id={`original-${appeal.id}`} className="text-sm font-semibold">{t('mod.appeal.originalContent')}</h3>
+          <p className="mt-1 whitespace-pre-line text-sm">{appeal.originalContent}</p>
+        </section>
+      )}
       <div>
         <h3 className="text-sm font-semibold">{t('mod.appeal.reason')}</h3>
         <p className="mt-1 whitespace-pre-line text-sm">{appeal.reason}</p>

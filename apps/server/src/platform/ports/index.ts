@@ -64,6 +64,8 @@ export interface QueueOptions {
 export interface JobContext {
   id: string;
   name: string;
+  /** Letzter Versuch: scheitert er, landet der Job in der Dead-Letter-Queue (Metrik outcome=dead, RV-A-18). */
+  finalAttempt: boolean;
 }
 
 export type JobHandler<T> = (data: T, ctx: JobContext) => Promise<void>;

@@ -37,6 +37,12 @@ export function DecisionDetails({ decision }: { decision: DecisionStatement }) {
           </dd>
         </>
       )}
+      {decision.legalGround && (
+        <>
+          <dt className="font-semibold">{t('dsa.legalGround')}</dt>
+          <dd className="whitespace-pre-line">{decision.legalGround}</dd>
+        </>
+      )}
       <dt className="font-semibold">{t('dsa.detection')}</dt>
       <dd>
         {decision.automatedDetection ? t('dsa.detection.automated') : t('dsa.detection.report')}
@@ -50,7 +56,7 @@ function AppealForm({ notice, onDone }: { notice: ModerationNotice; onDone: () =
   const [reason, setReason] = useState('');
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    appeal.mutate({ decisionId: notice.decision.id, reason: reason.trim() }, { onSuccess: onDone });
+    if (notice.decision) appeal.mutate({ decisionId: notice.decision.id, reason: reason.trim() }, { onSuccess: onDone });
   };
   const tooShort = reason.trim().length < MIN_APPEAL;
   return (
@@ -79,11 +85,13 @@ function NoticeCard({ notice }: { notice: ModerationNotice }) {
   const [sent, setSent] = useState(false);
   const { appeal } = notice;
   const title =
-    notice.kind === 'appeal_result'
-      ? t('notices.title.appealResult')
-      : notice.recipientRole === 'reporter'
-        ? t('notices.title.reportResult')
-        : t('notices.title.decision');
+    notice.kind === 'provisional_hide'
+      ? t('notices.title.provisional')
+      : notice.kind === 'appeal_result'
+        ? t('notices.title.appealResult')
+        : notice.recipientRole === 'reporter'
+          ? t('notices.title.reportResult')
+          : t('notices.title.decision');
   return (
     <Card className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -91,7 +99,15 @@ function NoticeCard({ notice }: { notice: ModerationNotice }) {
         {!notice.readAt && <Badge tone="info">{t('notices.new')}</Badge>}
         <span className="text-sm text-slate-600">{formatDateTime(notice.createdAt)}</span>
       </div>
-      <DecisionDetails decision={notice.decision} />
+      {notice.decision ? (
+        <DecisionDetails decision={notice.decision} />
+      ) : notice.provisional ? (
+        <p className="text-sm">
+          {t('notices.provisional.text', {
+            target: `${targetLabels[notice.provisional.targetType]}${notice.provisional.targetTitle ? ` ${t('common.quoted', { text: notice.provisional.targetTitle })}` : ''}`,
+          })}
+        </p>
+      ) : null}
       {appeal.status && (
         <Alert tone={appeal.status === 'reversed' ? 'success' : appeal.status === 'open' ? 'info' : 'warning'} title={t('notices.appealStatus', { status: appealStatusLabels[appeal.status] })}>
           {appeal.outcomeReason}

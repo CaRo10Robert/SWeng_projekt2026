@@ -17,6 +17,13 @@ route:
       receiver: rufbereitschaft
       repeat_interval: 30m
 
+# Folgealarme unterdrücken: Ist die App weg oder nicht bereit, sind Fehlerquote, fehlende Sicherung, Jobs und
+# Suchzeit nur Folgen davon (RV-A-04)
+inhibit_rules:
+  - source_matchers: ['alertname=~"AppDown|NotReady"']
+    target_matchers: ['alertname=~"HighErrorRate|BackupMissing|JobFailures|SlowSearch|WebSocketDrop"']
+    equal: [job]
+
 receivers:
   - name: betrieb
     email_configs:

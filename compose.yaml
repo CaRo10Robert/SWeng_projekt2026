@@ -2,7 +2,8 @@
 #   docker compose up --build   → App http://localhost:8080, E-Mails http://localhost:8025
 #   docker compose down -v      → alle Daten löschen
 # Optionale Profile (ADR-0017, Q-27), der Standardstart bleibt app + db + mailpit:
-#   docker compose --profile proxy up -d       → https://campusmarkt.localhost:8443 (TLS, HSTS)
+#   docker compose --env-file .env.proxy.example --profile proxy up -d
+#                                               → https://campusmarkt.localhost:8443 (TLS, HSTS; setzt TRUST_PROXY und PUBLIC_URL)
 #   docker compose --profile monitoring up -d  → Prometheus :9090, Alertmanager :9093 (nur 127.0.0.1)
 name: campusmarkt
 
@@ -29,8 +30,11 @@ services:
       # Wartungsmodus (REQ-OPS-006) und Vertrauen in X-Forwarded-* hinter dem Proxy (Profil proxy)
       MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
       TRUST_PROXY: ${TRUST_PROXY:-false}
+      # Löschjournal in eigenem Volume: übersteht eine Wiederherstellung (ADR-0018)
+      JOURNAL_DIR: /data/journal
     volumes:
       - uploads:/data/uploads
+      - journal:/data/journal
     read_only: true
     tmpfs:
       - /tmp
@@ -117,6 +121,7 @@ services:
 volumes:
   pgdata:
   uploads:
+  journal:
   caddy_data:
   caddy_config:
   prometheus_data:

@@ -139,7 +139,10 @@ export function createListingsService(deps: ModuleDeps) {
     }
     const removed = await tx.db.query<ImageRow>(sql`
       DELETE FROM listings.image WHERE listing_id = ${listingId} AND NOT (id = ANY(${unique}::uuid[])) RETURNING *`);
-    for (const image of removed) await deleteImageFiles(image);
+    for (const image of removed) {
+      await deleteImageFiles(image);
+      deps.journal.record(tx, 'image_deleted', image.id);
+    }
 
     for (const [position, id] of unique.entries()) {
       const row = rows.find((r) => r.id === id)!;
@@ -365,8 +368,11 @@ export function createListingsService(deps: ModuleDeps) {
 
     // ------------------------------------------------------------ Moderation (trust)
     async removeByModeration(tx: Tx, id: string) {
+      // Vorherigen Status merken, damit eine Stattgabe ihn wiederherstellt (RV-C-09)
       await tx.db.exec(sql`
-        UPDATE listings.listing SET status = 'removed', status_changed_at = now() WHERE id = ${id}`);
+        UPDATE listings.listing SET status_before_removal = status, status = 'removed', status_changed_at = now()
+        WHERE id = ${id} AND status NOT IN ('removed', 'deleted')`);
+      deps.journal.record(tx, 'listing_removed', id);
     },
     async approveFromReview(tx: Tx, id: string) {
       await tx.db.exec(sql`
@@ -381,12 +387,43 @@ export function createListingsService(deps: ModuleDeps) {
     async setOwnerSuspended(tx: Tx, ownerId: string, suspended: boolean) {
       await tx.db.exec(sql`UPDATE listings.listing SET owner_suspended = ${suspended} WHERE owner_id = ${ownerId}`);
     },
-    /** Widerspruch stattgegeben (REQ-LEGAL-007): entfernte Anzeige wieder sichtbar, mit voller Laufzeit. */
-    async restoreByModeration(tx: Tx, id: string) {
-      await tx.db.exec(sql`
-        UPDATE listings.listing SET status = 'active', hidden = false, status_changed_at = now(),
-          expires_at = now() + make_interval(days => ${LISTING_LIFETIME_DAYS})
+    /**
+     * Widerspruch stattgegeben (REQ-LEGAL-007): Status vor der Entfernung wiederherstellen (reserviert, pausiert und
+     * abgelaufen bleiben es); aktive Anzeigen und solche aus der Prüfung erhalten die volle Laufzeit. Liefert false,
+     * wenn nichts wiederhergestellt werden konnte (z. B. inzwischen gelöscht).
+     */
+    async restoreByModeration(tx: Tx, id: string): Promise<boolean> {
+      const restored = await tx.db.exec(sql`
+        UPDATE listings.listing SET
+          status = CASE WHEN status_before_removal IN ('reserved', 'paused', 'expired', 'completed') THEN status_before_removal ELSE 'active' END,
+          expires_at = CASE WHEN status_before_removal IN ('reserved', 'paused', 'expired', 'completed') THEN expires_at
+                            ELSE now() + make_interval(days => ${LISTING_LIFETIME_DAYS}) END,
+          hidden = false, status_changed_at = now(), status_before_removal = NULL
         WHERE id = ${id} AND status = 'removed'`);
+      if (restored) deps.journal.record(tx, 'listing_restored', id);
+      return restored > 0;
+    },
+
+    /** Beweissicherung (REQ-LEGAL-008): Inhalt der Anzeige als Kopie, ohne Kontaktdaten. */
+    async evidenceSnapshot(id: string): Promise<Record<string, unknown> | null> {
+      const row = await db.one<ListingRow>(sql`SELECT * FROM listings.listing WHERE id = ${id}`);
+      return row
+        ? { kind: 'listing', listingId: row.id, title: row.title, description: row.description, priceCents: row.price_cents, createdAt: row.created_at }
+        : null;
+    },
+
+    // ------------------------------------------------------------ Löschjournal nach Wiederherstellung (ADR-0018)
+    async replayDelete(tx: Tx, id: string): Promise<boolean> {
+      const row = await tx.db.one<{ id: string }>(sql`
+        SELECT id FROM listings.listing WHERE id = ${id} AND status <> 'deleted' FOR UPDATE`);
+      if (!row) return false;
+      await softDelete(tx, [id]);
+      return true;
+    },
+    async replayImageDelete(tx: Tx, imageId: string): Promise<boolean> {
+      const images = await tx.db.query<ImageRow>(sql`DELETE FROM listings.image WHERE id = ${imageId} RETURNING *`);
+      for (const image of images) await deleteImageFiles(image);
+      return images.length > 0;
     },
     async deleteAllForOwner(tx: Tx, ownerId: string) {
       const rows = await tx.db.query<{ id: string }>(sql`SELECT id FROM listings.listing WHERE owner_id = ${ownerId}`);
@@ -514,6 +551,7 @@ export function createListingsService(deps: ModuleDeps) {
     for (const id of ids) await storage.deletePrefix(`public/${id}`);
     await tx.db.exec(sql`
       UPDATE listings.listing SET status = 'deleted', status_changed_at = now() WHERE id = ANY(${ids}::uuid[])`);
+    for (const id of ids) deps.journal.record(tx, 'listing_deleted', id);
   }
 }
 

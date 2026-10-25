@@ -11,7 +11,7 @@ import type {
   UpdateMeBody,
 } from '@campusmarkt/contracts';
 import { api, ApiError } from './client';
-import { onLocaleChosen, storedLocale, useLocale } from '../i18n';
+import { clearSessionLocaleChoice, localeChosenThisSession, onLocaleChosen, useLocale } from '../i18n';
 
 export const meQuery = queryOptions({
   queryKey: ['me'],
@@ -95,6 +95,15 @@ export function useUpdateMe() {
   });
 }
 
+/** Kenntnisnahme einer neuen Datenschutzerklärung, keine Einwilligung (REQ-LEGAL-002, RV-R-08). */
+export function useAcknowledgePrivacy() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (version: string) => api<Me>('/me/privacy-ack', { method: 'POST', body: { version } }),
+    onSuccess: (me) => qc.setQueryData(meQuery.queryKey, me),
+  });
+}
+
 /** Erneute Zustimmung zu einer neuen Fassung der Nutzungsbedingungen (REQ-LEGAL-003). */
 export function useAcceptTerms() {
   const qc = useQueryClient();
@@ -106,8 +115,8 @@ export function useAcceptTerms() {
 
 /**
  * Sprache und Konto abgleichen (ADR-0016, REQ-UX-007): Eine ausdrückliche Wahl wird im Profil gespeichert.
- * Beim Anmelden gilt die Sprache des Kontos; nur wenn auf diesem Gerät ausdrücklich eine andere gewählt wurde
- * (z. B. vor der Registrierung), wird diese neuere Wahl ins Konto übernommen.
+ * Beim Anmelden gilt die Sprache des Kontos. Nur eine in derselben Sitzung vor der Anmeldung getroffene Wahl wird ins
+ * Konto übernommen; eine ältere Wahl auf einem geteilten Gerät ändert die Kontosprache nicht (RV-C-08).
  */
 let pendingLocale: string | null = null;
 
@@ -134,10 +143,11 @@ export function useAccountLocale() {
   const accountLocale = me?.locale;
   useEffect(() => {
     if (!accountLocale || pendingLocale) return;
-    const stored = storedLocale();
-    if (stored && stored !== accountLocale) {
-      pendingLocale = stored;
-      api<Me>('/me', { method: 'PATCH', body: { locale: stored } })
+    const chosen = localeChosenThisSession();
+    clearSessionLocaleChoice();
+    if (chosen && chosen !== accountLocale) {
+      pendingLocale = chosen;
+      api<Me>('/me', { method: 'PATCH', body: { locale: chosen } })
         .then((updated) => qc.setQueryData(meQuery.queryKey, updated))
         .catch(() => undefined)
         .finally(() => {

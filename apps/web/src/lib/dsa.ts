@@ -53,4 +53,4 @@ export const appealStatusLabels = labels<AppealStatus>({
 /** Mindestlänge der Begründung (REQ-LEGAL-006), identisch mit `DecisionBody.reason` im Contract. */
 export const MIN_REASON = 20;
 /** Mindestlänge eines Widerspruchs, identisch mit `AppealBody.reason`. */
-export const MIN_APPEAL = 10;
+export const MIN_APPEAL = 20;

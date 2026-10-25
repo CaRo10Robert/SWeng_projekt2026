@@ -21,7 +21,7 @@ export function createMetrics() {
 
   const jobsProcessed = new client.Counter({
     name: 'jobs_processed_total',
-    help: 'Verarbeitete Jobs',
+    help: 'Verarbeitete Jobs; outcome: ok, retry (wird wiederholt) oder dead (endgültig gescheitert)',
     labelNames: ['queue', 'outcome'] as const,
     registers: [registry],
   });
@@ -50,11 +50,15 @@ export function createMetrics() {
   });
   new client.Gauge({
     name: 'campusmarkt_backup_last_success_timestamp_seconds',
-    help: 'Zeitpunkt der letzten erfolgreichen Sicherung (Unix-Sekunden, 0 = noch keine)',
+    help: 'Zeitpunkt der letzten erfolgreichen Sicherung (Unix-Sekunden, 0 = noch keine, NaN = nicht lesbar)',
     registers: [registry],
     async collect() {
-      const at = await probes.lastBackupAt().catch(() => null);
-      this.set(at ? Math.floor(at.getTime() / 1000) : 0);
+      // Nicht lesbar (z. B. Datenbank weg): NaN statt 0, damit BackupMissing nicht zusätzlich zu NotReady auslöst (RV-A-05)
+      const at = await probes.lastBackupAt().then(
+        (value) => value,
+        () => undefined,
+      );
+      this.set(at === undefined ? Number.NaN : at ? Math.floor(at.getTime() / 1000) : 0);
     },
   });
 

@@ -12,6 +12,8 @@ export interface Db {
 export interface Tx {
   db: Db;
   enqueue(name: string, data: object, options?: EnqueueOptions): Promise<void>;
+  /** Läuft erst nach erfolgreichem COMMIT (z. B. Löschjournal außerhalb der Datenbank); Fehler werden nur protokolliert. */
+  afterCommit(fn: () => Promise<void> | void): void;
 }
 
 export interface Database {
@@ -64,19 +66,32 @@ function wrap(client: pg.Pool | pg.PoolClient): Db {
   };
 }
 
-export function createDatabase(pool: pg.Pool, jobs: () => JobQueue): Database {
+export function createDatabase(
+  pool: pg.Pool,
+  jobs: () => JobQueue,
+  onAfterCommitError: (error: unknown) => void = () => undefined,
+): Database {
   async function tx<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
     const client = await pool.connect();
     const executor: SqlExecutor = {
       executeSql: (text, values) => client.query(text, values),
     };
+    const after: (() => Promise<void> | void)[] = [];
     try {
       await client.query('BEGIN');
       const result = await fn({
         db: wrap(client),
         enqueue: (name, data, options) => jobs().enqueue(name, data, options, executor),
+        afterCommit: (cb) => void after.push(cb),
       });
       await client.query('COMMIT');
+      for (const cb of after) {
+        try {
+          await cb();
+        } catch (error) {
+          onAfterCommitError(error);
+        }
+      }
       return result;
     } catch (error) {
       await client.query('ROLLBACK').catch(() => undefined);

@@ -4,7 +4,7 @@ import { createLogger } from '../logger.js';
 import { createMetrics } from '../metrics.js';
 import { createOps } from '../ops.js';
 import type { SettingsStore } from '../settings.js';
-import { buildSecurityTxt, createHttpServer } from './server.js';
+import { buildSecurityTxt, createHttpServer, requestLogEntry } from './server.js';
 
 function memorySettings(): SettingsStore {
   const values = new Map<string, unknown>();
@@ -79,6 +79,12 @@ describe('Betriebs-Endpunkte (REQ-PRIV-008, REQ-SEC-012, REQ-OPS-006/007)', () =
     expect(txt).toMatch(/^Canonical: https:\/\/campusmarkt\.example\/\.well-known\/security\.txt$/m);
   });
 
+  it('security.txt ohne HTTPS: keine Web-URIs (RFC 9116, RV-A-17)', () => {
+    const txt = buildSecurityTxt('http://localhost:8080', 'mailto:security@hwg-lu.example');
+    expect(txt).not.toMatch(/^(Policy|Canonical):/m);
+    expect(txt).toMatch(/^Contact: /m);
+  });
+
   it('Wartungsmodus aus der Einstellung: API 503 mit Retry-After, Status und Health erreichbar', async () => {
     const settings = memorySettings();
     await settings.set('maintenance', { on: true, until: null }, null);
@@ -102,5 +108,41 @@ describe('Betriebs-Endpunkte (REQ-PRIV-008, REQ-SEC-012, REQ-OPS-006/007)', () =
     expect(body.services).toContainEqual({ id: 'email', status: 'disrupted' });
     expect(res.body).not.toMatch(/version|host|error|postgres|smtp/i);
     await app.close();
+  });
+});
+
+describe('[AT-OPS-002] Request-Log ohne IP-Adresse und ohne Query-Werte (REQ-OPS-002, RV-R-01, RV-C-07)', () => {
+  it('enthält Methode, Routenmuster, Status und Dauer, aber kein token= und keine IP', () => {
+    const entry = requestLogEntry(
+      { method: 'GET', url: '/api/v1/notifications/unsubscribe?token=geheim.abc', routeOptions: { url: '/api/v1/notifications/unsubscribe' } },
+      200,
+      12.4,
+    );
+    expect(entry).toEqual({ method: 'GET', route: '/api/v1/notifications/unsubscribe', status: 200, ms: 12 });
+    expect(JSON.stringify(entry)).not.toMatch(/token=|geheim|\d+\.\d+\.\d+\.\d+/);
+  });
+
+  it('auch ohne Routenmuster (404) nur der Pfad ohne Query', () => {
+    expect(requestLogEntry({ method: 'GET', url: '/widerspruch?token=abc' }, 200, 1).route).toBe('/widerspruch');
+  });
+
+  it('der Server protokolliert über den eigenen Eintrag (Fastify-Request-Log ist abgeschaltet)', async () => {
+    const lines: string[] = [];
+    const { default: pino } = await import('pino');
+    const logger = pino({ level: 'info' }, { write: (line: string) => void lines.push(line) });
+    process.env.WEB_DIST_DIR = '/does-not-exist';
+    const app = await createHttpServer({
+      config: loadConfig(),
+      logger,
+      metrics: createMetrics(),
+      resolveSession: async () => null,
+      isReady: async () => true,
+      ops: createOps({ maintenanceFromEnv: false, maintenanceUntilFromEnv: null, settings: memorySettings(), checkDatabase: async () => true, checkMail: async () => true }),
+    });
+    await app.inject({ method: 'GET', url: '/robots.txt?token=geheim', remoteAddress: '203.0.113.9' });
+    await app.close();
+    const all = lines.join(String.fromCharCode(10));
+    expect(all).toContain('"route":"/robots.txt"');
+    expect(all).not.toMatch(/geheim|203\.0\.113\.9|remoteAddress/);
   });
 });

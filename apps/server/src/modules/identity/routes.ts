@@ -9,6 +9,7 @@ import {
   IdParams,
   LoginBody,
   Me,
+  PrivacyAckBody,
   RegisterBody,
   ResetConfirmBody,
   SetRoleBody,
@@ -94,6 +95,10 @@ export function identityRoutes(service: IdentityService, config: Config): Fastif
 
     app.post('/me/terms', { schema: { tags, body: AcceptTermsBody, response: { 200: Me } } }, async (req) => {
       return service.acceptTerms(requireAuth(req).userId, req.body.version);
+    });
+
+    app.post('/me/privacy-ack', { schema: { tags, body: PrivacyAckBody, response: { 200: Me } } }, async (req) => {
+      return service.acknowledgePrivacy(requireAuth(req).userId, req.body.version);
     });
 
     app.get(

@@ -65,6 +65,11 @@ export function termsVersionOf(manifest: LegalManifest | null): string | null {
   return manifest?.documents.find((d) => d.name === 'nutzungsbedingungen' && d.lang === 'de')?.version || null;
 }
 
+/** Version der verbindlichen (deutschen) Datenschutzerklärung; neue Version → Hinweis beim Login (REQ-LEGAL-002, RV-R-08). */
+export function privacyVersionOf(manifest: LegalManifest | null): string | null {
+  return manifest?.documents.find((d) => d.name === 'datenschutz' && d.lang === 'de')?.version || null;
+}
+
 /** LEGAL_STRICT=true (Echtbetrieb): Start verweigern, solange Muster oder Platzhalter enthalten sind. */
 export function strictLegalProblems(manifest: LegalManifest | null): string[] {
   if (!manifest) return ['Rechtstexte nicht gefunden (legal-manifest.json fehlt)'];

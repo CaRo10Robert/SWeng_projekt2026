@@ -144,7 +144,13 @@ const catalogText = (() => { try { return readFileSync(CATALOG, 'utf8'); } catch
 if (!catalogText) err('nachweise.md', 'Nachweiskatalog fehlt');
 const catalogIds = new Set([...catalogText.matchAll(/^\|\s*`?((?:AT|MAN|CTRL)-[A-Z0-9-]+)`?\s*\|/gm)].map((m) => m[1]));
 
-const testFiles = TEST_SOURCES.flatMap((p) => walk(join(ROOT, p))).filter((f) => /\.(m?[jt]sx?)$/.test(f));
+// Nur echte Testquellen zählen (RV-R-23): *.test.* und *.spec.*, alles unter e2e/ und tests/ sowie der Smoke-Test;
+// eine Nachweis-ID in Produktivcode (z. B. in einem Kommentar) ist kein Nachweis.
+const isTestSource = (f) => {
+  const rel = relative(ROOT, f).split(sep).join('/');
+  return /\.(test|spec)\.m?[jt]sx?$/.test(rel) || /^(e2e|tests)\//.test(rel) || rel === 'scripts/smoke-test.mjs';
+};
+const testFiles = TEST_SOURCES.flatMap((p) => walk(join(ROOT, p))).filter((f) => /\.(m?[jt]sx?)$/.test(f) && isTestSource(f));
 const taggedInTests = new Map();
 for (const f of testFiles) {
   for (const m of readFileSync(f, 'utf8').matchAll(/\b(AT-[A-Z0-9]+-[A-Z0-9-]*[A-Z0-9])\b/g)) {

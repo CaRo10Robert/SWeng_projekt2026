@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import Fastify, { type FastifyError } from 'fastify';
+import Fastify, { LogController, type FastifyError } from 'fastify';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
@@ -57,7 +57,10 @@ export async function createHttpServer(options: HttpServerOptions) {
     genReqId: () => randomUUID(),
     bodyLimit: 1024 * 1024,
     return503OnClosing: true,
-    trustProxy: config.trustProxy,
+    // Genau ein vertrauenswürdiger Hop (Caddy im Profil proxy); weitere X-Forwarded-For-Einträge zählen nicht (RV-A-07)
+    trustProxy: config.trustProxy ? (_address: string, hop: number) => hop < 1 : false,
+    // Eigenes Request-Log ohne IP-Adresse, Port und Query-Werte (REQ-OPS-002, RV-R-01, RV-C-07)
+    logController: new LogController({ disableRequestLogging: true }),
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   await app.register(cookie);
@@ -121,8 +124,12 @@ export async function createHttpServer(options: HttpServerOptions) {
         .send(maintenancePage(maintenance.until));
     }
 
-    // Neue Nutzungsbedingungen: schreibende Aktionen erst nach erneuter Zustimmung (REQ-LEGAL-003)
-    if (req.auth && !req.auth.termsCurrent && requiresCurrentTerms(req)) {
+  });
+
+  // Neue Nutzungsbedingungen: schreibende Aktionen erst nach erneuter Zustimmung (REQ-LEGAL-003); nach dem
+  // Body-Parsing, weil bei PATCH /me und der Kontaktfreigabe der Inhalt entscheidet (RV-C-06)
+  app.addHook('preHandler', async (req) => {
+    if (req.auth && !req.auth.termsCurrent && requiresCurrentTerms({ method: req.method, url: req.url, body: req.body })) {
       throw new AppError(403, 'terms_required', 'Bitte stimme zuerst den aktuellen Nutzungsbedingungen zu.');
     }
   });
@@ -143,6 +150,7 @@ export async function createHttpServer(options: HttpServerOptions) {
     metrics.httpDuration
       .labels(req.method, req.routeOptions.url ?? 'unmatched', String(reply.statusCode))
       .observe(reply.elapsedTime / 1000);
+    req.log.info(requestLogEntry(req, reply.statusCode, reply.elapsedTime), 'request');
   });
 
   app.setErrorHandler((error: FastifyError | AppError, req, reply) => {
@@ -207,10 +215,19 @@ export async function createHttpServer(options: HttpServerOptions) {
   });
 
   // Statusseite (REQ-OPS-007), öffentlich und auch im Wartungsmodus erreichbar
+  // Grobe Begrenzung je Prozess: die Prüfungen selbst laufen höchstens einmal gleichzeitig (ops.ts, RV-A-11)
+  const statusLimiter = { windowStart: 0, count: 0 };
   app.get(
     `${API_PREFIX}/status`,
     { schema: { tags: ['ops'], security: [], response: { 200: SystemStatus } } },
     async (_req, reply) => {
+      const now = Date.now();
+      if (now - statusLimiter.windowStart > 10_000) Object.assign(statusLimiter, { windowStart: now, count: 0 });
+      if (++statusLimiter.count > STATUS_REQUESTS_PER_10S) {
+        throw Object.assign(new AppError(429, 'rate_limited', 'Zu viele Anfragen. Bitte versuche es gleich erneut.'), {
+          retryAfterSeconds: 10,
+        });
+      }
       reply.header('cache-control', 'no-store');
       return options.ops.status();
     },
@@ -233,7 +250,8 @@ export async function createHttpServer(options: HttpServerOptions) {
   // Bekannte SPA-Routen → 200, sonstige Seitenaufrufe → 404 mit der SPA, die „Seite nicht gefunden“ zeigt (REQ-UX-003)
   app.setNotFoundHandler((req, reply) => {
     const isApi = req.url.startsWith(API_PREFIX) || req.url.startsWith('/api/') || req.url.startsWith('/health');
-    if (spaAvailable && req.method === 'GET' && !isApi && !/\.[a-z0-9]+$/i.test(req.url.split('?')[0] ?? '')) {
+    const pageRequest = req.method === 'GET' || req.method === 'HEAD';
+    if (spaAvailable && pageRequest && !isApi && !/\.[a-z0-9]+$/i.test(req.url.split('?')[0] ?? '')) {
       return reply
         .status(isKnownSpaPath(req.url) ? 200 : 404)
         .header('cache-control', 'no-cache')
@@ -250,16 +268,38 @@ export async function createHttpServer(options: HttpServerOptions) {
 
 export type App = Awaited<ReturnType<typeof createHttpServer>>;
 
-/** RFC 9116: Pflichtfelder Contact und Expires; Expires höchstens ein Jahr, hier 180 Tage ab Start. */
+const STATUS_REQUESTS_PER_10S = 50;
+
+/**
+ * Ein Eintrag je Anfrage: Methode, Routenmuster (bzw. Pfad ohne Query), Status, Dauer; die Request-ID steht in den
+ * Bindings von req.log. Keine IP-Adresse, kein Port, keine Query-Werte (Tokens in Einmal- und Abmeldelinks).
+ */
+export function requestLogEntry(
+  req: { method: string; url: string; routeOptions?: { url?: string } },
+  statusCode: number,
+  elapsedMs: number,
+) {
+  return {
+    method: req.method,
+    route: req.routeOptions?.url ?? req.url.split('?')[0],
+    status: statusCode,
+    ms: Math.round(elapsedMs),
+  };
+}
+
+/**
+ * RFC 9116: Pflichtfelder Contact und Expires; Expires höchstens ein Jahr, hier 180 Tage ab Start. Web-URIs (Policy,
+ * Canonical) nur bei HTTPS, weil die Datei sonst nicht vertrauenswürdig ausgeliefert wird (RV-A-17).
+ */
 export function buildSecurityTxt(publicUrl: string, contact: string, now = new Date()): string {
   const expires = new Date(now.getTime() + 180 * 86_400_000);
   expires.setUTCHours(0, 0, 0, 0);
+  const https = publicUrl.startsWith('https://');
   return [
     `Contact: ${contact}`,
     `Expires: ${expires.toISOString()}`,
     'Preferred-Languages: de, en',
-    `Policy: ${publicUrl}/kontakt`,
-    `Canonical: ${publicUrl}/.well-known/security.txt`,
+    ...(https ? [`Policy: ${publicUrl}/kontakt`, `Canonical: ${publicUrl}/.well-known/security.txt`] : []),
     '',
   ].join('\n');
 }

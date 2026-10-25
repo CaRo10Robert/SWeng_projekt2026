@@ -9,6 +9,13 @@ export const APPEAL_RATE = { limit: 10, windowSeconds: 86_400 };
 export const EVIDENCE_HOLD_MONTHS = 6;
 /** DSA Art. 17 Abs. 3 lit. b: konkrete Tatsachen, nicht nur ein Stichwort (REQ-LEGAL-006). */
 export const MIN_REASON_LENGTH = 20;
+/** Begründung eines Widerspruchs (UC-35) und der Entscheidung darüber (UC-36), jeweils ohne Leerzeichen am Rand. */
+export const MIN_APPEAL_REASON_LENGTH = 20;
+
+/** Länge nach dem Entfernen von Leerzeichen am Rand (RV-C-11: nur Leerzeichen zählt nicht). */
+export function hasMinLength(text: string | undefined, min: number): boolean {
+  return (text ?? '').trim().length >= min;
+}
 
 /** Kalendermonate addieren; am Monatsende auf den letzten Tag begrenzen (31.08. + 6 = 28./29.02.). */
 export function addMonths(date: Date, months: number): Date {
@@ -56,14 +63,34 @@ export function checkAppeal(input: {
   return { ok: true };
 }
 
-/** Vier-Augen-Prinzip: Den Widerspruch entscheidet nie, wer die ursprüngliche Entscheidung getroffen hat. */
-export function canReviewAppeal(reviewerId: string, originalModeratorId: string): boolean {
-  return reviewerId !== originalModeratorId;
+/**
+ * Vier-Augen-Prinzip (REQ-LEGAL-007, RV-C-01): Den Widerspruch entscheidet nie, wer die ursprüngliche Entscheidung
+ * getroffen hat, wer selbst widerspricht, wer betroffen ist oder wer den Fall gemeldet hat.
+ */
+export function canReviewAppeal(input: {
+  reviewerId: string;
+  originalModeratorId: string;
+  appellantId: string | null;
+  subjectUserId: string | null;
+  reporterIds: readonly string[];
+}): boolean {
+  const { reviewerId } = input;
+  return (
+    reviewerId !== input.originalModeratorId &&
+    reviewerId !== input.appellantId &&
+    reviewerId !== input.subjectUserId &&
+    !input.reporterIds.includes(reviewerId)
+  );
+}
+
+/** Eine Moderationsentscheidung trifft nicht, wer betroffen ist oder den Fall selbst gemeldet hat (RV-C-01). */
+export function canDecideCase(input: { moderatorId: string; subjectUserId: string | null; reporterIds: readonly string[] }): boolean {
+  return input.moderatorId !== input.subjectUserId && !input.reporterIds.includes(input.moderatorId);
 }
 
 export type DecisionCheck =
   | { ok: true }
-  | { ok: false; code: 'rule_required' | 'criminal_reason_required' | 'reason_too_short'; path: string };
+  | { ok: false; code: 'rule_required' | 'criminal_reason_required' | 'reason_too_short' | 'legal_ground_required'; path: string };
 
 /** Pflichtangaben einer Moderationsentscheidung (REQ-LEGAL-006, REQ-LEGAL-008). */
 export function checkDecision(input: {
@@ -72,11 +99,16 @@ export function checkDecision(input: {
   ruleRef?: ModerationRule;
   criminalSuspicion?: CriminalSuspicion;
   criminalSuspicionReason?: string;
+  legalGround?: string;
 }): DecisionCheck {
-  if (input.reason.trim().length < MIN_REASON_LENGTH) return { ok: false, code: 'reason_too_short', path: 'reason' };
+  if (!hasMinLength(input.reason, MIN_REASON_LENGTH)) return { ok: false, code: 'reason_too_short', path: 'reason' };
   if (input.decision !== 'no_action' && !input.ruleRef) return { ok: false, code: 'rule_required', path: 'ruleRef' };
+  // DSA Art. 17 Abs. 3 lit. d: bei rechtswidrigen Inhalten die Rechtsgrundlage mit Erläuterung (RV-R-03)
+  if (input.decision !== 'no_action' && input.ruleRef === 'illegal_content' && !hasMinLength(input.legalGround, MIN_REASON_LENGTH)) {
+    return { ok: false, code: 'legal_ground_required', path: 'legalGround' };
+  }
   const flagged = (input.criminalSuspicion ?? 'none') !== 'none';
-  if (flagged && (input.criminalSuspicionReason ?? '').trim().length < MIN_REASON_LENGTH) {
+  if (flagged && !hasMinLength(input.criminalSuspicionReason, MIN_REASON_LENGTH)) {
     return { ok: false, code: 'criminal_reason_required', path: 'criminalSuspicionReason' };
   }
   return { ok: true };

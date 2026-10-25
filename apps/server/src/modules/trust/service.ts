@@ -74,7 +74,11 @@ export function createTrustService(deps: ModuleDeps) {
           SELECT count(DISTINCT reporter_id) AS n FROM trust.report WHERE case_id = ${kase.id} AND reporter_id IS NOT NULL`);
         if ((reporters?.n ?? 0) >= HIDE_THRESHOLD && !kase.hidden) {
           await tx.db.exec(sql`UPDATE trust.moderation_case SET hidden = true WHERE id = ${kase.id}`);
-          if (body.targetType === 'listing') await modules.listings.setHidden(tx, body.targetId, true);
+          if (body.targetType === 'listing') {
+            await modules.listings.setHidden(tx, body.targetId, true);
+            // Betroffene informieren: vorläufig, automatisch, Entscheidung folgt (REQ-MOD-004, RV-R-04)
+            await dsa.provisionalHide(tx, kase);
+          }
         }
         return { id: report.id };
       });

@@ -39,10 +39,10 @@ export async function createPgBossQueue(connectionString: string, log: Logger): 
     },
 
     async work(name, handler, options = {}) {
-      await boss.work<object>(name, { batchSize: options.batchSize ?? 1, pollingIntervalSeconds: 1 }, async (jobs) => {
+      await boss.work<object>(name, { batchSize: options.batchSize ?? 1, pollingIntervalSeconds: 1, includeMetadata: true }, async (jobs) => {
         for (const job of jobs) {
           try {
-            await handler(job.data as never, { id: job.id, name: job.name });
+            await handler(job.data as never, { id: job.id, name: job.name, finalAttempt: job.retryCount >= job.retryLimit });
           } catch (error) {
             log.warn({ err: error, job: job.name, jobId: job.id }, 'Job fehlgeschlagen, wird ggf. wiederholt');
             throw error;

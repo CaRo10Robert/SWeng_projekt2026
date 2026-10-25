@@ -111,7 +111,8 @@ export function useAppeal() {
 export const useTokenAppealInfo = (token: string | undefined) =>
   useQuery({
     queryKey: ['appeal-token', token],
-    queryFn: () => api<TokenAppealInfo>(`/appeals/token${qs({ token })}`),
+    // Token im Body, nie in der URL (RV-C-07)
+    queryFn: () => api<TokenAppealInfo>('/appeals/token/info', { method: 'POST', body: { token } }),
     enabled: !!token,
     retry: false,
   });

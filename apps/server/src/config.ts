@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { readLegalManifest, termsVersionOf } from './platform/legal.js';
+import { privacyVersionOf, readLegalManifest, termsVersionOf } from './platform/legal.js';
 
 /** Wurzel des Server-Pakets (gleich für `src/` mit tsx und `dist/` im Image). */
 export const APP_ROOT = resolve(import.meta.dirname, '..');
@@ -60,18 +60,22 @@ export function loadConfig() {
     trustProxy: bool('TRUST_PROXY', false),
     sessionTtlDays: int('SESSION_TTL_DAYS', 30),
     termsVersion: process.env.TERMS_VERSION || termsVersionOf(legalManifest) || '2026-10',
+    privacyVersion: privacyVersionOf(legalManifest) || '2026-10',
     seedDemo: bool('SEED_DEMO', false),
     demoMode: bool('DEMO_MODE', false),
     logLevel: env('LOG_LEVEL', 'info'),
     passwordBlocklistFile: env('PASSWORD_BLOCKLIST_FILE', resolve(APP_ROOT, 'assets/password-blocklist.txt')),
-    /** Geheimnis für das Hashen von IP-Adressen (REQ-PRIV-002). Im Beispiel unkritisch. */
-    ipHashSalt: env('IP_HASH_SALT', 'campusmarkt-demo-salt'),
     shutdownTimeoutMs: int('SHUTDOWN_TIMEOUT_MS', 25_000),
     /** Harter Wartungsmodus, z. B. während einer Wiederherstellung (REQ-OPS-006, ADR-0018). */
     maintenanceMode: bool('MAINTENANCE_MODE', false),
     maintenanceUntil: process.env.MAINTENANCE_UNTIL || null,
-    /** Signiert die Abmeldelinks in Benachrichtigungs-Mails (REQ-NOTI-003, REQ-OPS-010). Im Beispiel unkritisch. */
-    unsubscribeSecret: env('UNSUBSCRIBE_SECRET', 'campusmarkt-demo-unsubscribe'),
+    /**
+     * Signiert die Abmeldelinks in Benachrichtigungs-Mails (REQ-NOTI-003, REQ-OPS-010). Ohne UNSUBSCRIBE_SECRET erzeugt
+     * der Start ein zufälliges Geheimnis und speichert es in `platform.setting` (kein öffentlicher Standardwert, RV-C-02).
+     */
+    unsubscribeSecret: process.env.UNSUBSCRIBE_SECRET || '',
+    /** Löschjournal außerhalb der Datenbank (ADR-0018, RV-A-01); eigenes Volume im Docker-Beispiel. */
+    journalDir: env('JOURNAL_DIR', resolve(APP_ROOT, '../../.data/journal')),
     /** Kontakt in security.txt (REQ-SEC-012); Platzhalter bis zum Echtbetrieb. */
     securityContact: env('SECURITY_CONTACT', 'mailto:security@hwg-lu.example'),
   };

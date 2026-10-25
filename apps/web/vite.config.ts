@@ -21,7 +21,7 @@ export default defineConfig({
       manifest: {
         name: 'CampusMarkt HWG LU',
         short_name: 'CampusMarkt',
-        description: 'Tausch- und Verkaufsplattform für Angehörige der HWG Ludwigshafen',
+        description: 'Tausch- und Verkaufsplattform der HWG Ludwigshafen / Swap and sell marketplace of HWG Ludwigshafen',
         lang: 'de',
         start_url: '/',
         display: 'standalone',
