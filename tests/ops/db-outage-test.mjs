@@ -58,7 +58,7 @@ try {
   const after = { restarts: restarts(), startedAt: startedAt() };
   check('App-Prozess läuft weiter (kein Absturz, kein Neustart)', after.restarts === before.restarts && after.startedAt === before.startedAt, { before, after });
   check('Lebendigkeit bleibt „ok“ (REQ-OPS-001)', live.status === 200, live.status);
-  check('Bereitschaft meldet „nicht bereit“ (REQ-OPS-001)', ready.status === 503, ready.status);
+  check('[AT-OPS-001-3] Bereitschaft meldet „nicht bereit“, Lebendigkeit bleibt „ok“ bei fehlender Datenbank (REQ-OPS-001)', ready.status === 503, ready.status);
   const db = status.json?.services?.find((s) => s.id === 'database');
   check('Status-API meldet die Datenbank als gestört, ohne interne Details (REQ-OPS-007)',
     status.status === 200 && db?.status === 'disrupted' && !/postgres|ECONN|password|host/i.test(status.text), { status: status.status, db });

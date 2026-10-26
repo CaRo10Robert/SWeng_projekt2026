@@ -3,7 +3,7 @@ id: REQ-SEC-008
 title: Sicherheitsprüfungen in der CI-Pipeline
 type: security
 class: constraint
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 release: R1
@@ -12,9 +12,9 @@ moscow_reason: [2, 4]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 07, NIST SSDF
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [CTRL-CI-SCAN]
 ---
 
@@ -39,8 +39,9 @@ Lieferkettenrisiken und versehentlich eingecheckte Geheimnisse sind ohne Automat
 | Geheimnis wurde bereits eingecheckt | Geheimnis gilt als kompromittiert und wird gewechselt; Entfernen aus der Historie allein genügt nicht |
 
 ## Nachweis
-- `CTRL-CI-SCAN`: Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt.
-- Stand: **nicht umgesetzt** (Umsetzungsstand ⬜).
+- `CTRL-CI-SCAN`: Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt – CI-Job `security-scans`: SAST mit Semgrep (Regelsätze JavaScript, TypeScript, OWASP Top Ten, SARIF-Bericht), SCA mit `pnpm audit --audit-level high`, Secret-Scan mit gitleaks über die gesamte Historie, Image-Scan mit Trivy (HIGH/CRITICAL brechen den Lauf ab), SBOM im CycloneDX-Format als Artefakt `security-reports`.
+- Befunde der Ersteinrichtung (2026-10-26) und Behandlung: 2 kritische und 9 hohe Abhängigkeitsbefunde durch Updates behoben (sharp 0.35.5, @fastify/static 10.1.5, @fastify/swagger-ui 6.1.1, nodemailer 10.0.16, vitest 4.1.11); 11 hohe Image-Befunde durch Entfernen von npm, npx, corepack und yarn aus dem Runtime-Image behoben.
+- Begründete Ausnahmen mit Ablaufdatum: `.gitleaks.toml` (drei feste Testwerte, bis 2027-04), `.trivyignore` mit `--ignore-unfixed` für Debian-Pakete ohne verfügbaren Fix (bis 2027-01), gezielte `nosemgrep`-Kommentare mit Begründung in `notifications/index.ts`.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -48,3 +49,4 @@ Lieferkettenrisiken und versehentlich eingecheckte Geheimnisse sind ohne Automat
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Fehlschlagkriterien ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason (Kriterium 4: Guideline); Status `approved` |
+| 1.3 | 2026-10-26 | Security-Scans in CI eingerichtet (B-06), Befunde und Ausnahmen dokumentiert; Status → implemented |

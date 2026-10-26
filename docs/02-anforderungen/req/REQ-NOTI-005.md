@@ -15,9 +15,9 @@ epic: EPIC-05
 source: QS-3, BG-1
 use_cases: [UC-01, UC-23]
 depends_on: [REQ-NOTI-001]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [AT-NOTI-005, CTRL-DLQ]
 ---
 
@@ -52,7 +52,7 @@ Ohne Verifikationsmail keine Registrierung (BG-1). Qualitätsszenario QS-3.
 
 ## Nachweis
 - `AT-NOTI-005`: Resilienztest QS-3 mit gestopptem Mail-Catcher (neu).
-- `CTRL-DLQ`: Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen.
+- `CTRL-DLQ`: Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen – geprüft mit `tests/ops/dlq-test.mjs` (Mailpit gestoppt, Passwort-Reset angefordert, nach 302 s steht der Job mit Vorlage `password_reset` in der Ansicht, die App bleibt erreichbar); Protokoll [CTRL-DLQ](../../05-umsetzung/nachweise/CTRL-DLQ.md). Läuft wegen der Dauer wöchentlich im Workflow `ops-weekly.yml`, nicht bei jedem Push.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -60,3 +60,4 @@ Ohne Verifikationsmail keine Registrierung (BG-1). Qualitätsszenario QS-3.
 | 1.0 | 2026-10-20 | Erstfassung im Katalog („transaktional eingereihter Job“) |
 | 2.0 | 2026-10-23 | Lösungsneutral als Zuverlässigkeitsanforderung (Fallstudie FS-M5), Metrik und Messverfahren |
 | 2.1 | 2026-10-23 | Review v0.2: R-24 Ziel „Ausfälle bis 30 min ohne Verlust“ statt offener Wiederholungsparameter, Dead-Letter-Übersicht, Messverfahren angepasst; Must-Begründung |
+| 2.2 | 2026-10-26 | CTRL-DLQ mit Test und Protokoll belegt, wöchentlicher Workflow |

@@ -3,9 +3,9 @@ id: OPS-MAIL
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.0
+version: 1.1
 created: 2026-10-24
-last_updated: 2026-10-24
+last_updated: 2026-10-26
 ---
 
 # Zustellbarkeit der E-Mails (SPF, DKIM, DMARC)
@@ -39,7 +39,8 @@ _dmarc.campusmarkt.example.     IN TXT "v=DMARC1; p=none; rua=mailto:dmarc-repor
 
 ## Weitere Regeln
 
-- **Absender:** `MAIL_FROM` mit eigener Domain, z. B. `CampusMarkt <no-reply@campusmarkt.example>`; `Reply-To` auf die Kontaktstelle.
+- **Absender:** `MAIL_FROM` mit eigener Domain; im Beispiel `CampusMarkt HWG LU <no-reply@campusmarkt.example>`, passend zu den DNS-Einträgen oben (vorher `campusmarkt.local`, Befund N-1 aus [MAN-NOTI-004](../05-umsetzung/nachweise/MAN-NOTI-004.md)).
+- **Antwortadresse:** `MAIL_REPLY_TO` = Kontaktstelle, im Beispiel `CampusMarkt Support <campusmarkt-support@hwg-lu.example>` (fiktiv; Befund N-2).
 - **Inhalte:** reine Transaktionsmails, keine Werbung (UWG § 7 nicht berührt); Text- und HTML-Teil; Fußzeile mit Impressum-Link (REQ-UX-006) und Abmeldelink für abbestellbare Kategorien (REQ-NOTI-003, `List-Unsubscribe`).
 - **Bounces:** harte Bounces (Adresse existiert nicht mehr) markieren das Konto; nach 3 harten Bounces keine weiteren Mails und Hinweis beim nächsten Login. Im Beispiel nicht umgesetzt (Mailpit kennt keine Bounces).
 - **Prüfen:** Testmails an Hochschul-Postfächer und Werkzeuge wie `mail-tester` (im Echtbetrieb zusätzlich Prüfpostfach des RZ, fiktiv); DMARC-Berichte wöchentlich ansehen.

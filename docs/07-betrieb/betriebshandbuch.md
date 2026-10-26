@@ -3,9 +3,9 @@ id: OPS-RUNBOOK
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Betriebshandbuch
@@ -32,13 +32,13 @@ Architektur und Begründung: [Architektur, Verteilungssicht](../03-architektur/a
 | Standard starten | `docker compose up -d` |
 | mit TLS-Proxy | `docker compose --env-file .env.proxy.example --profile proxy up -d` |
 | mit Überwachung | `docker compose --profile monitoring up -d` |
-| Zustand prüfen | `docker compose ps` (Spalte „healthy“) |
+| Zustand prüfen | `docker compose ps -a` (Spalte „healthy“; `-a` zeigt auch gestoppte Container, z. B. eine gestoppte Datenbank – Befund H-1 aus [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md)) |
 | Protokolle | `docker compose logs -f app` |
 | stoppen (Daten bleiben) | `docker compose down` |
 | alles zurücksetzen (**löscht Daten**) | `docker compose down -v` |
 | Image neu bauen | `docker compose build` |
 
-Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campusmarkt.localhost:8443`), Mailpit unter `http://localhost:8025`, mit Profil `monitoring` Prometheus unter `http://127.0.0.1:9090` und Alertmanager unter `http://127.0.0.1:9093`.
+App, Mailpit, Prometheus und Alertmanager sind nur an `127.0.0.1` gebunden. Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campusmarkt.localhost:8443`), Mailpit unter `http://localhost:8025`, mit Profil `monitoring` Prometheus unter `http://127.0.0.1:9090` und Alertmanager unter `http://127.0.0.1:9093`.
 
 ## 3. Konfiguration (Umgebungsvariablen)
 
@@ -50,7 +50,10 @@ Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campus
 | `TRUST_PROXY` | `false` | `true` hinter einem Reverse Proxy: Client-IP aus `X-Forwarded-For`, genau ein Hop |
 | `DATABASE_URL` | Compose-intern | Verbindung zur Datenbank |
 | `DB_POOL_SIZE` | 10 | Verbindungen je Prozess |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `MAIL_FROM` | Mailpit | Mailversand; im Echtbetrieb SMTP-Relay (siehe [Zustellbarkeit](mail-zustellbarkeit.md)) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | Mailpit | Mailversand; im Echtbetrieb SMTP-Relay (siehe [Zustellbarkeit](mail-zustellbarkeit.md)) |
+| `MAIL_FROM` | `CampusMarkt HWG LU <no-reply@campusmarkt.example>` | Absender; Domain muss zu SPF/DKIM/DMARC passen (Befund N-1 aus MAN-NOTI-004) |
+| `MAIL_REPLY_TO` | `CampusMarkt Support <campusmarkt-support@hwg-lu.example>` (fiktiv) | Antwortadresse aller E-Mails = Kontaktstelle (REQ-LEGAL-005, Befund N-2) |
+| `API_DOCS` | wie `DEMO_MODE` | `true`: OpenAPI-Dokumentation unter `/api/docs`; im Echtbetrieb **false** (Pentest-Befund PT-F-17) |
 | `TERMS_VERSION` | leer | nur **Override**: Die Version der Nutzungsbedingungen kommt aus dem Front Matter (`legal-manifest.json`, ADR-0015). Ein gesetzter Wert überschreibt sie und kann zu Abweichungen führen – im Normalfall nicht setzen |
 | `LEGAL_STRICT` | `false` | `true`: Die App startet nicht, solange Rechtstexte Platzhalter enthalten (Pflicht im Echtbetrieb) |
 | `SESSION_TTL_DAYS` | 30 | maximale Sitzungsdauer |
@@ -60,7 +63,9 @@ Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campus
 | `SECURITY_CONTACT` | `mailto:security@hwg-lu.example` | Kontakt in `security.txt`; im Echtbetrieb echte Adresse |
 | `JOURNAL_DIR` | `/data/journal` (Volume `journal`) | Ablage des Löschjournals (ADR-0018) |
 | `MAINTENANCE_MODE` / `MAINTENANCE_UNTIL` | `false` / leer | harter Wartungsmodus mit voraussichtlichem Ende (Neustart nötig); daneben gibt es den weichen Modus über die Admin-Oberfläche, siehe [Wartung](wartung-statusseite.md) |
-| `LOG_LEVEL` | `info` | Protokollstufe |
+| `LOG_LEVEL` | `info` | Protokollstufe; das Request-Log enthält Methode, Route ohne Query, Status, Dauer und Request-ID, keine IP-Adresse. Eine Request-ID vom Client (`x-request-id`) wird nur übernommen, wenn sie eine UUID ist; unbekannte Pfade erscheinen als `unmatched`. Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme |
+| `PROMETHEUS_PORT`, `ALERTMANAGER_PORT`, `PROXY_HTTPS_PORT`, `PROXY_HTTP_PORT` | 9090, 9093, 8443, 8088 | Host-Ports der Profile `monitoring` und `proxy` |
+| `DEV_DB_PORT`, `DEV_SMTP_PORT`, `DEV_MAILPIT_PORT` | 5432, 1025, 8025 | nur Entwicklungsumgebung (`compose.dev.yaml`), an `127.0.0.1` gebunden; Vite liest `VITE_API_TARGET` bzw. den `PORT` des Servers aus `.env` |
 | `SHUTDOWN_TIMEOUT_MS` | Standardwert im Code | Zeit für geordnetes Herunterfahren |
 
 Die IP-Pseudonymisierung braucht keine Variable mehr: Der Schlüssel wird zufällig erzeugt und täglich in der Datenbank rotiert (`platform.ip_pepper`, ADR-0014).
@@ -95,10 +100,27 @@ Geheimnisse (Datenbankpasswort, SMTP-Zugang) gehören im Echtbetrieb nicht in `c
 | Symptom | Ursache | Abhilfe |
 |---|---|---|
 | `app` wird nicht „healthy“ | Datenbank noch nicht bereit, Migration fehlgeschlagen | `docker compose logs app`; Migrationen laufen beim Start automatisch (REQ-OPS-005) |
+| **Datenbank nicht erreichbar** (Alarm `NotReady`, Statusseite „Datenbank gestört“, `/health/ready` 503) | `db`-Container gestoppt oder abgestürzt, Volume voll, Verbindungsabbruch | Runbook siehe unten (Abschnitt 6.1) |
 | Port belegt | anderer Dienst auf 8080/8025 | `APP_PORT=8081 docker compose up -d` |
 | keine E-Mails | Mailpit nicht erreichbar | Jobs werden wiederholt (ADR-0005); nach Neustart von Mailpit kommen sie an |
 | Demo-Konto muss nach einem Update den Nutzungsbedingungen zustimmen | Installation ohne `SEED_DEMO=true` gestartet, daher kein Abgleich | mit `SEED_DEMO=true` neu starten oder einmal zustimmen; Tim ist absichtlich der Testfall |
 | alle Anfragen 503 | Wartungsmodus aktiv | weicher Modus: als Administrator in der Admin-Oberfläche ausschalten (Admins sind vom Wartungsmodus ausgenommen); harter Modus: `MAINTENANCE_MODE=false`, Neustart von `app` |
 | Registrierung liefert 429 | Registrierungsgrenze je IP erreicht (Q-18) | eine Stunde warten; im Test Stack neu aufsetzen |
+
+### 6.1 Runbook „Datenbank nicht erreichbar“
+
+Ergebnis der Störungsübung [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md) (Befund H-2). Die App bleibt bei einem Datenbankausfall erreichbar (Lebendigkeit „ok“, Bereitschaft 503, Status-, Rechts- und Wartungsseiten laden; abgesichert durch AT-OPS-001-3) und verbindet sich nach dem Start der Datenbank selbst wieder.
+
+1. Einstufen: SEV-1 ([Incident-Prozess](incident-prozess.md)); Ankündigungsbanner ist bei ausgefallener Datenbank nicht setzbar – Ausweichkanal nutzen (siehe Incident-Prozess, Kommunikation).
+2. Zustand: `docker compose ps -a` (läuft `db`? Exit-Code?), `docker compose logs --tail 100 db`.
+3. Speicher prüfen: `docker system df -v` bzw. freier Platz des Volumes `pgdata`; bei vollem Volume Platz schaffen, keine Dateien im Volume löschen.
+4. Starten: `docker compose start db`, auf „healthy“ warten (`docker compose ps`).
+5. Prüfen: `curl -s http://localhost:8080/health/ready` → 200 innerhalb von 60 s; Anmeldung mit einem Testkonto; Alarm `NotReady` wird nach höchstens 5 min als behoben gemeldet.
+6. Startet die Datenbank nicht (beschädigte Daten): Wiederherstellung nach [backup-restore.md](backup-restore.md); bei Verdacht auf Datenabfluss zusätzlich [Datenpannen-Prozess](../06-recht/datenpannen-prozess.md).
+7. Postmortem nach Incident-Prozess.
+
+### 6.2 Notfall: alle Sitzungen beenden
+
+Bei Verdacht auf gestohlene Sitzungen oder Zugangsdaten beendet ein Administrator in der Admin-Oberfläche (Bereich „Sicherheit“, zweistufige Bestätigung) **alle** Sitzungen einschließlich der eigenen (`POST /api/v1/admin/security/end-sessions`, Eintrag im Audit-Log). Optional wird beim nächsten Login ein Passwortwechsel erzwungen: Die Anmeldung antwortet dann mit `password_change_required` und schickt einen Link zum Zurücksetzen. Für die Information **aller** Mitglieder gibt es bewusst keine Rundmail (Missbrauchsrisiko); genutzt wird das Ankündigungsbanner bzw. bei ausgefallener App der Ausweichkanal.
 
 Weitere Hinweise: README des Repos, Abschnitt Fehlerbehebung (REQ-OPS-003).

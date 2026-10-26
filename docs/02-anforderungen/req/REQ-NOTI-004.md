@@ -13,9 +13,9 @@ kano: basis
 epic: EPIC-12
 source: Zustellbarkeit an Hochschul-Postfächer
 use_cases: [UC-23]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [MAN-NOTI-004]
 ---
 
@@ -39,7 +39,7 @@ Ohne Absenderauthentifizierung landen Verifikationsmails im Spam; ohne Verifikat
 | Messkontext | Echtbetrieb vor Go-Live, danach bei jeder Änderung der Mailkonfiguration |
 
 ## Nachweis
-- `MAN-NOTI-004`: Protokoll des mail-tester-Laufs und der Testzustellung (erst im Echtbetrieb).
+- `MAN-NOTI-004`: Protokoll des mail-tester-Laufs und der Testzustellung – als Übung: [MAN-NOTI-004](../../05-umsetzung/nachweise/MAN-NOTI-004.md). Header in Mailpit echt geprüft, DNS-Einträge syntaktisch gültig, mail-tester-Werte fiktiv (Q-28). Befunde behoben: Absender `no-reply@campusmarkt.example` (`MAIL_FROM`) passt zu den Beispiel-DNS-Einträgen, `Reply-To` ist die Kontaktstelle (`MAIL_REPLY_TO`).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -47,3 +47,4 @@ Ohne Absenderauthentifizierung landen Verifikationsmails im Spam; ohne Verifikat
 | 1.0 | 2026-10-20 | Erstfassung im Katalog, N/A für das Beispiel |
 | 1.1 | 2026-10-23 | Eigene Datei, Messverfahren; MoSCoW für R1 auf W (EPIC-12) |
 | 1.2 | 2026-10-23 | Review v0.2: Reviewer nach Fachgebiet (R-16); Status in-review → approved nach Review |
+| 1.3 | 2026-10-26 | Nachweis MAN-NOTI-004 als Übung verlinkt; Absenderdomain und Reply-To behoben |

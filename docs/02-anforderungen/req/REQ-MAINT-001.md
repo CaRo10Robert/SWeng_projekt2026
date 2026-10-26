@@ -3,7 +3,7 @@ id: REQ-MAINT-001
 title: Testabdeckung der Fachlogik
 type: quality
 class: quality
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -12,9 +12,9 @@ moscow: S
 kano: n/a
 epic: EPIC-00
 source: BG-5
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [CTRL-COVERAGE, CTRL-MUTATION]
 ---
 
@@ -36,9 +36,8 @@ Erweiterbarkeit ohne Umbau (BG-5) setzt belastbare Tests voraus.
 | Verhalten bei Verfehlung | CI schlägt fehl, wenn die Abdeckung unter den Schwellwert fällt |
 
 ## Nachweis
-- `CTRL-COVERAGE`: Coverage-Schwelle in der Testkonfiguration (neu einzurichten).
-- `CTRL-MUTATION`: Mutationstestlauf (neu einzurichten).
-- Umsetzungsstand 🟡: Unit-Tests der Geschäftsregeln vorhanden, Abdeckung nicht gemessen.
+- `CTRL-COVERAGE`: Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Messwerte (2026-10-26): Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen (Schwelle 95 % Zeilen, 85 % Zweige, 95 % Funktionen); **Fachmodule insgesamt 15,9 %** (Schwelle 13 % = Messwert minus 2 Pp). **Lücke zu Kriterium (1) ≥ 80 % offen:** Die Services hängen an der Datenbank und werden nur über Smoke- und E2E-Tests ausgeführt, die nicht in die Messung eingehen. Lösungsweg: Server unter Smoke- und E2E-Tests mit `NODE_V8_COVERAGE` messen und mit der Unit-Coverage zusammenführen (Backlog B-64).
+- `CTRL-MUTATION`: StrykerJS 10.0.0 auf die Geschäftsregeln (`stryker.config.mjs`), Workflow `mutation.yml` montags und auf Anforderung. Score **73,8 %** (Schwelle 60 %) – Kriterium (2) erfüllt; Ausreißer `platform/pseudonym.ts` 45,9 % (datenbanknahe Mutanten) und `listings/domain.ts` 59,3 %.
 
 
 ## Änderungshistorie
@@ -47,3 +46,4 @@ Erweiterbarkeit ohne Umbau (BG-5) setzt belastbare Tests voraus.
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Codepfade in den Messkontext) |
+| 2.2 | 2026-10-26 | Coverage und Mutationstests eingerichtet; Messwerte und Lücke Fachmodule (15,9 % statt 80 %) dokumentiert, B-64; Status → implemented |

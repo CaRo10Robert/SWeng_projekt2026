@@ -3,9 +3,9 @@ id: LEGAL-VVT
 type: privacy
 status: in-review
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Verzeichnis der Verarbeitungstätigkeiten (Art. 30 DSGVO)
@@ -39,7 +39,7 @@ Rechtsgrundlagen-Kürzel: **e** = Art. 6 Abs. 1 lit. e DSGVO i. V. m. dem Landes
 | V-6 | Meldungen, Moderation, Widerspruch | Melde- und Abhilfeverfahren, Begründung, internes Beschwerdemanagement | Meldende, Betroffene | Meldung (Grund, Text), betroffener Inhalt, Entscheidung, Begründung, Regel, Rechtsgrundlage, Mitteilungen im Konto, Widerspruch, Einmal-Links (Hash), Originaltexte entfernter Nachrichten, Kennzeichen Straftatverdacht, Beweissicherung als pseudonymisierte Kopie (Inhalt mit ± 5 Nachrichten Kontext) | c (DSA Art. 16, 17, 18, 20; Übungsannahme Q-28: DSA anwendbar) | Moderation (Originaltext nur im Widerspruch, protokolliert); bei Art. 18 Strafverfolgungsbehörden | 12 Monate nach Abschluss; Originaltexte 6 Monate (nicht bei offenem Widerspruch); Einmal-Links bis Fristende (6 Monate); Beweissicherung bis Freigabe, höchstens 6 Monate | REQ-MOD-*, REQ-LEGAL-006…008 |
 | V-7 | Audit-Log | Nachvollziehbarkeit von Verwaltungsaktionen | Moderation, Administration, Betroffene | handelnde Person, Aktion, Ziel, Zeit, Begründung | c, e | Administration | 24 Monate | REQ-MOD-003 |
 | V-8 | E-Mail-Benachrichtigungen | Kontomails, Hinweise auf Nachrichten und Abläufe, Begründungen | Mitglieder | E-Mail-Adresse, Art der Mail (ohne Nachrichteninhalt) | e | Auftragsverarbeiter E-Mail-Versand | Versandprotokoll 30 Tage (Übungsannahme Q-28) | REQ-NOTI-* |
-| V-9 | Protokolle, Metriken, Rate-Limits | Betrieb, Fehlersuche, Sicherheit | alle Nutzenden | Request-Log: Zeit, Methode, Route ohne Query, Status, Dauer, Request-ID – keine IP-Adresse, kein Port, keine Tokens; Rate-Limit-Zähler mit IP und E-Mail nur als HMAC-Pseudonym (Schlüssel täglich neu, Vorgänger nach 1 h gelöscht) | e; Art. 32 | Betriebsteam | Protokolle 14 Tage (Übungsannahme Q-28); Zähler höchstens 7 Tage (im Beispiel 1 Tag); Schlüssel 25 h | REQ-OPS-002, REQ-PRIV-002, ADR-0014 |
+| V-9 | Protokolle, Metriken, Rate-Limits | Betrieb, Fehlersuche, Sicherheit | alle Nutzenden | Request-Log: Zeit, Methode, Route ohne Query (unbekannte Pfade als `unmatched`), Status, Dauer, Request-ID (nur UUID) – keine IP-Adresse, kein Port, keine Tokens; Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) nur mit HMAC-Pseudonym; Rate-Limit-Zähler mit IP und E-Mail nur als HMAC-Pseudonym (Schlüssel täglich neu, Vorgänger nach 1 h gelöscht) | e; Art. 32 | Betriebsteam | Protokolle 14 Tage (Übungsannahme Q-28); Zähler höchstens 7 Tage (im Beispiel 1 Tag); Schlüssel 25 h | REQ-OPS-002, REQ-PRIV-002, ADR-0014 |
 | V-10 | Datensicherung | Wiederherstellung nach Störungen | alle | vollständige Kopie von Datenbank und Bildern; Löschjournal (nur Art, ID, Zeitpunkt einer Löschung) | e i. V. m. Art. 32; Löschjournal c i. V. m. Art. 17 | Betriebsteam; ggf. Auftragsverarbeiter Speicher | Sicherungen höchstens 28 Tage rollierend (7 Tage täglich, danach wöchentlich, auch die neueste); Löschjournal 35 Tage | REQ-AVAIL-003, [Backup](../07-betrieb/backup-restore.md) |
 | V-11 | Steuermeldung DAC7 | Erfüllung des PStTG | Verkäufer über Schwelle | Identität, Anschrift, Geburtsdatum, Steuer-ID, Anzahl und Summe der Verkäufe je Quartal | c (PStTG; Übungsannahme Q-28: Meldepflicht besteht, § 3 greift nicht) | Bundeszentralamt für Steuern | 10 Jahre nach Meldezeitraum (§ 22 PStTG, Übungswert) | REQ-LEGAL-009, [DAC7-Konzept](dac7-konzept.md) |
 | V-12 | Anfragen an die Kontaktstelle | Beantwortung von Anfragen, Meldungen ohne Konto, Behördenanfragen | Anfragende | Name, E-Mail, Inhalt der Anfrage | e, c | zuständige Stelle der Hochschule | 12 Monate nach Abschluss der Anfrage (Übungsannahme Q-28) | REQ-LEGAL-005 |

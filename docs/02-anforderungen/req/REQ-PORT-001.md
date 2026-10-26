@@ -12,9 +12,9 @@ moscow: S
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 05
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [MAN-PORT-001]
 ---
 
@@ -38,7 +38,7 @@ Dev/Prod-Parität (Twelve-Factor, Guideline Kap. 05); schnelles Onboarding im St
 | Verhalten bei Verfehlung | README und Skripte werden nachgebessert |
 
 ## Nachweis
-- `MAN-PORT-001`: Protokoll des Onboarding-Tests.
+- `MAN-PORT-001`: Protokoll des Onboarding-Tests – [MAN-PORT-001](../../05-umsetzung/nachweise/MAN-PORT-001.md) (simuliert, 3 min 25 s). Die Befunde (feste Ports in `compose.dev.yaml`, Dev-Proxy ohne `.env`) sind behoben: Ports nur an 127.0.0.1 und per `DEV_DB_PORT`, `DEV_SMTP_PORT`, `DEV_MAILPIT_PORT` änderbar; Vite liest `VITE_API_TARGET` bzw. den `PORT` des Servers aus `.env`.
 
 
 ## Änderungshistorie
@@ -47,3 +47,4 @@ Dev/Prod-Parität (Twelve-Factor, Guideline Kap. 05); schnelles Onboarding im St
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should) |
+| 2.2 | 2026-10-26 | Nachweis MAN-PORT-001 mit Protokoll verlinkt; Port-Befunde behoben |

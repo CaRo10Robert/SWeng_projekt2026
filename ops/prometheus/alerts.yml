@@ -22,7 +22,7 @@ groups:
         annotations:
           summary: CampusMarkt meldet „nicht bereit“
           description: Die Readiness-Prüfung schlägt seit 5 Minuten fehl, meist ist die Datenbank nicht erreichbar (REQ-OPS-001).
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#61-runbook-datenbank-nicht-erreichbar
 
       - alert: HighErrorRate
         # Nicht während des Wartungsmodus (503 sind dann gewollt) und erst ab Mindestlast von 0,1 Anfragen/s,

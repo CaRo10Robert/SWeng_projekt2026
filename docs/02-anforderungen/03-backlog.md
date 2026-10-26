@@ -3,9 +3,9 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-26
 ---
 
 # Product Backlog und Release-Planung
@@ -87,6 +87,12 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-56 | Datensicherung und Wiederherstellung per Skript, Restore-Test in CI | Enabler | REQ-AVAIL-003 | n/a | hoch | B-07 | 3 | 1 | 3 | 13 | 17 | 5,7 | 5 |
 | B-57 | Betriebshandbuch, Störungsprozess mit Übung, Mail-Zustellbarkeit, Pentest-Plan, Go-live-Checkliste | Enabler | REQ-OPS-011, REQ-OPS-010, REQ-SEC-013 | n/a | mittel | – | 3 | 1 | 2 | 5 | 8 | 2,7 | 6 |
 | B-58 | Renovate-Konfiguration mit Prüfung in CI | Enabler | REQ-OPS-012 | n/a | niedrig | B-07 | 1 | 1 | 1 | 3 | 5 | 5,0 | 6 |
+| B-59 | Konto-Sicherheit I: Passwort im Profil ändern (mit altem Passwort, andere Sitzungen beenden) und Hinweismail nach jeder Passwortänderung (Pentest PT-F-04, PT-F-06; ASVS 2.1.5, 2.2.3, 2.5.5) | Feature | REQ-SEC-001, REQ-SEC-003 | basis | hoch | – | 3 | 3 | 1 | 5 | 9 | 3,0 | R2 |
+| B-60 | Konto-Sicherheit II: Leerlaufgrenze der Sitzung, Übersicht „aktive Sitzungen“ und „überall abmelden“ (PT-F-08; ASVS 3.3.2, 3.3.4) | Feature | REQ-SEC-004, REQ-SEC-001 | basis | hoch | – | 3 | 2 | 1 | 5 | 8 | 2,7 | R2 |
+| B-61 | Härtung: Cookie `__Host-cm_session`, Pepper für Passwort-Hashes analog ADR-0014 (PT-F-07, PT-F-09; ASVS 2.4.5, 3.4.4) | Enabler | REQ-SEC-002, REQ-SEC-004 | n/a | hoch | – | 2 | 1 | 1 | 3 | 5 | 2,5 | R2 |
+| B-62 | Passwortformular: Stärkeanzeige und „Passwort anzeigen“ (PT-F-05; ASVS 2.1.8, 2.1.12) | Feature | REQ-SEC-003 | basis | mittel | – | 2 | 2 | 1 | 1 | 4 | 2,0 | R2 |
+| B-63 | Sicherheitsalarme und Bestätigungen: erneute Passwortabfrage für Rollenwechsel und DAC7-Export, Metrik und Alarm bei gehäuften Fehlanmeldungen, `Content-Disposition` für JSON-Antworten (PT-F-10 bis PT-F-12; ASVS 3.7.1, 4.3.3, 11.1.8, 14.4.2) | Enabler | REQ-SEC-001, REQ-OPS-008 | basis | hoch | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
+| B-64 | Coverage der Fachmodule auch unter Smoke- und E2E-Tests messen (`NODE_V8_COVERAGE`, zusammengeführt mit der Unit-Coverage), Ziel ≥ 80 % (REQ-MAINT-001 Kriterium 1) | Enabler | REQ-MAINT-001 | n/a | mittel | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
 
 **Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
 
@@ -129,6 +135,13 @@ gantt
 | 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung | B-54, B-53, B-51 | 14 |
 
 **Einordnung EPIC-13 (2026-10-24, Q-23):** Der Auftraggeber hat die Rechts- und Betreiberpflichten als Übung in R1 aufgenommen. Sie passen nicht in die Sprints 1–4, deren Umfang feststeht; der Feature Freeze nach Sprint 3 gilt weiter für den bisherigen R1-Umfang. EPIC-13 erweitert R1 um drei Sprints (53 SP bei ~20 SP Kapazität). **Reihenfolge:** alle Must-Einträge (B-43, B-44, B-46, B-49, B-50, B-56, B-57) in Sprint 5 und 6; Sprint 5 zuerst die Einträge mit hohem WSJF und die Rechtspflichten, die ein Besucher sofort sieht; Sprint 7 enthält nur Should/Could und ist der Puffer: Reicht die Kapazität nicht, rücken B-51, B-53 und B-54 nach R2. Die Einträge entstehen im Docker-Beispiel teilweise schon vorab als Übungsinkrement; der Sprint-Plan bleibt der Maßstab für Nachweise und Abnahme.
+
+**Stand Nachweise und Kontrollen (2026-10-26):**
+
+- **B-06 und B-08 erledigt** (vorgezogen aus Sprint 4): CI-Job `security-scans` (Semgrep, `pnpm audit`, gitleaks, Trivy, SBOM) und CI-Job `multiarch` (amd64/arm64). Sprint 4 verliert damit 10 SP Arbeit, behält sie aber als Puffer für Messungen und Fehlerbehebung.
+- **Coverage und Mutationstests** (bisher B-18, R2) sind eingerichtet; offen bleibt nur die Coverage der Fachmodule (15,9 % statt 80 %) als **B-64**.
+- **Übungs-Pentest und ASVS-Checkliste:** Die offenen Empfehlungen PT-F-04 bis PT-F-12 sind als **B-59 bis B-63** in R2 eingeplant. Begründung für R2 statt R1: alle niedrig bzw. Empfehlung, keine Ausnutzung im Docker-Beispiel möglich, die R1-Sprints sind voll.
+- **Manuelle Nachweise:** Protokolle in [`docs/05-umsetzung/nachweise/`](../05-umsetzung/nachweise/README.md). Screenreader- und Usability-Test (MAN-A11Y-001/002, MAN-LST-001) brauchen echte Testpersonen; Leitfäden liegen vor.
 
 **Stand Sprint 1 (2026-10-23):**
 

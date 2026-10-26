@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 version: 2026-10-25
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 sample: true
 ---
 
@@ -47,7 +47,7 @@ Email: datenschutz@hwg-lu.example
 | Audit log | who performed which administrative action and when | Traceability of moderation and administration | Art. 6(1)(c) and (e) GDPR | 24 months |
 | Email notifications | Email address, type of notification (without message content) | Confirmations, notices about new messages, expiring listings | as for the account; can be unsubscribed per category, except necessary account emails | delivery log 30 days (exercise assumption Q-28) |
 | Abuse protection | IP address and, for login and registration, the email address only as a pseudonym (HMAC with a random key that changes daily; the old key is deleted after one hour), counters | Protection against automated attacks (login, registration, messages) | Art. 6(1)(e) GDPR; Art. 32 GDPR | at most 7 days; the counters are deleted after one day |
-| Server logs and metrics | Time, method, requested route without parameters, status code, duration, request ID – without IP address, email address, links with tokens or content | Operation, troubleshooting, security | Art. 6(1)(e) GDPR; Art. 32 GDPR | 14 days (exercise assumption Q-28) |
+| Server logs and metrics | Time, method, requested route without parameters, status code, duration, request ID – without IP address, email address, links with tokens or content; security events (sign-in, failed or throttled sign-in, denied access) only with a pseudonym instead of the address | Operation, troubleshooting, security | Art. 6(1)(e) GDPR; Art. 32 GDPR | 14 days (exercise assumption Q-28) |
 | Backups | Copy of the database and images | Recovery after incidents | Art. 6(1)(e) in conjunction with Art. 32 GDPR | deleted after 28 days at the latest |
 | Deletion journal | Type, identifier and time of a deletion (no content) | Re-applying deletions after a restore from a backup | Art. 6(1)(c) in conjunction with Art. 17 GDPR | 35 days |
 | Platform tax reporting obligation (DAC7) | once the thresholds are reached (30 sales or €2,000 per calendar year): name, address, date of birth, tax ID, total and number of sales | Compliance with the German Platform Tax Transparency Act (PStTG) | Art. 6(1)(c) GDPR in conjunction with the PStTG where the reporting obligation applies (exercise assumption Q-28: the reporting obligation applies, the exemption in Section 3 PStTG does not) | 10 years after the end of the reporting period (Section 22 PStTG, exercise value; in this sample only evaluation, no collection) |

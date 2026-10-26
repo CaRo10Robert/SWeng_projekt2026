@@ -12,9 +12,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-00
 source: CIS Docker Benchmark, ADR-0010
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-26
 verification: [CTRL-IMAGE-INSPECT]
 ---
 
@@ -42,6 +42,7 @@ Begrenzt die Folgen einer Kompromittierung der Anwendung.
 
 ## Nachweis
 - `CTRL-IMAGE-INSPECT`: Prüfung von Benutzer und Umgebung des Images sowie Start mit `read_only: true` (Compose) bis zum Status „healthy“.
+- Seit 2026-10-26 enthält das Runtime-Image weder npm, npx, corepack noch yarn (`docker/Dockerfile`); das verkleinert die Angriffsfläche und entfernt die Trivy-Befunde dieser Werkzeuge (REQ-SEC-008).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -50,3 +51,4 @@ Begrenzt die Folgen einer Kompromittierung der Anwendung.
 | 1.1 | 2026-10-23 | Eigene Datei, Prüftabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason |
 | 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-IMAGE-INSPECT bestanden bzw. ausgeführt); Status → verified |
+| 1.4 | 2026-10-26 | Runtime-Image ohne npm, npx, corepack und yarn |

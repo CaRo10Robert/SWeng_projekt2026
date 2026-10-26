@@ -3,15 +3,17 @@ id: ARC-001
 type: architecture
 status: draft
 owner: team-architektur
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 review_due: 2027-01-31
 ---
 
 # Architekturdokumentation CampusMarkt (arc42, kompakt)
 
 > **v1.3:** Befunde aus dem [Review v1.3](../04-review/review-v1.3-recht-betrieb.md) eingearbeitet: Stand der EPIC-13-Bausteine auf „umgesetzt“, Modul `reporting`, Datenmodell nach Migration 0003/0004 (Mitteilungen, Einmal-Links, Beweissicherung, Rechtsgrundlage, Pseudonymisierungsschlüssel), Vier-Augen-Regel vollständig, Einmal-Link im Fragment, Löschjournal und Restore mit Rückfall, Alarmregeln ohne Fehlalarme, QS-16 auf 5 min.
+>
+> **v1.4:** Ergebnisse der Nachweisrunde (2026-10-26) eingearbeitet: Ausfallverhalten bei Datenbankausfall (QS-22), Migration 0005 (Indizes, Zustimmungsnachweise ohne Profilbezug, Systemnachrichten als Code, erzwungener Passwortwechsel), Fitness Function gegen Zahlungs-SDKs, `eventId` für Deal-Ereignisse, Sicherheitsereignisse im Log, Qualitätssicherung in CI (Coverage, Mutation, Scans, Multi-Arch) und [Threat Model](threat-model.md).
 >
 > **v1.2:** Recht, Auftritt und Betrieb als Übung mit Platzhaltern (EPIC-13, Q-23): Rechtstexte als versionierte Markdown-Inhalte ([ADR-0015](decisions/0015-rechtstexte-als-markdown.md)), englische Oberfläche ([ADR-0016](decisions/0016-internationalisierung.md)), optionale Compose-Profile für Reverse Proxy mit TLS/HSTS und Überwachung ([ADR-0017](decisions/0017-optionale-betriebsprofile.md)), Datensicherung mit getesteter Wiederherstellung ([ADR-0018](decisions/0018-datensicherung.md)). Neu: DSA-Begründung und Widerspruch (Vier-Augen), Wartungsmodus und Statusseite, DAC7-Auswertung, Fehlerseiten mit korrekten Statuscodes, Laufzeitsichten 6.5/6.6, Verteilungssicht 7.3, Querschnitt 8.8–8.11. Alle neuen Bausteine sind **geplant** (Spalte „Stand“ mit Backlog-ID B-43 … B-58; Sprint-Zuordnung im [Backlog](../02-anforderungen/03-backlog.md)). Prozessartefakte: [Recht](../06-recht/README.md), [Betrieb](../07-betrieb/README.md).
 >
@@ -387,6 +389,7 @@ Weitere Aufrufe: `trust → messaging` (Nachrichtenkontext, Entfernen), `messagi
 | 3 | Kommunikation zwischen Modulen synchron über das öffentliche API oder asynchron über Domain Events (Jobs im selben Commit) | Regel 1 + Review | umgesetzt (Zyklus `listings ↔ messaging` bis B-39) |
 | 4 | `domain.ts` ist frei von Frameworks und Plattform | dependency-cruiser `domain-is-pure` | umgesetzt |
 | 5 | Fachmodule kennen nur Ports, nie Adapter; die Plattform kennt keine Fachmodule | dependency-cruiser `modules-only-know-ports`, `no-infrastructure-libs-in-modules`, `platform-independent-of-modules` | umgesetzt |
+| 6 | Fachmodule importieren keine SDKs von Zahlungsdienstleistern (stripe, mollie, @paypal, @adyen, braintree); eine Bezahlung kommt nur über den `PaymentPort` (ADR-0006) | dependency-cruiser `no-payment-sdk-in-modules` | umgesetzt (MAN-ARCH-001) |
 
 ### 5.3 C4 Ebene 3: Komponenten der Web-App
 
@@ -483,6 +486,7 @@ erDiagram
         string role
         string locale "de oder en"
         string privacy_ack_version "zur Kenntnis genommene Fassung"
+        bool password_change_required "Notfallfunktion"
         timestamptz verified_at
     }
     SESSION {
@@ -492,7 +496,9 @@ erDiagram
     }
     CONSENT {
         uuid id PK
-        uuid user_id FK "Soll: nullable, anonymisierbar"
+        uuid user_id FK "nullable, ON DELETE SET NULL"
+        string subject_ref "HMAC der kanonischen Adresse (Nachweis ohne Profil)"
+        timestamptz anonymized_at
         string kind
         string version
         timestamptz given_at
@@ -520,10 +526,12 @@ erDiagram
         uuid conversation_id FK
         uuid sender_id "ref identity.user"
         uuid client_msg_id
-        text body "Soll: nullable"
+        text body
+        string system_code "Systemnachricht als Code (übersetzbar)"
+        jsonb system_params
         timestamptz created_at
         timestamptz read_at
-        timestamptz deleted_at "Soll"
+        timestamptz removed_at "Moderation; Original 6 Monate"
     }
     CONTACT_CONSENT {
         uuid conversation_id PK
@@ -643,7 +651,7 @@ Unique-Constraints (Auszug): `USER(email_canonical)` · `CONVERSATION(listing_id
 | Anzeigen, Bilder, Merkliste, Blockierungen | gelöscht | je Modul über `privacy` | umgesetzt |
 | Eigene Nachrichten | Text gelöscht, Nachricht bleibt als Platzhalter; das Gegenüber behält die Konversation | `message.body` nullable + `deleted_at`; „Ehemaliges Mitglied“ entsteht, weil `sender_id` nicht mehr auflösbar ist | geplant B-22 (Sprint 2); heute werden ganze Konversationen gelöscht |
 | Meldungen des Mitglieds | bleiben für die Frist, ohne Personenbezug | `report.reporter_id := NULL` | umgesetzt |
-| Einwilligungen | Nachweis bleibt ohne Profilbezug | `consent.user_id` nullable, `anonymized_at` | geplant B-22 (Sprint 2) |
+| Zustimmungsnachweise | Nachweis bleibt 3 Jahre ohne Profilbezug | `consent.user_id` → NULL (ON DELETE SET NULL), `subject_ref`, `anonymized_at`; Löschlauf nach 3 Jahren | umgesetzt (Migration 0005) |
 | Kontaktfreigaben | mit der Konversation gelöscht bzw. für das Gegenüber ausgeblendet | `CONTACT_CONSENT` | Kaskade mit der Konversation umgesetzt (B-01); Ausblenden geplant B-22 |
 
 ## 6. Laufzeitsicht
@@ -995,6 +1003,8 @@ flowchart LR
 - **Domain Events per publish/subscribe:** Ereignisse wie `DealAgreed` werden pro Konsument in eine eigene Queue verteilt, damit weitere Konsumenten (z. B. `payments`) rein additiv hinzukommen (geplant B-40, Sprint 2).
 - **Graceful Shutdown** bei `SIGTERM` (`docker compose stop`): keine neuen Requests annehmen, WebSockets schließen (Client verbindet neu), laufende Jobs beenden (≤ 30 s).
 - **Degradation:** Chat fällt auf Polling zurück. Suche fällt auf Titel-ILIKE zurück.
+- **Datenbankausfall (QS-22, AT-OPS-001-3):** Jeder Pool hat einen `error`-Handler (`guardPool` in `platform/db.ts`); abgebrochene Clients werden verworfen. `database.ping()` bricht nach 2 s ab, die Wartungsprüfung nutzt nach einem Lesefehler 5 s lang den zuletzt bekannten Zustand. Die App bleibt so erreichbar: Lebendigkeit „ok“, Bereitschaft 503, Status-, Rechts- und Wartungsseiten laden; nach dem Datenbankstart verbindet sie sich selbst wieder (Befund B-1 aus der Störungsübung MAN-OPS-011).
+- **Deal-Ereignisse** entstehen über `dealEvent()` und tragen `eventId` (UUID), `occurredAt` und `dealId`; Konsumenten können damit idempotent verarbeiten (ADR-0006).
 
 ### 8.3 E-Mail-Konzept
 - Vorlagen als TypeScript-Funktionen (HTML + Text) im Modul `notifications`, deutsch und i18n-fähig ([ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 3).
@@ -1066,7 +1076,7 @@ flowchart LR
 - Im Docker-Beispiel wäre ein **Fake-PSP-Adapter** (Sandbox-Simulation) ausreichend, um den Ablauf zu zeigen, ohne externe Konten.
 
 ### 8.6 Observability (Beispiel-Niveau)
-Strukturierte JSON-Logs (pino) mit Korrelations-ID; der Request-Log ist ein eigener Eintrag mit Methode, Route ohne Query, Status, Dauer und Request-ID, **ohne IP-Adresse, Port und Query-Werte** (REQ-OPS-002, Unit-Test AT-OPS-002); `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Profil `proxy` ist es am Proxy gesperrt, im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. **Überwachung und Alarmierung** (REQ-OPS-008) liefert das Profil `monitoring` (ADR-0017): Prometheus mit Alarmregeln auf Symptome (App nicht erreichbar oder nicht bereit, Fehlerrate ab Mindestlast und nicht im Wartungsmodus, Latenz, endgültig gescheiterte Jobs `outcome="dead"`, Wartungsmodus zu lange aktiv, fehlende Sicherung; Folgealarme werden per `inhibit_rules` unterdrückt), Alertmanager sendet an Mailpit; jede Regel verweist auf ein Runbook in [monitoring-alarmierung.md](../07-betrieb/monitoring-alarmierung.md). Neu ist die Metrik `app_ready` (0/1) aus der Readiness-Prüfung (Stand: umgesetzt (B-54)). Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); Grafana bleibt Could.
+Strukturierte JSON-Logs (pino) mit Korrelations-ID; der Request-Log ist ein eigener Eintrag mit Methode, Route ohne Query, Status, Dauer und Request-ID, **ohne IP-Adresse, Port und Query-Werte** (REQ-OPS-002, Unit-Test AT-OPS-002); `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Profil `proxy` ist es am Proxy gesperrt, im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. **Überwachung und Alarmierung** (REQ-OPS-008) liefert das Profil `monitoring` (ADR-0017): Prometheus mit Alarmregeln auf Symptome (App nicht erreichbar oder nicht bereit, Fehlerrate ab Mindestlast und nicht im Wartungsmodus, Latenz, endgültig gescheiterte Jobs `outcome="dead"`, Wartungsmodus zu lange aktiv, fehlende Sicherung; Folgealarme werden per `inhibit_rules` unterdrückt), Alertmanager sendet an Mailpit; jede Regel verweist auf ein Runbook in [monitoring-alarmierung.md](../07-betrieb/monitoring-alarmierung.md). Neu ist die Metrik `app_ready` (0/1) aus der Readiness-Prüfung (Stand: umgesetzt (B-54)). Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); Grafana bleibt Could. Eine Request-ID vom Client (`x-request-id`) wird nur übernommen, wenn sie eine UUID ist; unbekannte Pfade erscheinen im Log als `unmatched`. Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur HMAC-Pseudonyme (ADR-0014; Review [MAN-OPS-002](../05-umsetzung/nachweise/MAN-OPS-002.md)).
 
 ### 8.7 Barrierefreiheit und UX
 Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test umgesetzt B-02, `e2e/tests/keyboard.spec.ts`). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten).
@@ -1085,6 +1095,8 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 - `<html lang>` folgt der Sprache (WCAG 3.1.1). Fehlertexte übersetzt die Web-App anhand des stabilen `code` aus Problem Details. Mails gehen in der Konto-Sprache.
 - Bei Rechtstexten ist nur die deutsche Fassung verbindlich; die englische trägt einen Hinweis.
 - `scripts/check-i18n.mjs` prüft in CI gleiche Schlüssel, gültige ICU-Syntax und gleiche Platzhalter (Risiko R-12).
+
+- **Systemnachrichten im Chat** werden als Code mit Parametern gespeichert (`message.system_code`, `system_params`) und im Client übersetzt; ältere Nachrichten ohne Code erkennt der Client weiter am deutschen Text.
 
 ### 8.10 Fehlerbehandlung und HTTP-Statuscodes (REQ-UX-003)
 
@@ -1110,6 +1122,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 - **Statusseite (REQ-OPS-007):** `/status` öffentlich, aus der Readiness-Prüfung und dem Wartungsmodus abgeleitet. Sie zeigt nur den Gesamtzustand (`operational`, `degraded`, `maintenance`), den Zustand der Bereiche `app`, `database`, `email` und `realtime` (Vertrag `SystemStatus`) und die Ankündigung; Prüfungen laufen höchstens einmal gleichzeitig, die Route ist auf 50 Anfragen je 10 s begrenzt; keine internen Details (Versionen, Hosts, Fehlermeldungen).
 - **Aktualisierung (REQ-OPS-012):** Renovate gruppiert Updates. Sicherheitsupdates kommen sofort, alle anderen wöchentlich; CI muss grün sein, und vor dem Update wird gesichert ([update-prozess.md](../07-betrieb/update-prozess.md)).
 - **Störungen und Datenpannen (REQ-OPS-011, REQ-LEGAL-013):** Schweregrade, Rollen und Kommunikation über Ankündigung bzw. Statusseite. Bei Personenbezug greift der Datenpannen-Prozess mit Meldung binnen 72 h ([incident-prozess.md](../07-betrieb/incident-prozess.md), [datenpannen-prozess.md](../06-recht/datenpannen-prozess.md)).
+- **Qualitätssicherung in CI:** Coverage mit Schwellen (Geschäftsregeln 100 %, Fachmodule 15,9 % – Lücke zu REQ-MAINT-001 offen, B-64), Mutationstests wöchentlich (`mutation.yml`, 73,8 %), Security-Scans mit SBOM (`security-scans`, REQ-SEC-008), Multi-Arch-Build (`multiarch`, REQ-PORT-002), Ops-Tests im Job `compose` (Restore, Löschfristen, Datenbankausfall, Proxy) und wöchentlich der Dead-Letter-Test (`ops-weekly.yml`). Bedrohungen und Gegenmaßnahmen: [Threat Model](threat-model.md).
 
 ## 9. Architekturentscheidungen
 
@@ -1159,6 +1172,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | QS-19 | Benutzbarkeit / Korrektheit | Ein Aufruf von `/gibt-es-nicht` → HTTP-Status 404 (nicht 200) und Fehlerseite mit Weg zurück; `/api/v1/gibt-es-nicht` → 404 Problem Details (REQ-UX-003) |
 | QS-20 | Rechtskonformität (DSA) | Ein Moderator versucht, einen Widerspruch gegen seine eigene Entscheidung zu entscheiden → 403 → 0 Widersprüche ohne Vier-Augen-Prinzip (REQ-LEGAL-007) |
 | QS-21 | Benutzbarkeit (Internationalisierung) | Ein neuer Text wird nur im deutschen Katalog ergänzt → CI schlägt fehl (`check-i18n.mjs`) → 0 fehlende Schlüssel in `en` auf `main` (REQ-UX-007) |
+| QS-22 | Zuverlässigkeit (Fehlertoleranz) | Der Datenbank-Container fällt aus (`docker compose stop db`) → die App läuft ohne Neustart weiter, `/health/live` 200, `/health/ready` 503, Statusseite meldet „Datenbank gestört“, Rechtsseiten laden → nach dem Datenbankstart innerhalb von 60 s wieder bereit | AT-OPS-001-3 (`tests/ops/db-outage-test.mjs`, CI) |
 
 ## 11. Risiken und technische Schulden
 

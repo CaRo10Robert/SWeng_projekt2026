@@ -46,3 +46,4 @@ Eine gespeicherte Sprachwahl im Browser ist eine Speicherung auf dem Endgerät (
 - (−) Testselektoren, die auf deutsche Texte zielen, bleiben auf die deutsche Oberfläche festgelegt. Neue Tests sollen Rollen und Labels aus dem Katalog verwenden.
 - Umsetzung: Backlog B-51.
 - *Nachtrag 2026-10-25 (Review v1.3, RV-A-08, RV-C-08):* Katalogpfad korrigiert; Reihenfolge präzisiert (Konto vor Gerät, Übernahme nur aus derselben Sitzung); `RegisterBody.locale` ergänzt. Die zunächst umgesetzte Übernahme jeder gespeicherten Gerätewahl beim Login ist entfernt.
+- *Nachtrag 2026-10-26 (Befund T-2 aus MAN-ARCH-004/MAN-UX-002):* Systemnachrichten im Chat werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten erkennt der Client weiter am Text.

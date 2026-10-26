@@ -1,0 +1,29 @@
+# Langlaufende Betriebsprüfungen (CTRL-DLQ, REQ-NOTI-005): wöchentlich und auf Anforderung, nicht bei jedem Push,
+# weil ein Lauf etwa 5 min auf die endgültig gescheiterte Zustellung wartet.
+name: Ops wöchentlich
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # montags 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dlq:
+    name: Dead-Letter-Ansicht bei Mailausfall (CTRL-DLQ)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compose-Setup starten
+        run: docker compose up --build -d --wait
+      - name: Mailpit stoppen, Zustellung bis „dead“ laufen lassen, Admin-Ansicht prüfen
+        run: node tests/ops/dlq-test.mjs http://localhost:8080
+      - name: Logs bei Fehler
+        if: failure()
+        run: docker compose logs --no-color app | tail -200

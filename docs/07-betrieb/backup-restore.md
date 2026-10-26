@@ -3,9 +3,9 @@ id: OPS-BACKUP
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Datensicherung und Wiederherstellung
@@ -86,4 +86,7 @@ Monatlich auf einer Testumgebung. Protokoll:
 
 | Datum | Sicherung von | Dauer bis „healthy“ | Stichprobe geprüft (Konto, Anzeige mit Bild, Konversation) | Ergebnis | Durchgeführt von |
 |---|---|---|---|---|---|
-| *(Übung: Restore-Test aus CI; Echtbetrieb: Eintrag nach jeder Übung)* | | | | | |
+| 2026-10-25 | frische Sicherung desselben Laufs | 26 s nach Totalverlust (Restore-Skript 12,7 s) | Konto, Anzeige mit Bild, Konversation, Löschjournal | bestanden (RTO erfüllt; RPO der Echtbetriebs-Anforderung mit täglicher Sicherung nicht erreichbar) | Übung, Protokoll [MAN-AVAIL-002](../05-umsetzung/nachweise/MAN-AVAIL-002.md) |
+| laufend | Restore-Test in CI (`tests/ops/restore-test.mjs`) | etwa 24–27 s | automatisiert | bei jedem Push | CI-Job `compose` |
+
+**Hinweis nach Totalverlust (Befund R-3):** Startet die App nach `docker compose down -v` mit `SEED_DEMO=true`, legt sie zuerst Demo-Daten an. Der Restore ersetzt diese vollständig (temporäre Datenbank, Tausch). Im Echtbetrieb (`SEED_DEMO=false`) entsteht nur das leere Schema.

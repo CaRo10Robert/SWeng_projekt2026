@@ -12,9 +12,9 @@ kano: n/a
 epic: EPIC-13
 source: REQ-SEC-001, OWASP WSTG, Q-23
 depends_on: [REQ-SEC-001, REQ-SEC-009]
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-DOC-PENTEST, MAN-SEC-013]
 ---
 
@@ -37,7 +37,7 @@ Automatisierte Scans (REQ-SEC-008) und Threat Model (REQ-SEC-009) finden nicht a
 
 ## Nachweis
 - `CTRL-DOC-PENTEST`: Kontrolle `docs/07-betrieb/pentest-plan.md` – Umfang, Methode, Befundbehandlung vorhanden.
-- `MAN-SEC-013`: Abschlussbericht des Penetrationstests (erst vor einem Echtbetrieb).
+- `MAN-SEC-013`: Abschlussbericht des Penetrationstests – als Übungs-Pentest durchgeführt (kein externer Tester): [MAN-SEC-013](../../05-umsetzung/nachweise/MAN-SEC-013.md), Rohdaten `pentest-results.json`, ZAP-Zusammenfassungen in `zap/`. 49 gezielte Prüfungen, 47 bestanden, 2 akzeptierte Demo-Befunde (PT-F-17 API-Doku im Demo-Modus, PT-F-18 `/metrics` am lokalen Port); kein kritischer oder hoher Befund. Behoben: PT-F-01, 02, 03, 13, 14, 15, 16. Offen als Backlog: PT-F-04 bis PT-F-12 (B-59 bis B-63).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -45,3 +45,4 @@ Automatisierte Scans (REQ-SEC-008) und Threat Model (REQ-SEC-009) finden nicht a
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung (Pentest-Plan vorhanden; Durchführung MAN-SEC-013 vor Go-live offen) |
 | 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.3 | 2026-10-26 | Übungs-Pentest MAN-SEC-013 verlinkt; offene Empfehlungen als B-59…B-63 |

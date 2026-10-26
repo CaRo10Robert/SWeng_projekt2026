@@ -13,9 +13,9 @@ moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 11, REQ-PRIV-002
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-OPS-002, MAN-OPS-002]
 ---
 
@@ -38,7 +38,7 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 
 ## Nachweis
 - `AT-OPS-002`: Smoke-Test `/metrics` (bestehend) plus Unit-Test des Request-Logs (`apps/server/src/platform/http/server.test.ts`): Eintrag enthält Methode, Route ohne Query, Status, Dauer und Request-ID, aber keine IP-Adresse, keinen Port und keine Query-Werte wie `token=`.
-- `MAN-OPS-002`: Review der Protokollfelder.
+- `MAN-OPS-002`: Review der Protokollfelder – Protokoll [MAN-OPS-002](../../05-umsetzung/nachweise/MAN-OPS-002.md): Normalbetrieb ohne Personenbezug, Korrelations-ID in allen Einträgen; die Lücken P-1 (Request-ID aus dem Client) und P-2 (Rohpfad unbekannter Routen) sind behoben (Request-ID nur als UUID, unbekannte Pfade als `unmatched`). Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme.
 - Umsetzungsstand 🟡: verteiltes Tracing (z. B. OpenTelemetry) noch nicht zuschaltbar; Backlog.
 
 
@@ -49,3 +49,4 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15 |
 | 2.2 | 2026-10-25 | Review v1.3 (RV-R-01, RV-C-07): Request-Log ohne IP und Query umgesetzt (6e6fe40), Nachweis um den Unit-Test ergänzt |
+| 2.3 | 2026-10-26 | Nachweis MAN-OPS-002 mit Protokoll verlinkt; P-1/P-2 behoben, Sicherheitsereignisse im Log |

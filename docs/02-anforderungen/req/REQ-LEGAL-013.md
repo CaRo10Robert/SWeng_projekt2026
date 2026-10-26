@@ -13,9 +13,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 33, Art. 34, Q-23
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-DOC-DATENPANNE, MAN-LEGAL-013]
 ---
 
@@ -39,7 +39,7 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 
 ## Nachweis
 - `CTRL-DOC-DATENPANNE`: Kontrolle `docs/06-recht/datenpannen-prozess.md` – Rollen, Fristen, Bewertung, Vorlagen vorhanden.
-- `MAN-LEGAL-013`: Protokoll einer Tabletop-Übung.
+- `MAN-LEGAL-013`: Protokoll einer Tabletop-Übung – [MAN-LEGAL-013](../../05-umsetzung/nachweise/MAN-LEGAL-013.md): fiktives Szenario, Bewertung nach 1 h 50 min, Meldung nach 28 h 50 min (Frist 72 h). Die Befunde T-1, T-3, T-4 und T-6 sind im Datenpannen-Prozess eingearbeitet.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -47,3 +47,4 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-12): Status nach Umsetzung; Datenpannen-Prozess um Risikomatrix, Dokumentationsvorlage, Rollen, Erreichbarkeit und Art. 33 Abs. 2 ergänzt |
 | 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.3 | 2026-10-26 | Nachweis MAN-LEGAL-013 mit Protokoll verlinkt |

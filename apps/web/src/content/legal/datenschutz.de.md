@@ -1,7 +1,7 @@
 ---
 title: Datenschutzerklärung
 version: 2026-10-25
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 sample: true
 ---
 
@@ -45,7 +45,7 @@ E-Mail: datenschutz@hwg-lu.example
 | Audit-Log | wer hat wann welche Verwaltungsaktion ausgeführt | Nachvollziehbarkeit von Moderation und Verwaltung | Art. 6 Abs. 1 lit. c und e DSGVO | 24 Monate |
 | E-Mail-Benachrichtigungen | E-Mail-Adresse, Art der Benachrichtigung (ohne Nachrichteninhalt) | Bestätigungen, Hinweise auf neue Nachrichten, ablaufende Anzeigen | wie Konto; abbestellbar je Kategorie, außer notwendige Kontomails | Versandprotokoll 30 Tage (Übungsannahme Q-28) |
 | Missbrauchsschutz | IP-Adresse und bei Anmeldung und Registrierung die E-Mail-Adresse nur als Pseudonym (HMAC mit zufälligem Schlüssel, der täglich wechselt; der alte Schlüssel wird nach einer Stunde gelöscht), Zähler | Schutz vor automatisierten Angriffen (Anmeldung, Registrierung, Nachrichten) | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | höchstens 7 Tage; die Zähler werden nach einem Tag gelöscht |
-| Server-Protokolle und Metriken | Zeitpunkt, Methode, aufgerufene Route ohne Parameter, Statuscode, Dauer, Kennung der Anfrage – ohne IP-Adresse, E-Mail-Adresse, Links mit Tokens oder Inhalte | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | 14 Tage (Übungsannahme Q-28) |
+| Server-Protokolle und Metriken | Zeitpunkt, Methode, aufgerufene Route ohne Parameter, Statuscode, Dauer, Kennung der Anfrage – ohne IP-Adresse, E-Mail-Adresse, Links mit Tokens oder Inhalte; Sicherheitsereignisse (Anmeldung, fehlgeschlagene oder gebremste Anmeldung, verweigerter Zugriff) nur mit einem Pseudonym statt Adresse | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | 14 Tage (Übungsannahme Q-28) |
 | Datensicherungen | Kopie der Datenbank und Bilder | Wiederherstellung nach Störungen | Art. 6 Abs. 1 lit. e i. V. m. Art. 32 DSGVO | spätestens nach 28 Tagen gelöscht |
 | Löschjournal | Art, Kennung und Zeitpunkt einer Löschung (keine Inhalte) | Löschungen nach einer Wiederherstellung aus einer Sicherung erneut ausführen | Art. 6 Abs. 1 lit. c i. V. m. Art. 17 DSGVO | 35 Tage |
 | Steuerliche Meldepflicht der Plattform (DAC7) | bei Erreichen der Schwellen (30 Verkäufe oder 2.000 € je Kalenderjahr): Name, Anschrift, Geburtsdatum, Steuer-ID, Summe und Anzahl der Verkäufe | Erfüllung des Plattformen-Steuertransparenzgesetzes (PStTG) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. PStTG, soweit die Meldepflicht besteht (Übungsannahme Q-28: Meldepflicht besteht, Ausnahme nach § 3 PStTG greift nicht) | 10 Jahre nach Ablauf des Meldezeitraums (§ 22 PStTG, Übungswert; im Beispiel nur Auswertung, keine Erhebung) |

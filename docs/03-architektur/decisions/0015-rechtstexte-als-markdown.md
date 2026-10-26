@@ -51,3 +51,4 @@ Heute gibt es zwei Quellen, die auseinanderlaufen können: den Text, den es noch
 - (−) Ohne JavaScript sind die Rechtsseiten nicht lesbar. Das gilt für die ganze SPA; ein Fallback ist nicht vorgesehen. Risiko gering, weil die Zielgruppe die App ohnehin mit JavaScript nutzt; im Echtbetrieb neu bewerten.
 - (−) `react-markdown` vergrößert die Chunks der Rechtsseiten (etwa 40–50 KB gzip), nicht das Haupt-Bundle.
 - Umsetzung: Backlog B-43.
+- *Nachtrag 2026-10-26 (Befund T-1 aus MAN-ARCH-004):* Ob ein Rechtstext ein Muster ist, ergibt sich **nur** aus `sample: true` im Front Matter (gesetzt in allen Rechtstexten de/en); die frühere Erkennung am Hinweistext ist aus `content.ts`, `legal-manifest.mjs` und `platform/legal.ts` entfernt. Eine Umformulierung des Hinweises kann Muster-Badge und `LEGAL_STRICT` damit nicht mehr aushebeln.

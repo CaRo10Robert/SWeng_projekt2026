@@ -21,20 +21,20 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | ID | Art | Anforderung | Prüfung |
 |---|---|---|---|
 | `AT-A11Y-001` | automatisiert | REQ-A11Y-001 | E2E-Test – axe-core auf allen Routen, Ergebnis 0 `serious`/`critical`. |
-| `MAN-A11Y-001` | manuell | REQ-A11Y-001 | Manuelle WCAG-Prüfung mit Screenreader, Protokoll im Review-Ordner. |
+| `MAN-A11Y-001` | manuell | REQ-A11Y-001 | Manuelle WCAG-Prüfung mit Screenreader – **noch nicht durchgeführt**. Vorbereitet: [Leitfaden](../05-umsetzung/nachweise/leitfaden-screenreader.md), [Protokollvorlage](../05-umsetzung/nachweise/protokollvorlage-screenreader.md) und ein [fiktives Beispielprotokoll](../05-umsetzung/nachweise/MAN-A11Y-001-fiktiv.md) (ausdrücklich **kein** Nachweis). Der Nachweis braucht eine echte Prüfung durch eine Person mit NVDA. |
 | `AT-A11Y-002` | automatisiert | REQ-A11Y-002 | E2E-Test – neun Kernabläufe ausschließlich per Tastatur (neu). |
 | `AT-A11Y-002-2` | automatisiert | REQ-A11Y-002 | E2E-Test – axe-core auf Registrierungs-, Anmelde-, Passwort-, Such-, Formular-, Detail-, Meine-Anzeigen- und Chatseite, 0 `serious`/`critical` (neu). |
-| `MAN-A11Y-002` | manuell | REQ-A11Y-002 | Manuelle Tastatur- und Screenreader-Prüfung inklusive Dateiauswahl im Systemdialog, Protokoll im Review-Ordner (neu). |
+| `MAN-A11Y-002` | manuell | REQ-A11Y-002 | Manuelle Tastatur- und Screenreader-Prüfung inklusive Dateiauswahl im Systemdialog – **noch nicht durchgeführt**; Ablauf und Vorlage im [Leitfaden Screenreader](../05-umsetzung/nachweise/leitfaden-screenreader.md). |
 | `AT-ACC-001` | automatisiert | REQ-ACC-001 | Smoke-Test – Anzeigename, Studiengang und Übergabeorte ändern und Änderung im eigenen Profil prüfen (neu). |
 | `AT-ACC-002` | automatisiert | REQ-ACC-002 | Smoke-Test – Löschung beantragen, Anmeldung bricht ab. |
 | `AT-ACC-002-2` | automatisiert | REQ-ACC-002 | Integrationstest – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen. |
 | `AT-ACC-003` | automatisiert | REQ-ACC-003 | Smoke-Test „Datenexport (Art. 15/20)“ (bestehend). |
 | `AT-ACC-004` | automatisiert | REQ-ACC-004 | Smoke-Test – Profilbild hochladen, Metadaten entfernt, Bild für andere Mitglieder sichtbar, Entfernen setzt Platzhalter (neu). |
 | `CTRL-DEPCRUISE` | Kontrolle | REQ-ARCH-001, REQ-ARCH-006, REQ-AUTH-009, REQ-MAINT-002 | Modulgrenzen ohne Verstöße. |
-| `MAN-ARCH-001` | manuell | REQ-ARCH-001 | Architektur-Review-Protokoll (QS-5). |
+| `MAN-ARCH-001` | manuell | REQ-ARCH-001 | Architektur-Review-Protokoll (QS-5) – [MAN-ARCH-001](../05-umsetzung/nachweise/MAN-ARCH-001.md). Die dependency-cruiser-Regel `no-payment-sdk-in-modules` verhindert Importe von Zahlungsdienstleister-SDKs in Fachmodulen; Deal-Ereignisse tragen `eventId`, `occurredAt` und `dealId`. |
 | `MAN-ARCH-002` | manuell | REQ-ARCH-002 | Review-Protokoll im Spike PAY-02 (rechtliche Prüfung). Gilt ab EPIC-09; im MVP wird kein Geld verarbeitet. |
 | `AT-ARCH-003` | automatisiert | REQ-ARCH-003 | Integrationstest – Domain in der Datenbank ergänzen, Registrierung mit dieser Domain gelingt (neu zu schreiben). |
-| `MAN-ARCH-004` | manuell | REQ-ARCH-004 | Schema-Review der Migrationen. |
+| `MAN-ARCH-004` | manuell | REQ-ARCH-004 | Schema-Review der Migrationen – [MAN-ARCH-004](../05-umsetzung/nachweise/MAN-ARCH-004.md). Die Index-Befunde S-1 bis S-6 und S-4 (Zustimmungsnachweise ohne Profilbezug) sind mit Migration `0005_nachweise_korrekturen.sql` behoben; S-9 (Institutionsprüfung bei `GET /listings/:id`) ist vor EPIC-10 einzuplanen. |
 | `AT-ARCH-005` | automatisiert | REQ-ARCH-005, REQ-AUTH-009 | `scripts/smoke-test.mjs` gegen ein frisch gestartetes Setup (bestehend). |
 | `AT-AUTH-001` | automatisiert | REQ-AUTH-001 | Unit-Test der Entscheidungstabelle, jede Zeile ein Testfall (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „BR-01 Domain-Prüfung“). |
 | `AT-AUTH-001-2` | automatisiert | REQ-AUTH-001 | Smoke-Test – Registrierung mit `x@hwg-lu.de.evil.com` wird mit `domain_not_allowed` abgelehnt (QS-1). |
@@ -53,7 +53,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-008` | automatisiert | REQ-AUTH-008 | neu zu schreiben – Konto per Moderationsentscheidung sperren, Neuregistrierung mit `+`-Alias legt kein Konto an und versendet keine Mail. |
 | `AT-AUTH-009` | automatisiert | REQ-AUTH-009 | (neu) Test des Anmelde-Anwendungsfalls mit einem simulierten zweiten Verfahren: Kontoverknüpfung, Neuanlage, Ablehnung fremder bzw. fehlender Adresse. |
 | `AT-AVAIL-001` | automatisiert | REQ-AVAIL-001 | Auswertung der Fehlerquote in den k6-Lasttests (neu zu schreiben). |
-| `MAN-AVAIL-002` | manuell | REQ-AVAIL-002 | Protokoll der Restore-Übung (erst im Echtbetrieb). |
+| `MAN-AVAIL-002` | manuell | REQ-AVAIL-002 | Protokoll der Restore-Übung – im Docker-Beispiel als Übung durchgeführt: [MAN-AVAIL-002](../05-umsetzung/nachweise/MAN-AVAIL-002.md). RTO gemessen 26 s (Restore-Skript 12,7 s) – erfüllt; das RPO dieser Anforderung ist mit der täglichen Sicherung des Beispiels **nicht** erreichbar und braucht im Echtbetrieb PITR bzw. WAL-Archivierung (EPIC-12). |
 | `AT-AVAIL-003` | automatisiert | REQ-AVAIL-003 | Restore-Test `tests/ops/restore-test.mjs` in CI (Job `compose`) – Teil 1: Sicherung, Löschen des Stacks, Wiederherstellung; Zählungen identisch, Anmeldung möglich, Anzeige mit Bild wieder da, Dauer ≤ 15 min. Teil 2: eine nach der Sicherung gelöschte Anzeige bleibt nach der Wiederherstellung gelöscht (Löschjournal). Dazu Unit-Test des Löschjournals (`deletion-journal.test.ts`). |
 | `CTRL-DOC-BACKUP` | Kontrolle | REQ-AVAIL-003 | Kontrolle `docs/07-betrieb/backup-restore.md` – Ablauf, Aufbewahrung, Verschlüsselung, Zuständigkeiten. |
 | `AT-CHAT-001` | automatisiert | REQ-CHAT-001 | Smoke-Test – Konversation starten, Anbieter erhält die Nachricht. |
@@ -104,9 +104,9 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `CTRL-DOC-TOM` | Kontrolle | REQ-LEGAL-011 | Kontrolle `docs/06-recht/toms.md` – Gliederung nach Art. 32, jede Maßnahme mit Anforderung und Nachweis. |
 | `CTRL-DOC-AVV` | Kontrolle | REQ-LEGAL-012 | Kontrolle `docs/06-recht/auftragsverarbeitung.md` – Kategorien, Ort, Vertragsstatus und Checkliste vorhanden. |
 | `CTRL-DOC-DATENPANNE` | Kontrolle | REQ-LEGAL-013 | Kontrolle `docs/06-recht/datenpannen-prozess.md` – Rollen, Fristen, Bewertung, Vorlagen vorhanden. |
-| `MAN-LEGAL-013` | manuell | REQ-LEGAL-013 | Protokoll einer Tabletop-Übung. |
+| `MAN-LEGAL-013` | manuell | REQ-LEGAL-013 | Protokoll einer Tabletop-Übung – [MAN-LEGAL-013](../05-umsetzung/nachweise/MAN-LEGAL-013.md): fiktives Szenario, Bewertung nach 1 h 50 min, Meldung nach 28 h 50 min (Frist 72 h). Die Befunde T-1, T-3, T-4 und T-6 sind im Datenpannen-Prozess eingearbeitet. |
 | `AT-LST-001` | automatisiert | REQ-LST-001 | Smoke-Test – Anzeige mit Bild anlegen, Status `aktiv`. |
-| `MAN-LST-001` | manuell | REQ-LST-001 | Usability-Test mit 5 Studierenden, Median der Erstellzeit < 2 min (noch nicht durchgeführt). |
+| `MAN-LST-001` | manuell | REQ-LST-001 | Usability-Test mit 5 Studierenden, Median der Erstellzeit < 2 min – **noch nicht durchgeführt**. Vorbereitet: [Leitfaden](../05-umsetzung/nachweise/leitfaden-usability.md), [Protokollvorlage](../05-umsetzung/nachweise/protokollvorlage-usability.md) und ein [fiktives Beispielprotokoll](../05-umsetzung/nachweise/MAN-LST-001-fiktiv.md) (ausdrücklich **kein** Nachweis). |
 | `AT-LST-002` | automatisiert | REQ-LST-002 | Unit-Test der Preisregel (Entscheidungstabelle oben). |
 | `AT-LST-002-2` | automatisiert | REQ-LST-002 | Smoke-Test – Preis über 10.000 € wird mit 422 abgelehnt. |
 | `AT-LST-003` | automatisiert | REQ-LST-003 | Smoke-Test – Upload, Verarbeitung, Auslieferung als Bild in allen Ansichten. |
@@ -124,8 +124,8 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-LST-010-2` | automatisiert | REQ-LST-010 | Smoke-Test – gefilterte Anzeige ist `in_review` und nicht suchbar. |
 | `AT-LST-011` | automatisiert | REQ-LST-011 | API-Test – 31. Anzeige wird abgelehnt, auch bei gleichzeitigen Anfragen (neu). |
 | `AT-LST-012` | automatisiert | REQ-LST-012 | Upload-Test mit HEIC-Beispielfoto inkl. Metadatenprüfung (neu). Noch nicht umgesetzt (⬜). |
-| `CTRL-COVERAGE` | Kontrolle | REQ-MAINT-001 | Coverage-Schwelle in der Testkonfiguration (neu einzurichten). |
-| `CTRL-MUTATION` | Kontrolle | REQ-MAINT-001 | Mutationstestlauf (neu einzurichten). |
+| `CTRL-COVERAGE` | Kontrolle | REQ-MAINT-001 | Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Messwerte (2026-10-26): Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen (Schwelle 95 % Zeilen, 85 % Zweige, 95 % Funktionen); **Fachmodule insgesamt 15,9 %** (Schwelle 13 % = Messwert minus 2 Pp). **Lücke zu Kriterium (1) ≥ 80 % offen:** Die Services hängen an der Datenbank und werden nur über Smoke- und E2E-Tests ausgeführt, die nicht in die Messung eingehen. Lösungsweg: Server unter Smoke- und E2E-Tests mit `NODE_V8_COVERAGE` messen und mit der Unit-Coverage zusammenführen (Backlog B-64). |
+| `CTRL-MUTATION` | Kontrolle | REQ-MAINT-001 | StrykerJS 10.0.0 auf die Geschäftsregeln (`stryker.config.mjs`), Workflow `mutation.yml` montags und auf Anforderung. Score **73,8 %** (Schwelle 60 %) – Kriterium (2) erfüllt; Ausreißer `platform/pseudonym.ts` 45,9 % (datenbanknahe Mutanten) und `listings/domain.ts` 59,3 %. |
 | `AT-MOD-001` | automatisiert | REQ-MOD-001 | Smoke-Test – Mitglied meldet eine Anzeige über die API, der Fall erscheint in der Queue. |
 | `AT-MOD-001-2` | automatisiert | REQ-MOD-001 | Smoke-Test – zweite Meldung desselben Mitglieds ergibt 409, Meldung eigener Inhalte 422. |
 | `AT-MOD-002` | automatisiert | REQ-MOD-002 | Smoke-Test – Moderator sieht Seed-Meldung und Wortfilter-Fall und entscheidet „entfernen“ (bestehend: „Moderations-Queue …“, „Moderationsentscheidung“). |
@@ -143,43 +143,44 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-NOTI-001-2` | automatisiert | REQ-NOTI-001 | Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu). |
 | `AT-NOTI-002` | automatisiert | REQ-NOTI-002 | Szenario-Test mit verkürzter Wartezeit – Bündelung, Lesen vor Versand, kein Inhalt in der Mail (neu). |
 | `AT-NOTI-003` | automatisiert | REQ-NOTI-003 | Szenario-Test – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmail trotzdem (neu). |
-| `MAN-NOTI-004` | manuell | REQ-NOTI-004 | Protokoll des mail-tester-Laufs und der Testzustellung (erst im Echtbetrieb). |
+| `MAN-NOTI-004` | manuell | REQ-NOTI-004 | Protokoll des mail-tester-Laufs und der Testzustellung – als Übung: [MAN-NOTI-004](../05-umsetzung/nachweise/MAN-NOTI-004.md). Header in Mailpit echt geprüft, DNS-Einträge syntaktisch gültig, mail-tester-Werte fiktiv (Q-28). Befunde behoben: Absender `no-reply@campusmarkt.example` (`MAIL_FROM`) passt zu den Beispiel-DNS-Einträgen, `Reply-To` ist die Kontaktstelle (`MAIL_REPLY_TO`). |
 | `AT-NOTI-005` | automatisiert | REQ-NOTI-005 | Resilienztest QS-3 mit gestopptem Mail-Catcher (neu). |
-| `CTRL-DLQ` | Kontrolle | REQ-NOTI-005 | Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen. |
+| `CTRL-DLQ` | Kontrolle | REQ-NOTI-005 | Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen – geprüft mit `tests/ops/dlq-test.mjs` (Mailpit gestoppt, Passwort-Reset angefordert, nach 302 s steht der Job mit Vorlage `password_reset` in der Ansicht, die App bleibt erreichbar); Protokoll [CTRL-DLQ](../05-umsetzung/nachweise/CTRL-DLQ.md). Läuft wegen der Dauer wöchentlich im Workflow `ops-weekly.yml`, nicht bei jedem Push. |
 | `AT-NOTI-006` | automatisiert | REQ-NOTI-006 | E2E-Test mit simuliertem Push-Dienst (neu). Noch nicht umgesetzt (⬜); offline nur eingeschränkt vorführbar. |
 | `AT-NOTI-007` | automatisiert | REQ-NOTI-007 | Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu). |
 | `AT-OPS-001` | automatisiert | REQ-OPS-001 | Smoke-Test „Readiness /health/ready“ (bestehend). |
 | `AT-OPS-001-2` | automatisiert | REQ-OPS-001 | Resilienztest – Stopp unter Last ohne abgebrochene Anfragen (neu zu schreiben). |
+| `AT-OPS-001-3` | automatisiert | REQ-OPS-001 | Ops-Test `tests/ops/db-outage-test.mjs` – Datenbank-Container gestoppt: Bereitschaft meldet „nicht bereit“ (503), Lebendigkeit bleibt „ok“, der App-Prozess läuft ohne Neustart weiter, Status-API meldet die Datenbank als gestört, Rechts- und Statusseite laden; nach dem Datenbankstart innerhalb von 60 s wieder bereit. Läuft in CI im Job `compose`. Hintergrund: Befund B-1 aus der Störungsübung [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md); behoben durch Error-Handler an allen Pools, Ping-Timeout 2 s und Rückgriff auf den zuletzt bekannten Wartungszustand bei Lesefehlern. |
 | `AT-OPS-002` | automatisiert | REQ-OPS-002 | Smoke-Test `/metrics` (bestehend) plus Unit-Test des Request-Logs (`apps/server/src/platform/http/server.test.ts`): Eintrag enthält Methode, Route ohne Query, Status, Dauer und Request-ID, aber keine IP-Adresse, keinen Port und keine Query-Werte wie `token=`. |
-| `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder. |
-| `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests. |
+| `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder – Protokoll [MAN-OPS-002](../05-umsetzung/nachweise/MAN-OPS-002.md): Normalbetrieb ohne Personenbezug, Korrelations-ID in allen Einträgen; die Lücken P-1 (Request-ID aus dem Client) und P-2 (Rohpfad unbekannter Routen) sind behoben (Request-ID nur als UUID, unbekannte Pfade als `unmatched`). Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme. |
+| `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests – [MAN-OPS-003](../05-umsetzung/nachweise/MAN-OPS-003.md) (simuliert: frischer Clone, nur README-Schritte, 1 min 16 s bis zur Anmeldung mit vorhandenem Build-Cache). |
 | `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24). |
 | `AT-OPS-005` | automatisiert | REQ-OPS-005 | Neustart-Test – zweiter Start meldet keine neue Migration und wird gesund (Grundlage: Frischstart-Zyklen; als Skript neu zu schreiben). |
 | `AT-OPS-006` | automatisiert | REQ-OPS-006 | Smoke-Test – mit `MAINTENANCE_MODE=true` liefern Seiten und API 503 mit `Retry-After`, Health, Status und Rechtsseiten nicht. |
 | `AT-OPS-006-2` | automatisiert | REQ-OPS-006 | Smoke-Test – Administrator setzt und entfernt eine Ankündigung (Mitglied 403), die Ankündigung ist öffentlich abrufbar, Audit-Log-Eintrag. |
 | `AT-OPS-007` | automatisiert | REQ-OPS-007 | Smoke-Test – `/status` (Seite) und die zugehörige API sind ohne Anmeldung erreichbar, zeigen je Dienst „in Betrieb“ bzw. „gestört“ mit Zeitpunkt und enthalten keine Versionen, Hostnamen oder Fehlertexte. |
 | `CTRL-ALERT-RULES` | Kontrolle | REQ-OPS-008 | CI-Kontrolle (Job `ops-config`) – `promtool check config`, `promtool test rules`, `amtool check-config`; jede Regel mit Annotation `runbook_url`. |
-| `MAN-OPS-008` | manuell | REQ-OPS-008 | Protokoll der Alarmübung (App gestoppt → Mail in Mailpit ≤ 5 min). |
+| `MAN-OPS-008` | manuell | REQ-OPS-008 | Protokoll der Alarmübung (App gestoppt → Mail in Mailpit ≤ 5 min) – [MAN-OPS-008](../05-umsetzung/nachweise/MAN-OPS-008.md): AppDown-Mail nach 196 s, Entwarnung nach 295 s (bis zu 5 min Verzögerung durch `group_interval`). Alarm-Links zeigen dank `--web.external-url` auf die lokal erreichbaren Adressen. |
 | `AT-OPS-009` | automatisiert | REQ-OPS-009 | `tests/ops/proxy-test.mjs` gegen das Profil `proxy` (CI-Job `compose`) – Zertifikat der lokalen CA, Umleitung 308 von HTTP, HSTS-Header `max-age=31536000`, `/metrics` am Proxy 404, Anmeldung über HTTPS mit `Secure`-Cookie. Adresse im Beispiel: `https://campusmarkt.localhost:8443` (eigener Hostname, ADR-0017). |
 | `AT-OPS-010` | automatisiert | REQ-OPS-010 | Smoke-Test – Benachrichtigungs-Mail in Mailpit trägt beide Header; Bestätigungsmail nicht. |
 | `CTRL-DOC-MAIL` | Kontrolle | REQ-OPS-010 | Kontrolle `docs/07-betrieb/mail-zustellbarkeit.md` – SPF-, DKIM-, DMARC-Beispiele und Bounce-Ablauf vorhanden. |
 | `CTRL-DOC-BETRIEB` | Kontrolle | REQ-OPS-011, REQ-SEC-012 | Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden. |
-| `MAN-OPS-011` | manuell | REQ-OPS-011 | Protokoll einer Störungsübung (z. B. Datenbank gestoppt) nach dem Handbuch. |
+| `MAN-OPS-011` | manuell | REQ-OPS-011 | Protokoll einer Störungsübung (z. B. Datenbank gestoppt) nach dem Handbuch – [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md): Störung nach 3 min 32 s behoben. Der Code-Befund B-1 (App-Absturz bei Datenbankausfall) ist behoben und durch AT-OPS-001-3 abgesichert; die Handbuch-Befunde H-1 bis H-4 sind im Betriebshandbuch und im Störungsprozess eingearbeitet (Schweregrade S1–S4 mit Reaktionszeiten, Runbook „Datenbank nicht erreichbar“, Ausweichkanal). |
 | `CTRL-RENOVATE` | Kontrolle | REQ-OPS-012 | CI-Kontrolle – `renovate-config-validator` prüft `renovate.json`. |
 | `AT-PERF-001` | automatisiert | REQ-PERF-001 | k6-Lasttest `tests/load/search.js` (geplant, siehe Umsetzungsstand). |
 | `AT-PERF-002` | automatisiert | REQ-PERF-002 | k6-Lasttest Chat (neu zu schreiben; Umsetzungsstand ⬜ – nicht gemessen). |
 | `AT-PERF-003` | automatisiert | REQ-PERF-003 | k6-Lasttest „Anzeige erstellen“ (neu zu schreiben; Umsetzungsstand ⬜). |
 | `AT-PERF-004` | automatisiert | REQ-PERF-004 | k6-Lasttest Registrierung mit Mailpit-Abgleich (neu zu schreiben; Umsetzungsstand ⬜). |
 | `AT-PERF-005` | automatisiert | REQ-PERF-005 | Lighthouse-CI-Lauf (neu zu schreiben; Umsetzungsstand ⬜). |
-| `MAN-PORT-001` | manuell | REQ-PORT-001 | Protokoll des Onboarding-Tests. |
-| `CTRL-CI-MULTIARCH` | Kontrolle | REQ-PORT-002 | Multi-Arch-Build mit Smoke-Test in der CI (neu einzurichten; Umsetzungsstand ⬜). |
+| `MAN-PORT-001` | manuell | REQ-PORT-001 | Protokoll des Onboarding-Tests – [MAN-PORT-001](../05-umsetzung/nachweise/MAN-PORT-001.md) (simuliert, 3 min 25 s). Die Befunde (feste Ports in `compose.dev.yaml`, Dev-Proxy ohne `.env`) sind behoben: Ports nur an 127.0.0.1 und per `DEV_DB_PORT`, `DEV_SMTP_PORT`, `DEV_MAILPIT_PORT` änderbar; Vite liest `VITE_API_TARGET` bzw. den `PORT` des Servers aus `.env`. |
+| `CTRL-CI-MULTIARCH` | Kontrolle | REQ-PORT-002 | CI-Job `multiarch` (QEMU + Buildx) baut `linux/amd64` und `linux/arm64`, startet das arm64-Image unter Emulation bis „healthy“ und lädt beide Image-Archive hoch; der Smoke-Test läuft gegen amd64 im Job `compose`. Lokal geprüft: arm64 nativ „healthy“, amd64 per Emulation in 347 s gebaut. |
 | `AT-PRIV-001` | automatisiert | REQ-PRIV-001 | (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel. |
 | `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt. |
 | `AT-PRIV-002` | automatisiert | REQ-PRIV-002 | Smoke-Test, (neu) erweitert – Antworten zu Anzeige, Konversation, Suche und Moderationsfall enthalten keine fremde E-Mail-Adresse; nach beidseitiger Freigabe nur das Gegenüber. |
 | `AT-PRIV-002-2` | automatisiert | REQ-PRIV-002 | (neu) Daten zum Missbrauchsschutz älter als 7 Tage werden vom täglichen Löschjob entfernt. |
 | `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | (neu) Szenario-Test mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |
-| `AT-PRIV-003-2` | automatisiert | REQ-PRIV-003 | (neu) Szenario-Test für Chats (12 Monate), Meldungen, Audit-Log, Links und entfernte Anzeigen. |
-| `AT-PRIV-003-3` | automatisiert | REQ-PRIV-003 | (neu) Kontolöschung: eigene Nachrichtentexte entfernt, Konversation des Gegenübers bleibt mit „Ehemaliges Mitglied“. |
+| `AT-PRIV-003-2` | automatisiert | REQ-PRIV-003 | Ops-Test `tests/ops/retention-test.mjs` – Datensätze werden per psql zurückdatiert, danach löst die Administration den Löschlauf aus (`POST /admin/demo/run-due-jobs`); geprüft werden Chats (12 Monate nach der letzten Nachricht), Meldungen und Entscheidungen (12 Monate nach Abschluss), Audit-Log (24 Monate), benutzte bzw. abgelaufene Links (7 Tage) und von der Moderation entfernte Anzeigen (12 Monate); jüngere Einträge bleiben. Läuft in CI im Job `compose`. |
+| `AT-PRIV-003-3` | automatisiert | REQ-PRIV-003 | derselbe Ops-Test – Kontolöschung entfernt nur die eigenen Nachrichtentexte (Systemcode `message_deleted`), die Konversation bleibt für das Gegenüber mit „Ehemaliges Mitglied“. |
 | `AT-PRIV-004` | automatisiert | REQ-PRIV-004 | neu zu schreiben – Meldung einer Nachricht in einer langen Konversation; Moderationsfall enthält höchstens 11 Nachrichten; Audit-Log enthält den Zugriff. |
 | `MAN-PRIV-005` | manuell | REQ-PRIV-005 | Verzeichnis der Auftragsverarbeiter mit AV-Verträgen. |
 | `AT-PRIV-006` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Browser-Test protokolliert alle Netzwerkanfragen über Anmelden, Suchen, Anzeige, Chat; keine fremde Domain, nur ein Cookie. |
@@ -187,7 +188,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `CTRL-DOC-DSFA` | Kontrolle | REQ-PRIV-007 | Kontrolle `docs/06-recht/dsfa-schwellwertanalyse.md` – alle Kriterien bewertet, Ergebnis begründet. |
 | `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Übungs-DSFA `docs/06-recht/dsfa.md` mit fiktiver Stellungnahme der DSB und fiktiver Entscheidung liegt vor; alle Pflichtinhalte nach Art. 35 Abs. 7 und die sieben Mindestszenarien sind bewertet (Q-28). |
 | `AT-PRIV-008` | automatisiert | REQ-PRIV-008 | Smoke-Test – `robots.txt` mit `Disallow: /`, Header `X-Robots-Tag` auf Start- und Rechtsseiten. |
-| `MAN-SEC-001` | manuell | REQ-SEC-001 | ASVS-L2-Checkliste mit Nachweis je Kontrolle und ZAP-Bericht. |
+| `MAN-SEC-001` | manuell | REQ-SEC-001 | ASVS-L2-Checkliste mit Nachweis je Kontrolle und ZAP-Bericht – [MAN-SEC-001](../05-umsetzung/nachweise/MAN-SEC-001.md), ZAP-Zusammenfassungen in `zap/` (Baseline 0 FAIL / 63 PASS, angemeldeter API-Scan 0 FAIL / 114 PASS). |
 | `AT-SEC-002` | automatisiert | REQ-SEC-002 | neu zu schreiben – Test prüft Algorithmus und Parameter eines frisch erzeugten Hashes. |
 | `AT-SEC-003` | automatisiert | REQ-SEC-003 | Unit-Test der Tabelle (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „Passwortrichtlinie“). |
 | `AT-SEC-004` | automatisiert | REQ-SEC-004 | Smoke-Test – zustandsändernde Anfrage ohne Schutzmerkmal liefert 403 `csrf`. |
@@ -202,15 +203,15 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SEC-007-2` | automatisiert | REQ-SEC-007 | Smoke-Test – Bildabruf ohne Sitzung liefert 401. |
 | `AT-SEC-007-3` | automatisiert | REQ-SEC-007 | Unit-Test der Formaterkennung am Inhalt (Grundlage: `listings/domain.test.ts`, „Magic Bytes“). |
 | `AT-SEC-007-4` | automatisiert | REQ-SEC-007 | (neu) JPEG mit GPS-EXIF hochladen, ausgeliefertes Bild enthält keine EXIF-Daten. |
-| `CTRL-CI-SCAN` | Kontrolle | REQ-SEC-008 | Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt. |
-| `MAN-SEC-009` | manuell | REQ-SEC-009 | Threat-Model-Dokument mit Review-Vermerk. |
+| `CTRL-CI-SCAN` | Kontrolle | REQ-SEC-008 | Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt – CI-Job `security-scans`: SAST mit Semgrep (Regelsätze JavaScript, TypeScript, OWASP Top Ten, SARIF-Bericht), SCA mit `pnpm audit --audit-level high`, Secret-Scan mit gitleaks über die gesamte Historie, Image-Scan mit Trivy (HIGH/CRITICAL brechen den Lauf ab), SBOM im CycloneDX-Format als Artefakt `security-reports`. |
+| `MAN-SEC-009` | manuell | REQ-SEC-009 | Threat-Model-Dokument mit Review-Vermerk – [Threat Model](../03-architektur/threat-model.md): STRIDE über 7 Abläufe mit Datenflussdiagramm und Vertrauensgrenzen; 39 Bedrohungen, davon 32 umgesetzt und getestet, 7 begründet akzeptiert, 0 offen; Review-Vermerk (fiktiv: security-lead, architecture-lead). |
 | `CTRL-IMAGE-INSPECT` | Kontrolle | REQ-SEC-010 | Prüfung von Benutzer und Umgebung des Images sowie Start mit `read_only: true` (Compose) bis zum Status „healthy“. |
 | `AT-SEC-011` | automatisiert | REQ-SEC-011 | (neu) Registrierung ohne Bestätigung: Anmeldung liefert `not_verified`; Anzeige anlegen, Bild hochladen und Anzeige bearbeiten ohne Sitzung liefern 401. |
 | `AT-SEC-011-2` | automatisiert | REQ-SEC-011 | (neu) nach Sperre durch die Moderation liefern Anzeige anlegen, Bild hochladen und Bearbeiten mit der alten Sitzung 401. |
 | `AT-SEC-011-3` | automatisiert | REQ-SEC-011 | (neu) nach beantragter Kontolöschung liefert Anzeige anlegen mit der alten Sitzung 401. |
 | `AT-SEC-012` | automatisiert | REQ-SEC-012 | Smoke-Test – `/.well-known/security.txt` liefert 200, `text/plain`, alle Pflichtfelder, `Expires` in der Zukunft. |
 | `CTRL-DOC-PENTEST` | Kontrolle | REQ-SEC-013 | Kontrolle `docs/07-betrieb/pentest-plan.md` – Umfang, Methode, Befundbehandlung vorhanden. |
-| `MAN-SEC-013` | manuell | REQ-SEC-013 | Abschlussbericht des Penetrationstests (erst vor einem Echtbetrieb). |
+| `MAN-SEC-013` | manuell | REQ-SEC-013 | Abschlussbericht des Penetrationstests – als Übungs-Pentest durchgeführt (kein externer Tester): [MAN-SEC-013](../05-umsetzung/nachweise/MAN-SEC-013.md), Rohdaten `pentest-results.json`, ZAP-Zusammenfassungen in `zap/`. 49 gezielte Prüfungen, 47 bestanden, 2 akzeptierte Demo-Befunde (PT-F-17 API-Doku im Demo-Modus, PT-F-18 `/metrics` am lokalen Port); kein kritischer oder hoher Befund. Behoben: PT-F-01, 02, 03, 13, 14, 15, 16. Offen als Backlog: PT-F-04 bis PT-F-12 (B-59 bis B-63). |
 | `AT-SRCH-001` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit Tippfehler findet die Anzeige. |
 | `AT-SRCH-001-2` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit abweichender Wortform findet Anzeigen. |
 | `AT-SRCH-002` | automatisiert | REQ-SRCH-002 | API-Test – Filterkombinationen und Sortierungen gegen Seed-Daten (neu). |
@@ -221,7 +222,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SRCH-006` | automatisiert | REQ-SRCH-006 | API-Test – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus (neu). |
 | `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben). |
 | `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test – Manifest und Service Worker sind vorhanden und registriert. |
-| `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte. |
+| `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte – [MAN-UX-002](../05-umsetzung/nachweise/MAN-UX-002.md). Chat-Systemnachrichten werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten werden weiter am Text erkannt. |
 | `AT-UX-003` | automatisiert | REQ-UX-003 | Smoke- oder E2E-Test – unbekannte Seite ergibt 404 mit Seite „Seite nicht gefunden“ und Links; unbekannter API-Pfad ergibt JSON-404. |
 | `AT-UX-003-2` | automatisiert | REQ-UX-003 | Unit-Test – Fehlerbehandler liefert bei unerwartetem Fehler 500 mit Request-ID ohne Stacktrace. |
 | `AT-UX-004` | automatisiert | REQ-UX-004 | E2E-Test – Gast sieht die Startseite mit Zugangsregel, drei Schritten, Registrieren und Anmelden; angemeldetes Mitglied wird zur Suche weitergeleitet; axe-core ohne Verstöße `serious`/`critical`. |

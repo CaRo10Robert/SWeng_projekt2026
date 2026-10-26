@@ -3,9 +3,9 @@ id: OPS-GOLIVE
 type: checklist
 status: in-review
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Go-live-Checkliste
@@ -32,7 +32,11 @@ last_updated: 2026-10-25
 - [ ] Sicherheitsscans in CI aktiv (B-06), keine offenen kritischen Funde
 - [ ] `security.txt` mit echter Kontaktadresse (`SECURITY_CONTACT`) und gültigem `Expires`; `Policy` und `Canonical` erscheinen nur mit HTTPS-`PUBLIC_URL`
 - [ ] Datenbankpasswort aus `compose.yaml` ersetzt; Geheimnisse (DB-Passwort, SMTP, ggf. `UNSUBSCRIBE_SECRET`) im Secret-Store, nicht im Repo
-- [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden (damit entfällt auch der automatische Abgleich der Demo-Konten mit neuen Rechtstexten)
+- [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden
+- [ ] `API_DOCS=false` (keine OpenAPI-Doku im Echtbetrieb, PT-F-17)
+- [ ] `MAIL_FROM` mit der echten, per SPF/DKIM/DMARC abgesicherten Domain; `MAIL_REPLY_TO` = echte Kontaktstelle
+- [ ] Pentest-Empfehlungen B-59 bis B-63 umgesetzt oder als Ausnahme genehmigt; ASVS-Checkliste ohne „nicht erfüllt“
+- [ ] Screenreader- und Usability-Test (MAN-A11Y-001/002, MAN-LST-001) mit echten Personen durchgeführt (damit entfällt auch der automatische Abgleich der Demo-Konten mit neuen Rechtstexten)
 - [ ] Admin- und Moderationskonten personalisiert, Rollenliste geprüft
 
 ## Betrieb

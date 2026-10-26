@@ -3,9 +3,9 @@ id: OPS-UPDATES
 type: process
 status: in-review
 owner: architecture-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Update-, Release- und Rollback-Prozess
@@ -29,6 +29,12 @@ Versionen werden exakt gepinnt (`rangeStrategy: pin`), nach jedem Update läuft 
 Jeder Update-Pull-Request durchläuft die volle CI (Typprüfung, Unit-, E2E- und Smoke-Tests). Ein Mensch prüft und mergt, außer bei Patch-Updates von Entwicklungsabhängigkeiten.
 
 **Werkzeug-Versionen in CI:** Die Versionen der Prüfwerkzeuge und Images in `.github/workflows/ci.yml` (Caddy, Prometheus, Alertmanager, Renovate-Validator) stehen zentral im `env`-Block und werden von Renovate über einen Regex-Manager aktualisiert. Ein CI-Schritt prüft, dass sie mit `compose.yaml` übereinstimmen.
+
+**Sicherheitsscans in CI** (REQ-SEC-008, CTRL-CI-SCAN): Job `security-scans` mit Semgrep (SAST, SARIF), `pnpm audit --audit-level high` (SCA), gitleaks (Secrets, ganze Historie), Trivy (Image, HIGH/CRITICAL brechen ab) und SBOM (CycloneDX, Artefakt `security-reports`). Die Scanner-Images stehen ebenfalls im `env`-Block und werden von Renovate gepflegt. Ausnahmen nur begründet und befristet: `.gitleaks.toml` (bis 2027-04), `.trivyignore` mit `--ignore-unfixed` (bis 2027-01), `nosemgrep`-Kommentare mit Begründung.
+
+**Abhängigkeits-Updates vom 2026-10-26** (Ersteinrichtung der Scans): sharp 0.35.5, @fastify/static 10.1.5, @fastify/swagger-ui 6.1.1, nodemailer 10.0.16 (eigene Typen, `@types/nodemailer` entfernt), vitest und @vitest/coverage-v8 4.1.11. Das Runtime-Image enthält seitdem weder npm, npx, corepack noch yarn.
+
+**Weitere Workflows:** `mutation.yml` (StrykerJS, montags und auf Anforderung, CTRL-MUTATION) und `ops-weekly.yml` (Dead-Letter-Test bei Mailausfall, montags, CTRL-DLQ). Der Job `multiarch` baut amd64 und arm64 (REQ-PORT-002).
 
 **Zeitziele (Beispiel):** kritische Sicherheitslücken in erreichbarem Code binnen 48 h, hohe binnen 7 Tagen, sonst mit dem nächsten wöchentlichen Update.
 

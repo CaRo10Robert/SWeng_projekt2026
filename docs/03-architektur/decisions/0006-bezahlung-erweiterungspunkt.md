@@ -43,3 +43,4 @@ Domain Events (`DealAgreed`, `DealCompleted`, `DealCancelled`) werden per pg-bos
 - (+) Der PSP ist austauschbar.
 - (−) Das Deal-Konzept muss im MVP sorgfältig modelliert werden, obwohl es zunächst nur die Reservierung abbildet.
 - Rechtliche Folgepflichten (DAC7/PStTG, AGB, Widerruf) werden im Spike PAY-02 geklärt.
+- *Nachtrag 2026-10-26 (MAN-ARCH-001):* Die dependency-cruiser-Regel `no-payment-sdk-in-modules` verhindert, dass Fachmodule SDKs von Zahlungsdienstleistern importieren; eine Bezahlung kommt nur über den `PaymentPort`. Deal-Ereignisse tragen `eventId`, `occurredAt` und `dealId`, damit ein späterer Zahlungs-Konsument idempotent verarbeiten kann.

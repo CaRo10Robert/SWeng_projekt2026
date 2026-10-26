@@ -12,9 +12,9 @@ moscow: W
 kano: n/a
 epic: EPIC-12
 source: Guideline Kap. 01
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [MAN-AVAIL-002]
 ---
 
@@ -38,7 +38,7 @@ Guideline Kap. 01: RTO und RPO sind für zustandsbehaftete Dienste Pflicht; im P
 | Verhalten bei Verfehlung | Incident mit Nachbereitung, Anpassung des Backup-Konzepts |
 
 ## Nachweis
-- `MAN-AVAIL-002`: Protokoll der Restore-Übung (erst im Echtbetrieb).
+- `MAN-AVAIL-002`: Protokoll der Restore-Übung – im Docker-Beispiel als Übung durchgeführt: [MAN-AVAIL-002](../../05-umsetzung/nachweise/MAN-AVAIL-002.md). RTO gemessen 26 s (Restore-Skript 12,7 s) – erfüllt; das RPO dieser Anforderung ist mit der täglichen Sicherung des Beispiels **nicht** erreichbar und braucht im Echtbetrieb PITR bzw. WAL-Archivierung (EPIC-12).
 
 
 ## Änderungshistorie
@@ -47,3 +47,4 @@ Guideline Kap. 01: RTO und RPO sind für zustandsbehaftete Dienste Pflicht; im P
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Messverfahren ergänzt; als N/A für das Beispiel markiert |
 | 2.1 | 2026-10-23 | Review v0.2: Status nach Review |
+| 2.2 | 2026-10-26 | Restore-Übung als Protokoll verlinkt: RTO erfüllt, RPO im Beispiel nicht erreichbar |

@@ -3,9 +3,9 @@ id: LEGAL-BREACH
 type: process
 status: in-review
 owner: security-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Prozess bei Verletzungen des Schutzes personenbezogener Daten (Art. 33/34 DSGVO)
@@ -106,9 +106,29 @@ Pflicht auch dann, wenn nicht gemeldet wird.
 
 ## Vorlage: Benachrichtigung Betroffener (Art. 34)
 
-> Betreff: Wichtiger Hinweis zur Sicherheit Ihrer Daten bei CampusMarkt
+Die App spricht Mitglieder mit „du“ an; die Benachrichtigung tut das auch (Befund T-4 aus [MAN-LEGAL-013](../05-umsetzung/nachweise/MAN-LEGAL-013.md)).
+
+> Betreff: Wichtiger Hinweis zur Sicherheit deiner Daten bei CampusMarkt
 >
-> Am [Datum] haben wir festgestellt, dass [klare Beschreibung, was passiert ist]. Betroffen sind [welche Daten]. Mögliche Folgen: [z. B. Phishing-Mails]. Wir haben [Maßnahmen] ergriffen. Wir empfehlen Ihnen [z. B. Passwort ändern, auf verdächtige Mails achten]. Fragen beantwortet die/der Datenschutzbeauftragte: datenschutz@hwg-lu.example.
+> Am [Datum] haben wir festgestellt, dass [klare Beschreibung, was passiert ist]. Betroffen sind [welche Daten]. Mögliche Folgen: [z. B. Phishing-Mails]. Wir haben [Maßnahmen] ergriffen. Wir empfehlen dir [z. B. Passwort ändern, auf verdächtige Mails achten]. Fragen beantwortet die Datenschutzbeauftragte: datenschutz@hwg-lu.example (fiktiv).
+
+## Vorlage: Teilmeldung an die Aufsichtsbehörde (Art. 33 Abs. 4)
+
+Ist nach 72 h noch nicht alles bekannt, wird fristgerecht eine Teilmeldung abgegeben und schrittweise ergänzt (Befund T-3).
+
+| Feld | Inhalt |
+|---|---|
+| Art der Meldung | Erstmeldung (Teilmeldung) / Ergänzung Nr. … / Abschluss |
+| Bezug | Aktenzeichen der Erstmeldung bei der Aufsicht (bei Ergänzungen) |
+| Bereits bekannt | Zeitpunkt der Kenntnis, betroffene Datenkategorien, geschätzte Zahl Betroffener, erste Maßnahmen |
+| Noch offen | was noch untersucht wird und bis wann eine Ergänzung folgt |
+| Ansprechperson | Datenschutzbeauftragte (fiktiv: Paula Prüfer, datenschutz@hwg-lu.example) |
+
+## Sicherungen und Zugriff (Befunde T-1, T-6)
+
+- Im Docker-Beispiel sind Sicherungen **unverschlüsselt** (`backups/`, in `.gitignore` und `.dockerignore`). Das ist nur für die Übung zulässig; im Echtbetrieb werden Sicherungen vor dem Ablegen verschlüsselt (z. B. age, Schlüssel im Tresor der Stabsstelle, fiktiv) – siehe [backup-restore.md](../07-betrieb/backup-restore.md), Abschnitt Echtbetrieb.
+- Zugriff auf Sicherungen haben nur Betrieb und Incident-Leitung; jeder Zugriff wird im Betriebsprotokoll vermerkt.
+- Kopien außerhalb des Servers sind nur auf dem freigegebenen, verschlüsselten Sicherungsspeicher des Rechenzentrums erlaubt (fiktiv), nie auf privaten Geräten oder öffentlichen Freigaben.
 
 ## Übung
 

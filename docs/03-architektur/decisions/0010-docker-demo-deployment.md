@@ -40,3 +40,4 @@ Folgen für andere Entscheidungen (die ADRs sind noch *Proposed* und wurden dire
 - (−) Verfügbarkeits-SLOs, RTO/RPO, Monitoring-Alarme und SPF/DKIM sind für das Beispiel **nicht anwendbar** und werden explizit als N/A markiert (Guideline: N/A nicht stillschweigend weglassen).
 - (−) Skalierungsaspekte (mehrere Instanzen) werden nur konzeptionell gezeigt, nicht betrieben.
 - **Q-11 beantwortet** ([ADR-0011](0011-mvp-umsetzung.md), [Entscheidungslog](../../02-anforderungen/05-entscheidungen.md)): ein Docker-Setup mit drei Diensten (Option B).
+- *Nachtrag 2026-10-26 (REQ-SEC-008, REQ-SEC-010):* Das Runtime-Image enthält weder npm, npx, corepack noch yarn; der Prozess braucht sie nicht, und der Image-Scan meldet damit keine Befunde dieser Werkzeuge. Das Image wird zusätzlich für `linux/arm64` gebaut und in CI unter Emulation gestartet (REQ-PORT-002).

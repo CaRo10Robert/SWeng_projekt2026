@@ -3,7 +3,7 @@ id: REQ-UX-002
 title: Deutsche Oberfläche, übersetzbar vorbereitet
 type: quality
 class: quality
-status: approved
+status: implemented
 owner: team-produkt
 risk: low
 reviewers: [qa-lead]
@@ -12,9 +12,9 @@ moscow: S
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [MAN-UX-002]
 ---
 
@@ -38,7 +38,7 @@ Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende br
 | Verhalten bei Verfehlung | Technische Schuld im Backlog, kein Release-Blocker für R1 |
 
 ## Nachweis
-- `MAN-UX-002`: Code-Review-Protokoll zur Auslagerung der Texte.
+- `MAN-UX-002`: Code-Review-Protokoll zur Auslagerung der Texte – [MAN-UX-002](../../05-umsetzung/nachweise/MAN-UX-002.md). Chat-Systemnachrichten werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten werden weiter am Text erkannt.
 - Umsetzungsstand: Texte sind in Sprachressourcen ausgelagert (`apps/web/src/i18n/de.json`, `en.json`, react-intl, ADR-0016); Englisch nach REQ-UX-007; Prüfung der Kataloge per `scripts/check-i18n.mjs` in CI.
 
 
@@ -50,3 +50,4 @@ Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende br
 | 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should), R-22 |
 | 2.2 | 2026-10-24 | Abgleich Recht und Betrieb: Englische Oberfläche als eigene Anforderung REQ-UX-007 (Q-25); diese Anforderung bleibt die Voraussetzung (Auslagerung der Texte) |
 | 2.3 | 2026-10-25 | Review v1.3 (RV-R-10): Umsetzungsstand nach a359f83 (Texte ausgelagert, Englisch) |
+| 2.4 | 2026-10-26 | Nachweis MAN-UX-002 verlinkt; Systemnachrichten als Code; Status → implemented (Texte ausgelagert, MAN-UX-002 durchgeführt) |

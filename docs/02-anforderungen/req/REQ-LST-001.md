@@ -14,9 +14,9 @@ epic: EPIC-02
 source: BG-2
 use_cases: [UC-10]
 depends_on: [REQ-LST-002, REQ-LST-003, REQ-LST-004, REQ-SEC-011]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [AT-LST-001, MAN-LST-001]
 ---
 
@@ -75,7 +75,7 @@ I: Bilder separat (REQ-LST-003) · N: Feldumfang verhandelbar · V: Kernnutzen �
 
 ## Nachweis
 - `AT-LST-001`: Smoke-Test – Anzeige mit Bild anlegen, Status `aktiv`.
-- `MAN-LST-001`: Usability-Test mit 5 Studierenden, Median der Erstellzeit < 2 min (noch nicht durchgeführt).
+- `MAN-LST-001`: Usability-Test mit 5 Studierenden, Median der Erstellzeit < 2 min – **noch nicht durchgeführt**. Vorbereitet: [Leitfaden](../../05-umsetzung/nachweise/leitfaden-usability.md), [Protokollvorlage](../../05-umsetzung/nachweise/protokollvorlage-usability.md) und ein [fiktives Beispielprotokoll](../../05-umsetzung/nachweise/MAN-LST-001-fiktiv.md) (ausdrücklich **kein** Nachweis).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -83,3 +83,4 @@ I: Bilder separat (REQ-LST-003) · N: Feldumfang verhandelbar · V: Kernnutzen �
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien und Feldgrenzen ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 1.3 | 2026-10-26 | Leitfaden, Vorlage und fiktives Beispiel für MAN-LST-001 verlinkt; Nachweis weiter offen |

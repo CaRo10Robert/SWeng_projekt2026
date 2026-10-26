@@ -3,9 +3,9 @@ id: OPS-MONITORING
 type: operational
 status: in-review
 owner: architecture-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Überwachung und Alarmierung
@@ -51,7 +51,7 @@ Schwellwerte sind Beispielwerte und werden nach den ersten Betriebswochen angepa
 | SEV-2 (wichtige Funktion gestört) | Mail an `betrieb@campusmarkt.example`, Erinnerung alle 4 h | nächster Werktag, 4 h in der Dienstzeit |
 | SEV-3 (Beeinträchtigung) | Mail an `betrieb@campusmarkt.example`, Erinnerung alle 4 h | im wöchentlichen Review |
 
-Gruppiert wird nach Alarmname (Wartezeit 30 s, Abstand 5 min); behobene Alarme werden ebenfalls gemeldet.
+Gruppiert wird nach Alarmname (Wartezeit 30 s, Abstand 5 min); behobene Alarme werden ebenfalls gemeldet. Wegen `group_interval: 5m` kommt die **Entwarnung bis zu 5 min nach der Behebung** (Alarmübung: 295 s, Befund A-1 aus [MAN-OPS-008](../05-umsetzung/nachweise/MAN-OPS-008.md)). Links in den Alarm-Mails zeigen dank `--web.external-url` auf die lokal erreichbaren Adressen (`http://127.0.0.1:9090` bzw. `:9093`) statt auf Container-Namen (Befund A-2).
 
 Bei Alarm: [Incident-Prozess](incident-prozess.md); bei Verdacht auf Datenabfluss zusätzlich [Datenpannen-Prozess](../06-recht/datenpannen-prozess.md).
 
