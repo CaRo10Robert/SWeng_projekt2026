@@ -3,7 +3,7 @@ id: REQ-SEC-009
 title: Threat Model für Registrierung, Chat und Upload
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -13,7 +13,7 @@ moscow_reason: [2, 4]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 07 (STRIDE)
-version: 1.3
+version: 1.4
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-SEC-009]
@@ -46,3 +46,4 @@ N/A – Dokumentationsanforderung. Die Missbrauchsfälle der betrachteten Abläu
 | 1.1 | 2026-10-23 | Eigene Datei, Kontaktfreigabe einbezogen |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Abschnitt (N/A mit Begründung); R-15 moscow_reason; Status `approved` |
 | 1.3 | 2026-10-26 | Threat Model erstellt (MAN-SEC-009); Status → implemented |
+| 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-SEC-009 bestanden bzw. ausgeführt); Status → verified |

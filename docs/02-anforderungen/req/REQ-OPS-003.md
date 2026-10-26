@@ -3,7 +3,7 @@ id: REQ-OPS-003
 title: Schnellstart und Fehlerbehebung dokumentiert
 type: operational
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: low
 reviewers: [qa-lead]
@@ -13,7 +13,7 @@ moscow_reason: [1]
 kano: n/a
 epic: EPIC-00
 source: BG-6
-version: 2.2
+version: 2.3
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-OPS-003]
@@ -47,3 +47,4 @@ Vorführbarkeit (BG-6, QS-9).
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-23 (zwei Zielwerte: Build ≤ 10 min online, Start bis Login ≤ 3 min offline), R-15 |
 | 2.2 | 2026-10-26 | Nachweis MAN-OPS-003 mit Protokoll verlinkt |
+| 2.3 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-OPS-003 bestanden bzw. ausgeführt); Status → verified |

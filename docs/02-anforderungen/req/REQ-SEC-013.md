@@ -3,7 +3,7 @@ id: REQ-SEC-013
 title: Penetrationstest vor dem Go-live
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -12,7 +12,7 @@ kano: n/a
 epic: EPIC-13
 source: REQ-SEC-001, OWASP WSTG, Q-23
 depends_on: [REQ-SEC-001, REQ-SEC-009]
-version: 1.3
+version: 1.4
 created: 2026-10-24
 last_updated: 2026-10-26
 verification: [CTRL-DOC-PENTEST, MAN-SEC-013]
@@ -46,3 +46,4 @@ Automatisierte Scans (REQ-SEC-008) und Threat Model (REQ-SEC-009) finden nicht a
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung (Pentest-Plan vorhanden; Durchführung MAN-SEC-013 vor Go-live offen) |
 | 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
 | 1.3 | 2026-10-26 | Übungs-Pentest MAN-SEC-013 verlinkt; offene Empfehlungen als B-59…B-63 |
+| 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-PENTEST, MAN-SEC-013 bestanden bzw. ausgeführt); Status → verified |

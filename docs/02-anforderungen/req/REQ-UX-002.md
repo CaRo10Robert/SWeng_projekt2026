@@ -3,7 +3,7 @@ id: REQ-UX-002
 title: Deutsche Oberfläche, übersetzbar vorbereitet
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-produkt
 risk: low
 reviewers: [qa-lead]
@@ -12,7 +12,7 @@ moscow: S
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.4
+version: 2.5
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-UX-002]
@@ -51,3 +51,4 @@ Zielgruppe ist deutschsprachig; das Ostasieninstitut und Austauschstudierende br
 | 2.2 | 2026-10-24 | Abgleich Recht und Betrieb: Englische Oberfläche als eigene Anforderung REQ-UX-007 (Q-25); diese Anforderung bleibt die Voraussetzung (Auslagerung der Texte) |
 | 2.3 | 2026-10-25 | Review v1.3 (RV-R-10): Umsetzungsstand nach a359f83 (Texte ausgelagert, Englisch) |
 | 2.4 | 2026-10-26 | Nachweis MAN-UX-002 verlinkt; Systemnachrichten als Code; Status → implemented (Texte ausgelagert, MAN-UX-002 durchgeführt) |
+| 2.5 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-UX-002 bestanden bzw. ausgeführt); Status → verified |

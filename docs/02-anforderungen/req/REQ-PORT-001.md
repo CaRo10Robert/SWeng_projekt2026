@@ -3,7 +3,7 @@ id: REQ-PORT-001
 title: Entwicklungsumgebung mit einem Befehl
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: low
 reviewers: [qa-lead]
@@ -12,7 +12,7 @@ moscow: S
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 05
-version: 2.2
+version: 2.3
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-PORT-001]
@@ -48,3 +48,4 @@ Dev/Prod-Parität (Twelve-Factor, Guideline Kap. 05); schnelles Onboarding im St
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should) |
 | 2.2 | 2026-10-26 | Nachweis MAN-PORT-001 mit Protokoll verlinkt; Port-Befunde behoben |
+| 2.3 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-PORT-001 bestanden bzw. ausgeführt); Status → verified |

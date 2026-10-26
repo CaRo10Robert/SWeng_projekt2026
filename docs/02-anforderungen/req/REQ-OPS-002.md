@@ -3,7 +3,7 @@ id: REQ-OPS-002
 title: Beobachtbarkeit ohne personenbezogene Daten
 type: operational
 class: quality
-status: approved
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,7 +13,7 @@ moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 11, REQ-PRIV-002
-version: 2.3
+version: 2.4
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [AT-OPS-002, MAN-OPS-002]
@@ -50,3 +50,4 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15 |
 | 2.2 | 2026-10-25 | Review v1.3 (RV-R-01, RV-C-07): Request-Log ohne IP und Query umgesetzt (6e6fe40), Nachweis um den Unit-Test ergänzt |
 | 2.3 | 2026-10-26 | Nachweis MAN-OPS-002 mit Protokoll verlinkt; P-1/P-2 behoben, Sicherheitsereignisse im Log |
+| 2.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-OPS-002, MAN-OPS-002 bestanden bzw. ausgeführt); Status → verified |

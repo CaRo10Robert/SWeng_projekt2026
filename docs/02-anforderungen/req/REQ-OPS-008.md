@@ -3,7 +3,7 @@ id: REQ-OPS-008
 title: Überwachung und Alarmierung
 type: operational
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -13,7 +13,7 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 11, Q-27
 depends_on: [REQ-OPS-002]
-version: 1.3
+version: 1.4
 created: 2026-10-24
 last_updated: 2026-10-26
 verification: [CTRL-ALERT-RULES, MAN-OPS-008]
@@ -47,3 +47,4 @@ Metriken (`/metrics`, REQ-OPS-002) ohne Alarmierung werden erst bemerkt, wenn Nu
 | 1.1 | 2026-10-24 | Angleichung an die Umsetzung (B-54): Alarmnamen und Dauern aus `ops/prometheus/alerts.yml` (AppDown 2 min, NotReady 5 min, JobFailures statt Dead-Letter-Queue), zusätzliche Regeln WebSocketDrop, MaintenanceModeOn, BackupMissing; Regeltests in CI |
 | 1.2 | 2026-10-25 | Review v1.3 (RV-A-04, RV-A-05, RV-A-18): Wartungsausschluss und Mindestlast, JobFailures nur dead, BackupMissing ohne Fehlalarme, Inhibit-Regeln; Status nach Umsetzung |
 | 1.3 | 2026-10-26 | Nachweis MAN-OPS-008 mit Protokoll verlinkt; Entwarnungsverzögerung und external-url dokumentiert |
+| 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-ALERT-RULES, MAN-OPS-008 bestanden bzw. ausgeführt); Status → verified |

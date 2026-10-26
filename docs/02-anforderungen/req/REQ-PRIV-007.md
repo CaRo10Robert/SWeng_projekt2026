@@ -3,7 +3,7 @@ id: REQ-PRIV-007
 title: Prüfung der Datenschutz-Folgenabschätzung
 type: privacy
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -11,9 +11,9 @@ moscow: S
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 35
-version: 1.5
+version: 1.6
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-DOC-DSFA, MAN-PRIV-007]
 ---
 
@@ -46,3 +46,4 @@ N/A – Prüfpflicht; keine Systemfunktion.
 | 1.3 | 2026-10-24 | Abgleich Recht und Betrieb: Schwellwertanalyse als Übung in R1 vorgezogen (Q-23, EPIC-13); Durchführung einer DSFA bleibt Voraussetzung des Echtbetriebs |
 | 1.4 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-16): Status nach Umsetzung; Schwellwertanalyse neu bewertet (Kriterien 4 und 7 → DSFA erforderlich, Bestätigung durch DSB offen) |
 | 1.5 | 2026-10-25 | Übungs-DSFA nach Art. 35 Abs. 7 mit fiktiver DSB-Stellungnahme (`docs/06-recht/dsfa.md`); MAN-PRIV-007 auf die Übungs-DSFA umgestellt (Q-28) |
+| 1.6 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-DSFA, MAN-PRIV-007 bestanden bzw. ausgeführt); Status → verified |

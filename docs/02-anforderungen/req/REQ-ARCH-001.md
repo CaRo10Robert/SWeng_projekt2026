@@ -3,7 +3,7 @@ id: REQ-ARCH-001
 title: Bezahlung als späteres Modul hinter einem Port
 type: architecture
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, architecture-lead]
@@ -14,7 +14,7 @@ kano: n/a
 epic: EPIC-09
 source: BG-5, ADR-0006
 depends_on: [REQ-CHAT-011]
-version: 1.3
+version: 1.4
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [CTRL-DEPCRUISE, MAN-ARCH-001]
@@ -54,3 +54,4 @@ Erweiterbarkeit (BG-5); ADR-0006.
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-04, R-15, Deal-Ereignisse aus REQ-CHAT-011 (Q-17) |
 | 1.3 | 2026-10-26 | Nachweis MAN-ARCH-001 verlinkt; PSP-SDK-Regel und eventId |
+| 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DEPCRUISE, MAN-ARCH-001 bestanden bzw. ausgeführt); Status → verified |

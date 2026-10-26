@@ -3,7 +3,7 @@ id: REQ-NOTI-004
 title: Authentifizierter E-Mail-Versand (SPF, DKIM, DMARC)
 type: operational
 class: quality
-status: approved
+status: verified
 owner: team-kommunikation
 risk: high
 reviewers: [product-owner, architecture-lead, qa-lead]
@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-12
 source: Zustellbarkeit an Hochschul-Postfächer
 use_cases: [UC-23]
-version: 1.3
+version: 1.4
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-NOTI-004]
@@ -48,3 +48,4 @@ Ohne Absenderauthentifizierung landen Verifikationsmails im Spam; ohne Verifikat
 | 1.1 | 2026-10-23 | Eigene Datei, Messverfahren; MoSCoW für R1 auf W (EPIC-12) |
 | 1.2 | 2026-10-23 | Review v0.2: Reviewer nach Fachgebiet (R-16); Status in-review → approved nach Review |
 | 1.3 | 2026-10-26 | Nachweis MAN-NOTI-004 als Übung verlinkt; Absenderdomain und Reply-To behoben |
+| 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-NOTI-004 bestanden bzw. ausgeführt); Status → verified |
