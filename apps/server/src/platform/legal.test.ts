@@ -23,6 +23,11 @@ describe('Rechtstexte als versionierte Inhalte (ADR-0015, REQ-LEGAL-003)', () =>
     expect(termsVersionOf(manifest)).toBe(manifest.documents.find((d) => d.name === 'nutzungsbedingungen')!.version);
   });
 
+  it('Muster-Kennzeichnung kommt nur aus dem Front Matter, nicht aus dem Hinweistext (T-1)', () => {
+    const manifest = readLegalManifest('/does-not-exist', CONTENT)!;
+    for (const d of manifest.documents) expect(d.sample, `${d.name}.${d.lang}`).toBe(true);
+  });
+
   it('LEGAL_STRICT meldet Muster und Platzhalter (Übungsaufgabe, Q-23)', () => {
     const manifest = readLegalManifest('/does-not-exist', CONTENT);
     expect(strictLegalProblems(manifest).length).toBeGreaterThan(0);

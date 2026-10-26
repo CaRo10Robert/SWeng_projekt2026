@@ -2,48 +2,49 @@
 title: Legal notice
 version: 2026-10
 last_updated: 2026-10-25
+sample: true
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
 
-> **Sample created as a course exercise – not legally binding.** All information in square brackets is a placeholder and must be replaced by the university and reviewed by its legal office or data protection officer before any live operation.
+> **Sample created as a course exercise – fictitious data, not legally binding.** People, addresses, phone numbers and reference numbers are invented; open legal questions are settled as exercise assumptions (decision Q-28).
 
 ## Provider {#anbieter}
 
 CampusMarkt HWG LU is a service of
 
-[Placeholder: name of the university]
-[Placeholder: street and house number]
-[Placeholder: postcode and town]
+Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU)
+Musterstraße 1
+67059 Ludwigshafen am Rhein (fictitious address)
 Germany
 
 The university is a corporation under public law and at the same time a state institution of the State of Rhineland-Palatinate.
 
 ## Authorised representative {#vertretungsberechtigt}
 
-[Placeholder: name of the President], President of the university
-[Placeholder: address as above]
+Prof. Dr. Erika Mustermann (fictitious), President of the university
+address as above
 
 ## Contact {#kontakt}
 
-- Email: [Placeholder: campusmarkt@hwg-lu.example]
-- Phone: [Placeholder: +49 000 000000]
+- Email: campusmarkt@hwg-lu.example
+- Phone: +49 621 555-0100 (fictitious)
 - Other ways to reach us: see the "Contact" page
 
 ## Supervisory authority {#zustaendige-aufsichtsbehoerde}
 
-[Placeholder: responsible state ministry for science, address]
+Musterministerium für Wissenschaft Rheinland-Pfalz, Musterplatz 2, 55116 Mainz (fictitious)
 
 ## VAT identification number {#umsatzsteuer-identifikationsnummer}
 
-[Placeholder: VAT ID of the university under Section 27a of the German VAT Act, if available]
+DE000000000 (fictitious)
 
 ## Responsible for content {#inhaltlich-verantwortlich}
 
 For editorial content of this platform (help pages, rules, notices):
 
-[Placeholder: name of the responsible person, organisational unit]
-[Placeholder: address as above]
+Dr. Anna Beispiel (fictitious), Stabsstelle Digitale Dienste (digital services unit)
+address as above
 
 Members are responsible for their own listings and messages. The university reviews content after it has been reported and removes illegal content (see terms of use, moderation section).
 

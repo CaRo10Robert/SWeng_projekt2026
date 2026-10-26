@@ -2,23 +2,24 @@
 title: Datenschutzerklärung
 version: 2026-10-25
 last_updated: 2026-10-25
+sample: true
 ---
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Vom Datenschutzbeauftragten der Hochschule zu prüfen. Angaben in eckigen Klammern sind Platzhalter.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.** Personen und Anschriften sind erfunden; Rechtsgrundlagen und Fristen beruhen auf Übungsannahmen (Entscheidung Q-28).
 
 Diese Erklärung informiert nach Art. 13 der Datenschutz-Grundverordnung (DSGVO) darüber, welche personenbezogenen Daten CampusMarkt HWG LU verarbeitet, wozu und wie lange.
 
 ## 1. Verantwortlicher
 
-[Platzhalter: Name der Hochschule], vertreten durch [Platzhalter: Präsidentin/Präsident]
-[Platzhalter: Anschrift]
-E-Mail: [Platzhalter: campusmarkt@hwg-lu.example]
+Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU), vertreten durch die Präsidentin, Prof. Dr. Erika Mustermann (fiktiv)
+Musterstraße 1, 67059 Ludwigshafen am Rhein (fiktive Anschrift)
+E-Mail: campusmarkt@hwg-lu.example
 
 ## 2. Datenschutzbeauftragte/r
 
-[Platzhalter: Name der/des Datenschutzbeauftragten]
-[Platzhalter: Anschrift]
-E-Mail: [Platzhalter: datenschutz@hwg-lu.example]
+Paula Prüfer (fiktiv), Datenschutzbeauftragte der Hochschule
+Musterstraße 1, 67059 Ludwigshafen am Rhein (fiktive Anschrift)
+E-Mail: datenschutz@hwg-lu.example
 
 ## 3. Grundsätze
 
@@ -31,7 +32,7 @@ E-Mail: [Platzhalter: datenschutz@hwg-lu.example]
 
 | Verarbeitung | Daten | Zweck | Rechtsgrundlage | Speicherdauer |
 |---|---|---|---|---|
-| Registrierung und Konto | Hochschul-E-Mail-Adresse, Passwort (nur als Hash), Anzeigename, optional Studiengang und bevorzugte Übergabeorte, Nutzertyp (aus der Domain), Sprache (Deutsch oder Englisch), Version der zur Kenntnis genommenen Datenschutzerklärung | Zugang nur für Hochschulangehörige, Betrieb des Kontos | Art. 6 Abs. 1 lit. e DSGVO i. V. m. dem Landesdatenschutzgesetz Rheinland-Pfalz und den Aufgaben der Hochschule [Platzhalter: genaue Norm prüfen]; Nutzungsverhältnis | bis zur Löschung des Kontos; Löschung 14 Tage nach dem Löschantrag. Unbestätigte Konten werden 7 Tage nach der Registrierung gelöscht |
+| Registrierung und Konto | Hochschul-E-Mail-Adresse, Passwort (nur als Hash), Anzeigename, optional Studiengang und bevorzugte Übergabeorte, Nutzertyp (aus der Domain), Sprache (Deutsch oder Englisch), Version der zur Kenntnis genommenen Datenschutzerklärung | Zugang nur für Hochschulangehörige, Betrieb des Kontos | Art. 6 Abs. 1 lit. e DSGVO i. V. m. dem Landesdatenschutzgesetz Rheinland-Pfalz und den Aufgaben der Hochschule (Übungsannahme Q-28: § 2 HochSchG RLP, Übungswert); Nutzungsverhältnis | bis zur Löschung des Kontos; Löschung 14 Tage nach dem Löschantrag. Unbestätigte Konten werden 7 Tage nach der Registrierung gelöscht |
 | Bestätigungs- und Passwort-Links | Zufallswert (gespeichert nur als Hash), Zeitpunkt | Bestätigung der Adresse, Passwort zurücksetzen | wie oben | 7 Tage nach Ablauf bzw. Nutzung |
 | Zustimmung zu den Nutzungsbedingungen und Kenntnisnahme der Datenschutzerklärung | Version, Zeitpunkt | Nachweis (Rechenschaftspflicht); das ist keine Einwilligung im Sinne der DSGVO | Art. 6 Abs. 1 lit. c i. V. m. Art. 5 Abs. 2 DSGVO | bis zur Kontolöschung, danach 3 Jahre ohne Profilbezug |
 | Anzeigen und Bilder | Titel, Beschreibung, Preis, Kategorie, Zustand, Übergabeorte, Fotos (neu kodiert, ohne Metadaten wie GPS-Position) | Veröffentlichung im Marktplatz für Mitglieder | wie Konto | sofort bei Löschung durch Sie; 30 Tage nach „abgegeben“; 90 Tage nach Ablauf; nie zugeordnete Bilder nach 24 Stunden |
@@ -39,26 +40,26 @@ E-Mail: [Platzhalter: datenschutz@hwg-lu.example]
 | Reservierung und Abgabe (Deals) | Anzeige, Anbieter/in, Interessent/in, vereinbarter Preis, Zeitpunkte von Reservierung und Abgabe | Reservierung bzw. Abgabe an genau eine Person; Grundlage für die steuerliche Auswertung (siehe DAC7 unten) | wie Konto | mit der Konversation (12 Monate nach der letzten Nachricht) bzw. dem Konto |
 | Kontaktfreigabe | Zustimmung, Widerruf oder Ablehnung je Konversation | Austausch der Hochschul-E-Mail-Adressen nur nach beidseitiger Zustimmung | Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) | mit der Konversation bzw. dem Konto |
 | Merkliste, Blockierungen, Benachrichtigungseinstellungen | Verweise auf Anzeigen bzw. Mitglieder, Einstellungen | Funktionen Ihres Kontos | wie Konto | bis zur Kontolöschung |
-| Meldungen und Moderation | Meldung (Grund, Text), betroffener Inhalt, Entscheidung mit Begründung, Regel und ggf. Rechtsgrundlage, Mitteilungen in Ihrem Konto (Begründungen, Ergebnisse von Widersprüchen, vorläufiges Ausblenden), Widerspruch, Einmal-Links für den Widerspruch (nur als Hash) | Melde- und Abhilfeverfahren und internes Beschwerdemanagement nach dem Digital Services Act (Art. 16, 17, 20 DSA) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. der Verordnung (EU) 2022/2065, soweit der DSA anwendbar ist, sonst lit. e [Platzhalter: Anwendbarkeit durch das Justiziariat prüfen] | 12 Monate nach Abschluss; entfernte Anzeigen 12 Monate nach der Entscheidung; Originaltexte entfernter Nachrichten 6 Monate (nicht, solange ein Widerspruch offen ist); Einmal-Links bis zum Ende der Widerspruchsfrist (6 Monate) |
-| Beweissicherung bei Verdacht auf Straftaten | pseudonymisierte Kopie des gekennzeichneten Inhalts mit bis zu fünf Nachrichten davor und danach (Absender nur als Rolle, keine Kontaktdaten) | Prüfung und ggf. Information der Strafverfolgungsbehörden (Art. 18 DSA) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 18 DSA, sonst lit. e [Platzhalter: prüfen] | bis zur Freigabe durch die Administration, höchstens 6 Monate; die Originale werden fristgerecht gelöscht |
+| Meldungen und Moderation | Meldung (Grund, Text), betroffener Inhalt, Entscheidung mit Begründung, Regel und ggf. Rechtsgrundlage, Mitteilungen in Ihrem Konto (Begründungen, Ergebnisse von Widersprüchen, vorläufiges Ausblenden), Widerspruch, Einmal-Links für den Widerspruch (nur als Hash) | Melde- und Abhilfeverfahren und internes Beschwerdemanagement nach dem Digital Services Act (Art. 16, 17, 20 DSA) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. der Verordnung (EU) 2022/2065 (Übungsannahme Q-28: der DSA ist anwendbar) | 12 Monate nach Abschluss; entfernte Anzeigen 12 Monate nach der Entscheidung; Originaltexte entfernter Nachrichten 6 Monate (nicht, solange ein Widerspruch offen ist); Einmal-Links bis zum Ende der Widerspruchsfrist (6 Monate) |
+| Beweissicherung bei Verdacht auf Straftaten | pseudonymisierte Kopie des gekennzeichneten Inhalts mit bis zu fünf Nachrichten davor und danach (Absender nur als Rolle, keine Kontaktdaten) | Prüfung und ggf. Information der Strafverfolgungsbehörden (Art. 18 DSA) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. Art. 18 DSA (Übungsannahme Q-28) | bis zur Freigabe durch die Administration, höchstens 6 Monate; die Originale werden fristgerecht gelöscht |
 | Audit-Log | wer hat wann welche Verwaltungsaktion ausgeführt | Nachvollziehbarkeit von Moderation und Verwaltung | Art. 6 Abs. 1 lit. c und e DSGVO | 24 Monate |
-| E-Mail-Benachrichtigungen | E-Mail-Adresse, Art der Benachrichtigung (ohne Nachrichteninhalt) | Bestätigungen, Hinweise auf neue Nachrichten, ablaufende Anzeigen | wie Konto; abbestellbar je Kategorie, außer notwendige Kontomails | Versandprotokoll [Platzhalter: Frist des Mail-Dienstes] |
+| E-Mail-Benachrichtigungen | E-Mail-Adresse, Art der Benachrichtigung (ohne Nachrichteninhalt) | Bestätigungen, Hinweise auf neue Nachrichten, ablaufende Anzeigen | wie Konto; abbestellbar je Kategorie, außer notwendige Kontomails | Versandprotokoll 30 Tage (Übungsannahme Q-28) |
 | Missbrauchsschutz | IP-Adresse und bei Anmeldung und Registrierung die E-Mail-Adresse nur als Pseudonym (HMAC mit zufälligem Schlüssel, der täglich wechselt; der alte Schlüssel wird nach einer Stunde gelöscht), Zähler | Schutz vor automatisierten Angriffen (Anmeldung, Registrierung, Nachrichten) | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | höchstens 7 Tage; die Zähler werden nach einem Tag gelöscht |
-| Server-Protokolle und Metriken | Zeitpunkt, Methode, aufgerufene Route ohne Parameter, Statuscode, Dauer, Kennung der Anfrage – ohne IP-Adresse, E-Mail-Adresse, Links mit Tokens oder Inhalte | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | [Platzhalter: z. B. 14 Tage] |
+| Server-Protokolle und Metriken | Zeitpunkt, Methode, aufgerufene Route ohne Parameter, Statuscode, Dauer, Kennung der Anfrage – ohne IP-Adresse, E-Mail-Adresse, Links mit Tokens oder Inhalte | Betrieb, Fehlersuche, Sicherheit | Art. 6 Abs. 1 lit. e DSGVO; Art. 32 DSGVO | 14 Tage (Übungsannahme Q-28) |
 | Datensicherungen | Kopie der Datenbank und Bilder | Wiederherstellung nach Störungen | Art. 6 Abs. 1 lit. e i. V. m. Art. 32 DSGVO | spätestens nach 28 Tagen gelöscht |
 | Löschjournal | Art, Kennung und Zeitpunkt einer Löschung (keine Inhalte) | Löschungen nach einer Wiederherstellung aus einer Sicherung erneut ausführen | Art. 6 Abs. 1 lit. c i. V. m. Art. 17 DSGVO | 35 Tage |
-| Steuerliche Meldepflicht der Plattform (DAC7) | bei Erreichen der Schwellen (30 Verkäufe oder 2.000 € je Kalenderjahr): Name, Anschrift, Geburtsdatum, Steuer-ID, Summe und Anzahl der Verkäufe | Erfüllung des Plattformen-Steuertransparenzgesetzes (PStTG) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. PStTG, soweit die Meldepflicht besteht [Platzhalter: Anwendbarkeit, u. a. § 3 PStTG, durch die Steuerabteilung prüfen] | 10 Jahre nach Ablauf des Meldezeitraums [Platzhalter: Fundstelle im PStTG durch die Steuerabteilung prüfen; im Beispiel nur Auswertung, keine Erhebung] |
+| Steuerliche Meldepflicht der Plattform (DAC7) | bei Erreichen der Schwellen (30 Verkäufe oder 2.000 € je Kalenderjahr): Name, Anschrift, Geburtsdatum, Steuer-ID, Summe und Anzahl der Verkäufe | Erfüllung des Plattformen-Steuertransparenzgesetzes (PStTG) | Art. 6 Abs. 1 lit. c DSGVO i. V. m. PStTG, soweit die Meldepflicht besteht (Übungsannahme Q-28: Meldepflicht besteht, Ausnahme nach § 3 PStTG greift nicht) | 10 Jahre nach Ablauf des Meldezeitraums (§ 22 PStTG, Übungswert; im Beispiel nur Auswertung, keine Erhebung) |
 
 ## 5. Empfänger
 
 - **Andere Mitglieder** sehen Ihren Anzeigenamen, Ihre Anzeigen und – in einer Konversation – Ihre Nachrichten. Ihre E-Mail-Adresse sehen sie nur nach beidseitiger Kontaktfreigabe.
 - **Moderatorinnen und Moderatoren** der Hochschule sehen gemeldete Inhalte und bei gemeldeten Nachrichten nur den Ausschnitt um die gemeldete Nachricht. Bei einem Widerspruch gegen das Entfernen einer Nachricht sehen die Prüfenden deren Originaltext; jeder Zugriff wird protokolliert.
-- **Auftragsverarbeiter:** [Platzhalter: Rechenzentrum der Hochschule bzw. Hosting-Dienstleister in der EU], [Platzhalter: E-Mail-Versanddienst in der EU]. Mit allen besteht ein Vertrag nach Art. 28 DSGVO.
+- **Auftragsverarbeiter:** MusterMail GmbH, Frankfurt am Main (fiktiv), für den Versand der E-Mails. Mit ihr besteht ein Vertrag nach Art. 28 DSGVO. Den Betrieb übernimmt das Rechenzentrum der Hochschule als interne Stelle; das ist keine Auftragsverarbeitung.
 - **Behörden** nur, wenn eine gesetzliche Pflicht besteht (z. B. Art. 18 DSA bei Verdacht auf schwere Straftaten gegen Leib und Leben, Meldung an das Bundeszentralamt für Steuern nach PStTG).
 
 ## 6. Übermittlung in Drittländer
 
-Eine Übermittlung in Länder außerhalb der EU bzw. des EWR findet nicht statt. Die Plattform lädt keine Inhalte, Schriften oder Skripte von fremden Servern nach und setzt keine Analyse- oder Werbedienste ein. Auftragsverarbeiter werden nur mit Sitz und Verarbeitung in der EU beauftragt [Platzhalter: Bestätigung durch den Betreiber].
+Eine Übermittlung in Länder außerhalb der EU bzw. des EWR findet nicht statt. Die Plattform lädt keine Inhalte, Schriften oder Skripte von fremden Servern nach und setzt keine Analyse- oder Werbedienste ein. Auftragsverarbeiter werden nur mit Sitz und Verarbeitung in der EU beauftragt.
 
 ## 7. Pflicht zur Bereitstellung
 
@@ -71,7 +72,7 @@ Es gibt keine automatisierte Entscheidung im Sinne von Art. 22 DSGVO. Zwei autom
 - Ein **Wortfilter** prüft neue Anzeigen auf eindeutig verbotene Begriffe. Trifft er zu, wird die Anzeige zunächst nicht veröffentlicht, sondern von einem Menschen geprüft.
 - Haben **drei Mitglieder** eine Anzeige gemeldet, wird sie **vorläufig ausgeblendet**. Sie erhalten eine Mitteilung und eine E-Mail mit dem Hinweis auf die automatische Auslösung; die Moderation entscheidet vorrangig.
 
-Erst die Person aus der Moderation entscheidet endgültig [Platzhalter: Einordnung nach Art. 22 DSGVO durch den DSB bestätigen].
+Erst die Person aus der Moderation entscheidet endgültig; eine automatisierte Einzelentscheidung nach Art. 22 DSGVO liegt nicht vor (Übungsannahme Q-28).
 
 ## 9. Cookies und lokale Speicherung
 
@@ -96,14 +97,14 @@ Sie haben das Recht auf
 - **Datenübertragbarkeit** (Art. 20) – gesetzlich nur für Daten auf Grundlage einer Einwilligung oder eines Vertrags; wir stellen den maschinenlesbaren Export (JSON) trotzdem für alle Ihre Daten bereit,
 - **Widerspruch** (Art. 21) gegen Verarbeitungen auf Grundlage von Art. 6 Abs. 1 lit. e DSGVO aus Gründen, die sich aus Ihrer besonderen Situation ergeben.
 
-Eine erteilte Einwilligung (Kontaktfreigabe) können Sie jederzeit mit Wirkung für die Zukunft in der Konversation zurückziehen. Für alle anderen Anliegen schreiben Sie an [Platzhalter: datenschutz@hwg-lu.example].
+Eine erteilte Einwilligung (Kontaktfreigabe) können Sie jederzeit mit Wirkung für die Zukunft in der Konversation zurückziehen. Für alle anderen Anliegen schreiben Sie an datenschutz@hwg-lu.example.
 
 ## 11. Beschwerderecht
 
 Sie können sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere beim
 
 Landesbeauftragten für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz
-[Platzhalter: Anschrift und Kontaktdaten der Aufsichtsbehörde]
+Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz, Musterweg 5, 55116 Mainz (fiktive Anschrift), poststelle@datenschutz-rlp.example
 
 ## 12. Änderungen
 

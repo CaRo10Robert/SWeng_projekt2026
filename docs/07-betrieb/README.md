@@ -10,7 +10,7 @@ last_updated: 2026-10-24
 
 # Betrieb (Übungsaufgabe)
 
-> **Muster im Rahmen einer Übungsaufgabe.** Das Docker-Beispiel läuft lokal und offline (ADR-0010). Die Dokumente beschreiben, wie ein Echtbetrieb aussehen würde, und welche Teile im Beispiel schon nachgestellt sind. Betreiberangaben stehen als `[Platzhalter: …]`.
+> **Muster im Rahmen einer Übungsaufgabe.** Das Docker-Beispiel läuft lokal und offline (ADR-0010). Die Dokumente beschreiben, wie ein Echtbetrieb aussehen würde, und welche Teile im Beispiel schon nachgestellt sind. Betreiberangaben sind fiktive Übungswerte (Q-28).
 
 | Dokument | Inhalt | Anforderung |
 |---|---|---|

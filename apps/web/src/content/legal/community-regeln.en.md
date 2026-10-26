@@ -2,11 +2,12 @@
 title: Community rules
 version: 2026-10-25
 last_updated: 2026-10-25
+sample: true
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
 
-> **Sample created as a course exercise – not legally binding.**
+> **Sample created as a course exercise – fictitious data, not legally binding.**
 
 CampusMarkt works because everyone on campus treats each other fairly. These rules supplement the terms of use.
 
@@ -24,7 +25,7 @@ The following may not be offered or sought:
 - content that insults, discriminates, threatens or sexually harasses,
 - advertising, chain letters and commercial offers.
 
-A filter recognises clear terms from this list. Such listings are not published immediately but reviewed by a human first. [Placeholder: agree the list with the legal office]
+A filter recognises clear terms from this list. Such listings are not published immediately but reviewed by a human first.
 
 ## Communicate fairly {#fair-kommunizieren}
 

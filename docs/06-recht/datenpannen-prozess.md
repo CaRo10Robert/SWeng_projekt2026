@@ -10,7 +10,7 @@ last_updated: 2026-10-25
 
 # Prozess bei Verletzungen des Schutzes personenbezogener Daten (Art. 33/34 DSGVO)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Datenschutzbeauftragten der Hochschule zu prüfen.** Anforderung: REQ-LEGAL-013. Technische Störungen ohne Datenbezug folgen dem [Incident-Prozess](../07-betrieb/incident-prozess.md).
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich (Q-28).** Anforderung: REQ-LEGAL-013. Technische Störungen ohne Datenbezug folgen dem [Incident-Prozess](../07-betrieb/incident-prozess.md).
 
 ## Was ist eine Datenpanne?
 
@@ -27,14 +27,14 @@ Jede Verletzung der Sicherheit, die zur Vernichtung, zum Verlust, zur Veränderu
 | Rolle | Aufgabe | Erreichbarkeit |
 |---|---|---|
 | Meldende Person (Team, Betrieb, Mitglied) | Hinweis sofort weitergeben | – |
-| Betrieb / `security-lead` | Sofortmaßnahmen, Beweissicherung, technische Bewertung, Vorfallprotokoll | Rufbereitschaft laut [Betriebshandbuch](../07-betrieb/betriebshandbuch.md) und [Incident-Prozess](../07-betrieb/incident-prozess.md), auch am Wochenende [Platzhalter: Bereitschaftsregelung] |
-| Datenschutzbeauftragte/r (DSB) | Risikobewertung, Beratung, Kontakt zur Aufsichtsbehörde | [Platzhalter: datenschutz@hwg-lu.example, Vertretung] |
-| Hochschulleitung (Verantwortlicher) | entscheidet über Meldung und Benachrichtigung, zeichnet die Meldung | [Platzhalter: Präsidium, Vertretungsregelung] |
-| Pressestelle | Kommunikation bei öffentlichem Interesse | [Platzhalter] |
+| Betrieb / `security-lead` | Sofortmaßnahmen, Beweissicherung, technische Bewertung, Vorfallprotokoll | Rufbereitschaft laut [Betriebshandbuch](../07-betrieb/betriebshandbuch.md) und [Incident-Prozess](../07-betrieb/incident-prozess.md), auch am Wochenende (Bereitschaft +49 621 555-0199, fiktiv) |
+| Datenschutzbeauftragte/r (DSB) | Risikobewertung, Beratung, Kontakt zur Aufsichtsbehörde | Paula Prüfer (fiktiv), datenschutz@hwg-lu.example, Vertretung: Jonas Vertreter (fiktiv) |
+| Hochschulleitung (Verantwortlicher) | entscheidet über Meldung und Benachrichtigung, zeichnet die Meldung | Präsidentin Prof. Dr. Erika Mustermann (fiktiv); Vertretung: Vizepräsident Prof. Dr. Max Mustermann (fiktiv) |
+| Pressestelle | Kommunikation bei öffentlichem Interesse | presse@hwg-lu.example (fiktiv) |
 
-Die 72-Stunden-Frist läuft ab Kenntnis auch am Wochenende und an Feiertagen. Ist die Hochschulleitung nicht erreichbar, entscheidet die Vertretung [Platzhalter: Regelung].
+Die 72-Stunden-Frist läuft ab Kenntnis auch am Wochenende und an Feiertagen. Ist die Hochschulleitung nicht erreichbar, entscheidet die Vertretung (Vizepräsident, fiktiv; danach die Kanzlerin, fiktiv).
 
-**Auftragsverarbeiter (Art. 33 Abs. 2):** Auftragsverarbeiter (Hosting, E-Mail-Versand) melden Verletzungen unverzüglich an [Platzhalter: Meldeadresse]; die Pflicht steht in jedem AV-Vertrag (siehe [Auftragsverarbeitung](auftragsverarbeitung.md)). Mit Eingang der Meldung beginnt die 72-Stunden-Frist des Verantwortlichen.
+**Auftragsverarbeiter (Art. 33 Abs. 2):** Auftragsverarbeiter (Hosting, E-Mail-Versand) melden Verletzungen unverzüglich an datenschutz@hwg-lu.example; die Pflicht steht in jedem AV-Vertrag (siehe [Auftragsverarbeitung](auftragsverarbeitung.md)). Mit Eingang der Meldung beginnt die 72-Stunden-Frist des Verantwortlichen.
 
 ## Risikobewertung
 
@@ -71,7 +71,7 @@ flowchart TD
 | Erfassen | wer den Hinweis erhält | sofort | Eintrag im Vorfallprotokoll mit Zeitpunkt der Kenntnis |
 | Sofortmaßnahmen | Betriebsteam / `security-lead` | sofort | Schaden begrenzt; Beweise gesichert (Logs, Audit-Log) |
 | Bewerten | `security-lead` mit DSB | innerhalb von 24 h | Risikoeinstufung: kein / normales / hohes Risiko |
-| Meldung an Aufsicht | Verantwortlicher (über DSB) | **spätestens 72 h** nach Kenntnis; Teilmeldung zulässig | Meldung an [Platzhalter: LfDI RLP, Online-Formular] |
+| Meldung an Aufsicht | Verantwortlicher (über DSB) | **spätestens 72 h** nach Kenntnis; Teilmeldung zulässig | Meldung über das Online-Formular der LfDI RLP (Übungsannahme) |
 | Benachrichtigung Betroffener | Verantwortlicher | unverzüglich bei hohem Risiko | E-Mail an Betroffene, ggf. Hinweis auf der Statusseite |
 | Dokumentation | `security-lead` | laufend | Vorfallprotokoll (auch ohne Meldung Pflicht) |
 | Nachbereitung | Team | binnen 2 Wochen | Postmortem, Backlog-Einträge, angepasste TOMs |
@@ -80,7 +80,7 @@ flowchart TD
 
 | Feld (Art. 33 Abs. 3) | Inhalt |
 |---|---|
-| Verantwortlicher, Kontakt DSB | [Platzhalter] |
+| Verantwortlicher, Kontakt DSB | Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU); DSB Paula Prüfer (fiktiv), datenschutz@hwg-lu.example |
 | Zeitpunkt der Verletzung / der Kenntnis | |
 | Art der Verletzung | Vertraulichkeit / Integrität / Verfügbarkeit |
 | Kategorien und ungefähre Zahl der Betroffenen | |
@@ -108,8 +108,8 @@ Pflicht auch dann, wenn nicht gemeldet wird.
 
 > Betreff: Wichtiger Hinweis zur Sicherheit Ihrer Daten bei CampusMarkt
 >
-> Am [Datum] haben wir festgestellt, dass [klare Beschreibung, was passiert ist]. Betroffen sind [welche Daten]. Mögliche Folgen: [z. B. Phishing-Mails]. Wir haben [Maßnahmen] ergriffen. Wir empfehlen Ihnen [z. B. Passwort ändern, auf verdächtige Mails achten]. Fragen beantwortet die/der Datenschutzbeauftragte: [Platzhalter: E-Mail].
+> Am [Datum] haben wir festgestellt, dass [klare Beschreibung, was passiert ist]. Betroffen sind [welche Daten]. Mögliche Folgen: [z. B. Phishing-Mails]. Wir haben [Maßnahmen] ergriffen. Wir empfehlen Ihnen [z. B. Passwort ändern, auf verdächtige Mails achten]. Fragen beantwortet die/der Datenschutzbeauftragte: datenschutz@hwg-lu.example.
 
 ## Übung
 
-Vor dem Echtbetrieb wird mindestens eine Übung (Planspiel) mit einem Szenario, z. B. „Datensicherung unverschlüsselt in falschem Speicher“, durchgespielt und protokolliert (Nachweis MAN-LEGAL-013, REQ-LEGAL-013) [Platzhalter: Termin]. Danach empfohlen: einmal je Jahr.
+Vor dem Echtbetrieb wird mindestens eine Übung (Planspiel) mit einem Szenario, z. B. „Datensicherung unverschlüsselt in falschem Speicher“, durchgespielt und protokolliert (Nachweis MAN-LEGAL-013, REQ-LEGAL-013). Danach empfohlen: einmal je Jahr.

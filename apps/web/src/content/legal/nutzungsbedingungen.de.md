@@ -2,17 +2,18 @@
 title: Nutzungsbedingungen
 version: 2026-10-25
 last_updated: 2026-10-25
+sample: true
 ---
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Vom Justiziariat und der/dem Datenschutzbeauftragten der Hochschule zu prüfen. Angaben in eckigen Klammern sind Platzhalter.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.** Offene Rechtsfragen sind als Übungsannahmen festgelegt (Entscheidung Q-28).
 
 ## 1. Geltung und Anbieter
 
-Diese Bedingungen regeln die Nutzung von CampusMarkt HWG LU (im Folgenden „Plattform“). Anbieter ist [Platzhalter: Name der Hochschule] (siehe Impressum). Ergänzend gelten die **Community-Regeln** und die **Datenschutzerklärung**.
+Diese Bedingungen regeln die Nutzung von CampusMarkt HWG LU (im Folgenden „Plattform“). Anbieter ist Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU) (siehe Impressum). Ergänzend gelten die **Community-Regeln** und die **Datenschutzerklärung**.
 
 ## 2. Wer mitmachen darf
 
-1. Die Plattform steht nur Angehörigen der Hochschule offen: Studierenden und Beschäftigten mit einer E-Mail-Adresse einer zugelassenen Hochschul-Domain [Platzhalter: z. B. studmail.hwg-lu.example, hwg-lu.example].
+1. Die Plattform steht nur Angehörigen der Hochschule offen: Studierenden und Beschäftigten mit einer E-Mail-Adresse einer zugelassenen Hochschul-Domain (studmail.hwg-lu.de, hwg-lu.de).
 2. Jede Person darf nur ein Konto haben. Das Konto ist nicht übertragbar.
 3. Endet die Zugehörigkeit zur Hochschule, endet auch die Berechtigung zur Nutzung.
 
@@ -49,7 +50,7 @@ Ihre E-Mail-Adresse ist für andere Mitglieder nicht sichtbar. In einer Konversa
 4. **Widerspruch:** Gegen eine Entscheidung können Betroffene und Meldende innerhalb von **sechs Monaten** nach der Mitteilung (Art. 20 Abs. 1 DSA) in ihrem Konto unter „Meine Mitteilungen“ Widerspruch einlegen; bei gesperrten Konten über den Link aus der E-Mail mit der Begründung. Eine andere Moderatorin oder ein anderer Moderator, die/der an der ersten Entscheidung nicht beteiligt war und den Fall weder gemeldet noch selbst widersprochen hat, entscheidet erneut (internes Beschwerdemanagement nach Art. 20 DSA). Das Ergebnis wird beiden Seiten begründet mitgeteilt.
 5. **Straftaten:** Bei Hinweisen auf eine Straftat, die eine Gefahr für Leben oder Sicherheit von Personen darstellt, informiert die Hochschule die zuständigen Behörden (Art. 18 DSA).
 6. **Automatische Hilfsmittel (Art. 14 DSA):** Ein Wortfilter hält neue Anzeigen mit eindeutig verbotenen Begriffen vor der Veröffentlichung zur Prüfung an. Haben drei Mitglieder eine Anzeige gemeldet, wird sie vorläufig ausgeblendet, bis die Moderation entschieden hat; die Betroffenen werden darüber informiert. Endgültig entscheidet immer ein Mensch.
-7. **Außergerichtliche Streitbeilegung und Rechtsweg:** Unabhängig vom Widerspruch können Sie eine zertifizierte außergerichtliche Streitbeilegungsstelle anrufen (Art. 21 DSA, [Platzhalter: Stelle]) oder den Rechtsweg beschreiten.
+7. **Außergerichtliche Streitbeilegung und Rechtsweg:** Unabhängig vom Widerspruch können Sie eine zertifizierte außergerichtliche Streitbeilegungsstelle anrufen (Art. 21 DSA, z. B. die Schlichtungsstelle Digitale Dienste e. V., Musterstadt – fiktiv) oder den Rechtsweg beschreiten.
 
 ## 9. Sperren
 
@@ -57,7 +58,7 @@ Bei schweren oder wiederholten Verstößen kann ein Konto dauerhaft gesperrt wer
 
 ## 10. Verfügbarkeit und Haftung
 
-Die Plattform ist ein freiwilliges Angebot ohne Anspruch auf ständige Verfügbarkeit. Die Hochschule haftet nur für Vorsatz und grobe Fahrlässigkeit sowie bei Verletzung von Leben, Körper oder Gesundheit [Platzhalter: Haftungsregelung vom Justiziariat prüfen; Amtshaftung beachten].
+Die Plattform ist ein freiwilliges Angebot ohne Anspruch auf ständige Verfügbarkeit. Die Hochschule haftet nur für Vorsatz und grobe Fahrlässigkeit sowie bei Verletzung von Leben, Körper oder Gesundheit; die Amtshaftung nach § 839 BGB i. V. m. Art. 34 GG bleibt unberührt (Übungsannahme Q-28).
 
 ## 11. Änderungen dieser Bedingungen
 

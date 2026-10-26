@@ -15,7 +15,7 @@ epic: EPIC-13
 source: DSA Art. 20, Q-22
 use_cases: [UC-35, UC-36]
 depends_on: [REQ-LEGAL-006]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4]
@@ -43,7 +43,7 @@ Vier-Augen-Prinzip: Über einen Widerspruch entscheidet eine Person aus der Mode
 
 Begründung des Widerspruchs: 20 bis 2.000 Zeichen, gezählt ohne Leerzeichen am Rand. Prüfende sehen bei entfernten Nachrichten den Originaltext; jeder Zugriff wird im Audit-Log protokolliert.
 
-Bearbeitungsziel (DSA Art. 20 Abs. 4 „zeitnah“): Entscheidung binnen `[Platzhalter: z. B. 14 Tage]` nach Eingang; Messung über die Zeit zwischen Eingang und Entscheidung im Audit-Log.
+Bearbeitungsziel (DSA Art. 20 Abs. 4 „zeitnah“): Entscheidung binnen 14 Tagen nach Eingang (Übungsannahme Q-28); Messung über die Zeit zwischen Eingang und Entscheidung im Audit-Log.
 
 ```gherkin
 Szenario: Widerspruch einlegen
@@ -92,3 +92,4 @@ I: braucht REQ-LEGAL-006 (Mitteilung als Einstieg) · N: Fristen und Darstellung
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-C-01, RV-C-03, RV-C-04, RV-C-09, RV-C-11, RV-R-09, RV-R-19): Vier-Augen vollständig, Ergebnis an beide Seiten, Begründung 20 Zeichen nach Trimmen, restore_impossible, Bearbeitungsziel mit Platzhalter, Token im Fragment; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

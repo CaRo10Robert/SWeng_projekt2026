@@ -8,6 +8,7 @@ export interface SmtpOptions {
   user?: string;
   password?: string;
   from: string;
+  replyTo?: string;
 }
 
 /** MailPort → SMTP (im Beispiel Mailpit, im Echtbetrieb ein Relay; REQ-NOTI-007). */
@@ -24,7 +25,7 @@ export function createSmtpMail(options: SmtpOptions): MailPort {
 
   return {
     async send(message: MailMessage) {
-      await transport.sendMail({ from: options.from, ...message });
+      await transport.sendMail({ from: options.from, replyTo: options.replyTo, ...message });
     },
     async verify() {
       try {

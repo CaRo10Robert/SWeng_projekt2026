@@ -14,7 +14,7 @@ epic: EPIC-13
 source: DSA Art. 18, Q-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-008, CTRL-DOC-DSA]
@@ -33,8 +33,8 @@ DSA Art. 18 verpflichtet zur unverzüglichen Information der Strafverfolgungsbeh
 | Einschätzung des Moderators | Kennzeichnung | System | Prozess (`docs/06-recht/dsa-prozesse.md`) |
 |---|---|---|---|
 | kein Verdacht | – | normale Entscheidung | – |
-| Verdacht auf Straftat ohne Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat“ | Audit-Log, E-Mail an Administratoren, Inhalt gesichert | Prüfung durch `[Platzhalter: Justiziariat der Hochschule]` |
-| Verdacht mit Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat – Gefahr“ | wie oben, Kennzeichnung „dringend“ | unverzügliche Information der Polizei `[Platzhalter: zuständige Polizeidienststelle]` |
+| Verdacht auf Straftat ohne Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat“ | Audit-Log, E-Mail an Administratoren, Inhalt gesichert | Prüfung durch das Justiziariat der Hochschule (fiktive Rolle) |
+| Verdacht mit Gefahr für Leben oder Sicherheit | „Verdacht auf Straftat – Gefahr“ | wie oben, Kennzeichnung „dringend“ | unverzügliche Information der Polizei (Übungsannahme: Polizeipräsidium Rheinpfalz) |
 
 Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopie** angelegt (Anzeige: Titel, Beschreibung, Preis, Zeitpunkt; Nachricht: die gemeldete Nachricht mit ± 5 Nachrichten Kontext, Absender nur als Rolle; Profil: Anzeigename). Die Kopie bleibt bis zur Freigabe durch einen Administrator erhalten, höchstens 6 Monate. Löschfristen und Kontolöschungen der Originale werden **nicht** zurückgestellt (Datenminimierung, Art. 5 Abs. 1 lit. c und e DSGVO). Bilder werden im Beispiel nicht mitkopiert (offener Punkt). Die Admin-Übersicht zeigt je Sicherung die Zahl der gesicherten Elemente (`preservedItems`).
 
@@ -56,3 +56,4 @@ Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopi
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-15, RV-R-20, RV-C-05): Beweissicherung als pseudonymisierte Kopie mit Kontext, keine Zurückstellung von Löschungen, preservedItems; Begründung der Einstufung Should; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-008, CTRL-DOC-DSA bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

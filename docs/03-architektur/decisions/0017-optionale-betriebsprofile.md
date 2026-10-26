@@ -36,7 +36,7 @@ Zwei Besonderheiten:
 **Profil `monitoring` (REQ-OPS-008):**
 1. **Dienste:**
    - `prometheus` (`prom/prometheus:v3.15.0`, Konfiguration `ops/prometheus/prometheus.yml`): liest `app:8080/metrics` alle 15 s; die Readiness kommt über die Metrik `app_ready` aus der Readiness-Prüfung der App.
-   - `alertmanager` (`prom/alertmanager:v0.34.1`, Konfiguration `ops/alertmanager/alertmanager.yml`): sendet Alarme per SMTP an Mailpit (`mailpit:1025`), nach Schweregrad an zwei Empfänger: `[Platzhalter: betrieb@campusmarkt.example]` für alle Alarme, SEV-1 zusätzlich an `[Platzhalter: rufbereitschaft@campusmarkt.example]` mit Erinnerung alle 30 min.
+   - `alertmanager` (`prom/alertmanager:v0.34.1`, Konfiguration `ops/alertmanager/alertmanager.yml`): sendet Alarme per SMTP an Mailpit (`mailpit:1025`), nach Schweregrad an zwei Empfänger: `betrieb@campusmarkt.example` für alle Alarme, SEV-1 zusätzlich an `rufbereitschaft@campusmarkt.example` mit Erinnerung alle 30 min.
 2. **Ports** nur an `127.0.0.1` gebunden, konfigurierbar über `PROMETHEUS_PORT` (Standard 9090) und `ALERTMANAGER_PORT` (Standard 9093).
 3. **Alarmregeln** in `ops/prometheus/alerts.yml`, je Regel ein Runbook-Link; maßgeblich ist die Tabelle in [Überwachung und Alarmierung](../../07-betrieb/monitoring-alarmierung.md), Regeltests in `ops/prometheus/alerts.test.yml`:
 

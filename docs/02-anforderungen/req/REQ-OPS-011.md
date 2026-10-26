@@ -13,7 +13,7 @@ kano: n/a
 epic: EPIC-13
 source: Guideline Kap. 11, Q-23
 depends_on: [REQ-OPS-003]
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [CTRL-DOC-BETRIEB, MAN-OPS-011]
@@ -28,7 +28,7 @@ REQ-OPS-003 deckt den Schnellstart ab, nicht den laufenden Betrieb. Ohne Prozess
 
 ## Akzeptanzkriterien
 `docs/07-betrieb/` enthält:
-- Betriebshandbuch: Start, Stopp, Update, Rollback, Konfiguration und Geheimnisse (Rotation), Datensicherung (REQ-AVAIL-003), Wartungsmodus (REQ-OPS-006), Alarme mit Runbooks (REQ-OPS-008), Sicherheitsmeldungen (REQ-SEC-012), Kontakte `[Platzhalter]`.
+- Betriebshandbuch: Start, Stopp, Update, Rollback, Konfiguration und Geheimnisse (Rotation), Datensicherung (REQ-AVAIL-003), Wartungsmodus (REQ-OPS-006), Alarme mit Runbooks (REQ-OPS-008), Sicherheitsmeldungen (REQ-SEC-012), Kontakte (fiktive Übungswerte, Q-28).
 - Störungsprozess: Schweregrade (S1–S4) mit Reaktionszeiten, Rollen (Incident-Lead, Kommunikation), Kommunikation über Statusseite und Ankündigung, Übergang in den Datenpannen-Prozess (REQ-LEGAL-013), Nachbetrachtung (Vorlage ohne Schuldzuweisung).
 - Go-live-Checkliste mit allen Voraussetzungen eines Echtbetriebs (u. a. keine Platzhalter mehr, Penetrationstest, AVV, Backups).
 
@@ -47,3 +47,4 @@ REQ-OPS-003 deckt den Schnellstart ab, nicht den laufenden Betrieb. Ohne Prozess
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-A-10): Status nach Umsetzung; Betriebshandbuch und Go-live-Checkliste vervollständigt |
+| 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

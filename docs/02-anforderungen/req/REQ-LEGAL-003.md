@@ -14,7 +14,7 @@ epic: EPIC-13
 source: DSA Art. 14, BGB §§ 305 ff., Q-23
 use_cases: [UC-01, UC-08]
 depends_on: [REQ-PRIV-001]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE]
@@ -24,7 +24,7 @@ verification: [AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE]
 ## Anforderung
 Das System muss versionierte Nutzungsbedingungen und Community-Regeln in klarer, verständlicher Sprache bereitstellen. Eine neue Version der Nutzungsbedingungen gilt für ein Mitglied erst nach seiner erneuten Zustimmung.
 
-> Übungsaufgabe: Inhalte mit Betreiberbezug stehen als Platzhalter `[Platzhalter: …]` (Q-23). Kein Rechtsrat; im Echtbetrieb prüft die/der Datenschutzbeauftragte bzw. das Justiziariat der Hochschule.
+> Übungsaufgabe: Betreiberangaben sind fiktive Übungswerte (z. B. Musternamen, Anschriften mit „(fiktiv)“, Domains `.example`); offene Rechtsfragen sind als Übungsannahmen festgelegt (Q-23, Q-28). Kein Rechtsrat, keine Nutzung im Echtbetrieb.
 
 ## Begründung
 DSA Art. 14 verlangt verständliche Bedingungen, die Beschränkungen, Moderation und Beschwerdewege beschreiben. Die Registrierung speichert schon eine Zustimmung mit Version (REQ-PRIV-001); der zugehörige Text fehlt bisher.
@@ -63,6 +63,7 @@ Szenario: Erneute Zustimmung nach Versionswechsel
 | Client sendet veraltete Version bei der Registrierung | 422 `terms_outdated` (bestehend) |
 | Schreibende API-Anfrage ohne Zustimmung zur aktuellen Version | 403 `terms_required`, keine Änderung |
 | Text und konfigurierte Version weichen ab | Startprüfung bzw. Unit-Test schlägt fehl (`TERMS_VERSION` = Version im Front Matter) |
+| Neue Version in einer Demo-Installation (`SEED_DEMO=true`) | Beim Start werden die Demo-Konten auf die aktuelle Version gehoben und fehlende Demo-Konten angelegt; Tim bleibt auf der alten Version (Testfall für AT-LEGAL-003-2). Echte Konten bleiben unberührt und müssen erneut zustimmen. Im Echtbetrieb ist der Demo-Modus aus, der Abgleich findet nicht statt |
 
 ## Nachweis
 - `AT-LEGAL-003`: E2E-Test – Nutzungsbedingungen und Community-Regeln ohne Anmeldung erreichbar, Version sichtbar, aus dem Registrierungsformular verlinkt.
@@ -75,3 +76,4 @@ Szenario: Erneute Zustimmung nach Versionswechsel
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-06): Status nach Umsetzung; Schutzrechte (Melden, Blockieren, Kontaktfreigabe widerrufen/ablehnen, Benachrichtigungen, Sprache) bleiben ohne aktuelle Zustimmung möglich |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Demo-Modus: Abgleich der Demo-Konten mit der aktuellen Fassung beim Start (`syncDemoLegalVersions`), Tim bleibt Testfall |

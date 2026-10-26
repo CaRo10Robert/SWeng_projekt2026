@@ -2,9 +2,10 @@
 title: Community-Regeln
 version: 2026-10-25
 last_updated: 2026-10-25
+sample: true
 ---
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.**
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.**
 
 CampusMarkt lebt davon, dass sich alle auf dem Campus fair begegnen. Diese Regeln ergänzen die Nutzungsbedingungen.
 
@@ -22,7 +23,7 @@ Nicht angeboten oder gesucht werden dürfen:
 - Inhalte, die beleidigen, diskriminieren, bedrohen oder sexuell belästigen,
 - Werbung, Kettenbriefe und gewerbliche Angebote.
 
-Eindeutige Begriffe aus dieser Liste erkennt ein Filter. Solche Anzeigen werden nicht sofort veröffentlicht, sondern zuerst von einem Menschen geprüft. [Platzhalter: Liste mit dem Justiziariat abstimmen]
+Eindeutige Begriffe aus dieser Liste erkennt ein Filter. Solche Anzeigen werden nicht sofort veröffentlicht, sondern zuerst von einem Menschen geprüft.
 
 ## Fair kommunizieren
 

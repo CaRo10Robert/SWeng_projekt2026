@@ -18,7 +18,7 @@ last_updated: 2026-10-25
 |---|---|---|
 | Datenbank | alle Schemas (identity, listings, messaging, trust, platform, pg-boss) | `pg_dump --format=custom` im Container `db` |
 | Bilder | Volume `uploads` | `tar` des Verzeichnisses im Container `app` |
-| Konfiguration | `compose.yaml`, `.env` (ohne Geheimnisse im Repo) | Git; Geheimnisse im Secret-Store [Platzhalter] |
+| Konfiguration | `compose.yaml`, `.env` (ohne Geheimnisse im Repo) | Git; Geheimnisse im Secret-Store des RZ (fiktiv „MusterVault“) |
 
 Ein Backup ist ein Verzeichnis `backups/<UTC-Zeitstempel>/` (in `.gitignore` und `.dockerignore`) mit `db.dump`, `uploads.tar.gz` und `manifest.json` (Zeitpunkt, Compose-Projekt, App-Version, letzte Migration, SHA-256-Prüfsummen und Größen). Es entsteht zuerst als `<Zeitstempel>.partial` und wird erst nach Abschluss umbenannt; abgebrochene Läufe werden weder rotiert noch wiederhergestellt. Reihenfolge: erst die Datenbank, dann die Bilder. Bilder, die nach dem Dump **entstehen**, liegen höchstens zusätzlich im Archiv. Bilder, die zwischen Dump und Archiv **gelöscht** werden, fehlen nach einer Wiederherstellung (die Anzeige verweist dann auf ein fehlendes Bild); das ist im Beispiel hingenommen (RV-A-12).
 
@@ -75,7 +75,7 @@ Eine Wiederherstellung würde sonst Daten zurückbringen, die nach dem Sicherung
 
 ## Echtbetrieb
 
-- **Verschlüsselung:** Archive vor dem Verlassen des Servers verschlüsseln (z. B. age oder GPG; Schlüssel getrennt verwahrt) [Platzhalter: Verfahren des RZ].
+- **Verschlüsselung:** Archive vor dem Verlassen des Servers verschlüsseln (z. B. age oder GPG; Schlüssel getrennt verwahrt) (Verfahren des RZ: age mit Schlüssel im Tresor der Stabsstelle, fiktiv).
 - **Ablage:** zweiter Standort bzw. Objektspeicher in der EU, unveränderlich (Object Lock) gegen Ransomware.
 - **Point-in-Time-Recovery:** WAL-Archivierung (z. B. pgBackRest), damit das RPO unter 24 h sinkt.
 - **Ziele (Beispielwerte, REQ-AVAIL-002):** RPO 24 h (mit PITR 15 min), RTO 4 h.
@@ -86,4 +86,4 @@ Monatlich auf einer Testumgebung. Protokoll:
 
 | Datum | Sicherung von | Dauer bis „healthy“ | Stichprobe geprüft (Konto, Anzeige mit Bild, Konversation) | Ergebnis | Durchgeführt von |
 |---|---|---|---|---|---|
-| [Platzhalter] | | | | | |
+| *(Übung: Restore-Test aus CI; Echtbetrieb: Eintrag nach jeder Übung)* | | | | | |

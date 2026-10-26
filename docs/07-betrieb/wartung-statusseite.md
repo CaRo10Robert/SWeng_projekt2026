@@ -21,7 +21,7 @@ last_updated: 2026-10-25
 | Während der Wartung | – | alle Seiten und API-Aufrufe liefern **503** mit `Retry-After` und einer Wartungsseite; `/health/*` und `/status` bleiben erreichbar |
 | Wartung beenden | nach Prüfung | weich: in der Admin-Oberfläche ausschalten; hart: `MAINTENANCE_MODE=false` und Neustart; danach Smoke-Test, Banner entfernen |
 
-Wartungsfenster [Platzhalter: z. B. dienstags 6–8 Uhr, außerhalb von Prüfungszeiten und Semesterstart].
+Wartungsfenster dienstags 6–8 Uhr, außerhalb von Prüfungszeiten und Semesterstart (Übungswert).
 
 ## Ankündigungsbanner
 
@@ -38,4 +38,4 @@ Wartungsfenster [Platzhalter: z. B. dienstags 6–8 Uhr, außerhalb von Prüfung
 - zeigt die aktuelle Ankündigung,
 - verrät **keine internen Details** (keine Versionen, Hostnamen, Fehlermeldungen).
 
-Im Echtbetrieb sollte die Statusseite zusätzlich **außerhalb** der Plattform gespiegelt werden (z. B. statische Seite beim RZ), damit sie auch bei einem Totalausfall erreichbar ist [Platzhalter].
+Im Echtbetrieb sollte die Statusseite zusätzlich **außerhalb** der Plattform gespiegelt werden (z. B. statische Seite beim RZ), damit sie auch bei einem Totalausfall erreichbar ist (Übungsannahme: `status.hwg-lu.example`).

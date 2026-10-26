@@ -4,6 +4,8 @@ import {
   Accepted,
   AnnouncementBody,
   AuditEntry,
+  EndSessionsBody,
+  EndSessionsResult,
   EvidenceHold,
   IdParams,
   JobOverview,
@@ -12,7 +14,7 @@ import {
 } from '@campusmarkt/contracts';
 import { audit } from '../platform/audit.js';
 import { notFound, unprocessable } from '../platform/errors.js';
-import { requireRole } from '../platform/http/auth.js';
+import { requireRole, SESSION_COOKIE } from '../platform/http/auth.js';
 import { SETTING } from '../platform/settings.js';
 import { sql } from '../platform/sql.js';
 import { LISTINGS_MAINTENANCE } from './listings/index.js';
@@ -67,6 +69,19 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
       await audit(db, { actorId: auth.userId, action: 'demo.run_due_jobs', targetType: 'jobs' });
       return reply.status(202).send({ message: 'Wartungsjobs wurden angestoßen.' });
     });
+
+    // ---------------------------------------------------------- Notfall: alle Sitzungen beenden (Incident-Prozess, T-2/T-5)
+    app.post(
+      '/admin/security/end-sessions',
+      { schema: { tags, body: EndSessionsBody, response: { 200: EndSessionsResult } } },
+      async (req, reply) => {
+        const auth = requireRole(req, 'admin');
+        const result = await deps.modules.identity.endAllSessions(auth, req.body.forcePasswordChange);
+        // Auch die eigene Sitzung ist beendet
+        reply.clearCookie(SESSION_COOKIE, { path: '/' });
+        return result;
+      },
+    );
 
     // ---------------------------------------------------------- Wartungsmodus und Ankündigung (REQ-OPS-006)
     app.put('/admin/maintenance', { schema: { tags, body: MaintenanceBody, response: { 200: SystemStatus } } }, async (req) => {

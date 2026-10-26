@@ -659,6 +659,26 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
       return rows.map((r) => r.target_id);
     },
 
+    /**
+     * Fristlöschung (REQ-PRIV-003): abgeschlossene Moderationsfälle samt Meldungen, Entscheidungen, Widersprüchen und
+     * Einmal-Links 12 Monate nach Abschluss; Mitteilungen 12 Monate nach Erstellung; abgelaufene Einmal-Links sofort.
+     * Fälle mit offenem Widerspruch oder aktiver Beweissicherung bleiben erhalten.
+     */
+    async purgeExpired(c: { moderationBefore: Date; noticesBefore: Date }) {
+      const cases = await db.exec(sql`
+        DELETE FROM trust.moderation_case mc
+        WHERE mc.status = 'decided' AND mc.decided_at < ${c.moderationBefore}
+          AND NOT EXISTS (SELECT 1 FROM trust.decision d JOIN trust.appeal a ON a.decision_id = d.id
+                          WHERE d.case_id = mc.id AND (a.status = 'open' OR a.decided_at >= ${c.moderationBefore}))
+          AND NOT EXISTS (SELECT 1 FROM trust.decision d JOIN trust.evidence_hold h ON h.decision_id = d.id
+                          WHERE d.case_id = mc.id AND h.released_at IS NULL AND h.held_until > now())`);
+      return {
+        moderationCases: cases,
+        notices: await db.exec(sql`DELETE FROM trust.notice WHERE created_at < ${c.noticesBefore}`),
+        appealTokens: await db.exec(sql`DELETE FROM trust.appeal_token WHERE expires_at < now() OR used_at IS NOT NULL`),
+      };
+    },
+
     /** Gesicherte Kopien nach Freigabe oder Fristende löschen (höchstens 6 Monate, REQ-LEGAL-008). */
     async purgeExpiredEvidence(): Promise<number> {
       return db.exec(sql`

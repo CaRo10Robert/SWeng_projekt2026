@@ -1,0 +1,9 @@
+# SAST (CTRL-CI-SCAN, REQ-SEC-008): nur Build-Ausgaben und Abhängigkeiten ausnehmen.
+# Fehlalarme werden NICHT hier, sondern gezielt per `nosemgrep: <regel> -- Begründung` an der Fundstelle
+# ausgenommen (Stand 2026-10-26: 2 Stellen in apps/server/src/modules/notifications/index.ts, Express-Regeln
+# auf Fastify-Code mit escapten Werten). Genehmigt: security-lead (Übung), überprüfen bis 2027-04-30.
+node_modules/
+dist/
+coverage/
+reports/
+.stryker-tmp/

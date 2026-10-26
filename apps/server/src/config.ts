@@ -48,7 +48,10 @@ export function loadConfig() {
       secure: bool('SMTP_SECURE', false),
       user: process.env.SMTP_USER || undefined,
       password: process.env.SMTP_PASSWORD || undefined,
-      from: env('MAIL_FROM', 'CampusMarkt HWG LU <no-reply@campusmarkt.local>'),
+      // Absenderdomain passt zu den Beispiel-DNS-Einträgen (SPF/DKIM/DMARC, docs/07-betrieb/mail-zustellbarkeit.md)
+      from: env('MAIL_FROM', 'CampusMarkt HWG LU <no-reply@campusmarkt.example>'),
+      // Antworten gehen an die Kontaktstelle (REQ-LEGAL-005), nicht ins Leere
+      replyTo: env('MAIL_REPLY_TO', 'CampusMarkt Support <campusmarkt-support@hwg-lu.example>'),
     },
     uploadsDir: env('UPLOADS_DIR', resolve(APP_ROOT, '../../.data/uploads')),
     webDistDir,
@@ -63,6 +66,8 @@ export function loadConfig() {
     privacyVersion: privacyVersionOf(legalManifest) || '2026-10',
     seedDemo: bool('SEED_DEMO', false),
     demoMode: bool('DEMO_MODE', false),
+    // Interaktive API-Doku nur im Demo-Modus, sonst ausdrücklich einschalten (Pentest PT-INFO-01)
+    apiDocs: bool('API_DOCS', bool('DEMO_MODE', false)),
     logLevel: env('LOG_LEVEL', 'info'),
     passwordBlocklistFile: env('PASSWORD_BLOCKLIST_FILE', resolve(APP_ROOT, 'assets/password-blocklist.txt')),
     shutdownTimeoutMs: int('SHUTDOWN_TIMEOUT_MS', 25_000),

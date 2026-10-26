@@ -10,7 +10,7 @@ last_updated: 2026-10-25
 
 # Abgleich Recht, Auftritt und Betrieb (EPIC-13)
 
-> **Übungsaufgabe.** CampusMarkt hat keinen Echtbetrieb (ADR-0010). Auf Wunsch des Auftraggebers werden die Rechts- und Betreiberpflichten eines Online-Marktplatzes trotzdem vollständig umgesetzt. Statt echter Betreiberdaten stehen erkennbare Platzhalter im Format `[Platzhalter: …]` (Entscheidung Q-23). Betreiber im Muster ist die Hochschule als öffentliche Stelle in Rheinland-Pfalz. **Das Dokument ist kein Rechtsrat**; vor einem Echtbetrieb prüfen die/der Datenschutzbeauftragte und das Justiziariat der Hochschule.
+> **Übungsaufgabe.** CampusMarkt hat keinen Echtbetrieb (ADR-0010). Auf Wunsch des Auftraggebers werden die Rechts- und Betreiberpflichten eines Online-Marktplatzes trotzdem vollständig umgesetzt. Statt echter Betreiberdaten stehen erkennbar fiktive Übungswerte (Entscheidungen Q-23, Q-28). Betreiber im Muster ist die Hochschule als öffentliche Stelle in Rheinland-Pfalz. **Das Dokument ist kein Rechtsrat**; offene Rechtsfragen sind als Übungsannahmen festgelegt (Q-28), es wird nie im Echtbetrieb genutzt.
 
 ## 1. Ausgangslage
 
@@ -76,7 +76,7 @@ Zuordnung der Normen zu Pflichten und zu ihrer Umsetzung. Die Prozessdokumente l
 | DSA Art. 18 | Meldung von Straftatverdacht | REQ-LEGAL-008 | `docs/06-recht/dsa-prozesse.md` |
 | DSA Art. 20, 21 | Internes Beschwerdemanagement, außergerichtliche Streitbeilegung | REQ-LEGAL-007 | `docs/06-recht/dsa-prozesse.md` |
 | DSA Art. 23 | Maßnahmen gegen missbräuchliche Meldungen und Widersprüche | REQ-LEGAL-007, REQ-MOD-001 | `docs/06-recht/dsa-prozesse.md` |
-| LGGBehM RLP mit Landesverordnung [Platzhalter], RL (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523 (BITV 2.0 nur als fachliche Orientierung) | Barrierefreiheit, Erklärung, Feedback | REQ-A11Y-001/002, REQ-LEGAL-004 | `apps/web/src/content/legal/barrierefreiheit.de.md` |
+| LGGBehM RLP mit Landesverordnung über barrierefreie Informationstechnik (Fundstelle als Übungswert, Q-28), RL (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523 (BITV 2.0 nur als fachliche Orientierung) | Barrierefreiheit, Erklärung, Feedback | REQ-A11Y-001/002, REQ-LEGAL-004 | `apps/web/src/content/legal/barrierefreiheit.de.md` |
 | PStTG (DAC7) | Meldung von Anbietern über der Bagatellgrenze | REQ-LEGAL-009 | `docs/06-recht/dac7-konzept.md` |
 | BGB §§ 305 ff. | Einbeziehung und Transparenz von Bedingungen | REQ-LEGAL-003 | Nutzungsbedingungen |
 | UWG § 7, RFC 8058 | Keine unerwünschte Werbung; einfache Abmeldung | REQ-NOTI-003, REQ-OPS-010 | `docs/07-betrieb/mail-zustellbarkeit.md` |
@@ -87,18 +87,18 @@ Zuordnung der Normen zu Pflichten und zu ihrer Umsetzung. Die Prozessdokumente l
 - **Barrierefreiheitsstärkungsgesetz (BFSG):** gilt für Wirtschaftsakteure; für die Hochschule als öffentliche Stelle gilt das Landesrecht (LGGBehM RLP).
 - **Befreiung kleiner Unternehmen nach DSA Art. 19:** setzt ein Unternehmen voraus; eine öffentliche Stelle ist kein KMU. Wir setzen Art. 20 um (Q-22); das ist der sichere Weg.
 
-**Offene Prüfpunkte (Review v1.3, RV-R-07, RV-R-22):**
-- **Anwendbarkeit des DSA:** Der DSA erfasst „Dienste der Informationsgesellschaft“, die in der Regel gegen Entgelt erbracht werden; ob ein kostenloses Angebot einer öffentlichen Stelle darunter fällt, prüft das Justiziariat. Davon hängt ab, ob für Moderation und Beschwerden Art. 6 Abs. 1 lit. c oder lit. e DSGVO die Rechtsgrundlage ist.
-- **Anwendbarkeit des PStTG:** Ausnahme nach § 3 PStTG für reine Inseratsplattformen und Einordnung von Tausch; prüft die Steuerabteilung.
-- **§ 5 DDG** setzt einen geschäftsmäßigen, in der Regel entgeltlichen digitalen Dienst voraus; Auffangnorm § 18 Abs. 1 MStV.
-- **DSFA:** Die Schwellwertanalyse ergibt nach Neubewertung (Kriterien 4 und 7) eine DSFA vor dem Echtbetrieb; Bestätigung durch den DSB offen.
+**Übungsannahmen statt offener Prüfpunkte (Review v1.3, RV-R-07, RV-R-22; Entscheidung Q-28):**
+- **Anwendbarkeit des DSA:** Übungsannahme: Der DSA gilt (CampusMarkt wird wie ein Dienst der Informationsgesellschaft behandelt, obwohl er unentgeltlich ist). Rechtsgrundlage für Moderation und Beschwerden ist daher Art. 6 Abs. 1 lit. c DSGVO i. V. m. dem DSA.
+- **Anwendbarkeit des PStTG:** Übungsannahme: Die Meldepflicht besteht, die Ausnahme nach § 3 PStTG für reine Inseratsplattformen greift nicht (Reservierung und Abgabe werden im System markiert). Tausch zählt nicht als Vergütung.
+- **§ 5 DDG:** Übungsannahme: wird angewendet; § 18 Abs. 1 MStV wäre die Auffangnorm mit denselben Angaben.
+- **DSFA:** Die Schwellwertanalyse ergibt eine DSFA; sie liegt als Übungs-DSFA mit fiktiver Stellungnahme der DSB vor ([`docs/06-recht/dsfa.md`](../06-recht/dsfa.md)).
 - **Rückverfolgbarkeit von Unternehmern (DSA Art. 30):** entfällt, weil gewerbliche Anbieter ausgeschlossen sind (REQ-LEGAL-003).
 - **Verbraucherinformationen für Fernabsatz:** Die Plattform ist nicht Vertragspartei; die Geschäfte schließen Privatpersonen untereinander.
 
 ## 4. Grenzen der Übung
 
-- Alle Betreiberangaben sind Platzhalter. Die Go-live-Checkliste (`docs/07-betrieb/go-live-checkliste.md`) verlangt, dass vor einem Echtbetrieb kein `[Platzhalter:` mehr vorkommt.
-- Nicht ausgeführt werden: Meldungen an BZSt, Polizei oder Aufsichtsbehörde, Abschluss von AV-Verträgen, Penetrationstest, DSFA (nach der Schwellwertanalyse vor dem Echtbetrieb erforderlich). Diese Schritte stehen in EPIC-12 und in der Go-live-Checkliste.
+- Alle Betreiberangaben sind fiktive Übungswerte (Q-28). Die Go-live-Checkliste (`docs/07-betrieb/go-live-checkliste.md`) verlangt, dass sie vor einem Echtbetrieb durch echte Angaben ersetzt werden; `LEGAL_STRICT=true` verhindert den Start, solange die Rechtstexte als Muster gekennzeichnet sind.
+- Nicht ausgeführt werden: Meldungen an BZSt, Polizei oder Aufsichtsbehörde, Abschluss von AV-Verträgen, Penetrationstest. Die DSFA liegt als Übung vor (fiktive Stellungnahme, Q-28). Diese Schritte stehen in EPIC-12 und in der Go-live-Checkliste.
 - Die Widerspruchsfrist beträgt **6 Monate** (DSA Art. 20 Abs. 1). Eine kürzere Frist ist rechtlich nicht zulässig.
 
 ## 5. Entscheidungen

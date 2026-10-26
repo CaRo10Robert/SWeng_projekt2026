@@ -23,6 +23,12 @@ export const MaintenanceBody = Type.Object({
 });
 export type MaintenanceBody = Static<typeof MaintenanceBody>;
 
+/** Notfall nach einem Sicherheitsvorfall (Incident-Prozess): alle Sitzungen beenden, optional Passwortwechsel erzwingen. */
+export const EndSessionsBody = Type.Object({ forcePasswordChange: Type.Boolean() });
+export type EndSessionsBody = Static<typeof EndSessionsBody>;
+export const EndSessionsResult = Type.Object({ sessions: Type.Integer(), accounts: Type.Integer() });
+export type EndSessionsResult = Static<typeof EndSessionsResult>;
+
 export const ServiceState = Type.Union([Type.Literal('operational'), Type.Literal('disrupted')]);
 export type ServiceState = Static<typeof ServiceState>;
 

@@ -12,11 +12,11 @@ moscow: M
 moscow_reason: [2]
 kano: basis
 epic: EPIC-13
-source: LGGBehM RLP, Landesverordnung zur Barrierefreiheit [Platzhalter], Richtlinie (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523, Q-23
+source: LGGBehM RLP, Landesverordnung über barrierefreie Informationstechnik (Übungswert, Q-28), Richtlinie (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523, Q-23
 use_cases: [UC-08]
 depends_on: [REQ-A11Y-001]
 review_due: 2027-10-24
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE]
@@ -26,17 +26,17 @@ verification: [AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE]
 ## Anforderung
 Das System muss eine Erklärung zur Barrierefreiheit mit Stand der Vereinbarkeit, bekannten Barrieren, Feedback-Möglichkeit und Hinweis auf das Schlichtungsverfahren bereitstellen, die von jeder Seite aus erreichbar ist.
 
-> Übungsaufgabe: Inhalte mit Betreiberbezug stehen als Platzhalter `[Platzhalter: …]` (Q-23). Kein Rechtsrat; im Echtbetrieb prüft die/der Datenschutzbeauftragte bzw. das Justiziariat der Hochschule.
+> Übungsaufgabe: Betreiberangaben sind fiktive Übungswerte (z. B. Musternamen, Anschriften mit „(fiktiv)“, Domains `.example`); offene Rechtsfragen sind als Übungsannahmen festgelegt (Q-23, Q-28). Kein Rechtsrat, keine Nutzung im Echtbetrieb.
 
 ## Begründung
-Öffentliche Stellen müssen eine Erklärung zur Barrierefreiheit veröffentlichen und einen Feedback-Mechanismus anbieten (Richtlinie (EU) 2016/2102 mit dem Mustertext aus dem Durchführungsbeschluss (EU) 2018/1523; für eine Hochschule in Rheinland-Pfalz umgesetzt im Landesgesetz zur Gleichstellung behinderter Menschen (LGGBehM) und der zugehörigen Landesverordnung `[Platzhalter: genaue Fundstelle]`; die BITV 2.0 gilt nur für Bundesstellen und dient hier als fachliche Orientierung). Ergänzt die technische Barrierefreiheit (REQ-A11Y-001/002).
+Öffentliche Stellen müssen eine Erklärung zur Barrierefreiheit veröffentlichen und einen Feedback-Mechanismus anbieten (Richtlinie (EU) 2016/2102 mit dem Mustertext aus dem Durchführungsbeschluss (EU) 2018/1523; für eine Hochschule in Rheinland-Pfalz umgesetzt im Landesgesetz zur Gleichstellung behinderter Menschen (LGGBehM) und der zugehörigen Landesverordnung „Landesverordnung über barrierefreie Informationstechnik“ (Fundstelle als Übungswert, Q-28); die BITV 2.0 gilt nur für Bundesstellen und dient hier als fachliche Orientierung). Ergänzt die technische Barrierefreiheit (REQ-A11Y-001/002).
 
 ## Qualitätsmerkmal, Metrik, Messverfahren
 | Feld | Festlegung |
 |---|---|
 | Qualitätsmerkmal (ISO 25010) | Interaction Capability → Inclusivity; Compliance |
 | Metrik | (1) Pflichtabschnitte der Mustererklärung (Durchführungsbeschluss (EU) 2018/1523) vorhanden; (2) Alter des Stands der Erklärung; (3) Reaktionszeit auf Feedback |
-| Akzeptanzkriterium | (1) **alle 5** Abschnitte: Stand der Vereinbarkeit, nicht barrierefreie Inhalte mit Begründung, Erstellung (Datum, Methode: Selbstbewertung mit axe-core; die manuelle Prüfung MAN-A11Y-001 steht noch aus und wird in der Erklärung als offen genannt), Feedback und Kontakt, Durchsetzungsverfahren (`[Platzhalter: Schlichtungsstelle]`); (2) **≤ 12 Monate**; (3) Antwort **≤ 1 Monat** (Prozess, `docs/06-recht/dsa-prozesse.md` nennt die Zuständigkeit) |
+| Akzeptanzkriterium | (1) **alle 5** Abschnitte: Stand der Vereinbarkeit, nicht barrierefreie Inhalte mit Begründung, Erstellung (Datum, Methode: Selbstbewertung mit axe-core; die manuelle Prüfung MAN-A11Y-001 steht noch aus und wird in der Erklärung als offen genannt), Feedback und Kontakt, Durchsetzungsverfahren (Durchsetzungsstelle für digitale Barrierefreiheit Rheinland-Pfalz, fiktive Kontaktdaten); (2) **≤ 12 Monate**; (3) Antwort **≤ 1 Monat** (Prozess, `docs/06-recht/dsa-prozesse.md` nennt die Zuständigkeit) |
 | Messverfahren | (1) E2E-Test auf Abschnittsüberschriften; (2) Datum im Front Matter, `review_due`; (3) Prozessdokument |
 | Messkontext | Web-Oberfläche, Inhalt `apps/web/src/content/legal/barrierefreiheit.de.md` |
 | Verhalten bei Verfehlung | Release-Blocker für (1); (2) und (3) Aufgabe im nächsten Sprint |
@@ -60,3 +60,4 @@ Szenario: Barriere melden
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-18): Rechtsquelle LGGBehM RLP und RL (EU) 2016/2102 statt BITV 2.0/LBGG; Methode ehrlich (manuelle Prüfung offen); Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

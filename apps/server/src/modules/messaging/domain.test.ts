@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contactView, decideContactAction, needsSafetyHint } from './domain.js';
+import { contactView, dealEvent, decideContactAction, needsSafetyHint, SYSTEM_TEXT } from './domain.js';
 
 describe('[AT-CHAT-006] Sicherheitshinweis im Chat (REQ-CHAT-006)', () => {
   it.each([
@@ -67,5 +67,42 @@ describe('Kontaktfreigabe (REQ-CHAT-010) – Entscheidungsregeln', () => {
     expect(decideContactAction('decline', ctx())).toEqual({ ok: false, code: 'invalid_contact_action' });
     expect(decideContactAction('withdraw', ctx())).toEqual({ ok: false, code: 'invalid_contact_action' });
     expect(decideContactAction('withdraw', ctx(row('granted')))).toMatchObject({ ok: true, state: 'withdrawn' });
+  });
+});
+
+describe('Deal-Ereignisse mit eigener eventId (ADR-0006, MAN-ARCH-001 B-2)', () => {
+  const deal = {
+    id: '11111111-1111-4111-8111-111111111111',
+    listing_id: '22222222-2222-4222-8222-222222222222',
+    seller_id: '33333333-3333-4333-8333-333333333333',
+    buyer_id: '44444444-4444-4444-8444-444444444444',
+    agreed_price_cents: 4500,
+    currency: 'EUR',
+    status: 'completed',
+    created_at: '2026-10-26T10:00:00.000Z',
+  };
+
+  it('jedes Ereignis bekommt eine neue eventId, auch für denselben Deal', () => {
+    let n = 0;
+    const id = () => `e-${++n}`;
+    const a = dealEvent('DealAgreed', deal, id);
+    const b = dealEvent('DealCompleted', deal, id);
+    expect(a.eventId).not.toBe(b.eventId);
+    expect(a.dealId).toBe(b.dealId);
+  });
+
+  it('enthält Betrag in Cent mit Währung und keine personenbezogenen Daten außer IDs', () => {
+    const event = dealEvent('DealCompleted', deal, () => 'e-1', new Date('2026-10-26T12:00:00Z'));
+    expect(event).toMatchObject({ type: 'DealCompleted', agreedPriceCents: 4500, currency: 'EUR', occurredAt: '2026-10-26T12:00:00.000Z' });
+    expect(JSON.stringify(event)).not.toMatch(/@/);
+  });
+});
+
+describe('Systemnachrichten als Code (MAN-UX-002 T-2)', () => {
+  it('jeder Code hat einen deutschen Klartext', () => {
+    for (const [code, text] of Object.entries(SYSTEM_TEXT)) expect(text.length, code).toBeGreaterThan(5);
+    expect(Object.keys(SYSTEM_TEXT).sort()).toEqual(
+      ['contact_exchanged', 'deal_cancelled', 'deal_completed', 'deal_reserved', 'message_deleted', 'message_removed'],
+    );
   });
 });

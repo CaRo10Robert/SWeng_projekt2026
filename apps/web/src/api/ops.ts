@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AnnouncementBody, MaintenanceBody, SystemStatus } from '@campusmarkt/contracts';
+import type { AnnouncementBody, EndSessionsBody, EndSessionsResult, MaintenanceBody, SystemStatus } from '@campusmarkt/contracts';
 import { api } from './client';
 
 /** Öffentlicher Systemstatus inkl. Ankündigung (REQ-OPS-006/007); auch im Wartungsmodus erreichbar. */
@@ -28,5 +28,12 @@ export function useSetAnnouncement() {
         ? api<SystemStatus>('/admin/announcement', { method: 'PUT', body })
         : api<SystemStatus>('/admin/announcement', { method: 'DELETE' }),
     onSuccess: (status) => qc.setQueryData(statusQuery.queryKey, status),
+  });
+}
+
+/** Notfall (Incident-Prozess): alle Sitzungen beenden; die eigene Sitzung endet mit. */
+export function useEndAllSessions() {
+  return useMutation({
+    mutationFn: (body: EndSessionsBody) => api<EndSessionsResult>('/admin/security/end-sessions', { method: 'POST', body }),
   });
 }

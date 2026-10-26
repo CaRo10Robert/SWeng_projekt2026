@@ -1,5 +1,7 @@
 # Lokale Entwicklung: nur Postgres + Mailpit, die App läuft per `pnpm dev` mit Hot Reload.
 #   docker compose -f compose.dev.yaml up -d
+# Ports nur lokal und per Variable änderbar (MAN-PORT-001 P-1). Bei geändertem DEV_DB_PORT bzw. DEV_SMTP_PORT
+# DATABASE_URL bzw. SMTP_PORT für `pnpm dev` entsprechend setzen (z. B. in apps/server/.env).
 name: campusmarkt-dev
 
 services:
@@ -10,15 +12,15 @@ services:
       POSTGRES_PASSWORD: campusmarkt
       POSTGRES_DB: campusmarkt
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${DEV_DB_PORT:-5432}:5432"
     volumes:
       - pgdata-dev:/var/lib/postgresql/data
 
   mailpit:
     image: axllent/mailpit:v1.27
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:${DEV_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${DEV_MAILPIT_PORT:-8025}:8025"
 
 volumes:
   pgdata-dev:

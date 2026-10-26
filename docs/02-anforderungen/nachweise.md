@@ -80,7 +80,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-DEMO-001` | automatisiert | REQ-DEMO-001 | Smoke-Test – Login mit Demo-Konto, Suche liefert Anzeigen, Queue ≥ 2 Fälle (bestehend: „Moderations-Queue enthält Seed-Meldung und Wortfilter-Fall“). |
 | `AT-DEMO-002` | automatisiert | REQ-DEMO-002 | Smoke-Test – Auslösen liefert 202 und erzeugt die Erinnerungsmail in Mailpit (neu zu schreiben). |
 | `AT-LEGAL-001` | automatisiert | REQ-LEGAL-001 | E2E-Test – Impressum ohne Anmeldung aus dem Seitenfuß erreichbar, HTTP 200 bei Direktaufruf, alle Pflichtabschnitte und der Muster-Hinweis sichtbar. |
-| `CTRL-DOC-LEGAL-TEXTE` | Kontrolle | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005 | Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als `[Platzhalter: …]` markiert, Version und Datum im Front Matter, Review protokolliert. |
+| `CTRL-DOC-LEGAL-TEXTE` | Kontrolle | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005 | Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als fiktiver Übungswert erkennbar (Muster-Hinweis, „(fiktiv)“, Domain `.example`, Q-28), Version und Datum im Front Matter, Review protokolliert. |
 | `AT-LEGAL-002` | automatisiert | REQ-LEGAL-002 | E2E-Test – Datenschutzerklärung ohne Anmeldung erreichbar, aus dem Registrierungsformular verlinkt, Abschnitte 1–12 und Version vorhanden. |
 | `AT-LEGAL-002-2` | automatisiert | REQ-LEGAL-002 | E2E-Test – jede nach den Kernabläufen vorhandene Speicherung im Browser steht im Abschnitt „Cookies und lokale Speicherung“. |
 | `AT-LEGAL-002-3` | automatisiert | REQ-LEGAL-002 | E2E-Test – bei neuer Fassung der Datenschutzerklärung erscheint für Mitglieder mit älterer Kenntnisnahme ein Hinweis mit Link; „Zur Kenntnis genommen“ per Tastatur speichert die Version im Konto, der Hinweis verschwindet. |
@@ -185,7 +185,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-PRIV-006` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Browser-Test protokolliert alle Netzwerkanfragen über Anmelden, Suchen, Anzeige, Chat; keine fremde Domain, nur ein Cookie. |
 | `AT-PRIV-006-2` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Smoke-Test prüft, dass die Content-Security-Policy nur den eigenen Ursprung erlaubt. |
 | `CTRL-DOC-DSFA` | Kontrolle | REQ-PRIV-007 | Kontrolle `docs/06-recht/dsfa-schwellwertanalyse.md` – alle Kriterien bewertet, Ergebnis begründet. |
-| `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Bestätigung der Schwellwertanalyse durch die/den DSB (erst vor einem Echtbetrieb). |
+| `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Übungs-DSFA `docs/06-recht/dsfa.md` mit fiktiver Stellungnahme der DSB und fiktiver Entscheidung liegt vor; alle Pflichtinhalte nach Art. 35 Abs. 7 und die sieben Mindestszenarien sind bewertet (Q-28). |
 | `AT-PRIV-008` | automatisiert | REQ-PRIV-008 | Smoke-Test – `robots.txt` mit `Disallow: /`, Header `X-Robots-Tag` auf Start- und Rechtsseiten. |
 | `MAN-SEC-001` | manuell | REQ-SEC-001 | ASVS-L2-Checkliste mit Nachweis je Kontrolle und ZAP-Bericht. |
 | `AT-SEC-002` | automatisiert | REQ-SEC-002 | neu zu schreiben – Test prüft Algorithmus und Parameter eines frisch erzeugten Hashes. |

@@ -32,8 +32,8 @@ export function buildLegalManifest(dir) {
         title: data.title ?? name,
         version: data.version,
         lastUpdated: data.last_updated ?? '',
-        // Deutsche Rechtstexte und englische Lesefassungen (ADR-0016) markieren Muster und Platzhalter je in ihrer Sprache
-        sample: data.sample === 'true' || /Muster im Rahmen einer Übungsaufgabe|course exercise/.test(body),
+        // Muster nur per Front Matter `sample: true`, nicht am Hinweistext (T-1)
+        sample: data.sample === 'true',
         placeholders: (body.match(/\[(?:Platzhalter|Placeholder):/g) ?? []).length,
         sha256: createHash('sha256').update(source).digest('hex'),
       };

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import Fastify, { LogController, type FastifyError } from 'fastify';
 import cookie from '@fastify/cookie';
@@ -14,7 +14,7 @@ import { AppError } from '../errors.js';
 import type { Logger } from '../logger.js';
 import type { Metrics } from '../metrics.js';
 import type { Ops } from '../ops.js';
-import { SESSION_COOKIE, type AuthContext } from './auth.js';
+import { isSameOrigin, SESSION_COOKIE, type AuthContext } from './auth.js';
 import { isMaintenanceExempt, maintenancePage, retryAfterSeconds } from './maintenance.js';
 import { isKnownSpaPath } from './spa-routes.js';
 import { requiresCurrentTerms } from './terms.js';
@@ -37,7 +37,7 @@ const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const CSP = [
   "default-src 'self'",
   "img-src 'self' blob: data:",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self'",
   "script-src 'self'",
   "connect-src 'self'",
   "font-src 'self'",
@@ -48,13 +48,26 @@ const CSP = [
   "form-action 'self'",
 ].join('; ');
 
+/**
+ * CSP je Antwort: Serverseitig erzeugte HTML-Seiten (Wartung, Abmeldung) bringen ihr CSS als festen <style>-Block mit.
+ * Statt 'unsafe-inline' wird genau dieser Block per SHA-256 erlaubt (ZAP 10055, Pentest PT-HDR-01).
+ */
+export function cspFor(payload: unknown, contentType: string | undefined): string {
+  if (typeof payload !== 'string' || !contentType?.startsWith('text/html')) return CSP;
+  const hashes = [...payload.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(
+    (m) => `'sha256-${createHash('sha256').update(m[1]!).digest('base64')}'`,
+  );
+  return hashes.length ? CSP.replace("style-src 'self'", `style-src 'self' ${hashes.join(' ')}`) : CSP;
+}
+
 export async function createHttpServer(options: HttpServerOptions) {
   const { config, logger, metrics } = options;
 
   const app = Fastify({
     loggerInstance: logger,
-    requestIdHeader: 'x-request-id',
-    genReqId: () => randomUUID(),
+    // Fremde Request-IDs nur als UUID übernehmen; sonst könnten Clients beliebigen Text ins Log schreiben (MAN-OPS-002, P-1)
+    requestIdHeader: false,
+    genReqId: (req) => requestIdFrom(req.headers['x-request-id']),
     bodyLimit: 1024 * 1024,
     return503OnClosing: true,
     // Genau ein vertrauenswürdiger Hop (Caddy im Profil proxy); weitere X-Forwarded-For-Einträge zählen nicht (RV-A-07)
@@ -82,7 +95,7 @@ export async function createHttpServer(options: HttpServerOptions) {
       security: [{ session: [] }],
     },
   });
-  await app.register(swaggerUi, { routePrefix: '/api/docs' });
+  if (config.apiDocs) await app.register(swaggerUi, { routePrefix: '/api/docs' });
 
   app.decorateRequest('auth', null);
 
@@ -99,9 +112,7 @@ export async function createHttpServer(options: HttpServerOptions) {
     // CSRF: zustandsändernde API-Requests brauchen den Custom Header (nicht cross-origin setzbar)
     // und, falls vorhanden, einen Origin des eigenen Hosts (REQ-SEC-004).
     if (UNSAFE_METHODS.has(req.method) && req.url.startsWith('/api/') && !CSRF_EXEMPT.has(req.url.split('?')[0]!)) {
-      const origin = req.headers.origin;
-      const sameOrigin = !origin || new URL(origin).host === req.headers.host;
-      if (req.headers[CSRF_HEADER] !== '1' || !sameOrigin) {
+      if (req.headers[CSRF_HEADER] !== '1' || !isSameOrigin(req.headers.origin, req.headers.host)) {
         throw new AppError(403, 'csrf', 'Anfrage wurde aus Sicherheitsgründen abgelehnt (CSRF).');
       }
     }
@@ -139,9 +150,15 @@ export async function createHttpServer(options: HttpServerOptions) {
     reply.header('referrer-policy', 'same-origin');
     reply.header('x-frame-options', 'DENY');
     reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+    // Prozess-Isolation gegen Spectre-artige Angriffe; alle Ressourcen kommen vom eigenen Ursprung (ZAP 90004)
+    reply.header('cross-origin-opener-policy', 'same-origin');
+    reply.header('cross-origin-resource-policy', 'same-origin');
+    if (!req.url.startsWith('/api/docs')) reply.header('cross-origin-embedder-policy', 'require-corp');
     // Keine Indexierung durch Suchmaschinen (REQ-PRIV-008)
     reply.header('x-robots-tag', 'noindex, nofollow');
-    if (!req.url.startsWith('/api/docs')) reply.header('content-security-policy', CSP);
+    if (!req.url.startsWith('/api/docs')) {
+      reply.header('content-security-policy', cspFor(payload, reply.getHeader('content-type') as string | undefined));
+    }
     if (req.url.startsWith('/api/') && !reply.hasHeader('cache-control')) reply.header('cache-control', 'no-store');
     return payload;
   });
@@ -155,6 +172,10 @@ export async function createHttpServer(options: HttpServerOptions) {
 
   app.setErrorHandler((error: FastifyError | AppError, req, reply) => {
     if (error instanceof AppError) {
+      // Abgelehnte Zugriffe als Sicherheitsereignis, ohne Personenbezug (ASVS 7.2.2); Request-ID steht in den Bindings
+      if (error.status === 401 || error.status === 403) {
+        req.log.info({ event: 'access_denied', status: error.status, code: error.code, route: req.routeOptions?.url ?? 'unmatched' }, 'Zugriff abgelehnt');
+      }
       const retryAfter = (error as AppError & { retryAfterSeconds?: number }).retryAfterSeconds;
       if (retryAfter) reply.header('retry-after', String(retryAfter));
       return reply
@@ -274,6 +295,14 @@ const STATUS_REQUESTS_PER_10S = 50;
  * Ein Eintrag je Anfrage: Methode, Routenmuster (bzw. Pfad ohne Query), Status, Dauer; die Request-ID steht in den
  * Bindings von req.log. Keine IP-Adresse, kein Port, keine Query-Werte (Tokens in Einmal- und Abmeldelinks).
  */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Übernimmt eine vom Client oder Proxy gesetzte Request-ID nur, wenn sie eine UUID ist. */
+export function requestIdFrom(header: string | string[] | undefined): string {
+  const value = Array.isArray(header) ? header[0] : header;
+  return value && UUID.test(value) ? value.toLowerCase() : randomUUID();
+}
+
 export function requestLogEntry(
   req: { method: string; url: string; routeOptions?: { url?: string } },
   statusCode: number,
@@ -281,7 +310,8 @@ export function requestLogEntry(
 ) {
   return {
     method: req.method,
-    route: req.routeOptions?.url ?? req.url.split('?')[0],
+    // Unbekannte Pfade nicht roh protokollieren, sie können Adressen oder Tokens enthalten (MAN-OPS-002, P-2)
+    route: req.routeOptions?.url ?? (isKnownSpaPath(req.url) ? req.url.split('?')[0] : 'unmatched'),
     status: statusCode,
     ms: Math.round(elapsedMs),
   };

@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, appealDeadline, appealRole, canDecideCase, canReviewAppeal, checkAppeal, checkDecision, hasMinLength } from './domain.js';
+import {
+  addMonths,
+  appealDeadline,
+  appealRole,
+  canDecideCase,
+  canReviewAppeal,
+  checkAppeal,
+  checkDecision,
+  hashAppealToken,
+  hasMinLength,
+  newAppealToken,
+} from './domain.js';
 
 describe('Widerspruch nach DSA Art. 20 (REQ-LEGAL-007) – Regeln', () => {
   it('Frist: sechs Kalendermonate ab Mitteilung, am Monatsende begrenzt', () => {
@@ -83,5 +94,17 @@ describe('[AT-LEGAL-006-2] Pflichtangaben einer Entscheidung (REQ-LEGAL-006, REQ
     expect(hasMinLength(`   ${'x'.repeat(19)}   `, 20)).toBe(false);
     expect(hasMinLength('x'.repeat(20), 20)).toBe(true);
     expect(hasMinLength(undefined, 1)).toBe(false);
+  });
+});
+
+describe('Einmal-Link für den Widerspruch gesperrter Konten (REQ-LEGAL-007)', () => {
+  it('erzeugt 256 Bit Zufall und speichert nur den Hash', () => {
+    const a = newAppealToken();
+    const b = newAppealToken();
+    expect(Buffer.from(a.token, 'base64url')).toHaveLength(32);
+    expect(a.token).not.toBe(b.token);
+    expect(a.hash).toBe(hashAppealToken(a.token));
+    expect(a.hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(a.hash).not.toContain(a.token);
   });
 });

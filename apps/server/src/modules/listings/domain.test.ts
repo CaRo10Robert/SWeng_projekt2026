@@ -61,4 +61,11 @@ describe('[AT-SEC-007-3] [AT-LST-003-2] Magic Bytes (REQ-SEC-007)', () => {
     expect(sniffImageType(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg">'))).toBeNull();
     expect(sniffImageType(Buffer.from('MZ\x90\x00 ausführbare Datei'))).toBeNull();
   });
+
+  it('erkennt HEIC an der ftyp-Box und lehnt zu kurze Dateien ab', () => {
+    expect(sniffImageType(Buffer.from('0000ftypheic0000', 'ascii'))).toBe('heic');
+    expect(sniffImageType(Buffer.from('0000ftypmif10000', 'ascii'))).toBe('heic');
+    expect(sniffImageType(Buffer.from('0000ftypisom0000', 'ascii'))).toBeNull();
+    expect(sniffImageType(Buffer.from([0xff, 0xd8, 0xff]))).toBeNull();
+  });
 });

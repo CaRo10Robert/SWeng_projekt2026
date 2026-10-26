@@ -31,12 +31,12 @@ flowchart LR
 
 | Thema | Docker-Beispiel | Echtbetrieb |
 |---|---|---|
-| Zertifikat | `tls internal` (lokale CA von Caddy; Browser warnt, bis die CA importiert ist) | Zertifikat des RZ oder ACME (Let's Encrypt / HARICA) [Platzhalter] |
+| Zertifikat | `tls internal` (lokale CA von Caddy; Browser warnt, bis die CA importiert ist) | Zertifikat des RZ oder ACME (Let's Encrypt / HARICA), Übungsannahme: HARICA über das RZ |
 | Protokolle | TLS 1.2 und 1.3 (Caddy-Standard) | wie Beispiel; Prüfung mit `testssl.sh`, Ziel Note A |
 | HSTS | `Strict-Transport-Security: max-age=31536000` | zusätzlich `includeSubDomains` nach Prüfung aller Subdomains; Preload nur nach Abstimmung |
 | Weitere Kopfzeilen | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `X-Robots-Tag` setzt die App | wie Beispiel |
 | Cookie | `Secure` (Standard `COOKIE_SECURE=true`) | wie Beispiel |
-| Domain | `campusmarkt.localhost` (eigener Hostname, damit HSTS keine anderen Dienste auf `localhost` betrifft; Browser lösen `*.localhost` ohne Hosts-Datei auf) | [Platzhalter: campusmarkt.hwg-lu.example] |
+| Domain | `campusmarkt.localhost` (eigener Hostname, damit HSTS keine anderen Dienste auf `localhost` betrifft; Browser lösen `*.localhost` ohne Hosts-Datei auf) | `campusmarkt.hwg-lu.example` (fiktiv) |
 | Ports | `PROXY_HTTPS_PORT` (Standard 8443), `PROXY_HTTP_PORT` (Standard 8088) | 443 / 80 |
 
 ## Starten im Beispiel

@@ -10,13 +10,13 @@ last_updated: 2026-10-25
 
 # Prozesse nach dem Digital Services Act (Verordnung (EU) 2022/2065)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Justiziariat der Hochschule zu prüfen.** Anforderungen: REQ-LEGAL-005 … REQ-LEGAL-008, REQ-MOD-001 … REQ-MOD-003.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich (Q-28).** Anforderungen: REQ-LEGAL-005 … REQ-LEGAL-008, REQ-MOD-001 … REQ-MOD-003.
 
 ## Einordnung
 
 CampusMarkt speichert Inhalte von Mitgliedern und macht sie anderen Mitgliedern zugänglich. Damit ist die Plattform ein **Hostingdienst** und eine **Online-Plattform** im Sinne des DSA. Ein Online-Marktplatz für Verbraucherverträge mit Unternehmern (Art. 30–32) liegt nicht vor, weil nur private Angebote erlaubt sind (Nutzungsbedingungen Abschnitt 3).
 
-**Offene Anwendbarkeitsfragen (Justiziariat):** (1) Der DSA gilt für Vermittlungsdienste, die „Dienste der Informationsgesellschaft“ sind, also in der Regel gegen Entgelt erbracht werden; ob ein kostenloses Angebot einer öffentlichen Stelle darunter fällt, ist offen [Platzhalter]. (2) Die Ausnahme für Kleinst- und Kleinunternehmen (Art. 19) setzt ein Unternehmen voraus; eine öffentliche Stelle ist kein KMU. Ob sie für eine Hochschule gilt, ist offen [Platzhalter: vom Justiziariat zu klären]. Das Muster setzt die Pflichten aus Art. 20 deshalb vorsorglich um (Entscheidung Q-22).
+**Anwendbarkeit (Übungsannahmen, Q-28):** (1) Der DSA gilt für Vermittlungsdienste, die „Dienste der Informationsgesellschaft“ sind, also in der Regel gegen Entgelt erbracht werden. Annahme: CampusMarkt wird trotz Unentgeltlichkeit so behandelt; der DSA gilt. (2) Die Ausnahme für Kleinst- und Kleinunternehmen (Art. 19) setzt ein Unternehmen voraus; eine öffentliche Stelle ist kein KMU. Annahme: Art. 19 greift nicht, die Pflichten aus Art. 20 gelten (Entscheidung Q-22).
 
 | Pflicht | Artikel | Umsetzung | Anforderung |
 |---|---|---|---|
@@ -27,7 +27,7 @@ CampusMarkt speichert Inhalte von Mitgliedern und macht sie anderen Mitgliedern 
 | Begründung von Beschränkungen | 17 | Mitteilung an Betroffene mit allen Pflichtangaben | REQ-LEGAL-006 |
 | Meldung von Straftaten | 18 | Kennzeichen „Straftatverdacht“, Eskalation | REQ-LEGAL-008 |
 | Internes Beschwerdemanagement | 20 | Widerspruch im Konto, Vier-Augen-Prüfung | REQ-LEGAL-007 |
-| Transparenzbericht | 15, 24 | jährlich, aus Audit-Log auswertbar | Echtbetrieb [Platzhalter] |
+| Transparenzbericht | 15, 24 | jährlich, aus Audit-Log auswertbar | Echtbetrieb (erster Bericht fiktiv zum 2027-02-17) |
 
 ## Melde- und Abhilfeverfahren
 
@@ -80,15 +80,15 @@ Pflichtangaben je Mitteilung:
 | Begründung | 20 bis 2.000 Zeichen, gezählt ohne Leerzeichen am Rand |
 | Prüfung | durch eine Person der Moderation, die weder die Erstentscheidung getroffen hat noch selbst Widersprechende, Betroffene oder Meldende ist (Vier-Augen-Prinzip, serverseitig geprüft, 403 `four_eyes`), nicht ausschließlich automatisiert; wer einen Fall gemeldet hat, entscheidet ihn auch nicht. Prüfende sehen bei entfernten Nachrichten den Originaltext, jeder Zugriff im Audit-Log |
 | Ergebnis | bestätigt oder aufgehoben, begründet **beiden Seiten** mitgeteilt; bei Aufhebung wird die Maßnahme rückgängig gemacht (Anzeige mit vorherigem Status, Konto nur entsperrt, wenn keine andere Sperre besteht); ist der Inhalt nicht mehr vorhanden, 409 `restore_impossible` statt falscher Erfolgsmeldung |
-| Bearbeitungsziel | [Platzhalter: z. B. 14 Tage] |
+| Bearbeitungsziel | 14 Tage nach Eingang (Übungsannahme Q-28) |
 
 ## Straftatverdacht (Art. 18)
 
 Erlangt die Moderation Kenntnis von Informationen, die den Verdacht begründen, dass eine Straftat begangen wurde, wird oder werden könnte, die **eine Gefahr für das Leben oder die Sicherheit einer Person** darstellt (z. B. Bedrohung, Waffen- oder Drogenhandel mit Gewaltbezug):
 
 1. Moderator/in setzt bei der Entscheidung das Kennzeichen „Straftatverdacht“ mit Begründung (Audit-Log); das System legt eine pseudonymisierte Kopie des Inhalts mit ± 5 Nachrichten Kontext an (Beweissicherung, höchstens 6 Monate; Originale werden fristgerecht gelöscht).
-2. Die Moderationsleitung wird sofort informiert [Platzhalter: Bereitschaftsnummer].
-3. Die Moderationsleitung informiert unverzüglich die zuständige Strafverfolgungsbehörde [Platzhalter: Polizeipräsidium bzw. Zentrale Meldestelle beim BKA] mit allen verfügbaren Informationen.
+2. Die Moderationsleitung wird sofort informiert (Bereitschaft +49 621 555-0199, fiktiv).
+3. Die Moderationsleitung informiert unverzüglich die zuständige Strafverfolgungsbehörde (Übungsannahme: Polizeipräsidium Rheinpfalz bzw. Zentrale Meldestelle für strafbare Inhalte im Internet beim BKA) mit allen verfügbaren Informationen.
 4. Im Docker-Beispiel gibt es keine automatische Weitergabe; der Schritt ist manuell (Q-4).
 
 ## Mitteilungen an Meldende (Art. 16 Abs. 5)
@@ -97,16 +97,16 @@ Meldende erhalten die Entscheidung mit Begründung und den Hinweis auf ihre Rech
 
 ## Vorläufiges Ausblenden (REQ-MOD-004)
 
-Ab drei Meldungen wird eine Anzeige automatisch vorläufig ausgeblendet. Die Betroffene erhält eine Mitteilung und eine E-Mail „vorläufig ausgeblendet, Prüfung läuft“ mit dem Hinweis auf die automatische Auslösung (Art. 14, 17 DSA). Der Fall wird vorrangig entschieden. Ob für die vorläufige Maßnahme eine vollständige Begründung nach Art. 17 nötig ist, prüft das Justiziariat [Platzhalter].
+Ab drei Meldungen wird eine Anzeige automatisch vorläufig ausgeblendet. Die Betroffene erhält eine Mitteilung und eine E-Mail „vorläufig ausgeblendet, Prüfung läuft“ mit dem Hinweis auf die automatische Auslösung (Art. 14, 17 DSA). Der Fall wird vorrangig entschieden. Übungsannahme (Q-28): Die Mitteilung über das vorläufige Ausblenden gilt als Begründung nach Art. 17; die vollständige Begründung folgt mit der Entscheidung der Moderation.
 
 ## Transparenzbericht (Art. 15, 24)
 
-Seit 2025 gelten für Transparenzberichte verbindliche Vorlagen der Durchführungsverordnung (EU) 2024/2835 [Platzhalter: Anwendbarkeit und aktuelle Fassung prüfen]. Die Zahlen (Meldungen, Entscheidungen, Widersprüche, Bearbeitungszeiten) lassen sich aus dem Audit-Log ermitteln; im Beispiel gibt es keinen Bericht.
+Seit 2025 gelten für Transparenzberichte verbindliche Vorlagen der Durchführungsverordnung (EU) 2024/2835 (Übungsannahme Q-28: anwendbar, Vorlagen werden genutzt). Die Zahlen (Meldungen, Entscheidungen, Widersprüche, Bearbeitungszeiten) lassen sich aus dem Audit-Log ermitteln; im Beispiel gibt es keinen Bericht.
 
 ## Kontaktstelle (Art. 11, 12)
 
-Siehe Rechtstext `kontakt.de.md`. Anfragen werden im Muster per E-Mail bearbeitet [Platzhalter: Ticketsystem der Hochschule]; Meldungen ohne Konto werden von der Moderation manuell in die Queue übernommen.
+Siehe Rechtstext `kontakt.de.md`. Anfragen werden im Muster per E-Mail bearbeitet (im Echtbetrieb: Ticketsystem der Hochschule, fiktiv „MusterTicket“); Meldungen ohne Konto werden von der Moderation manuell in die Queue übernommen.
 
 ## Transparenzbericht
 
-Jährlich [Platzhalter: Stichtag]: Anzahl der Meldungen je Grund, Maßnahmen, Zahl und Ergebnis der Widersprüche, mittlere Bearbeitungsdauer, Einsatz automatisierter Mittel. Die Zahlen lassen sich aus Audit-Log und Moderationsfällen ohne Personenbezug auswerten.
+Jährlich zum 17. Februar (Übungswert): Anzahl der Meldungen je Grund, Maßnahmen, Zahl und Ergebnis der Widersprüche, mittlere Bearbeitungsdauer, Einsatz automatisierter Mittel. Die Zahlen lassen sich aus Audit-Log und Moderationsfällen ohne Personenbezug auswerten.

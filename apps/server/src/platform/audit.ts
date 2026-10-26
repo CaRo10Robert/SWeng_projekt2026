@@ -9,6 +9,11 @@ export interface AuditEvent {
   details?: Record<string, unknown>;
 }
 
+/** Fristlöschung des Audit-Logs nach 24 Monaten (REQ-PRIV-003); Löschen ist erlaubt, Ändern nicht. */
+export async function purgeAuditLog(db: Db, before: Date): Promise<number> {
+  return db.exec(sql`DELETE FROM platform.audit_log WHERE created_at < ${before}`);
+}
+
 /** Append-only Audit-Log für Admin- und Moderationsaktionen (REQ-MOD-003/007, REQ-PRIV-004). */
 export async function audit(db: Db, event: AuditEvent): Promise<void> {
   await db.exec(sql`

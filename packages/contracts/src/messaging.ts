@@ -4,6 +4,17 @@ import { ListingStatus } from './listings.js';
 
 export const MessageBody = Type.String({ minLength: 1, maxLength: 2000 });
 
+/** Systemnachrichten als Code; der Client übersetzt, body bleibt als deutscher Klartext (ADR-0016, MAN-UX-002 T-2). */
+export const SystemCode = Type.Union([
+  Type.Literal('contact_exchanged'),
+  Type.Literal('deal_reserved'),
+  Type.Literal('deal_completed'),
+  Type.Literal('deal_cancelled'),
+  Type.Literal('message_removed'),
+  Type.Literal('message_deleted'),
+]);
+export type SystemCode = Static<typeof SystemCode>;
+
 export const Message = Type.Object({
   id: Uuid,
   conversationId: Uuid,
@@ -15,6 +26,8 @@ export const Message = Type.Object({
   readAt: Type.Union([Timestamp, Type.Null()]),
   /** Sicherheitshinweis bei Links, IBAN oder Telefonnummern (REQ-CHAT-006). */
   safetyHint: Type.Boolean(),
+  /** Nur bei kind = system; ältere Systemnachrichten haben keinen Code. */
+  systemCode: Type.Optional(Type.Union([SystemCode, Type.Null()])),
 });
 export type Message = Static<typeof Message>;
 

@@ -12,7 +12,7 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 5 Abs. 2, Art. 30, Art. 32, Q-23
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [CTRL-DOC-VVT, CTRL-DOC-TOM]
@@ -28,7 +28,7 @@ Rechenschaftspflicht (Art. 5 Abs. 2), Verzeichnis (Art. 30) und Sicherheit der V
 ## Akzeptanzkriterien
 - `docs/06-recht/vvt.md` enthält je Verarbeitung: Zweck, Rechtsgrundlage, Kategorien betroffener Personen und Daten, Empfänger, Drittlandübermittlung, Löschfristen (aus REQ-PRIV-003), Verweis auf die TOMs. Mindestens: Konto und Anmeldung, Anzeigen und Bilder, Chat, Kontaktfreigabe, Meldungen und Moderation, Widersprüche, E-Mail-Benachrichtigungen, Rate-Limits und Sicherheit, Protokolle und Metriken, Datensicherung, DAC7-Auswertung.
 - `docs/06-recht/toms.md` gliedert die Maßnahmen nach Art. 32 (Vertraulichkeit, Integrität, Verfügbarkeit, Belastbarkeit, Wiederherstellbarkeit, regelmäßige Überprüfung) und verweist je Maßnahme auf Anforderung und Nachweis.
-- Betreiberangaben sind als `[Platzhalter: …]` markiert.
+- Betreiberangaben sind fiktive Übungswerte (Q-28).
 - Definition of Done: Eine neue Verarbeitung ergänzt VVT, TOMs und Datenschutzerklärung im selben Pull Request.
 
 ## Fehler- und Missbrauchsfälle
@@ -47,3 +47,4 @@ Rechenschaftspflicht (Art. 5 Abs. 2), Verzeichnis (Art. 30) und Sicherheit der V
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-01, RV-R-02, RV-R-06): Status nach Umsetzung; VVT und TOMs an Ist-Stand (Logs ohne IP, Pseudonymisierung, Löschjournal, Deals) angeglichen |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-VVT, CTRL-DOC-TOM bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

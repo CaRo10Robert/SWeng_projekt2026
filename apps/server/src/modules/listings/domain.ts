@@ -6,6 +6,8 @@ export type StoredStatus = ListingStatus | 'deleted';
 export const MAX_ACTIVE_LISTINGS = 30;
 export const LISTING_LIFETIME_DAYS = 60;
 export const EXPIRY_REMINDER_DAYS = 7;
+/** Höchstens so viele Bilder je Mitglied und Stunde (ASVS 12.1.3). */
+export const UPLOAD_QUOTA = { limit: 100, windowSeconds: 3600 };
 /** Status, die gegen das Limit von 30 aktiven Anzeigen zählen (REQ-LST-011). */
 export const COUNTED_STATUSES: StoredStatus[] = ['in_review', 'active', 'paused', 'reserved'];
 /** Für andere Mitglieder sichtbare Status. */

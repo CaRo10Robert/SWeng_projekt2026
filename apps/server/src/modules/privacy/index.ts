@@ -1,14 +1,18 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Accepted, DeleteAccountBody } from '@campusmarkt/contracts';
+import { purgeAuditLog } from '../../platform/audit.js';
 import type { DeletionEntry } from '../../platform/deletion-journal.js';
 import { entriesSince } from '../../platform/deletion-journal.js';
 import { SESSION_COOKIE, requireAuth } from '../../platform/http/auth.js';
 import type { Module, ModuleDeps } from '../shared.js';
+import { retentionCutoffs } from './domain.js';
 
 export const PRIVACY_PURGE = 'privacy-purge';
 
 export interface PrivacyApi {
   purgeDueAccounts(): Promise<number>;
+  /** Fristlöschungen nach dem Löschkonzept (REQ-PRIV-003); liefert Anzahlen je Kategorie, ohne Personenbezug. */
+  purgeExpired(now?: Date): Promise<Record<string, number>>;
   /** Nach einer Wiederherstellung: Löschungen seit dem Sicherungszeitpunkt erneut ausführen (ADR-0018, RV-A-01). */
   replayDeletions(entries: readonly DeletionEntry[], since: Date): Promise<number>;
 }
@@ -55,6 +59,17 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       await modules.messaging.purgeRemovedOriginals(await modules.trust.protectedMessageIds());
       await modules.trust.purgeExpiredEvidence();
       return due.length;
+    },
+
+    async purgeExpired(now = new Date()) {
+      const c = retentionCutoffs(now);
+      const protectedMessages = await modules.trust.protectedMessageIds();
+      return {
+        ...(await modules.identity.purgeExpired(c)),
+        ...(await modules.trust.purgeExpired(c)),
+        conversations: await modules.messaging.purgeInactiveConversations(c.conversationsBefore, protectedMessages),
+        auditLog: await purgeAuditLog(database.db, c.auditBefore),
+      };
     },
 
     async replayDeletions(entries, since) {
@@ -130,6 +145,8 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       await deps.jobs.work(PRIVACY_PURGE, async () => {
         const count = await api.purgeDueAccounts();
         if (count) deps.logger.info({ count }, 'Fällige Kontolöschungen ausgeführt');
+        // Ergebnis ohne personenbezogene Daten: nur Anzahlen je Kategorie (REQ-PRIV-003)
+        deps.logger.info({ purged: await api.purgeExpired() }, 'Fristlöschungen ausgeführt');
         // Zähler mit IP-Hashes nach spätestens 7 Tagen löschen (REQ-PRIV-002); Fenster sind ≤ 1 h
         await deps.rateLimit.purge(86_400);
       });

@@ -14,7 +14,7 @@ last_updated: 2026-10-25
 
 ## Recht und Datenschutz
 
-- [ ] Betreiber festgelegt (Hochschule, Organisationseinheit) und alle `[Platzhalter: …]` in `apps/web/src/content/legal/`, `docs/06-recht/` und `docs/07-betrieb/` ersetzt (Suche nach `Platzhalter`)
+- [ ] Betreiber festgelegt (Hochschule, Organisationseinheit) und alle fiktiven Übungswerte (Q-28) in `apps/web/src/content/legal/`, `docs/06-recht/` und `docs/07-betrieb/` durch echte Angaben ersetzt (Suche nach `fiktiv`, `fictitious`, `Übungswert`, `Übungsannahme`, `.example` und `Platzhalter`); Muster-Hinweis entfernt
 - [ ] Hinweis „Muster im Rahmen einer Übungsaufgabe“ aus allen Rechtstexten entfernt
 - [ ] Impressum, Datenschutzerklärung, Nutzungsbedingungen, Community-Regeln vom Justiziariat und DSB freigegeben
 - [ ] Erklärung zur Barrierefreiheit nach manueller Prüfung (MAN-A11Y-001) aktualisiert, Durchsetzungsstelle eingetragen
@@ -32,7 +32,7 @@ last_updated: 2026-10-25
 - [ ] Sicherheitsscans in CI aktiv (B-06), keine offenen kritischen Funde
 - [ ] `security.txt` mit echter Kontaktadresse (`SECURITY_CONTACT`) und gültigem `Expires`; `Policy` und `Canonical` erscheinen nur mit HTTPS-`PUBLIC_URL`
 - [ ] Datenbankpasswort aus `compose.yaml` ersetzt; Geheimnisse (DB-Passwort, SMTP, ggf. `UNSUBSCRIBE_SECRET`) im Secret-Store, nicht im Repo
-- [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden
+- [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden (damit entfällt auch der automatische Abgleich der Demo-Konten mit neuen Rechtstexten)
 - [ ] Admin- und Moderationskonten personalisiert, Rollenliste geprüft
 
 ## Betrieb
@@ -52,6 +52,6 @@ last_updated: 2026-10-25
 
 - [ ] Englische Oberfläche geprüft (Muttersprachler/in)
 - [ ] Hilfe/FAQ mit echten Kontaktwegen
-- [ ] Kommunikationsplan für den Start (Hochschul-Newsletter, AStA) [Platzhalter]
+- [ ] Kommunikationsplan für den Start (Hochschul-Newsletter, AStA)
 
-Freigabe: [Platzhalter: Datum, Name, Rolle]
+Freigabe: entfällt (Übungsaufgabe, kein Echtbetrieb – Q-28)

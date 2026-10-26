@@ -10,7 +10,7 @@ last_updated: 2026-10-24
 
 # Auftragsverarbeitung (Art. 28 DSGVO)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Datenschutzbeauftragten der Hochschule zu prüfen.** Anforderung: REQ-LEGAL-012.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich (Q-28).** Anforderung: REQ-LEGAL-012.
 
 Im Docker-Beispiel gibt es **keine Auftragsverarbeiter**: Alles läuft lokal (app, db, mailpit; ADR-0010). Für einen Echtbetrieb sind folgende Kategorien zu erwarten.
 
@@ -18,10 +18,10 @@ Im Docker-Beispiel gibt es **keine Auftragsverarbeiter**: Alles läuft lokal (ap
 
 | Kategorie | Dienstleister | Leistung | Datenkategorien | Ort der Verarbeitung | AVV | Unterauftragnehmer | Stand |
 |---|---|---|---|---|---|---|---|
-| Hosting / Rechenzentrum | [Platzhalter: RZ der Hochschule – dann keine Auftragsverarbeitung, sondern interne Stelle – oder Hoster in der EU] | Server, Datenbank, Speicher, Backups | alle (VVT V-1 … V-12) | [Platzhalter: Deutschland] | [Platzhalter: Datum, Fundstelle] | [Platzhalter] | offen |
-| E-Mail-Versand | [Platzhalter: SMTP-Relay des RZ oder Versanddienst in der EU] | Zustellung transaktionaler E-Mails | E-Mail-Adresse, Betreff, Mailtext (ohne Chatinhalte) | [Platzhalter: EU] | [Platzhalter] | [Platzhalter] | offen |
-| Speicher für Datensicherungen | [Platzhalter: Objektspeicher in der EU] | verschlüsselte Ablage der Backups | alle (verschlüsselt) | [Platzhalter: EU] | [Platzhalter] | [Platzhalter] | offen |
-| Monitoring (optional) | [Platzhalter: selbst betrieben – dann entfällt die Auftragsverarbeitung] | Metriken und Alarme | keine personenbezogenen Daten (Metriken ohne Personenbezug) | intern | nicht nötig | – | im Beispiel selbst betrieben (Profil `monitoring`) |
+| Hosting / Rechenzentrum | Rechenzentrum der Hochschule (interne Stelle) | Server, Datenbank, Speicher, Backups | alle (VVT V-1 … V-13) | Ludwigshafen, Deutschland | nicht nötig (interne Stelle, keine Auftragsverarbeitung) | – | Übungsannahme (Q-28) |
+| E-Mail-Versand | MusterMail GmbH, Frankfurt am Main (fiktiv) | Zustellung transaktionaler E-Mails | E-Mail-Adresse, Betreff, Mailtext (ohne Chatinhalte) | Frankfurt am Main, Deutschland | AVV vom 2026-10-01, Vertrags-Nr. AV-2026-001 (fiktiv) | Rechenzentrumsbetreiber MusterDC AG, Frankfurt (fiktiv) | Übungswert (Q-28) |
+| Speicher für Datensicherungen | Musterspeicher GmbH, Frankfurt am Main (fiktiv) | verschlüsselte Ablage der Backups (Schlüssel nur bei der Hochschule) | alle (verschlüsselt) | Frankfurt am Main, Deutschland | AVV vom 2026-10-01, Vertrags-Nr. AV-2026-002 (fiktiv) | keine | Übungswert (Q-28) |
+| Monitoring (optional) | selbst betrieben (Profil `monitoring`) | Metriken und Alarme | keine personenbezogenen Daten (Metriken ohne Personenbezug) | intern | nicht nötig | – | im Beispiel selbst betrieben (Profil `monitoring`) |
 
 Die Bezahlfunktion (EPIC-09) bringt später einen Zahlungsdienstleister dazu. Er ist für die Zahlung selbst in der Regel **eigener Verantwortlicher**, nicht Auftragsverarbeiter; das ist dann gesondert zu prüfen.
 

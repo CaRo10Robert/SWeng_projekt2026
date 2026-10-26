@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { hash as argonHash, verify as argonVerify } from '@node-rs/argon2';
 import type { AdminUser, Locale, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
@@ -5,6 +6,7 @@ import { audit } from '../../platform/audit.js';
 import type { Db, Tx } from '../../platform/db.js';
 import { AppError, badRequest, conflict, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
+import { ensureSecret } from '../../platform/pseudonym.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import { checkPassword, checkRegistrationEmail, hashToken, newToken, normalizeEmail, type DomainRule } from './domain.js';
@@ -33,6 +35,7 @@ interface UserRow {
   created_at: string;
   deletion_requested_at: string | null;
   privacy_ack_version: string | null;
+  password_change_required: boolean;
 }
 
 export interface Contact {
@@ -123,6 +126,16 @@ export function createIdentityService(deps: ModuleDeps) {
       INSERT INTO identity.token (token_hash, user_id, purpose, expires_at)
       VALUES (${hash}, ${userId}, ${purpose}, now() + make_interval(hours => ${ttlHours}))`);
     return token;
+  }
+
+  /** Zustimmungen ohne Profilbezug behalten: HMAC der kanonischen Adresse mit festem Geheimnis (REQ-PRIV-003, S-4). */
+  async function anonymizeConsents(tx: Tx, userId: string) {
+    const user = await tx.db.one<{ email_canonical: string }>(sql`SELECT email_canonical FROM identity."user" WHERE id = ${userId}`);
+    if (!user) return;
+    const secret = await ensureSecret(tx.db, 'secret.consent-proof');
+    const subjectRef = createHmac('sha256', secret).update(user.email_canonical.toLowerCase()).digest('base64url');
+    await tx.db.exec(sql`
+      UPDATE identity.consent SET subject_ref = ${subjectRef}, anonymized_at = now() WHERE user_id = ${userId}`);
   }
 
   async function createSession(tx: Tx, userId: string) {
@@ -225,7 +238,7 @@ export function createIdentityService(deps: ModuleDeps) {
     async resendVerification(rawEmail: string): Promise<void> {
       const email = normalizeEmail(rawEmail);
       if (!email) return;
-      await limit(`resend:${email.canonical}`, 3, 3600);
+      await limit(`resend:${await pseudo(email.canonical)}`, 3, 3600);
       await database.tx(async (tx) => {
         const user = await tx.db.one<UserRow>(
           sql`SELECT * FROM identity."user" WHERE email_canonical = ${email.canonical} AND status = 'unverified'`,
@@ -245,13 +258,19 @@ export function createIdentityService(deps: ModuleDeps) {
       // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP. Erst atomar zählen, dann prüfen, damit parallele
       // Versuche das Limit nicht gemeinsam unterlaufen; eine erfolgreiche Anmeldung setzt den Zähler zurück.
       const attempt = await rateLimit.hit(failKey, 5, 900);
-      if (!attempt.allowed) throw rateLimited(attempt.retryAfterSeconds);
+      // Sicherheitsereignisse ohne Personenbezug: nur das täglich wechselnde Pseudonym (ASVS 7.1.3/7.2.1, REQ-OPS-002)
+      const subject = await pseudo(email?.canonical ?? rawEmail.toLowerCase());
+      if (!attempt.allowed) {
+        deps.logger.warn({ event: 'auth.login_throttled', subject }, 'Anmeldung gedrosselt');
+        throw rateLimited(attempt.retryAfterSeconds);
+      }
 
       const outcome = await resolveLogin(passwordProvider, { email: rawEmail, password }, {
         rules: await domainRules(),
         findByCanonical,
       });
       if (!outcome.ok) {
+        deps.logger.warn({ event: 'auth.login_failed', reason: outcome.code, subject }, 'Anmeldung fehlgeschlagen');
         if (outcome.code === 'invalid_credentials' || outcome.code === 'domain_not_allowed') {
           throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
         }
@@ -262,6 +281,13 @@ export function createIdentityService(deps: ModuleDeps) {
       }
       const user = outcome.account;
       await rateLimit.reset(failKey);
+      if ((user as Partial<UserRow>).password_change_required) {
+        // Notfall (T-5): Passwort ist richtig, aber zurückgesetzt; Link per Mail statt Sitzung
+        deps.logger.warn({ event: 'auth.password_change_required', subject }, 'Passwortwechsel erzwungen');
+        await this.requestPasswordReset(rawEmail).catch(() => undefined);
+        throw new AppError(403, 'password_change_required', 'Bitte vergib ein neues Passwort. Wir haben dir einen Link geschickt.');
+      }
+      deps.logger.info({ event: 'auth.login', subject }, 'Anmeldung erfolgreich');
 
       return database.tx(async (tx) => {
         let deletionCancelled = false;
@@ -302,7 +328,7 @@ export function createIdentityService(deps: ModuleDeps) {
     async requestPasswordReset(rawEmail: string): Promise<void> {
       const email = normalizeEmail(rawEmail);
       if (!email) return;
-      await limit(`reset:${email.canonical}`, 3, 3600);
+      await limit(`reset:${await pseudo(email.canonical)}`, 3, 3600);
       await database.tx(async (tx) => {
         const user = await tx.db.one<UserRow>(
           sql`SELECT * FROM identity."user" WHERE email_canonical = ${email.canonical} AND status = 'active'`,
@@ -324,7 +350,8 @@ export function createIdentityService(deps: ModuleDeps) {
         if (!pw.ok) throw unprocessable('weak_password', pw.reason, [{ path: 'password', message: pw.reason }]);
         const passwordHash = await argonHash(password, ARGON);
         await tx.db.exec(sql`
-          UPDATE identity."user" SET password_hash = ${passwordHash}, updated_at = now() WHERE id = ${userId}`);
+          UPDATE identity."user" SET password_hash = ${passwordHash}, password_change_required = false, updated_at = now()
+          WHERE id = ${userId}`);
         // Alle Sitzungen widerrufen
         await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
       });
@@ -531,9 +558,51 @@ export function createIdentityService(deps: ModuleDeps) {
     },
 
     async deleteUser(tx: Tx, userId: string): Promise<void> {
-      // Sessions, Tokens und Einwilligungen werden per ON DELETE CASCADE entfernt
+      // Sessions und Tokens per ON DELETE CASCADE; Zustimmungen bleiben ohne Profilbezug als Nachweis (REQ-PRIV-003, S-4)
+      await anonymizeConsents(tx, userId);
       await tx.db.exec(sql`DELETE FROM identity."user" WHERE id = ${userId}`);
       deps.journal.record(tx, 'account_deleted', userId);
+    },
+
+    /**
+     * Fristlöschungen nach dem Löschkonzept (REQ-PRIV-003): unbestätigte Konten, benutzte bzw. abgelaufene Links,
+     * abgelaufene Sitzungen und Zustimmungsnachweise nach Ablauf der Nachweisfrist. Idempotent.
+     */
+    async purgeExpired(c: { unverifiedAccountsBefore: Date; linksBefore: Date; consentProofsBefore: Date }) {
+      const unverified = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE status = 'unverified' AND created_at < ${c.unverifiedAccountsBefore}`);
+      for (const { id } of unverified) {
+        await database.tx(async (tx) => {
+          await anonymizeConsents(tx, id);
+          await tx.db.exec(sql`DELETE FROM identity."user" WHERE id = ${id} AND status = 'unverified'`);
+        });
+      }
+      return {
+        unverifiedAccounts: unverified.length,
+        links: await db.exec(sql`DELETE FROM identity.token WHERE COALESCE(used_at, expires_at) < ${c.linksBefore}`),
+        sessions: await db.exec(sql`DELETE FROM identity.session WHERE expires_at < now()`),
+        consentProofs: await db.exec(sql`
+          DELETE FROM identity.consent WHERE user_id IS NULL AND anonymized_at < ${c.consentProofsBefore}`),
+      };
+    },
+
+    /** Notfall (T-2/T-5): alle Sitzungen beenden, optional Passwortwechsel für alle Konten erzwingen. */
+    async endAllSessions(auth: AuthContext, forcePasswordChange: boolean): Promise<{ sessions: number; accounts: number }> {
+      return database.tx(async (tx) => {
+        const sessions = await tx.db.exec(sql`DELETE FROM identity.session`);
+        const accounts = forcePasswordChange
+          ? await tx.db.exec(sql`
+              UPDATE identity."user" SET password_change_required = true, updated_at = now()
+              WHERE status IN ('active', 'suspended', 'pending_deletion')`)
+          : 0;
+        await audit(tx.db, {
+          actorId: auth.userId,
+          action: 'security.end_all_sessions',
+          targetType: 'session',
+          details: { sessions, forcePasswordChange, accounts },
+        });
+        return { sessions, accounts };
+      });
     },
 
     // ------------------------------------------------------------ Löschjournal nach Wiederherstellung (ADR-0018)
@@ -593,6 +662,28 @@ export function createIdentityService(deps: ModuleDeps) {
       await tx.db.exec(sql`
         INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${input.termsVersion ?? config.termsVersion})`);
       return row!.id;
+    },
+
+    /**
+     * Für den Seed: aktuelle Fassung von Nutzungsbedingungen und Datenschutzerklärung für ein Demo-Konto
+     * übernehmen. Idempotent; liefert true, wenn sich etwas geändert hat.
+     */
+    async syncDemoLegalVersions(email: string): Promise<boolean> {
+      const user = await db.one<{ id: string; privacy_ack_version: string | null }>(sql`
+        SELECT id, privacy_ack_version FROM identity."user" WHERE email = ${email} AND status = 'active'`);
+      if (!user) return false;
+      const terms = await db.one<{ version: string }>(LATEST_TERMS(user.id));
+      let changed = false;
+      if (terms?.version !== config.termsVersion) {
+        await db.exec(sql`
+          INSERT INTO identity.consent (user_id, kind, version) VALUES (${user.id}, 'terms_privacy', ${config.termsVersion})`);
+        changed = true;
+      }
+      if (user.privacy_ack_version !== config.privacyVersion) {
+        await db.exec(sql`UPDATE identity."user" SET privacy_ack_version = ${config.privacyVersion} WHERE id = ${user.id}`);
+        changed = true;
+      }
+      return changed;
     },
   };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aggregateSales, isReportable, isValidReportYear, quarterOf, toCsv } from './domain.js';
+import { aggregateSales, euro, isReportable, isValidReportYear, quarterOf, toCsv } from './domain.js';
 
 describe('[AT-LEGAL-009] DAC7-Schwellen (REQ-LEGAL-009)', () => {
   it.each([
@@ -41,5 +41,16 @@ describe('[AT-LEGAL-009] DAC7-Schwellen (REQ-LEGAL-009)', () => {
 
   it('CSV schützt vor Formel-Injektion und maskiert Trennzeichen', () => {
     expect(toCsv([['=HYPERLINK("x")', 'Lea; Ben', 3]])).toBe(`"'=HYPERLINK(""x"")";"Lea; Ben";3\r\n`);
+  });
+});
+
+describe('Betragsformat im DAC7-Export', () => {
+  it.each([
+    [0, '0,00'],
+    [5, '0,05'],
+    [200_000, '2000,00'],
+    [123_456, '1234,56'],
+  ])('%i Cent → %s', (cents, text) => {
+    expect(euro(cents)).toBe(text);
   });
 });

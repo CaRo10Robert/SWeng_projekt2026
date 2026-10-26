@@ -25,10 +25,10 @@ Bestätigungslinks, Passwort-Resets und Moderationsbegründungen sind Pflichtmai
 campusmarkt.example.            IN TXT "v=spf1 include:_spf.relay.example -all"
 
 ; DKIM – öffentlicher Schlüssel des Relays (Selektor cm2026)
-cm2026._domainkey.campusmarkt.example. IN TXT "v=DKIM1; k=rsa; p=[Platzhalter: öffentlicher Schlüssel]"
+cm2026._domainkey.campusmarkt.example. IN TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA…(gekürzter Übungswert)"
 
 ; DMARC – zunächst beobachten, dann verschärfen
-_dmarc.campusmarkt.example.     IN TXT "v=DMARC1; p=none; rua=mailto:[Platzhalter: dmarc-reports@campusmarkt.example]; adkim=s; aspf=s"
+_dmarc.campusmarkt.example.     IN TXT "v=DMARC1; p=none; rua=mailto:dmarc-reports@campusmarkt.example; adkim=s; aspf=s"
 ```
 
 | Schritt | Einstellung | Dauer |
@@ -41,5 +41,5 @@ _dmarc.campusmarkt.example.     IN TXT "v=DMARC1; p=none; rua=mailto:[Platzhalte
 
 - **Absender:** `MAIL_FROM` mit eigener Domain, z. B. `CampusMarkt <no-reply@campusmarkt.example>`; `Reply-To` auf die Kontaktstelle.
 - **Inhalte:** reine Transaktionsmails, keine Werbung (UWG § 7 nicht berührt); Text- und HTML-Teil; Fußzeile mit Impressum-Link (REQ-UX-006) und Abmeldelink für abbestellbare Kategorien (REQ-NOTI-003, `List-Unsubscribe`).
-- **Bounces:** harte Bounces (Adresse existiert nicht mehr) markieren das Konto; nach [Platzhalter: 3] harten Bounces keine weiteren Mails und Hinweis beim nächsten Login. Im Beispiel nicht umgesetzt (Mailpit kennt keine Bounces).
-- **Prüfen:** Testmails an Hochschul-Postfächer und Werkzeuge wie `mail-tester` [Platzhalter: internes Prüfverfahren]; DMARC-Berichte wöchentlich ansehen.
+- **Bounces:** harte Bounces (Adresse existiert nicht mehr) markieren das Konto; nach 3 harten Bounces keine weiteren Mails und Hinweis beim nächsten Login. Im Beispiel nicht umgesetzt (Mailpit kennt keine Bounces).
+- **Prüfen:** Testmails an Hochschul-Postfächer und Werkzeuge wie `mail-tester` (im Echtbetrieb zusätzlich Prüfpostfach des RZ, fiktiv); DMARC-Berichte wöchentlich ansehen.

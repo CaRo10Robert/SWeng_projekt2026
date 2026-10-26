@@ -47,9 +47,9 @@ Schwellwerte sind Beispielwerte und werden nach den ersten Betriebswochen angepa
 
 | Schweregrad | Wer wird benachrichtigt | Reaktionszeit (Beispiel) |
 |---|---|---|
-| SEV-1 (Plattform nicht nutzbar) | Mail an `[Platzhalter: rufbereitschaft@campusmarkt.example]` mit Erinnerung alle 30 min; im Echtbetrieb zusätzlich [Platzhalter: Telefon/Messenger] | 30 min, auch außerhalb der Dienstzeit [Platzhalter: Vereinbarung] |
-| SEV-2 (wichtige Funktion gestört) | Mail an `[Platzhalter: betrieb@campusmarkt.example]`, Erinnerung alle 4 h | nächster Werktag, 4 h in der Dienstzeit |
-| SEV-3 (Beeinträchtigung) | Mail an `[Platzhalter: betrieb@campusmarkt.example]`, Erinnerung alle 4 h | im wöchentlichen Review |
+| SEV-1 (Plattform nicht nutzbar) | Mail an `rufbereitschaft@campusmarkt.example` mit Erinnerung alle 30 min; im Echtbetrieb zusätzlich Anruf an +49 621 555-0199 (fiktiv) | 30 min, auch außerhalb der Dienstzeit (Dienstvereinbarung Rufbereitschaft, fiktiv) |
+| SEV-2 (wichtige Funktion gestört) | Mail an `betrieb@campusmarkt.example`, Erinnerung alle 4 h | nächster Werktag, 4 h in der Dienstzeit |
+| SEV-3 (Beeinträchtigung) | Mail an `betrieb@campusmarkt.example`, Erinnerung alle 4 h | im wöchentlichen Review |
 
 Gruppiert wird nach Alarmname (Wartezeit 30 s, Abstand 5 min); behobene Alarme werden ebenfalls gemeldet.
 

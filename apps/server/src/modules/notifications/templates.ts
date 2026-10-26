@@ -213,7 +213,7 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Grundlage: ${p.basis}. Geprüft und entschieden hat ein Mensch aus der Moderation.`,
       ...(p.appealLink
         ? [
-            `Deine Möglichkeiten: Du kannst bis zum ${p.deadline} kostenlos Widerspruch einlegen (DSA Art. 20); eine andere Person aus der Moderation prüft den Fall dann erneut. Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen.`,
+            `Deine Möglichkeiten: Du kannst bis zum ${p.deadline} kostenlos Widerspruch einlegen (DSA Art. 20); eine andere Person aus der Moderation prüft den Fall dann erneut. Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle nach DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fiktiv) und der Rechtsweg offen.`,
           ]
         : []),
     ],
@@ -230,7 +230,7 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
       ...(p.appealLink
         ? [`Wenn du mit dem Ergebnis nicht einverstanden bist, kannst du bis zum ${p.deadline} kostenlos Widerspruch einlegen (DSA Art. 20).`]
         : []),
-      'Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen. Danke, dass du hilfst, CampusMarkt sicher zu halten.',
+      'Außerdem stehen dir eine außergerichtliche Streitbeilegungsstelle nach DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fiktiv) und der Rechtsweg offen. Danke, dass du hilfst, CampusMarkt sicher zu halten.',
     ],
     action: p.appealLink ? { label: 'Mitteilung ansehen', url: p.appealLink } : undefined,
   }),
@@ -250,7 +250,7 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Hallo ${p.name},`,
       `eine andere Person aus der Moderation hat den Widerspruch zu ${p.targetPlain ?? p.target} geprüft. Ergebnis: ${p.outcome}.`,
       `Begründung: ${p.reason}`,
-      'Gegen diese Entscheidung stehen dir eine außergerichtliche Streitbeilegungsstelle ([Platzhalter: Stelle nach DSA Art. 21]) und der Rechtsweg offen.',
+      'Gegen diese Entscheidung stehen dir eine außergerichtliche Streitbeilegungsstelle nach DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fiktiv) und der Rechtsweg offen.',
     ],
     action: p.link ? { label: 'Mitteilung ansehen', url: p.link } : undefined,
   }),
@@ -261,8 +261,8 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Hallo ${p.name},`,
       `eine Moderationsentscheidung (Fall ${p.caseId}) wurde als „${p.label}“ gekennzeichnet. Die Inhalte sind gesichert.`,
       p.urgent === 'true'
-        ? 'Gefahr für Leben oder Sicherheit: Bitte informiere unverzüglich die zuständige Stelle ([Platzhalter: zuständige Polizeidienststelle]) nach dem Prozess in docs/06-recht/dsa-prozesse.md.'
-        : 'Bitte prüfe den Fall mit [Platzhalter: Justiziariat der Hochschule] nach dem Prozess in docs/06-recht/dsa-prozesse.md.',
+        ? 'Gefahr für Leben oder Sicherheit: Bitte informiere unverzüglich die zuständige Stelle (Polizeipräsidium Rheinpfalz bzw. Zentrale Meldestelle für strafbare Inhalte im Internet beim BKA – Übungsannahme) nach dem Prozess in docs/06-recht/dsa-prozesse.md.'
+        : 'Bitte prüfe den Fall mit dem Justiziariat der Hochschule (fiktiv: justiziariat@hwg-lu.example) nach dem Prozess in docs/06-recht/dsa-prozesse.md.',
     ],
     action: { label: 'Zur Administration', url: p.link! },
   }),
@@ -336,7 +336,7 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Basis: ${p.basis}. The case was reviewed and decided by a human moderator.`,
       ...(p.appealLink
         ? [
-            `Your options: you can appeal free of charge until ${p.deadline} (DSA Art. 20); another moderator will then review the case again. You can also turn to an out-of-court dispute settlement body ([Placeholder: body under DSA Art. 21]) or the courts.`,
+            `Your options: you can appeal free of charge until ${p.deadline} (DSA Art. 20); another moderator will then review the case again. You can also turn to an out-of-court dispute settlement body under DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fictitious) or the courts.`,
           ]
         : []),
     ],
@@ -352,7 +352,7 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       ...(p.appealLink
         ? [`If you disagree with the result, you can appeal free of charge until ${p.deadline} (DSA Art. 20).`]
         : []),
-      'You can also turn to an out-of-court dispute settlement body ([Placeholder: body under DSA Art. 21]) or the courts. Thank you for helping to keep CampusMarkt safe.',
+      'You can also turn to an out-of-court dispute settlement body under DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fictitious) or the courts. Thank you for helping to keep CampusMarkt safe.',
     ],
     action: p.appealLink ? { label: 'View notice', url: p.appealLink } : undefined,
   }),
@@ -371,7 +371,7 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Hi ${p.name},`,
       `another moderator has reviewed the appeal about ${p.targetPlain ?? p.target}. Result: ${p.outcome}.`,
       `Reasons: ${p.reason}`,
-      'You can turn to an out-of-court dispute settlement body ([Placeholder: body under DSA Art. 21]) or the courts against this decision.',
+      'You can turn to an out-of-court dispute settlement body under DSA Art. 21 (Schlichtungsstelle Digitale Dienste e. V., fictitious) or the courts against this decision.',
     ],
     action: p.link ? { label: 'View notice', url: p.link } : undefined,
   }),
@@ -381,8 +381,8 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `Hi ${p.name},`,
       `a moderation decision (case ${p.caseId}) was flagged as “${p.label}”. The content has been preserved.`,
       p.urgent === 'true'
-        ? 'Threat to life or safety: please inform the competent authority ([Placeholder: competent police station]) without delay, following the process in docs/06-recht/dsa-prozesse.md.'
-        : 'Please review the case with [Placeholder: legal office of the university] following the process in docs/06-recht/dsa-prozesse.md.',
+        ? 'Threat to life or safety: please inform the competent authority (Polizeipräsidium Rheinpfalz or the BKA reporting office for criminal content online – exercise assumption) without delay, following the process in docs/06-recht/dsa-prozesse.md.'
+        : 'Please review the case with the legal office of the university (fictitious: justiziariat@hwg-lu.example) following the process in docs/06-recht/dsa-prozesse.md.',
     ],
     action: { label: 'Go to administration', url: p.link! },
   }),
@@ -412,7 +412,7 @@ interface FooterTexts {
 }
 
 const FOOTER_DE: FooterTexts = {
-  sender: 'CampusMarkt HWG LU – ein Angebot von [Platzhalter: Name der Hochschule]',
+  sender: 'CampusMarkt HWG LU – ein Angebot der Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (fiktive Übungsangaben)',
   imprint: 'Impressum',
   privacy: 'Datenschutz',
   contact: 'Kontakt',
@@ -422,7 +422,7 @@ const FOOTER_DE: FooterTexts = {
 };
 
 const FOOTER_EN: FooterTexts = {
-  sender: 'CampusMarkt HWG LU – a service of [Placeholder: name of the university]',
+  sender: 'CampusMarkt HWG LU – a service of the University of Economics and Society Ludwigshafen (fictitious exercise data)',
   imprint: 'Legal notice',
   privacy: 'Privacy',
   contact: 'Contact',

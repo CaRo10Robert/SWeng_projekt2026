@@ -55,7 +55,7 @@ Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campus
 | `LEGAL_STRICT` | `false` | `true`: Die App startet nicht, solange Rechtstexte Platzhalter enthalten (Pflicht im Echtbetrieb) |
 | `SESSION_TTL_DAYS` | 30 | maximale Sitzungsdauer |
 | `COOKIE_SECURE` | `true` | `Secure`-Attribut des Sitzungscookies |
-| `SEED_DEMO`, `DEMO_MODE` | `true` | Demo-Daten und Demo-Werkzeuge; im Echtbetrieb **false** |
+| `SEED_DEMO`, `DEMO_MODE` | `true` | Demo-Daten und Demo-Werkzeuge; im Echtbetrieb **false**. Mit `SEED_DEMO=true` hebt jeder Start die Demo-Konten auf die aktuelle Fassung der Rechtstexte und legt fehlende Demo-Konten an (Tim bleibt auf der alten Fassung) |
 | `UNSUBSCRIBE_SECRET` | leer | optionaler Override; ohne Wert erzeugt die App beim ersten Start ein zufälliges Geheimnis in `platform.setting` (kein öffentlicher Standardwert) |
 | `SECURITY_CONTACT` | `mailto:security@hwg-lu.example` | Kontakt in `security.txt`; im Echtbetrieb echte Adresse |
 | `JOURNAL_DIR` | `/data/journal` (Volume `journal`) | Ablage des Löschjournals (ADR-0018) |
@@ -65,16 +65,16 @@ Nach dem Start: Web-App unter `http://localhost:8080` (mit Proxy `https://campus
 
 Die IP-Pseudonymisierung braucht keine Variable mehr: Der Schlüssel wird zufällig erzeugt und täglich in der Datenbank rotiert (`platform.ip_pepper`, ADR-0014).
 
-Geheimnisse (Datenbankpasswort, SMTP-Zugang) gehören im Echtbetrieb nicht in `compose.yaml`, sondern in eine `.env`-Datei außerhalb des Repos oder einen Secret-Store [Platzhalter: Verfahren des RZ].
+Geheimnisse (Datenbankpasswort, SMTP-Zugang) gehören im Echtbetrieb nicht in `compose.yaml`, sondern in eine `.env`-Datei außerhalb des Repos oder einen Secret-Store (Verfahren des RZ: age mit Schlüssel im Tresor der Stabsstelle, fiktiv).
 
 ## 4. Rollen
 
 | Rolle | Aufgabe | Im Muster |
 |---|---|---|
-| Betriebsverantwortliche/r | Verfügbarkeit, Updates, Backups | [Platzhalter: RZ-Team] |
-| Rufbereitschaft | nimmt Alarme der Stufe SEV-1/SEV-2 an | [Platzhalter: Bereitschaftsplan, Erreichbarkeit] |
+| Betriebsverantwortliche/r | Verfügbarkeit, Updates, Backups | Team Plattformbetrieb im RZ (fiktiv) |
+| Rufbereitschaft | nimmt Alarme der Stufe SEV-1/SEV-2 an | Bereitschaftsplan des RZ, +49 621 555-0199 (fiktiv) |
 | `security-lead` | Sicherheitsvorfälle, Datenpannen, Pentest | Team |
-| Moderationsleitung | DSA-Prozesse | [Platzhalter] |
+| Moderationsleitung | DSA-Prozesse | Max Moderato (fiktiv) |
 | Administrator/in (App) | Rollen, Wartungsankündigung, DAC7-Auswertung | Rolle `admin` in der App |
 
 ## 5. Regelmäßige Aufgaben
@@ -82,7 +82,7 @@ Geheimnisse (Datenbankpasswort, SMTP-Zugang) gehören im Echtbetrieb nicht in `c
 | Häufigkeit | Aufgabe | Wie |
 |---|---|---|
 | täglich (automatisch) | Fristen löschen, Erinnerungen, Ablauf von Anzeigen | Job-Worker (pg-boss) |
-| täglich | Datensicherung | `node scripts/backup.mjs` per Zeitplan [Platzhalter: Cron/Timer des Hosts] |
+| täglich | Datensicherung | `node scripts/backup.mjs` per Zeitplan (systemd-Timer des Hosts, täglich 02:30 Uhr – Übungswert) |
 | wöchentlich | Abhängigkeits-Updates prüfen und mergen | Renovate-Pull-Requests ([Update-Prozess](update-prozess.md)) |
 | wöchentlich | Alarme und Fehlerrate durchsehen | Prometheus / Alertmanager |
 | monatlich | Restore-Übung auf Testumgebung | [Backup und Restore](backup-restore.md) |
@@ -97,6 +97,7 @@ Geheimnisse (Datenbankpasswort, SMTP-Zugang) gehören im Echtbetrieb nicht in `c
 | `app` wird nicht „healthy“ | Datenbank noch nicht bereit, Migration fehlgeschlagen | `docker compose logs app`; Migrationen laufen beim Start automatisch (REQ-OPS-005) |
 | Port belegt | anderer Dienst auf 8080/8025 | `APP_PORT=8081 docker compose up -d` |
 | keine E-Mails | Mailpit nicht erreichbar | Jobs werden wiederholt (ADR-0005); nach Neustart von Mailpit kommen sie an |
+| Demo-Konto muss nach einem Update den Nutzungsbedingungen zustimmen | Installation ohne `SEED_DEMO=true` gestartet, daher kein Abgleich | mit `SEED_DEMO=true` neu starten oder einmal zustimmen; Tim ist absichtlich der Testfall |
 | alle Anfragen 503 | Wartungsmodus aktiv | weicher Modus: als Administrator in der Admin-Oberfläche ausschalten (Admins sind vom Wartungsmodus ausgenommen); harter Modus: `MAINTENANCE_MODE=false`, Neustart von `app` |
 | Registrierung liefert 429 | Registrierungsgrenze je IP erreicht (Q-18) | eine Stunde warten; im Test Stack neu aufsetzen |
 

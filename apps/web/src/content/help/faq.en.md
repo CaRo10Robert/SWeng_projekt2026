@@ -9,7 +9,7 @@ last_updated: 2026-10-24
 ## Signing up and logging in {#registrieren-und-anmelden}
 
 ### Who can sign up? {#wer-kann-sich-registrieren}
-All students and staff of the university with an address of an approved university domain [Placeholder: e.g. @studmail.hwg-lu.example, @hwg-lu.example]. Private addresses (e.g. free email providers) are not possible.
+All students and staff of the university with an address of an approved university domain (@studmail.hwg-lu.de, @hwg-lu.de). Private addresses (e.g. free email providers) are not possible.
 
 ### The confirmation email does not arrive. What can I do? {#die-bestaetigungsmail-kommt-nicht-an-was-tun}
 1. Wait a few minutes and check the spam folder of your university mailbox.

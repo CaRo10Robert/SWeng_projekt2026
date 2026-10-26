@@ -19,6 +19,11 @@ env:
   PROMETHEUS_IMAGE: prom/prometheus:v3.15.0 # renovate: datasource=docker
   ALERTMANAGER_IMAGE: prom/alertmanager:v0.34.1 # renovate: datasource=docker
   RENOVATE_VERSION: 44.145.1 # renovate: datasource=npm depName=renovate
+  # Sicherheitsscans (CTRL-CI-SCAN, REQ-SEC-008) und Workflow-Prüfung
+  SEMGREP_IMAGE: returntocorp/semgrep:1.179.0 # renovate: datasource=docker
+  GITLEAKS_IMAGE: zricethezav/gitleaks:v8.30.1 # renovate: datasource=docker
+  TRIVY_IMAGE: aquasec/trivy:0.75.0 # renovate: datasource=docker
+  ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12 # renovate: datasource=docker
 
 jobs:
   checks:
@@ -34,7 +39,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @campusmarkt/contracts build
       - run: pnpm typecheck
-      - run: pnpm test
+      - name: Unit-Tests mit Coverage-Schwellen (CTRL-COVERAGE, REQ-MAINT-001)
+        run: pnpm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-server
+          path: apps/server/coverage
+          retention-days: 14
       - run: pnpm lint:deps
       - name: Übersetzungen Deutsch/Englisch (REQ-UX-007, ADR-0016)
         run: |
@@ -78,6 +90,8 @@ jobs:
         run: docker run --rm --entrypoint amtool -v "$PWD/ops/alertmanager:/a:ro" "$ALERTMANAGER_IMAGE" check-config /a/alertmanager.yml
       - name: Renovate-Konfiguration (CTRL-RENOVATE)
         run: npx -y -p "renovate@$RENOVATE_VERSION" renovate-config-validator --strict
+      - name: Workflows prüfen (actionlint)
+        run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
       - name: Image-Versionen in CI und compose.yaml gleich
         run: |
           for image in "$CADDY_IMAGE" "$PROMETHEUS_IMAGE" "$ALERTMANAGER_IMAGE"; do
@@ -142,4 +156,77 @@ jobs:
         with:
           name: playwright-report
           path: e2e/playwright-report
+          retention-days: 7
+
+  security-scans:
+    name: Sicherheitsscans – SAST, SCA, Secrets, Image, SBOM (CTRL-CI-SCAN)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Secret-Scan über die gesamte Historie
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Secret-Scan (gitleaks, Ausnahmen in .gitleaks.toml)
+        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --config /repo/.gitleaks.toml --redact --no-banner
+      - name: SAST (Semgrep, Regeln JavaScript/TypeScript/OWASP Top 10, Ausnahmen in .semgrepignore)
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src "$SEMGREP_IMAGE" semgrep scan \
+            --config p/javascript --config p/typescript --config p/owasp-top-ten \
+            --severity ERROR --severity WARNING --metrics off --error \
+            --sarif --output semgrep.sarif \
+            apps/server/src apps/web/src packages scripts
+      - name: SCA (pnpm audit, hoch und kritisch)
+        run: pnpm audit --audit-level high
+      - name: Image bauen
+        run: docker build -f docker/Dockerfile -t campusmarkt:scan .
+      - name: Image-Scan (Trivy, hoch und kritisch, Ausnahmen in .trivyignore)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/w" -w /w "$TRIVY_IMAGE" image \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --ignorefile /w/.trivyignore \
+            --no-progress campusmarkt:scan
+      - name: SBOM im CycloneDX-Format
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/w" -w /w "$TRIVY_IMAGE" image \
+            --format cyclonedx --output /w/sbom.cdx.json --no-progress campusmarkt:scan
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            sbom.cdx.json
+            semgrep.sarif
+          retention-days: 30
+
+  multiarch:
+    name: Multi-Arch-Image amd64 und arm64 (CTRL-CI-MULTIARCH, REQ-PORT-002)
+    runs-on: ubuntu-24.04
+    needs: checks
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Images für beide Plattformen bauen
+        run: |
+          for arch in amd64 arm64; do
+            docker buildx build --platform "linux/$arch" -f docker/Dockerfile -t "campusmarkt:$arch" --load .
+            docker save "campusmarkt:$arch" | gzip > "campusmarkt-$arch.tar.gz"
+          done
+          ls -lh campusmarkt-*.tar.gz
+      - name: arm64-Image unter QEMU starten, bis „healthy“ (Smoke gegen amd64 im Job compose)
+        run: |
+          docker tag campusmarkt:arm64 campusmarkt:local
+          docker compose up -d --no-build --wait --wait-timeout 600
+          curl -fsS http://localhost:8080/health/ready
+          docker inspect -f '{{.Architecture}}' campusmarkt:local | grep -qx arm64
+      - name: Logs bei Fehler
+        if: failure()
+        run: docker compose logs --no-color app | tail -200
+      - uses: actions/upload-artifact@v4
+        with:
+          name: campusmarkt-image-multiarch
+          path: campusmarkt-*.tar.gz
           retention-days: 7

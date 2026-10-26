@@ -167,6 +167,17 @@ for (let i = 0; i < 6; i++) {
   loginStatuses.push((await anon.call('POST', '/auth/login', { email: `niemand.${TS}@studmail.hwg-lu.de`, password: 'falsch-falsch-falsch' })).status);
 }
 check('[AT-SEC-005] 5 Fehlversuche, die 6. Anmeldung → 429', loginStatuses.join() === '401,401,401,401,401,429', loginStatuses);
+// Upload-Quote je Mitglied: 100 Bilder je Stunde, danach 429 (ASVS 12.1.3, Pentest PT-UP-07)
+const jonas = await login('jonas.weber@hwg-lu.de');
+const eightPngs = () => {
+  const form = new FormData();
+  for (let i = 0; i < 8; i++) form.append('files', new Blob([png], { type: 'image/png' }), `foto${i}.png`);
+  return form;
+};
+const quotaStatuses = [];
+for (let i = 0; i < 13; i++) quotaStatuses.push((await jonas.call('POST', '/uploads', eightPngs())).status);
+check('[AT-SEC-005] Upload-Quote: nach 100 Bildern je Stunde → 429',
+  quotaStatuses.slice(0, 12).every((st) => st === 201) && quotaStatuses[12] === 429, quotaStatuses.join(','));
 
 // Nur verifizierte Nutzer dürfen anbieten (REQ-SEC-011, Fallstudie FS-C4)
 const unverifiedEmail = `unbestaetigt.${TS}@studmail.hwg-lu.de`;
@@ -306,6 +317,19 @@ check('[AT-CHAT-011] Anbieter reserviert aus der Konversation, Anzeige reservier
 check('[AT-CHAT-011-2] Interessent darf den Deal nicht steuern', buyerDeal.status === 403);
 check('[AT-SEC-006] Autorisierung: fremde Konversation 404, Mitglied auf Moderation 403, Interessent auf Deal 403',
   foreignConv.status === 404 && memberQueue.status === 403 && buyerDeal.status === 403);
+// Bilder einer Anzeige in Prüfung (Wortfilter) sind auch bei bekannter Bild-ID nur für Anbieter und Moderation abrufbar
+const heldUpload = await user.call('POST', '/uploads', pngForm());
+const heldImageId = heldUpload.data?.uploads?.[0]?.id;
+const held = await user.call('POST', '/listings', listingBody({ title: 'Verkaufe Klausurlösungen mit Bild', description: 'Klausurlösungen, Foto anbei.', imageIds: heldImageId ? [heldImageId] : [] }));
+let heldOwnerMedia = 0;
+for (let i = 0; i < 40 && heldOwnerMedia !== 200; i++) {
+  heldOwnerMedia = (await user.call('GET', `/media/${heldImageId}/sm`)).status;
+  if (heldOwnerMedia !== 200) await sleep(500);
+}
+const heldForeignMedia = (await ben.call('GET', `/media/${heldImageId}/sm`)).status;
+check('[AT-SEC-006] Autorisierung: Bild einer Anzeige in Prüfung nur für Anbieter (fremd 404)',
+  held.data?.status === 'in_review' && heldOwnerMedia === 200 && heldForeignMedia === 404,
+  { status: held.data?.status, owner: heldOwnerMedia, foreign: heldForeignMedia });
 
 // ------------------------------------------------------------------ Kontaktfreigabe (REQ-CHAT-010, Fallstudie FS-C1)
 const contactOf = async (s, id) => (await s.call('GET', `/conversations/${id}`)).data.contact;
@@ -317,6 +341,7 @@ const leaViewBoth = await contactOf(lea, convId);
 const exchanged = userGrant.data?.counterpartEmail === 'lea@studmail.hwg-lu.de' && leaViewBoth.counterpartEmail === email;
 const msgs = (await lea.call('GET', `/conversations/${convId}/messages`)).data;
 const systemMsg = msgs.find((m) => m.kind === 'system' && m.body.includes('Kontaktdaten wurden ausgetauscht'));
+check('Systemnachricht trägt einen Code für die Übersetzung (MAN-UX-002 T-2)', systemMsg?.systemCode === 'contact_exchanged', systemMsg);
 const leaWithdraw = await lea.call('POST', `/conversations/${convId}/contact`, { action: 'withdraw' });
 const userAfterWithdraw = await contactOf(user, convId);
 const leaRegrant = await lea.call('POST', `/conversations/${convId}/contact`, { action: 'grant' });
@@ -701,6 +726,25 @@ try {
   const off = await admin.call('PUT', '/admin/maintenance', { on: false });
   check('Wartungsmodus wieder aus', off.status === 200 && off.data.maintenance.active === false && (await fetch(`${BASE}/`)).status === 200);
 }
+
+// Request-ID vom Client nur als UUID übernehmen (MAN-OPS-002, P-1)
+const foreignId = await fetch(`${API}/meta`, { headers: { 'x-request-id': 'max@studmail.hwg-lu.de' } });
+const uuidId = crypto.randomUUID();
+const ownId = await fetch(`${API}/meta`, { headers: { 'x-request-id': uuidId } });
+check('Request-ID: fremder Text wird ersetzt, UUID übernommen (MAN-OPS-002 P-1)',
+  !foreignId.headers.get('x-request-id')?.includes('@') && ownId.headers.get('x-request-id') === uuidId);
+
+// Notfall: alle Sitzungen beenden (Incident-Prozess, T-2); ohne erzwungenen Passwortwechsel, damit die Demo-Konten nutzbar bleiben
+const memberEnd = await lea.call('POST', '/admin/security/end-sessions', { forcePasswordChange: false });
+const endAll = await admin.call('POST', '/admin/security/end-sessions', { forcePasswordChange: false });
+const leaAfterEnd = await lea.call('GET', '/me');
+const adminAfterEnd = await admin.call('GET', '/me');
+const adminAgain = await login('admin@hwg-lu.de');
+const endAudit = (await adminAgain.call('GET', '/admin/audit')).data ?? [];
+check('Notfall: Admin beendet alle Sitzungen (Mitglied 403), danach 401 für alle, Eintrag im Audit-Log',
+  memberEnd.status === 403 && endAll.status === 200 && endAll.data.sessions >= 2 && endAll.data.accounts === 0 &&
+  leaAfterEnd.status === 401 && adminAfterEnd.status === 401 && endAudit.some((a) => a.action === 'security.end_all_sessions'),
+  [memberEnd.status, endAll.status, endAll.data, leaAfterEnd.status, adminAfterEnd.status]);
 
 check('[AT-ARCH-005] Alle Smoke-Prüfungen gegen das Docker-Beispiel bestanden', failures === 0, `${failures} Fehler`);
 console.log(failures ? `\n${failures} Prüfung(en) fehlgeschlagen` : '\nAlle Prüfungen bestanden');

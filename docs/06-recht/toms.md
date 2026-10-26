@@ -10,7 +10,7 @@ last_updated: 2026-10-25
 
 # Technische und organisatorische Maßnahmen (Art. 32 DSGVO)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Datenschutzbeauftragten der Hochschule zu prüfen.** Anforderung: REQ-LEGAL-011.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich (Q-28).** Anforderung: REQ-LEGAL-011.
 
 Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiels ([Architektur](../03-architektur/architektur.md)). Spalte „Stand“:
 - **umgesetzt**: im Code bzw. Docker-Beispiel vorhanden und geprüft.
@@ -36,7 +36,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 | Bilder ohne Metadaten | Neukodierung entfernt EXIF/GPS | REQ-SEC-007 | umgesetzt |
 | Transportverschlüsselung | TLS ≥ 1.2 und HSTS am Reverse Proxy | REQ-OPS-009 | im Beispiel (Profil `proxy`, interne CA) |
 | Verschlüsselung der Datensicherungen | Backup-Archive verschlüsselt ablegen | REQ-AVAIL-003 | Echtbetrieb |
-| Zugriff auf Server | Anmeldung nur mit persönlichem Konto und zweitem Faktor; kein gemeinsamer Admin-Zugang | – | Echtbetrieb [Platzhalter: RZ-Richtlinie] |
+| Zugriff auf Server | Anmeldung nur mit persönlichem Konto und zweitem Faktor; kein gemeinsamer Admin-Zugang | – | Echtbetrieb (RZ-Richtlinie „Serverzugang“, fiktiv) |
 
 ## 2. Integrität
 
@@ -79,7 +79,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 
 ## 6. Organisatorische Maßnahmen
 
-- Verpflichtung der Moderatorinnen, Moderatoren und Administratoren auf Vertraulichkeit [Platzhalter: Verpflichtungserklärung der Hochschule].
+- Verpflichtung der Moderatorinnen, Moderatoren und Administratoren auf Vertraulichkeit (Verpflichtungserklärung der Hochschule, Formular DS-07, fiktiv).
 - Schulung zu Moderation, DSA-Begründungen und Datenpannen vor Rollenvergabe.
 - Rollen nach dem Prinzip der minimalen Rechte; jährliche Überprüfung der Rollenliste.
 - Meldeweg für Datenpannen ([Prozess](datenpannen-prozess.md)) und Sicherheitslücken (`/.well-known/security.txt`, REQ-SEC-012).

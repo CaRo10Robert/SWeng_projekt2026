@@ -16,6 +16,8 @@ export interface OpsOptions {
   checkMail(): Promise<boolean>;
   /** Wie lange ein Ergebnis der Statusprüfung gilt (REQ-OPS-007: ≤ 60 s alt). */
   statusCacheMs?: number;
+  /** Nach einem Lesefehler so lange den letzten bekannten Wartungszustand nutzen. */
+  failureBackoffMs?: number;
 }
 
 /** Ankündigung nur im angegebenen Zeitraum sichtbar. Reine Funktion. */
@@ -33,10 +35,24 @@ export function createOps(options: OpsOptions) {
   // Laufende Prüfung teilen: viele gleichzeitige Abrufe erzeugen nur eine DB- und eine SMTP-Prüfung (RV-A-11)
   let inFlight: Promise<{ at: number; db: boolean; mail: boolean }> | null = null;
 
+  // Bei Datenbankausfall den letzten bekannten Zustand nutzen und die Datenbank kurz in Ruhe lassen, damit nicht jede
+  // Anfrage auf den Verbindungs-Timeout wartet (MAN-OPS-011, Befund B-1). Im Normalbetrieb wird nichts zwischengespeichert.
+  let lastKnown: MaintenanceState = { active: false, until: null, source: null };
+  let failedAt = 0;
+  const FAILURE_BACKOFF_MS = options.failureBackoffMs ?? 5_000;
+
   async function maintenance(): Promise<MaintenanceState> {
     if (options.maintenanceFromEnv) return { active: true, until: options.maintenanceUntilFromEnv, source: 'env' };
-    const value = await options.settings.get<{ on: boolean; until: string | null }>(SETTING.maintenance);
-    return value?.on ? { active: true, until: value.until ?? null, source: 'setting' } : { active: false, until: null, source: null };
+    if (Date.now() - failedAt < FAILURE_BACKOFF_MS) return lastKnown;
+    try {
+      const value = await options.settings.get<{ on: boolean; until: string | null }>(SETTING.maintenance);
+      failedAt = 0;
+      lastKnown = value?.on ? { active: true, until: value.until ?? null, source: 'setting' } : { active: false, until: null, source: null };
+      return lastKnown;
+    } catch {
+      failedAt = Date.now();
+      return lastKnown;
+    }
   }
 
   async function announcement(): Promise<Announcement | null> {

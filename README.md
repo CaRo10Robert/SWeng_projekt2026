@@ -37,6 +37,8 @@ Passwort für alle Konten: `CampusMarkt-Demo-2026`
 | `mod@hwg-lu.de` | Moderator | Moderations-Queue: Meldung + vom Wortfilter angehaltene Anzeige |
 | `admin@hwg-lu.de` | Admin | Rollen, Audit-Log, Jobs/Dead-Letter-Queue, „Fällige Jobs jetzt ausführen“ |
 
+**Neue Fassung der Rechtstexte:** Bei jedem Start im Demo-Modus (`SEED_DEMO=true`) werden die Demo-Konten auf die aktuelle Fassung der Nutzungsbedingungen und der Datenschutzerklärung gehoben, und fehlende Demo-Konten werden angelegt (ohne Anzeigen und Chats). Eine neue Version blockiert die Demo-Konten nach einem Update deshalb nicht. Tim bleibt bewusst auf der alten Fassung, damit sich die erneute Zustimmung vorführen lässt.
+
 Eigene Registrierung: Mit einer beliebigen Adresse `…@studmail.hwg-lu.de` oder `…@hwg-lu.de` registrieren. Die Bestätigungsmail erscheint in Mailpit, sie verlässt den Rechner nicht.
 
 ### Konfiguration

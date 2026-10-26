@@ -128,6 +128,8 @@ Der Code ist mit Commit `6e6fe40` korrigiert, die Dokumentation mit diesem Revie
 
 ## Offene Prüfpunkte für Justiziariat, DSB und Steuerabteilung
 
+> **Durch Übungsannahmen Q-28 ersetzt (2026-10-25).** Der Auftraggeber hat festgelegt, dass ein Real-World-Szenario mit fiktiven, nicht rechtsverbindlichen Werten genügt. Jeder Punkt der Tabelle ist im [Entscheidungslog](../02-anforderungen/05-entscheidungen.md#übungsannahmen-zu-q-28) als Annahme A-1 … A-22 festgelegt; die DSFA liegt als Übung vor ([DSFA](../06-recht/dsfa.md)).
+
 | Punkt | Zuständig | Wo dokumentiert |
 |---|---|---|
 | Anwendbarkeit des DSA auf ein kostenloses Angebot einer öffentlichen Stelle (Entgeltlichkeit); davon hängt lit. c oder lit. e als Rechtsgrundlage ab | Justiziariat | Abgleich §3, `dsa-prozesse.md`, Rechtskataster, Datenschutzerklärung |

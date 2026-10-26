@@ -1,3 +1,4 @@
+import type { SystemCode } from '@campusmarkt/contracts';
 const LINK = /\b(https?:\/\/|www\.)\S+/i;
 const IBAN = /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){3,7}(?:\s?[A-Z0-9]{1,3})?\b/i;
 const PHONE = /(?:\+|00)\d{2}[\s/-]?\d{2,5}[\s/-]?\d{3,}|\b0\d{2,5}[\s/-]?\d{4,}/;
@@ -95,4 +96,52 @@ export function decideContactAction(action: ContactAction, ctx: ContactContext):
   // decline: nur eine offene Anfrage des Gegenübers kann abgelehnt werden
   if (view.theirs !== 'granted' || view.mine === 'granted') return { ok: false, code: 'invalid_contact_action' };
   return { ok: true, set: 'theirs', state: 'declined', countsAsRequest: false, exchanged: false };
+}
+
+// ------------------------------------------------------------------ Systemnachrichten (ADR-0016, MAN-UX-002 T-2)
+
+/** Deutscher Klartext je Code: steht in body (Export, Moderation, ältere Clients); der Client übersetzt per Code. */
+export const SYSTEM_TEXT: Record<SystemCode, string> = {
+  contact_exchanged: 'Kontaktdaten wurden ausgetauscht. Ihr seht die Hochschul-E-Mail-Adresse des anderen oben im Chat.',
+  deal_reserved: 'Die Anzeige wurde für dich reserviert.',
+  deal_completed: 'Die Anzeige wurde als an dich abgegeben markiert.',
+  deal_cancelled: 'Die Reservierung wurde aufgehoben.',
+  message_removed: '[Nachricht wurde von der Moderation entfernt]',
+  message_deleted: '[Nachricht gelöscht – Konto des Absenders wurde gelöscht]',
+};
+
+// ------------------------------------------------------------------ Domain Events (ADR-0006, MAN-ARCH-001 B-2)
+
+export type DealEventType = 'DealAgreed' | 'DealCompleted' | 'DealCancelled';
+
+export interface DealEventSource {
+  id: string;
+  listing_id: string;
+  seller_id: string;
+  buyer_id: string;
+  agreed_price_cents: number | null;
+  currency: string;
+  status: string;
+  created_at: string;
+}
+
+/**
+ * Jedes Ereignis trägt eine eigene eventId (UUID): Ein späterer Konsument (payments) erkennt Wiederholungen der Queue
+ * daran und verarbeitet idempotent; dealId allein reicht nicht, weil ein Deal mehrere Ereignisse erzeugt.
+ */
+export function dealEvent(type: DealEventType, deal: DealEventSource, newId: () => string, now: Date = new Date()) {
+  return {
+    eventId: newId(),
+    type,
+    occurredAt: now.toISOString(),
+    id: deal.id,
+    dealId: deal.id,
+    listingId: deal.listing_id,
+    sellerId: deal.seller_id,
+    buyerId: deal.buyer_id,
+    agreedPriceCents: deal.agreed_price_cents,
+    currency: deal.currency.trim(),
+    status: deal.status,
+    createdAt: deal.created_at,
+  };
 }

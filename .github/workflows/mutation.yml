@@ -1,0 +1,33 @@
+# Mutationstests der Geschäftsregeln (CTRL-MUTATION, REQ-MAINT-001): wöchentlich und auf Anforderung,
+# nicht bei jedem Push, weil ein Lauf deutlich länger dauert als die Unit-Tests.
+name: Mutation
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # montags 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: StrykerJS auf domain.ts (Schwelle 60 %)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @campusmarkt/contracts build
+      - run: pnpm --filter @campusmarkt/server test:mutation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: apps/server/reports/mutation
+          retention-days: 30

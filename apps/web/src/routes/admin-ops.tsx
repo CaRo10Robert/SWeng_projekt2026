@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useDac7, useEvidenceHolds, useReleaseHold, dac7CsvUrl } from '../api/trust';
-import { useSetAnnouncement, useSetMaintenance, useSystemStatus } from '../api/ops';
+import { useEndAllSessions, useSetAnnouncement, useSetMaintenance, useSystemStatus } from '../api/ops';
 import { ApiError, errorMessage } from '../api/client';
-import { Alert, Badge, Button, buttonClass, EmptyState, Field, FormError, Loading, Select, TextArea } from '../components/ui';
+import { Alert, Badge, Button, buttonClass, Checkbox, EmptyState, Field, FormError, Loading, Select, TextArea } from '../components/ui';
 import { formatDateTime, formatMoney } from '../lib/format';
 import { targetLabels } from '../lib/dsa';
 import { t } from '../i18n';
@@ -173,7 +173,45 @@ export function Operations() {
           </div>
         </form>
       </section>
+
+      <EndAllSessions />
     </div>
+  );
+}
+
+/** Notfall nach einem Sicherheitsvorfall (docs/07-betrieb/incident-prozess.md); bewusst zweistufig. */
+function EndAllSessions() {
+  const end = useEndAllSessions();
+  const [force, setForce] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
+  return (
+    <section aria-labelledby="ops-security" className="space-y-3 lg:col-span-2">
+      <h3 id="ops-security" className="text-lg font-semibold">
+        {t('ops.security.title')}
+      </h3>
+      <p className="text-sm text-slate-700">{t('ops.security.text')}</p>
+      <Checkbox label={t('ops.security.force')} checked={force} onChange={(e) => setForce(e.target.checked)} />
+      <Checkbox label={t('ops.security.confirm')} checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+      <div aria-live="polite">
+        <FormError error={end.isError ? errorMessage(end.error) : null} />
+        {end.data && <Alert tone="success">{t('ops.security.done', end.data)}</Alert>}
+      </div>
+      <Button
+        variant="danger"
+        busy={end.isPending}
+        disabled={!confirmed}
+        onClick={() =>
+          end.mutate(
+            { forcePasswordChange: force },
+            // Die eigene Sitzung ist beendet: zur Anmeldung
+            { onSuccess: () => window.setTimeout(() => window.location.assign('/login'), 2_000) },
+          )
+        }
+      >
+        {t('ops.security.submit')}
+      </Button>
+    </section>
   );
 }
 

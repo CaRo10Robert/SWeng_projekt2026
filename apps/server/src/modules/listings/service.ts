@@ -13,7 +13,7 @@ import type {
   UpdateListingBody,
 } from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
-import { AppError, conflict, forbidden, notFound, unprocessable } from '../../platform/errors.js';
+import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
@@ -29,6 +29,7 @@ import {
   nextStatus,
   PUBLIC_STATUSES,
   sniffImageType,
+  UPLOAD_QUOTA,
 } from './domain.js';
 
 export const PROCESS_IMAGE = 'process-image';
@@ -86,8 +87,11 @@ export const toCard = (r: ListingRow): ListingCard => ({
   expiresAt: r.expires_at,
 });
 
+
+/** Bilder dieser Anzeigen sind für andere Mitglieder nicht abrufbar (Pentest PT-AC-11). */
+const MEDIA_HIDDEN_STATUSES: ListingRow['status'][] = ['in_review', 'removed'];
 export function createListingsService(deps: ModuleDeps) {
-  const { database, storage, modules } = deps;
+  const { database, storage, modules, rateLimit } = deps;
   const { db } = database;
 
   async function load(id: string, tx?: Tx) {
@@ -450,6 +454,11 @@ export function createListingsService(deps: ModuleDeps) {
           throw new AppError(415, 'heic_unsupported', 'HEIC wird noch nicht unterstützt. Bitte das Foto als JPEG speichern.');
         }
       }
+      // Quote je Mitglied gegen das Füllen des Speichers (ASVS 12.1.3, Pentest PT-UP-07); zählt jedes Bild
+      for (let i = 0; i < files.length; i++) {
+        const quota = await rateLimit.hit(`upload:${auth.userId}`, UPLOAD_QUOTA.limit, UPLOAD_QUOTA.windowSeconds);
+        if (!quota.allowed) throw rateLimited(quota.retryAfterSeconds);
+      }
       for (const file of files) {
         const id = randomUUID();
         const key = `quarantine/${id}`;
@@ -462,12 +471,15 @@ export function createListingsService(deps: ModuleDeps) {
     },
 
     async media(viewer: AuthContext, imageId: string, size: keyof typeof IMAGE_SIZES): Promise<Buffer> {
-      const row = await db.one<ImageRow & { listing_status: ListingRow['status']; owner: string; hidden: boolean }>(sql`
-        SELECT i.*, l.status AS listing_status, l.owner_id AS owner, l.hidden
+      const row = await db.one<ImageRow & { listing_status: ListingRow['status']; owner: string; hidden: boolean; owner_suspended: boolean }>(sql`
+        SELECT i.*, l.status AS listing_status, l.owner_id AS owner, l.hidden, l.owner_suspended
         FROM listings.image i JOIN listings.listing l ON l.id = i.listing_id
         WHERE i.id = ${imageId} AND i.status = 'ready'`);
       if (!row || row.listing_status === 'deleted') throw notFound();
-      const mayView = row.owner === viewer.userId || viewer.role !== 'member' || (!row.hidden && row.listing_status !== 'removed');
+      // Wie die Anzeige selbst: in Prüfung, entfernt, ausgeblendet oder gesperrt nur für Anbieter und Moderation.
+      // Reservierte, abgegebene und abgelaufene Anzeigen bleiben sichtbar (Vorschaubild in Konversationen).
+      const mayView = row.owner === viewer.userId || viewer.role !== 'member' ||
+        (!row.hidden && !row.owner_suspended && !MEDIA_HIDDEN_STATUSES.includes(row.listing_status));
       if (!mayView) throw notFound();
       const data = await storage.get(`public/${row.listing_id}/${row.id}-${size}.webp`);
       if (!data) throw notFound();
@@ -518,13 +530,19 @@ export function createListingsService(deps: ModuleDeps) {
       stats.expired = await db.exec(sql`
         UPDATE listings.listing SET status = 'expired', status_changed_at = now()
         WHERE status = 'active' AND expires_at < now()`);
+      // Pausierte Anzeigen laufen nach 90 Tagen Pause ab (REQ-PRIV-003, Zustandsmodell)
+      stats.pausedExpired = await db.exec(sql`
+        UPDATE listings.listing SET status = 'expired', status_changed_at = now()
+        WHERE status = 'paused' AND status_changed_at < now() - interval '90 days'`);
       // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell); gesicherte Anzeigen
       // (Verdacht auf Straftat, REQ-LEGAL-008) bleiben bis zur Freigabe erhalten
       const held = await modules.trust.heldTargetIds('listing');
       const purge = await db.query<{ id: string }>(sql`
         UPDATE listings.listing SET status = 'deleted', status_changed_at = now()
         WHERE ((status = 'expired' AND status_changed_at < now() - interval '90 days')
-           OR (status = 'completed' AND status_changed_at < now() - interval '30 days'))
+           OR (status = 'completed' AND status_changed_at < now() - interval '30 days')
+           -- von der Moderation entfernt: 12 Monate nach der Entscheidung (REQ-PRIV-003)
+           OR (status = 'removed' AND status_changed_at < now() - interval '12 months'))
           AND id <> ALL(${held}::uuid[])
         RETURNING id`);
       stats.purged = purge.length;

@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: DDG § 5, DSGVO Art. 12, Q-23
 depends_on: [REQ-LEGAL-001, REQ-NOTI-001]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-UX-006, AT-UX-006-2]
@@ -30,7 +30,7 @@ Jede Seite des Systems (auch Anmeldung, Registrierung, Fehler- und Wartungsseite
 | Ort | Pflichtlinks |
 |---|---|
 | Seitenfuß jeder Route | Impressum, Datenschutz, Nutzungsbedingungen, Barrierefreiheit, Kontakt, Hilfe |
-| Fußzeile jeder E-Mail-Vorlage | Absender `[Platzhalter: Name der Hochschule]`, Impressum, Datenschutz; bei Benachrichtigungen zusätzlich Abmeldelink (REQ-NOTI-003) |
+| Fußzeile jeder E-Mail-Vorlage | Absender „CampusMarkt – Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU)“, Impressum, Datenschutz; bei Benachrichtigungen zusätzlich Abmeldelink (REQ-NOTI-003) |
 
 Links sind per Tastatur erreichbar und haben eindeutige Namen (REQ-A11Y-001).
 
@@ -50,3 +50,4 @@ Links sind per Tastatur erreichbar und haben eindeutige Namen (REQ-A11Y-001).
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-UX-006, AT-UX-006-2 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

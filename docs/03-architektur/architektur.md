@@ -1024,7 +1024,7 @@ flowchart LR
 | Löschjournal | intern (nur IDs) | platform, Volume `journal` | 35 Tage, außerhalb der Datenbank (ADR-0018) |
 | Anwendungs-Logs | intern, **ohne PII** | – | Container-Logs, nicht persistiert |
 | Widersprüche | vertraulich | trust | wie Moderationsentscheidungen, Fristen geplant B-12 |
-| DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach PStTG (vom DSB zu prüfen), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
+| DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach § 22 PStTG (Übungswert, Q-28), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
 | Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: alle der letzten 7 Tage, danach je Woche die neueste; gelöschte Konten verschwinden nach ≤ 28 Tagen auch aus Sicherungen (ADR-0018) |
 | Einstellungen, Ankündigung | intern | platform | bis zur Änderung |
 | Sprachwahl | intern | identity (`user.locale`) bzw. Browser (`cm_locale`, nur auf Wunsch) | mit dem Konto bzw. durch Nutzer löschbar |
@@ -1074,7 +1074,8 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 ### 8.8 Rechtliche Inhalte und Versionierung (ADR-0015)
 - **Eine Quelle:** Rechtstexte und Hilfe liegen als Markdown in `apps/web/src/content/`. Die Doku in `docs/06-recht/` verlinkt sie nur. Die Version der Nutzungsbedingungen erreicht den Server über `legal-manifest.json`. Eine abweichende Zustimmung erzwingt die erneute Zustimmung vor schreibenden Aktionen (REQ-LEGAL-003).
 - **Erreichbarkeit:** Alle Rechtsseiten sind öffentlich, von jeder Seite über den Footer mit einem Klick erreichbar und aus jeder E-Mail verlinkt (REQ-UX-006). Sie bleiben auch im Wartungsmodus erreichbar.
-- **Platzhalter:** Format `[Platzhalter: …]` plus Muster-Hinweis (`sample: true`). `LEGAL_STRICT=true` verhindert im Echtbetrieb den Start mit Platzhaltern (Risiko R-11).
+- **Platzhalter und Übungswerte:** Betreiberangaben sind fiktive Übungswerte (Q-28); das Format `[Platzhalter: …]` wird weiter gezählt, falls es wieder vorkommt. Der Muster-Hinweis (`sample`) bleibt. `LEGAL_STRICT=true` verhindert im Echtbetrieb den Start, solange Muster oder Platzhalter enthalten sind (Risiko R-11).
+- **Neue Fassung im Demo-Modus:** Mit `SEED_DEMO=true` hebt der Start (`syncDemoLegalVersions` in `seed/seed.ts`, über das API von `identity`) alle Demo-Konten auf die aktuelle Fassung von Nutzungsbedingungen und Datenschutzerklärung und legt fehlende Demo-Konten an. Ausgenommen ist das Testkonto Tim mit fest alter Fassung. Echte Konten stimmen immer selbst zu.
 - **Sicherheit:** kein HTML im Markdown, keine `javascript:`-Links, kein `dangerouslySetInnerHTML`; die CSP bleibt unverändert.
 - **Kein Cookie-Banner (Q-24, REQ-LEGAL-010):** Es gibt nur das Sitzungscookie und – auf ausdrücklichen Wunsch – die Sprachwahl im Browser. Beides ist nach TDDDG § 25 Abs. 2 Nr. 2 einwilligungsfrei und in der Datenschutzerklärung aufgeführt. Jede weitere Speicherung auf dem Endgerät braucht vorher eine Einwilligung. Ein E2E-Test prüft, dass nach den Kernabläufen keine weiteren Cookies oder Speichereinträge entstehen (Erweiterung von AT-PRIV-006).
 
@@ -1209,7 +1210,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | VVT | Verzeichnis von Verarbeitungstätigkeiten nach Art. 30 DSGVO |
 | TOMs | Technische und organisatorische Maßnahmen nach Art. 32 DSGVO |
 | DAC7 / PStTG | EU-Richtlinie 2021/514 bzw. deutsches Plattformen-Steuertransparenzgesetz: Meldepflicht von Plattformen für Verkäufer ab bestimmten Schwellen |
-| Platzhalter | Kennzeichnung `[Platzhalter: …]` für Betreiberdaten, die in der Übung nicht real sind |
+| Platzhalter, Übungswert | Kennzeichnung nicht realer Betreiberdaten: früher `[Platzhalter: …]`, seit Q-28 erkennbar fiktive Werte (Musternamen, „(fiktiv)“, Domain `.example`) |
 | Wartungsmodus | Betriebszustand, in dem die Anwendung Anfragen mit 503 und `Retry-After` beantwortet; Rechtsseiten und Status bleiben erreichbar |
 | Statusseite | Öffentliche Seite mit dem Betriebszustand ohne interne Details |
 | Reverse Proxy | Vorgeschalteter Server, der TLS beendet und Anfragen an die Anwendung weiterleitet (hier Caddy) |

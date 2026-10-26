@@ -10,9 +10,9 @@ last_updated: 2026-10-25
 
 # Schwellwertanalyse zur Datenschutz-Folgenabschätzung (Art. 35 DSGVO)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Datenschutzbeauftragten der Hochschule zu prüfen.** Anforderung: REQ-PRIV-007.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich (Q-28).** Anforderung: REQ-PRIV-007.
 
-Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschätzung (DSFA) nötig ist. Grundlage sind Art. 35 Abs. 1 und 3 DSGVO, die Kriterien der Leitlinien der Artikel-29-Gruppe (WP 248) und die DSFA-Muss-Liste der deutschen Aufsichtsbehörden [Platzhalter: aktuelle Fassung der Liste der LfDI RLP prüfen].
+Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschätzung (DSFA) nötig ist. Grundlage sind Art. 35 Abs. 1 und 3 DSGVO, die Kriterien der Leitlinien der Artikel-29-Gruppe (WP 248) und die DSFA-Muss-Liste der deutschen Aufsichtsbehörden (Übungsannahme Q-28: Fassung 2026 der Liste der LfDI RLP).
 
 ## Prüfung nach Art. 35 Abs. 3
 
@@ -30,7 +30,7 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 | 2. automatisierte Entscheidung mit Rechtswirkung | nein | Wortfilter setzt nur „in Prüfung“; ein Mensch entscheidet |
 | 3. systematische Überwachung | nein | kein Tracking; Request-Logs ohne IP-Adresse und ohne Query-Werte; Rate-Limit-Zähler nur mit HMAC-Pseudonymen (Schlüssel täglich neu); keine Auswertung von Nutzungsverhalten |
 | 4. vertrauliche oder höchstpersönliche Daten | **ja** (neu bewertet, Review v1.3 RV-R-16) | Chatnachrichten sind private Kommunikation zwischen Mitgliedern; die Moderation liest bei Meldungen Ausschnitte und im Widerspruch Originaltexte entfernter Nachrichten, bei Straftatverdacht wird eine Kopie gesichert |
-| 5. Verarbeitung in großem Umfang | nein | eine Hochschule, [Platzhalter: ca. 5.000] potenzielle Nutzer |
+| 5. Verarbeitung in großem Umfang | nein | eine Hochschule, ca. 5.000 potenzielle Nutzer (Übungswert) |
 | 6. Abgleichen oder Zusammenführen von Datensätzen | nein | einzige Verknüpfung: Domain → Nutzertyp |
 | 7. Daten schutzbedürftiger Betroffener | teilweise | Studierende stehen in einem Abhängigkeitsverhältnis zur Hochschule; daher keine Verwendung der Daten für andere Hochschulzwecke |
 | 8. innovative Technologien | nein | Standardtechnik |
@@ -38,9 +38,9 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 
 ## Ergebnis
 
-Zwei Kriterien sind erfüllt bzw. teilweise erfüllt (Nr. 4 und Nr. 7). Nach WP 248 ist ab zwei Kriterien **in der Regel eine DSFA erforderlich**. Ergebnis dieser Analyse: **Eine DSFA ist vor einem Echtbetrieb durchzuführen**, sofern der DSB nicht begründet zu einem anderen Ergebnis kommt [Platzhalter: Stellungnahme DSB]. Die Verarbeitung steht nach erster Prüfung nicht auf der Muss-Liste [Platzhalter: prüfen].
+Zwei Kriterien sind erfüllt bzw. teilweise erfüllt (Nr. 4 und Nr. 7). Nach WP 248 ist ab zwei Kriterien **in der Regel eine DSFA erforderlich**. Ergebnis dieser Analyse: **Eine DSFA ist vor einem Echtbetrieb durchzuführen**, Die Verarbeitung steht nicht auf der Muss-Liste der LfDI RLP (Übungsannahme Q-28).
 
-Konsequenz: Die DSFA (Beschreibung, Notwendigkeit und Verhältnismäßigkeit, Risiken, Abhilfemaßnahmen nach Art. 35 Abs. 7) wird als Vorbedingung für den Echtbetrieb in die Go-live-Checkliste aufgenommen (`docs/07-betrieb/go-live-checkliste.md`); REQ-PRIV-007 bleibt bis dahin ohne `verified`. Für das Docker-Beispiel ohne echte Daten ist sie nicht nötig.
+Konsequenz: Die DSFA nach Art. 35 Abs. 7 ist als Hausaufgabe mit fiktiven Werten durchgeführt: [Übungs-DSFA](dsfa.md). Sie wird nie im Echtbetrieb genutzt (Q-28).
 
 Schon umgesetzte Abhilfemaßnahmen für die Kriterien 4 und 7:
 - Zweckbindung: keine Weitergabe an andere Stellen der Hochschule (z. B. Prüfungsamt).
@@ -55,4 +55,4 @@ Schon umgesetzte Abhilfemaßnahmen für die Kriterien 4 und 7:
 - weitere Hochschulen angebunden werden (Kriterium 5),
 - SSO mit zusätzlichen Attributen (z. B. Matrikelnummer) genutzt wird.
 
-Entscheidung: [Platzhalter: Datum, Unterschrift Verantwortlicher; Stellungnahme DSB]
+Entscheidung (fiktiv): DSFA durchführen – 2026-10-25, Prof. Dr. Erika Mustermann (fiktiv), Präsidentin; Stellungnahme der DSB Paula Prüfer (fiktiv) in der [Übungs-DSFA](dsfa.md).

@@ -29,7 +29,7 @@ import { createReportingModule } from './modules/reporting/index.js';
 import { createSearchModule } from './modules/search/index.js';
 import type { ModuleDeps, Modules } from './modules/shared.js';
 import { createTrustModule } from './modules/trust/index.js';
-import { seedBaseData, seedDemoData } from './seed/seed.js';
+import { seedBaseData, seedDemoData, syncDemoLegalVersions } from './seed/seed.js';
 
 /** Composition Root: verdrahtet Adapter mit Ports und Modulen. Startmodi all | api | worker (ADR-0001). */
 /**
@@ -58,7 +58,9 @@ async function main() {
   }
   if (legalProblems.length) logger.warn({ legalProblems }, 'Rechtstexte sind Muster mit Platzhaltern (Übungsaufgabe)');
 
-  const pool = createPool(config.databaseUrl, config.dbPoolSize);
+  const pool = createPool(config.databaseUrl, config.dbPoolSize, (error) =>
+    logger.error({ err: error }, 'Datenbankverbindung unterbrochen'),
+  );
   await waitForDatabase(pool, logger);
   await migrate(pool, resolve(APP_ROOT, 'migrations'), logger);
 
@@ -139,7 +141,10 @@ async function main() {
   for (const module of [notifications, listings, messaging, privacy]) await module.registerJobs?.(withWorkers);
 
   await seedBaseData(database);
-  if (config.seedDemo) await seedDemoData(deps);
+  if (config.seedDemo) {
+    await seedDemoData(deps);
+    await syncDemoLegalVersions(deps);
+  }
 
   let app: Awaited<ReturnType<typeof createHttpServer>> | undefined;
   if (config.mode !== 'worker') {

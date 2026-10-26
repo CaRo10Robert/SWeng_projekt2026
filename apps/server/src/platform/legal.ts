@@ -52,8 +52,8 @@ export function readLegalManifest(webDistDir: string, contentDir: string): Legal
         title: data.title ?? name,
         version: data.version ?? '',
         lastUpdated: data.last_updated ?? '',
-        // Muster-Hinweis: ausdrücklich per Front Matter oder erkennbar am Hinweis im Text
-        sample: data.sample === 'true' || /Muster im Rahmen einer Übungsaufgabe/.test(body),
+        // Muster nur per Front Matter `sample: true`, nicht am Hinweistext (T-1)
+        sample: data.sample === 'true',
         placeholders: countPlaceholders(body),
       };
     });

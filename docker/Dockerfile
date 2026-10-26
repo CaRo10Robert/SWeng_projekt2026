@@ -34,7 +34,11 @@ ENV NODE_ENV=production \
 WORKDIR /app
 COPY --from=build --chown=root:root /out ./server
 COPY --from=build --chown=root:root /repo/apps/web/dist ./web/dist
-RUN mkdir -p /data/uploads /data/journal && chown node:node /data/uploads /data/journal
+# npm, npx, corepack und yarn werden zur Laufzeit nicht gebraucht; die in npm gebündelten Pakete waren die
+# einzigen Node-Funde des Image-Scans (CTRL-CI-SCAN). Entfernen verkleinert zugleich die Angriffsfläche (REQ-SEC-010).
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+ && mkdir -p /data/uploads /data/journal && chown node:node /data/uploads /data/journal
 # Non-root, Code gehört root und ist damit für den Prozess schreibgeschützt (REQ-SEC-010)
 USER node
 EXPOSE 8080

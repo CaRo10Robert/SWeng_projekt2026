@@ -2,7 +2,7 @@
 #   docker compose --profile proxy up -d  →  https://campusmarkt.localhost:8443
 # Eigener Hostname statt localhost: HSTS gilt je Hostname und soll andere lokale Dienste nicht betreffen.
 {
-	# Lokale CA statt ACME, läuft offline; im Echtbetrieb Zertifikat des RZ bzw. ACME [Platzhalter]
+	# Lokale CA statt ACME, läuft offline; im Echtbetrieb Zertifikat des RZ bzw. ACME (Übung: nicht eingerichtet)
 	local_certs
 	# Die Weiterleitung http → https übernimmt der eigene Block unten, weil der äußere Port (8443) vom inneren (443) abweicht
 	auto_https disable_redirects

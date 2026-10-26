@@ -30,7 +30,7 @@ describe('[AT-UX-006-2] Jede E-Mail-Vorlage trägt Absender, Impressum und Daten
   it.each(ALL)('%s', (template) => {
     const mail = renderEmail(template, PARAMS, { publicUrl: 'http://localhost:8080' });
     for (const part of [mail.text, mail.html]) {
-      expect(part).toContain('[Platzhalter: Name der Hochschule]');
+      expect(part).toContain('Hochschule für Wirtschaft und Gesellschaft Ludwigshafen');
       expect(part).toContain('http://localhost:8080/impressum');
       expect(part).toContain('http://localhost:8080/datenschutz');
     }
@@ -86,7 +86,7 @@ describe('E-Mails in der Sprache des Kontos (REQ-UX-007, ADR-0016)', () => {
       expect(part).not.toContain('undefined');
     }
     expect(mail.text).toContain('Legal notice');
-    expect(mail.text).toContain('[Placeholder: name of the university]');
+    expect(mail.text).toContain('University of Economics and Society Ludwigshafen');
   });
 
   it('Begründung auf Englisch mit Maßnahme, Regel, Grundlage und Frist im englischen Format', () => {

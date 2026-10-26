@@ -13,7 +13,7 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 33, Art. 34, Q-23
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [CTRL-DOC-DATENPANNE, MAN-LEGAL-013]
@@ -27,7 +27,7 @@ Es muss ein dokumentierter Prozess bestehen, mit dem eine Verletzung des Schutze
 Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benachrichtigung bei hohem Risiko). Ohne eingeübten Ablauf ist die Frist praktisch nicht zu halten.
 
 ## Akzeptanzkriterien
-- `docs/06-recht/datenpannen-prozess.md` beschreibt: Rollen (`[Platzhalter: DSB]`, Betrieb, Hochschulleitung), Meldewege intern, Ablauf mit Zeitstempeln (Kenntnis → Bewertung ≤ 24 h → Meldung ≤ 72 h), Risikobewertung (Matrix Eintrittswahrscheinlichkeit × Schwere), Vorlage für Meldung und Benachrichtigung, Dokumentationsvorlage, Verknüpfung mit dem Störungsprozess (REQ-OPS-011).
+- `docs/06-recht/datenpannen-prozess.md` beschreibt: Rollen (DSB Paula Prüfer – fiktiv, Betrieb, Hochschulleitung), Meldewege intern, Ablauf mit Zeitstempeln (Kenntnis → Bewertung ≤ 24 h → Meldung ≤ 72 h), Risikobewertung (Matrix Eintrittswahrscheinlichkeit × Schwere), Vorlage für Meldung und Benachrichtigung, Dokumentationsvorlage, Verknüpfung mit dem Störungsprozess (REQ-OPS-011).
 - Eine Übung (Tabletop) mit einem Szenario, z. B. „Datensicherung unverschlüsselt in falschem Speicher“, ist protokolliert.
 
 ## Fehler- und Missbrauchsfälle
@@ -46,3 +46,4 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 |---|---|---|
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-12): Status nach Umsetzung; Datenpannen-Prozess um Risikomatrix, Dokumentationsvorlage, Rollen, Erreichbarkeit und Art. 33 Abs. 2 ergänzt |
+| 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

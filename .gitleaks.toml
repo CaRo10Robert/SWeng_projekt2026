@@ -1,0 +1,17 @@
+# Secret-Scan (CTRL-CI-SCAN, REQ-SEC-008): Standardregeln von gitleaks plus begründete Ausnahmen.
+# Ausnahmen nur für feste Testwerte, nicht für ganze Pfade, damit echte Geheimnisse in Testdateien auffallen.
+# Genehmigt: security-lead (Übung), überprüfen bis 2027-04-30.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Feste Testwerte ohne Schutzbedarf"
+regexTarget = "match"
+regexes = [
+  # Absichtlich ungültige Tokens in E2E-Tests (Fehlerseiten für /verify, /reset-password, /widerspruch)
+  '''ungueltig-0123456789''',
+  # Neue Passwörter der Testkonten, die Smoke- und E2E-Tests nur im lokalen Docker-Beispiel anlegen
+  '''ganz-neues-passwort-2026''',
+  '''englisch-test-passwort-1''',
+]

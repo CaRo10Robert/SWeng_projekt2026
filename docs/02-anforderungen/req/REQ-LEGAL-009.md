@@ -13,7 +13,7 @@ epic: EPIC-13
 source: PStTG (DAC7), Q-26
 use_cases: [UC-43]
 depends_on: [REQ-CHAT-011]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7]
@@ -27,7 +27,7 @@ Als Administrator möchte ich je Kalenderjahr die Anbieter ermitteln, die die Me
 Plattformbetreiber müssen Anbieter melden, die nicht unter die Bagatellgrenze fallen (PStTG). Im Beispiel erfolgt kein Versand (Q-26); die Auswertung zeigt, dass die nötigen Daten aus dem Deal-Kern (REQ-CHAT-011) ableitbar sind.
 
 ## Akzeptanzkriterien
-Zählweise: abgeschlossene Deals (`completed`) mit Gegenleistung in Euro, je Anbieter und Kalenderjahr (Zeitpunkt des Abschlusses); „zu verschenken“ zählt nicht; „Tausch“ zählt im Beispiel nicht – **offener Prüfpunkt**: ob Gegenleistungen in Sachwerten als Vergütung im Sinne des PStTG zählen, klärt die Steuerabteilung (`docs/06-recht/dac7-konzept.md`). Die JSON-Antwort enthält keine E-Mail-Adressen (Datenminimierung); nur der CSV-Export für die meldende Stelle enthält die Adresse. Formeln in Textfeldern werden im CSV entschärft.
+Zählweise: abgeschlossene Deals (`completed`) mit Gegenleistung in Euro, je Anbieter und Kalenderjahr (Zeitpunkt des Abschlusses); „zu verschenken“ zählt nicht; „Tausch“ zählt nicht – Übungsannahme (Q-28): Gegenleistungen in Sachwerten gelten nicht als Vergütung im Sinne des PStTG (`docs/06-recht/dac7-konzept.md`). Die JSON-Antwort enthält keine E-Mail-Adressen (Datenminimierung); nur der CSV-Export für die meldende Stelle enthält die Adresse. Formeln in Textfeldern werden im CSV entschärft.
 
 | Abgeschlossene Verkäufe | Summe der Gegenleistungen | Meldepflichtig? |
 |---|---|---|
@@ -60,3 +60,4 @@ I: nur lesend auf vorhandenen Deals · N: Zählregeln für Tausch verhandelbar �
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-C-12, RV-R-17): JSON ohne E-Mail-Adresse, nur CSV; Tausch als offener Prüfpunkt; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

@@ -10,7 +10,7 @@ last_updated: 2026-10-25
 
 # Rechtskataster
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Justiziariat und der/dem Datenschutzbeauftragten der Hochschule zu prüfen.**
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.** Offene Rechtsfragen sind als Übungsannahmen festgelegt (Entscheidung Q-28).
 
 Das Kataster ordnet jeder einschlägigen Norm die Pflicht, die Umsetzung in CampusMarkt und den Stand zu. Betreiber im Muster ist die Hochschule als öffentliche Stelle in Rheinland-Pfalz (Q-23).
 
@@ -25,7 +25,7 @@ Stand: **umgesetzt** = im Code oder Docker-Beispiel vorhanden; **dokumentiert** 
 | Art. 12 DSGVO | präzise, verständlich, leicht zugänglich | einfache Sprache, Tabellen, Link überall | REQ-LEGAL-002, REQ-UX-006 | dokumentiert |
 | § 25 TDDDG | Einwilligung für nicht notwendige Speicherung auf Endgeräten | nur notwendige Speicherung, kein Banner; Prüfung neuer Speicherung | REQ-LEGAL-010, Q-24 | umgesetzt (B-49) |
 | Art. 14 DSA | verständliche AGB inkl. Moderationsregeln und algorithmischer Hilfsmittel | Nutzungsbedingungen, Community-Regeln (Wortfilter, vorläufiges Ausblenden offengelegt) | REQ-LEGAL-003, REQ-MOD-004 | umgesetzt |
-| LGGBehM RLP und Landesverordnung [Platzhalter], RL (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523 | barrierefreie Gestaltung, Erklärung zur Barrierefreiheit, Feedback-Mechanismus | WCAG-Tests, Erklärung, Feedback-Kontakt | REQ-A11Y-001/002, REQ-LEGAL-004 | teilweise umgesetzt (manuelle Prüfung offen) |
+| LGGBehM RLP und Landesverordnung über barrierefreie Informationstechnik (Fundstelle als Übungswert, Q-28), RL (EU) 2016/2102, Durchführungsbeschluss (EU) 2018/1523 | barrierefreie Gestaltung, Erklärung zur Barrierefreiheit, Feedback-Mechanismus | WCAG-Tests, Erklärung, Feedback-Kontakt | REQ-A11Y-001/002, REQ-LEGAL-004 | teilweise umgesetzt (manuelle Prüfung offen) |
 
 ## Datenschutz
 
@@ -40,10 +40,10 @@ Stand: **umgesetzt** = im Code oder Docker-Beispiel vorhanden; **dokumentiert** 
 | Art. 30 DSGVO | Verzeichnis der Verarbeitungstätigkeiten | [VVT](vvt.md) | REQ-LEGAL-011 | dokumentiert |
 | Art. 32 DSGVO | Sicherheit der Verarbeitung | [TOMs](toms.md) | REQ-LEGAL-011, REQ-SEC-* | dokumentiert, überwiegend umgesetzt |
 | Art. 33, 34 DSGVO | Meldung von Datenpannen binnen 72 h | [Prozess](datenpannen-prozess.md) | REQ-LEGAL-013 | dokumentiert |
-| Art. 35 DSGVO | DSFA bei hohem Risiko | [Schwellwertanalyse](dsfa-schwellwertanalyse.md): DSFA vor Echtbetrieb erforderlich (Kriterien 4 und 7) | REQ-PRIV-007 | dokumentiert, DSFA offen |
+| Art. 35 DSGVO | DSFA bei hohem Risiko | [Schwellwertanalyse](dsfa-schwellwertanalyse.md) ergibt DSFA; [Übungs-DSFA](dsfa.md) mit fiktiver Stellungnahme | REQ-PRIV-007 | als Übung durchgeführt (Q-28) |
 | Art. 37–39 DSGVO | Benennung DSB, Kontaktdaten veröffentlichen | Datenschutzerklärung | REQ-LEGAL-002 | dokumentiert (Platzhalter) |
 | Kap. V DSGVO | keine ungesicherte Drittlandübermittlung | keine Drittanbieter, Hosting EU | REQ-PRIV-005, REQ-PRIV-006 | umgesetzt im Beispiel |
-| [Platzhalter: LDSG RLP] | landesrechtliche Ergänzungen für öffentliche Stellen | im VVT als Rechtsgrundlage | REQ-LEGAL-011 | zu prüfen |
+| LDSG RLP, § 2 HochSchG RLP (Übungswert) | landesrechtliche Ergänzungen und Aufgabennorm für öffentliche Stellen | im VVT als Rechtsgrundlage (lit. e) | REQ-LEGAL-011 | Übungsannahme (Q-28) |
 
 ## Plattformpflichten (Digital Services Act)
 
@@ -56,19 +56,19 @@ Stand: **umgesetzt** = im Code oder Docker-Beispiel vorhanden; **dokumentiert** 
 | Art. 18 DSA | Meldung von Straftaten | Kennzeichen, Eskalation | REQ-LEGAL-008 | umgesetzt (B-47) |
 | Art. 20 DSA | internes Beschwerdemanagement (≥ 6 Monate) | Widerspruch, Vier-Augen | REQ-LEGAL-007, Q-22 | umgesetzt (B-46) |
 | Art. 15, 24 DSA, DVO (EU) 2024/2835 | Transparenzbericht mit Pflichtvorlagen | jährlich aus Audit-Log | [DSA-Prozesse](dsa-prozesse.md) | Echtbetrieb, Vorlagen prüfen |
-| Art. 3 lit. i, Art. 19 DSA | Anwendbarkeit (Entgeltlichkeit, KMU-Ausnahme) | offener Prüfpunkt | [DSA-Prozesse](dsa-prozesse.md) | offen (Justiziariat) |
+| Art. 3 lit. i, Art. 19 DSA | Anwendbarkeit (Entgeltlichkeit, KMU-Ausnahme) | Übungsannahme: DSA gilt, Art. 19 greift nicht (öffentliche Stelle, kein KMU) | [DSA-Prozesse](dsa-prozesse.md) | Übungsannahme (Q-28) |
 
 ## Steuern
 
 | Norm | Pflicht | Umsetzung / Artefakt | Anforderung | Stand |
 |---|---|---|---|---|
-| PStTG (DAC7) | Meldung von Verkäufern ab 30 Verkäufen oder 2.000 € je Jahr bis 31.01. | Auswertung, CSV; Meldung im Echtbetrieb | REQ-LEGAL-009, Q-26 | umgesetzt (B-48); Anwendbarkeit § 3 PStTG und Tausch offen (Steuerabteilung) |
+| PStTG (DAC7) | Meldung von Verkäufern ab 30 Verkäufen oder 2.000 € je Jahr bis 31.01. | Auswertung, CSV; Meldung im Echtbetrieb | REQ-LEGAL-009, Q-26 | umgesetzt (B-48); Übungsannahme: Meldepflicht besteht, § 3 greift nicht, Tausch zählt nicht (Q-28) |
 
 ## Sicherheit und Betrieb
 
 | Norm / Standard | Pflicht | Umsetzung / Artefakt | Anforderung | Stand |
 |---|---|---|---|---|
-| Art. 32 DSGVO, [Platzhalter: IT-Sicherheitsrichtlinie der Hochschule] | angemessene Sicherheit, regelmäßige Überprüfung | ASVS L2, Pentest vor Go-live | REQ-SEC-001, REQ-SEC-013 | geplant |
+| Art. 32 DSGVO, IT-Sicherheitsrichtlinie der Hochschule (fiktiv, Fassung 2026) | angemessene Sicherheit, regelmäßige Überprüfung | ASVS L2, Pentest vor Go-live | REQ-SEC-001, REQ-SEC-013 | geplant |
 | RFC 9116 (Empfehlung) | Kontakt für Sicherheitslücken | `/.well-known/security.txt` | REQ-SEC-012 | umgesetzt (B-52) |
 | Art. 32 Abs. 1 lit. c DSGVO | Wiederherstellbarkeit | Backup und Restore-Test | REQ-AVAIL-003 | umgesetzt (B-56) |
 

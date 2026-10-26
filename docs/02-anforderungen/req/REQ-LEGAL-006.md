@@ -15,7 +15,7 @@ epic: EPIC-13
 source: DSA Art. 16 Abs. 5, Art. 17, Q-22
 use_cases: [UC-32, UC-33, UC-34]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-25
 verification: [AT-LEGAL-006, AT-LEGAL-006-2]
@@ -38,7 +38,7 @@ Pflichtangaben der Begründung (DSA Art. 17 Abs. 3):
 | 3 | Automatisierte Erkennung beteiligt? | „Hinweis der automatischen Inhaltsprüfung“ bzw. „Meldung eines Mitglieds“ |
 | 4a | Vertragliche Grundlage (lit. e) | Abschnitt der Nutzungsbedingungen bzw. Community-Regeln (Auswahlliste, Pflicht außer bei „keine Maßnahme“) |
 | 4b | Rechtsgrundlage bei rechtswidrigen Inhalten (lit. d) | bei Regel „rechtswidriger Inhalt“ Pflichtfeld `legalGround`: verletzte Norm und Erläuterung, warum der Inhalt rechtswidrig ist (mindestens 20 Zeichen), z. B. „§ 241 StGB (Bedrohung): …“ |
-| 5 | Rechtsbehelfe | Widerspruch im System (REQ-LEGAL-007) mit Frist und Link; Hinweis auf außergerichtliche Streitbeilegung (`[Platzhalter: Stelle nach DSA Art. 21]`) und den Rechtsweg |
+| 5 | Rechtsbehelfe | Widerspruch im System (REQ-LEGAL-007) mit Frist und Link; Hinweis auf außergerichtliche Streitbeilegung (z. B. Schlichtungsstelle Digitale Dienste e. V., fiktiv) und den Rechtsweg |
 
 ```gherkin
 Szenario: Betroffene erhält die Begründung
@@ -76,3 +76,4 @@ I: setzt auf der bestehenden Moderation auf · N: Darstellung der Mitteilungen v
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-03, RV-R-09): Pflichtangaben nach Art. 17 Abs. 3 lit. d und e getrennt, `legalGround` bei rechtswidrigen Inhalten; Meldende erhalten Begründung und Rechtsbehelfe; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-006, AT-LEGAL-006-2 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |

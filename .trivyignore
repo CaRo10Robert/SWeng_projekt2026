@@ -1,0 +1,12 @@
+# Image-Scan (CTRL-CI-SCAN, REQ-SEC-008): Ausnahmen mit Begründung, Genehmigung und Ablaufdatum.
+#
+# Grundregel in CI: Trivy läuft mit --ignore-unfixed. Hohe und kritische Funde OHNE verfügbaren Fix im
+# Basis-Image (node:22-bookworm-slim, Debian 12) lassen die Pipeline nicht scheitern, weil wir sie nicht
+# beheben können. Sie stehen weiter im SBOM-Artefakt. Renovate hebt das Basis-Image wöchentlich an
+# (docs/07-betrieb/update-prozess.md); sobald Debian einen Fix ausliefert, schlägt die Pipeline wieder an.
+# Stand 2026-10-26: 57 Funde ohne Fix in util-linux, systemd, ncurses, gzip, perl-base, libacl1 und zlib1g
+# (CVE-2023-45853 betrifft nur minizip, das im Image nicht genutzt wird).
+# Genehmigt: security-lead (Übung). Überprüfen bis: 2027-01-31.
+#
+# Einzelne Ausnahmen für Funde MIT Fix (Format: CVE-ID, darüber Begründung und Ablaufdatum):
+# (derzeit keine)

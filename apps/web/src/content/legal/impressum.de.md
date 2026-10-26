@@ -2,46 +2,47 @@
 title: Impressum
 version: 2026-10
 last_updated: 2026-10-25
+sample: true
 ---
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben.** Alle Angaben in eckigen Klammern sind Platzhalter und vor einem Echtbetrieb durch die Hochschule zu ersetzen und vom Justiziariat bzw. der/dem Datenschutzbeauftragten der Hochschule zu prüfen.
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.** Personen, Anschriften, Telefonnummern und Kennziffern sind erfunden; offene Rechtsfragen sind als Übungsannahmen festgelegt (Entscheidung Q-28).
 
 ## Anbieter
 
 CampusMarkt HWG LU ist ein Angebot der
 
-[Platzhalter: Name der Hochschule]
-[Platzhalter: Straße und Hausnummer]
-[Platzhalter: PLZ und Ort]
+Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU)
+Musterstraße 1
+67059 Ludwigshafen am Rhein (fiktive Anschrift)
 Deutschland
 
 Die Hochschule ist eine Körperschaft des öffentlichen Rechts und zugleich staatliche Einrichtung des Landes Rheinland-Pfalz.
 
 ## Vertretungsberechtigt
 
-[Platzhalter: Name der Präsidentin bzw. des Präsidenten], Präsidentin/Präsident der Hochschule
-[Platzhalter: Anschrift wie oben]
+Prof. Dr. Erika Mustermann (fiktiv), Präsidentin der Hochschule
+Anschrift wie oben
 
 ## Kontakt
 
-- E-Mail: [Platzhalter: campusmarkt@hwg-lu.example]
-- Telefon: [Platzhalter: +49 000 000000]
+- E-Mail: campusmarkt@hwg-lu.example
+- Telefon: +49 621 555-0100 (fiktiv)
 - Weitere Kontaktwege: siehe Seite „Kontakt“
 
 ## Zuständige Aufsichtsbehörde
 
-[Platzhalter: Zuständiges Landesministerium für Wissenschaft, Anschrift]
+Musterministerium für Wissenschaft Rheinland-Pfalz, Musterplatz 2, 55116 Mainz (fiktiv)
 
 ## Umsatzsteuer-Identifikationsnummer
 
-[Platzhalter: USt-IdNr. der Hochschule nach § 27a UStG, falls vorhanden]
+DE000000000 (fiktiv)
 
 ## Inhaltlich verantwortlich
 
 Für redaktionelle Inhalte dieser Plattform (Hilfeseiten, Regeln, Hinweise):
 
-[Platzhalter: Name der verantwortlichen Person, Organisationseinheit]
-[Platzhalter: Anschrift wie oben]
+Dr. Anna Beispiel (fiktiv), Stabsstelle Digitale Dienste
+Anschrift wie oben
 
 Für Anzeigen und Nachrichten sind die jeweiligen Mitglieder selbst verantwortlich. Die Hochschule prüft Inhalte nach Meldung und entfernt rechtswidrige Inhalte (siehe Nutzungsbedingungen, Abschnitt Moderation).
 

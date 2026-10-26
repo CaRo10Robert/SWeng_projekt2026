@@ -28,6 +28,10 @@ const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 /** Kleine HTML-Seite für die Abmeldung, ohne Skripte und externe Ressourcen; in der Sprache des Kontos (ADR-0016). */
+// Formular der One-Click-Abmeldung; das Token ist per encodeURIComponent, die Beschriftung ein fester Text
+// nosemgrep: javascript.express.security.injection.raw-html-format.raw-html-format -- kein Express, Werte kodiert (CTRL-CI-SCAN)
+const unsubscribeForm = (token: string, label: string) => `<form method="post" action="/api/v1/notifications/unsubscribe?token=${encodeURIComponent(token)}"><input type="hidden" name="List-Unsubscribe" value="One-Click"><button type="submit">${escapeHtml(label)}</button></form>`;
+
 const page = (lang: Locale, title: string, body: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
 <title>${escapeHtml(title)} – CampusMarkt HWG LU</title>
@@ -116,15 +120,8 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
       if (!parsed) return reply.status(404).send(page('de', UNSUBSCRIBE_TEXTS.de.invalidTitle, UNSUBSCRIBE_TEXTS.de.invalid));
       const lang = (await deps.modules.identity.getContact(parsed.userId))?.locale ?? 'de';
       const t = UNSUBSCRIBE_TEXTS[lang];
-      return reply.send(
-        page(
-          lang,
-          t.confirmTitle,
-          `<p>${escapeHtml(t.confirm(t.category[parsed.category]))}</p>
-<form method="post" action="/api/v1/notifications/unsubscribe?token=${encodeURIComponent(req.query.token)}">
-<input type="hidden" name="List-Unsubscribe" value="One-Click"><button type="submit">${t.button}</button></form>`,
-        ),
-      );
+      // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write, javascript.express.security.injection.raw-html-format.raw-html-format -- Fastify, alle Werte escaped (CTRL-CI-SCAN)
+      return reply.send(page(lang, t.confirmTitle, `<p>${escapeHtml(t.confirm(t.category[parsed.category]))}</p>${unsubscribeForm(req.query.token, t.button)}`));
     });
 
     // One-Click (RFC 8058): POST ohne Anmeldung und ohne CSRF-Header, geschützt durch die Signatur
@@ -136,6 +133,7 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
       }
       const lang = (await deps.modules.identity.getContact(parsed.userId))?.locale ?? 'de';
       const t = UNSUBSCRIBE_TEXTS[lang];
+      // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write, javascript.express.security.injection.raw-html-format.raw-html-format -- Fastify, alle Werte escaped (CTRL-CI-SCAN)
       return reply.send(page(lang, t.doneTitle, `<p>${escapeHtml(t.done(t.category[parsed.category]))}</p>`));
     });
   };

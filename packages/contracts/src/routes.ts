@@ -81,6 +81,7 @@ export const ROUTES = {
   evidenceHolds: 'GET /admin/evidence-holds → EvidenceHold[] (Rolle admin)',
   releaseHold: 'POST /admin/evidence-holds/:id/release → 204',
   maintenance: 'PUT /admin/maintenance MaintenanceBody → SystemStatus (Rolle admin, Audit-Log)',
+  endSessions: 'POST /admin/security/end-sessions EndSessionsBody → EndSessionsResult (Rolle admin, Audit-Log; beendet auch die eigene Sitzung)',
   announcement: 'PUT /admin/announcement AnnouncementBody → SystemStatus · DELETE /admin/announcement → SystemStatus',
 
   // Betrieb (öffentlich, außerhalb /api/v1 zusätzlich /health/*, /metrics, /robots.txt, /.well-known/security.txt)

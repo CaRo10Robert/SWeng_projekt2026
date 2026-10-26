@@ -2,19 +2,20 @@
 title: Terms of use
 version: 2026-10-25
 last_updated: 2026-10-25
+sample: true
 ---
 
 > **This translation is provided for convenience. Only the German version is legally binding.**
 
-> **Sample created as a course exercise – not legally binding.** To be reviewed by the university's legal office and data protection officer. Information in square brackets is a placeholder.
+> **Sample created as a course exercise – fictitious data, not legally binding.** Open legal questions are settled as exercise assumptions (decision Q-28).
 
 ## 1. Scope and provider {#1-geltung-und-anbieter}
 
-These terms govern the use of CampusMarkt HWG LU (the "platform"). The provider is [Placeholder: name of the university] (see legal notice). The **community rules** and the **privacy policy** apply in addition.
+These terms govern the use of CampusMarkt HWG LU (the "platform"). The provider is Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU) (see legal notice). The **community rules** and the **privacy policy** apply in addition.
 
 ## 2. Who may take part {#2-wer-mitmachen-darf}
 
-1. The platform is only open to members of the university: students and staff with an email address of an approved university domain [Placeholder: e.g. studmail.hwg-lu.example, hwg-lu.example].
+1. The platform is only open to members of the university: students and staff with an email address of an approved university domain (studmail.hwg-lu.de, hwg-lu.de).
 2. Each person may only have one account. The account is not transferable.
 3. When membership of the university ends, the right to use the platform also ends.
 
@@ -51,7 +52,7 @@ Your email address is not visible to other members. In a conversation, both side
 4. **Appeal:** Affected persons and reporters can appeal against a decision within **six months** of being notified (Art. 20(1) DSA), in their account under "My notices"; for suspended accounts via the link in the email containing the statement of reasons. Another moderator who was not involved in the first decision and who neither reported the case nor appealed themselves decides again (internal complaint-handling system under Art. 20 DSA). The result is communicated to both sides with reasons.
 5. **Criminal offences:** If there are indications of a criminal offence involving a threat to the life or safety of persons, the university informs the competent authorities (Art. 18 DSA).
 6. **Automated aids (Art. 14 DSA):** A word filter holds new listings with clearly prohibited terms for review before publication. Once three members have reported a listing, it is provisionally hidden until moderation has decided; the affected person is informed. A human always makes the final decision.
-7. **Out-of-court dispute settlement and courts:** Independently of the appeal, you can turn to a certified out-of-court dispute settlement body (Art. 21 DSA, [Placeholder: body]) or go to court.
+7. **Out-of-court dispute settlement and courts:** Independently of the appeal, you can turn to a certified out-of-court dispute settlement body (Art. 21 DSA, e.g. Schlichtungsstelle Digitale Dienste e. V., Musterstadt – fictitious) or go to court.
 
 ## 9. Suspensions {#9-sperren}
 
@@ -59,7 +60,7 @@ In the case of serious or repeated violations, an account may be permanently sus
 
 ## 10. Availability and liability {#10-verfuegbarkeit-und-haftung}
 
-The platform is a voluntary service with no entitlement to constant availability. The university is only liable for intent and gross negligence and in the case of injury to life, body or health [Placeholder: liability clause to be reviewed by the legal office; consider state liability].
+The platform is a voluntary service with no entitlement to constant availability. The university is only liable for intent and gross negligence and in the case of injury to life, body or health; state liability under Section 839 BGB in conjunction with Art. 34 GG remains unaffected (exercise assumption Q-28).
 
 ## 11. Changes to these terms {#11-aenderungen-dieser-bedingungen}
 

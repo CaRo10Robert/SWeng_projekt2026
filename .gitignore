@@ -11,3 +11,7 @@ e2e/playwright-report/
 
 # Datensicherungen (scripts/backup.mjs, ADR-0018) – enthalten personenbezogene Daten
 backups/
+
+# StrykerJS (CTRL-MUTATION)
+apps/server/.stryker-tmp/
+apps/server/reports/

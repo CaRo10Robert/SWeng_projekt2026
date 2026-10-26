@@ -81,7 +81,8 @@ export async function loadContent(name: ContentName, lang = 'de'): Promise<Conte
     title: data.title ?? name,
     version: data.version ?? '',
     lastUpdated: data.last_updated ?? '',
-    sample: data.sample === 'true' || body.includes('Muster im Rahmen einer Übungsaufgabe') || body.includes('course exercise'),
+    // Muster nur per Front Matter, nicht am Hinweistext (MAN-OPS-002 T-1: Umformulierungen dürfen den Hinweis nicht abschalten)
+    sample: data.sample === 'true',
     lang: load === loaders[`../content/${name}.${lang}.md`] ? lang : 'de',
     body,
     headings: extractHeadings(body),

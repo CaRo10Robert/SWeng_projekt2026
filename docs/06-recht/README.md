@@ -10,7 +10,7 @@ last_updated: 2026-10-25
 
 # Recht und Datenschutz (Übungsaufgabe)
 
-> **Muster im Rahmen einer Übungsaufgabe – keine rechtsverbindlichen Angaben; vom Datenschutzbeauftragten der Hochschule zu prüfen.** Alle Betreiberangaben stehen als `[Platzhalter: …]` im Text (Entscheidung Q-23).
+> **Muster im Rahmen einer Übungsaufgabe – fiktive Angaben, nicht rechtsverbindlich.** Betreiberangaben sind erfundene Übungswerte, offene Rechtsfragen Übungsannahmen (Entscheidungen Q-23, Q-28). Die Dokumente werden nie im Echtbetrieb genutzt.
 
 Dieser Ordner enthält die Prozessartefakte, die ein Betreiber für Datenschutz, Digital Services Act (DSA) und Steuermeldepflicht braucht. Die **Rechtstexte für Nutzerinnen und Nutzer** liegen als eine Quelle bei der App unter `apps/web/src/content/legal/` und werden dort angezeigt (ADR-0015).
 
@@ -33,12 +33,12 @@ Rechtstexte in der App (`apps/web/src/content/legal/`): Impressum (REQ-LEGAL-001
 
 | Rolle | Aufgabe | Im Muster |
 |---|---|---|
-| Verantwortlicher | trägt die Verantwortung nach Art. 24 DSGVO | [Platzhalter: Hochschule, vertreten durch die Präsidentin/den Präsidenten] |
-| Datenschutzbeauftragte/r (DSB) | berät, prüft Texte und Verzeichnis, Ansprechperson für Betroffene und Aufsicht | [Platzhalter: Name, Kontakt] |
+| Verantwortlicher | trägt die Verantwortung nach Art. 24 DSGVO | Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU), vertreten durch die Präsidentin Prof. Dr. Erika Mustermann (fiktiv) |
+| Datenschutzbeauftragte/r (DSB) | berät, prüft Texte und Verzeichnis, Ansprechperson für Betroffene und Aufsicht | Paula Prüfer (fiktiv), datenschutz@hwg-lu.example, Vertretung: Jonas Vertreter (fiktiv) |
 | Product Owner | pflegt Inhalte und stößt Änderungen an | Rolle `product-owner` im Team |
-| Moderationsleitung | verantwortet DSA-Prozesse, Begründungen, Widersprüche | [Platzhalter: Organisationseinheit] |
+| Moderationsleitung | verantwortet DSA-Prozesse, Begründungen, Widersprüche | Team Moderation in der Stabsstelle Digitale Dienste, Leitung: Max Moderato (fiktiv) |
 | Informationssicherheit | TOMs, Datenpannen, Sicherheitslücken | Rolle `security-lead` |
-| Justiziariat | Nutzungsbedingungen, Impressum, Haftung | [Platzhalter: Organisationseinheit] |
+| Justiziariat | Nutzungsbedingungen, Impressum, Haftung | Justiziariat der Hochschule, Ass. jur. Clara Recht (fiktiv) |
 
 ## Pflegeprozess für Rechtstexte
 

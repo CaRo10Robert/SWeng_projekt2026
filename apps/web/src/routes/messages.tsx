@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ConversationSummary, DealStatus, Message } from '@campusmarkt/contracts';
+import type { ConversationSummary, DealStatus, Message, SystemCode } from '@campusmarkt/contracts';
 import { useMe } from '../api/auth';
 import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
@@ -20,9 +20,17 @@ const dealLabels: Record<DealStatus, MessageKey> = {
 };
 
 /**
- * Systemnachrichten speichert der Server als deutschen Text (Verlauf bleibt unverändert). Bekannte Texte werden
- * in der gewählten Sprache angezeigt, unbekannte unverändert.
+ * Systemnachrichten tragen einen Code (Migration 0005); der Client übersetzt per Code. Ältere Nachrichten ohne Code
+ * werden über ihren deutschen Text erkannt, unbekannte Texte unverändert angezeigt.
  */
+const systemCodes: Record<SystemCode, MessageKey> = {
+  contact_exchanged: 'chat.system.contactExchanged',
+  deal_reserved: 'chat.system.reserved',
+  deal_completed: 'chat.system.completed',
+  deal_cancelled: 'chat.system.cancelled',
+  message_removed: 'chat.system.removed',
+  message_deleted: 'chat.system.deleted',
+};
 const systemMessages: Record<string, MessageKey> = {
   'Kontaktdaten wurden ausgetauscht. Ihr seht die Hochschul-E-Mail-Adresse des anderen oben im Chat.': 'chat.system.contactExchanged',
   'Die Anzeige wurde für dich reserviert.': 'chat.system.reserved',
@@ -30,7 +38,10 @@ const systemMessages: Record<string, MessageKey> = {
   'Die Reservierung wurde aufgehoben.': 'chat.system.cancelled',
   '[Nachricht wurde von der Moderation entfernt]': 'chat.system.removed',
 };
-const systemText = (body: string) => (systemMessages[body] ? t(systemMessages[body]) : body);
+const systemText = (body: string, code?: SystemCode | null) => {
+  const key = (code && systemCodes[code]) || systemMessages[body];
+  return key ? t(key) : body;
+};
 
 export function ConversationsPage() {
   const { data, isPending, isError, error } = useConversations();
@@ -126,7 +137,7 @@ function MessageBubble({ message, mine, onReport }: { message: Message; mine: bo
   if (message.kind === 'system') {
     return (
       <li className="my-2 text-center text-xs text-slate-600">
-        <span className="rounded-full bg-slate-200 px-3 py-1">{systemText(message.body)}</span>
+        <span className="rounded-full bg-slate-200 px-3 py-1">{systemText(message.body, message.systemCode)}</span>
       </li>
     );
   }
@@ -189,7 +200,7 @@ export function ConversationPage() {
     endRef.current?.scrollIntoView({ block: 'end' });
     if (!last) return;
     if (lastAnnounced.current && last.id !== lastAnnounced.current && last.senderId !== me?.id) {
-      setAnnouncement(t('chat.newMessage', { body: last.kind === 'system' ? systemText(last.body) : last.body }));
+      setAnnouncement(t('chat.newMessage', { body: last.kind === 'system' ? systemText(last.body, last.systemCode) : last.body }));
     }
     lastAnnounced.current = last.id;
   }, [last, me?.id, visiblePending.length]);
