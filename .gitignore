@@ -15,3 +15,6 @@ backups/
 # StrykerJS (CTRL-MUTATION)
 apps/server/.stryker-tmp/
 apps/server/reports/
+
+# Ergebnisse der Lasttests (k6), nur als CI-Artefakt
+tests/load/results/

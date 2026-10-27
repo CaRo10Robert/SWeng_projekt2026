@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Multi-Stage-Build: ein Image "campusmarkt" mit REST-API, WebSocket, React-SPA und Job-Worker (ADR-0002, ADR-0010).
 
-FROM node:22-bookworm-slim AS base
+FROM node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true
 RUN corepack enable
 WORKDIR /repo
@@ -25,7 +25,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
  && rm -rf /out/src /out/test /out/*.config.ts /out/tsconfig*.json /out/.dependency-cruiser.cjs
 
 # ---------------------------------------------------------------- Runtime
-FROM node:22-bookworm-slim AS runtime
+FROM node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS runtime
 ENV NODE_ENV=production \
     PORT=8080 \
     UPLOADS_DIR=/data/uploads \

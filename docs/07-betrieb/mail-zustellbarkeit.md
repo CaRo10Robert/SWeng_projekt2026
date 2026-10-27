@@ -1,9 +1,9 @@
 ---
 id: OPS-MAIL
 type: operational
-status: in-review
+status: approved
 owner: architecture-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-26
 ---

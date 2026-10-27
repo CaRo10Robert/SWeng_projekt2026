@@ -21,7 +21,7 @@ tests:
             exp_annotations:
               summary: CampusMarkt ist nicht erreichbar
               description: Prometheus erreicht app:8080/metrics seit 2 Minuten nicht (REQ-OPS-001).
-              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#63-runbook-appdown
 
   - name: BackupMissing bei Sicherung älter als 26 Stunden
     interval: 1h
@@ -42,7 +42,7 @@ tests:
             exp_annotations:
               summary: Seit mehr als 26 Stunden keine erfolgreiche Sicherung
               description: Seit 1d 3h 0m 0s keine erfolgreiche Sicherung (REQ-AVAIL-003).
-              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/backup-restore.md
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#69-runbook-backupmissing
 
   # NaN (Wert nicht lesbar) lässt sich in promtool-Serien nicht angeben; Vergleiche mit NaN sind immer falsch.
   - name: BackupMissing nie gesichert erst nach 26 Stunden Laufzeit
@@ -63,7 +63,7 @@ tests:
             exp_annotations:
               summary: Seit mehr als 26 Stunden keine erfolgreiche Sicherung
               description: Seit 1d 3h 0m 0s keine erfolgreiche Sicherung (REQ-AVAIL-003).
-              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/backup-restore.md
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#69-runbook-backupmissing
 
   - name: HighErrorRate nicht im Wartungsmodus und nicht bei geringer Last
     interval: 1m
@@ -108,7 +108,7 @@ tests:
             exp_annotations:
               summary: Mehr als 5 % der Anfragen enden mit 5xx
               description: 'Fehlerquote 50% über 5 Minuten (REQ-AVAIL-001).'
-              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#64-runbook-higherrorrate
 
   - name: JobFailures nur für endgültig gescheiterte Jobs
     interval: 1m
@@ -128,7 +128,7 @@ tests:
             exp_annotations:
               summary: 'Endgültig gescheiterte Jobs in Queue send-email'
               description: 'In den letzten 15 Minuten sind Jobs nach allen Wiederholungen gescheitert und liegen in der Dead-Letter-Queue, z. B. Mailversand (QS-3, REQ-NOTI-005).'
-              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md
+              runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#66-runbook-jobfailures
 
   - name: Keine Fehlalarme bei gesunder App
     interval: 1m

@@ -14,6 +14,25 @@ Protokolle der manuellen Nachweise (`MAN-…`) und Kontrollen (`CTRL-…`) aus d
 | MAN-NOTI-004 | REQ-NOTI-004 Zustellbarkeit | als Übung bestanden: Header echt geprüft, mail-tester-Werte fiktiv; Befunde N-1 (Absenderdomain) und N-2 (`Reply-To`) behoben | [MAN-NOTI-004.md](MAN-NOTI-004.md) |
 | CTRL-DLQ | REQ-NOTI-005 Zustellung ohne Verlust | bestanden: nach 302 s steht die gescheiterte Mail in der Dead-Letter-Ansicht, App bleibt erreichbar; wöchentlich in `ops-weekly.yml` | [CTRL-DLQ.md](CTRL-DLQ.md) |
 
+## Dokument-Kontrollen (Guideline-Review GL-07)
+
+Jede Kontrolle prüft ein Dokument gegen die Prüfpunkte im Nachweiskatalog. Nach bestandener Kontrolle steht das Dokument auf `approved`. Prüfer sind fiktive Rollen (Q-28).
+
+| Nachweis | Anforderung | Ergebnis | Protokoll |
+|---|---|---|---|
+| CTRL-DOC-LEGAL-TEXTE | REQ-LEGAL-001…005 Rechtstexte | bestanden (2026-10-26) | [CTRL-DOC-LEGAL-TEXTE.md](CTRL-DOC-LEGAL-TEXTE.md) |
+| CTRL-DOC-VVT | REQ-LEGAL-011 VVT | bestanden (2026-10-26) | [CTRL-DOC-VVT.md](CTRL-DOC-VVT.md) |
+| CTRL-DOC-TOM | REQ-LEGAL-011 TOMs | bestanden (2026-10-26) | [CTRL-DOC-TOM.md](CTRL-DOC-TOM.md) |
+| CTRL-DOC-AVV | REQ-LEGAL-012 Auftragsverarbeitung | bestanden (2026-10-26) | [CTRL-DOC-AVV.md](CTRL-DOC-AVV.md) |
+| CTRL-DOC-DATENPANNE | REQ-LEGAL-013 Datenpannen-Prozess | bestanden (2026-10-26) | [CTRL-DOC-DATENPANNE.md](CTRL-DOC-DATENPANNE.md) |
+| CTRL-DOC-DSA | REQ-LEGAL-008 DSA-Prozesse | bestanden (2026-10-26) | [CTRL-DOC-DSA.md](CTRL-DOC-DSA.md) |
+| CTRL-DOC-DAC7 | REQ-LEGAL-009 DAC7 | bestanden (2026-10-26) | [CTRL-DOC-DAC7.md](CTRL-DOC-DAC7.md) |
+| CTRL-DOC-DSFA | REQ-PRIV-007 DSFA | bestanden (2026-10-26) | [CTRL-DOC-DSFA.md](CTRL-DOC-DSFA.md) |
+| CTRL-DOC-BACKUP | REQ-AVAIL-003 Sicherung | bestanden (2026-10-26) | [CTRL-DOC-BACKUP.md](CTRL-DOC-BACKUP.md) |
+| CTRL-DOC-MAIL | REQ-OPS-010 Mail-Zustellbarkeit | bestanden (2026-10-26) | [CTRL-DOC-MAIL.md](CTRL-DOC-MAIL.md) |
+| CTRL-DOC-BETRIEB | REQ-OPS-011, REQ-SEC-012 Betrieb | bestanden (2026-10-26) | [CTRL-DOC-BETRIEB.md](CTRL-DOC-BETRIEB.md) |
+| CTRL-DOC-PENTEST | REQ-SEC-013 Pentest-Plan | bestanden (2026-10-26) | [CTRL-DOC-PENTEST.md](CTRL-DOC-PENTEST.md) |
+
 ## Recht und Datenschutz
 
 | Nachweis | Anforderung | Ergebnis | Protokoll |

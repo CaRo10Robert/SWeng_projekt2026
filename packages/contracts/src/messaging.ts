@@ -10,6 +10,7 @@ export const SystemCode = Type.Union([
   Type.Literal('deal_reserved'),
   Type.Literal('deal_completed'),
   Type.Literal('deal_cancelled'),
+  Type.Literal('reservation_expired'),
   Type.Literal('message_removed'),
   Type.Literal('message_deleted'),
 ]);

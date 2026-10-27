@@ -12,9 +12,9 @@ kano: n/a
 epic: EPIC-13
 source: RFC 9116, BSI CVD
 review_due: 2027-10-24
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-SEC-012, CTRL-DOC-BETRIEB]
 ---
 
@@ -34,7 +34,7 @@ N/A – Risiko niedrig; `Expires` wird über `review_due` überwacht.
 
 ## Nachweis
 - `AT-SEC-012`: Smoke-Test – `/.well-known/security.txt` liefert 200, `text/plain`, alle Pflichtfelder, `Expires` in der Zukunft.
-- `CTRL-DOC-BETRIEB`: Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden.
+- `CTRL-DOC-BETRIEB`: Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden – Protokoll [CTRL-DOC-BETRIEB](../../05-umsetzung/nachweise/CTRL-DOC-BETRIEB.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -43,3 +43,4 @@ N/A – Risiko niedrig; `Expires` wird über `review_due` überwacht.
 | 1.1 | 2026-10-25 | Review v1.3 (RV-A-17): Policy und Canonical nur bei HTTPS; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SEC-012, CTRL-DOC-BETRIEB bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

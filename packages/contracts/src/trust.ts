@@ -1,5 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { Timestamp, Uuid } from './common.js';
+import { Page, Timestamp, Uuid } from './common.js';
 import { Role, UserType } from './identity.js';
 import { ListingCard } from './listings.js';
 import { Message } from './messaging.js';
@@ -203,6 +203,8 @@ export const EvidenceHold = Type.Object({
   preservedItems: Type.Integer(),
 });
 export type EvidenceHold = Static<typeof EvidenceHold>;
+export const EvidenceHoldPage = Page(EvidenceHold);
+export type EvidenceHoldPage = Static<typeof EvidenceHoldPage>;
 
 /** DAC7-Auswertung (REQ-LEGAL-009, Q-26). */
 export const Dac7Query = Type.Object({
@@ -255,6 +257,8 @@ export const AuditEntry = Type.Object({
   createdAt: Timestamp,
 });
 export type AuditEntry = Static<typeof AuditEntry>;
+export const AuditPage = Page(AuditEntry);
+export type AuditPage = Static<typeof AuditPage>;
 
 export const JobOverview = Type.Object({
   queues: Type.Array(

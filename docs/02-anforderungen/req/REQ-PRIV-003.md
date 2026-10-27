@@ -14,7 +14,7 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 5, 17
 use_cases: [UC-01, UC-05]
-version: 2.2
+version: 2.3
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3]
@@ -45,7 +45,7 @@ Das System muss personenbezogene Daten nach festen Fristen automatisch löschen.
 | Schlüssel für die Pseudonymisierung (`platform.ip_pepper`, ADR-0014) | täglich neu; der Vorgänger wird 1 Stunde nach der Rotation gelöscht |
 | Datenexporte | werden nicht gespeichert (direkter Download, REQ-ACC-003) |
 | Datensicherungen (Datenbank und Bilder, REQ-AVAIL-003) | höchstens 28 Tage, auch die neueste Sicherung (ADR-0018) |
-| Löschjournal (nur Art, ID und Zeitpunkt einer Löschung, keine Inhalte; ADR-0018) | 35 Tage (länger als die älteste Sicherung) |
+| Löschjournal (nur Art, ID und Zeitpunkt einer Löschung, keine Inhalte; ADR-0019) | 35 Tage (länger als die älteste Sicherung) |
 | Abgeschlossene Deals (Preis, Gegenpartei, Zeitpunkt; REQ-CHAT-011, Grundlage für DAC7) | mit der Konversation bzw. dem Konto; DAC7-pflichtige Angaben im Echtbetrieb vor der Löschung sichern (offener Punkt, `docs/06-recht/dac7-konzept.md`) |
 | Mitteilungen im Konto (Begründungen, Ergebnisse von Widersprüchen, vorläufiges Ausblenden; REQ-LEGAL-006) | mit dem Konto; Soll: 12 Monate nach Erstellung |
 | Widersprüche (REQ-LEGAL-007) | mit dem Moderationsfall (12 Monate nach Abschluss) |
@@ -90,3 +90,4 @@ Speicherbegrenzung (DSGVO Art. 5) und Recht auf Löschung (Art. 17); Privacy by 
 | 2.0 | 2026-10-23 | Review v0.2: R-28 Fristentabelle vollständig (unbestätigte Konten, pausiert/reserviert, entfernt, Uploads, Einwilligungen, Zustimmungen, Links, Exporte); R-13 Kontolöschung nur eigene Nachrichtentexte; R-04 Fehler- und Missbrauchsfälle; Q-7, Q-13 |
 | 2.1 | 2026-10-25 | Review v1.3 (RV-R-05, RV-R-13, RV-A-01): Datensicherungen 28 Tage, neue Kategorien (Pseudonymisierungsschlüssel, Löschjournal, Deals, Mitteilungen, Widersprüche, Einmal-Links, Originaltexte, Beweissicherung, Ankündigungen, Sprache/Kenntnisnahme); Wiederherstellung über Löschjournal; Stand ergänzt |
 | 2.2 | 2026-10-26 | Löschläufe umgesetzt, Nachweise AT-PRIV-003-2/-3 als Ops-Test, Zustimmungsnachweise pseudonymisiert; offen: reservierte Anzeigen |
+| 2.3 | 2026-10-26 | Guideline-Review: GL-09 Löschjournal auf ADR-0019 verwiesen |

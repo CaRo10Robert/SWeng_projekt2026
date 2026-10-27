@@ -21,7 +21,8 @@ created: 2026-10-20
 last_updated: 2026-10-23
 # Optionale Felder
 reviewers: [product-owner, security-lead]   # Pflicht bei risk: high; Fachrolle passend: security-lead | architecture-lead | qa-lead (+ qa-lead bei class: quality)
-review_due: 2027-04-23        # bei zeitkritischen Standards (ASVS, WCAG, NIST, OWASP-Parameter)
+review_due: 2027-04-23        # Pflicht bei zeitkritischen Standards (ASVS, OWASP Top 10, WCAG, NIST, SLSA, RFCs); trace.mjs prüft Ablauf
+systems: [campusmarkt-server]   # betroffene Systeme/Dienste (Guideline Kap. 01, NFR-Vorlage „service“)
 use_cases: [UC-01]
 depends_on: [REQ-AREA-NNN]
 supersedes: REQ-AREA-NNN      # nur bei Ersatz einer Anforderung

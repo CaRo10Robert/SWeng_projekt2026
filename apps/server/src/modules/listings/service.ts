@@ -30,6 +30,7 @@ import {
   PUBLIC_STATUSES,
   sniffImageType,
   UPLOAD_QUOTA,
+  RESERVATION_FALLBACK_DAYS,
 } from './domain.js';
 
 export const PROCESS_IMAGE = 'process-image';
@@ -530,6 +531,35 @@ export function createListingsService(deps: ModuleDeps) {
       stats.expired = await db.exec(sql`
         UPDATE listings.listing SET status = 'expired', status_changed_at = now()
         WHERE status = 'active' AND expires_at < now()`);
+      // Reservierungen fallen nach 30 Tagen ohne Abgabe zurück (REQ-LST-008, REQ-PRIV-003): offener Deal wird storniert,
+      // der Anbieter erhält einen Hinweis. Gesicherte Anzeigen (REQ-LEGAL-008) bleiben unverändert.
+      const heldForFallback = await modules.trust.heldTargetIds('listing');
+      const lapsed = await db.query<{ id: string }>(sql`
+        SELECT id FROM listings.listing
+        WHERE status = 'reserved' AND status_changed_at < now() - make_interval(days => ${RESERVATION_FALLBACK_DAYS})
+          AND id <> ALL(${heldForFallback}::uuid[])`);
+      let fallbacks = 0;
+      for (const { id } of lapsed) {
+        const outcome = await database.tx(async (tx) => {
+          // Bedingtes Update macht den Lauf idempotent, auch bei parallelen Wartungsläufen
+          const row = await tx.db.one<{ owner_id: string; title: string }>(sql`
+            UPDATE listings.listing SET status = 'active', status_changed_at = now(), updated_at = now()
+            WHERE id = ${id} AND status = 'reserved'
+              AND status_changed_at < now() - make_interval(days => ${RESERVATION_FALLBACK_DAYS})
+            RETURNING owner_id, title`);
+          if (!row) return null;
+          const messages = await modules.messaging.expireReservation(tx, id);
+          await modules.notifications.email(tx, { userId: row.owner_id }, 'reservation_expired', {
+            listingTitle: row.title,
+            link: `${deps.config.publicUrl}/listings/${id}`,
+          });
+          return messages;
+        });
+        if (!outcome) continue;
+        fallbacks++;
+        await modules.messaging.publishSystemMessages(outcome);
+      }
+      stats.reservationFallback = fallbacks;
       // Pausierte Anzeigen laufen nach 90 Tagen Pause ab (REQ-PRIV-003, Zustandsmodell)
       stats.pausedExpired = await db.exec(sql`
         UPDATE listings.listing SET status = 'expired', status_changed_at = now()

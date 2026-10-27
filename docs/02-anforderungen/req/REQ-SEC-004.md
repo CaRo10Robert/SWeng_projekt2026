@@ -12,10 +12,11 @@ moscow: M
 moscow_reason: [2]
 kano: basis
 epic: EPIC-01
-source: ASVS
-version: 3.1
+source: OWASP ASVS 4.0.3 (EX-01)
+version: 3.2
 created: 2026-10-20
-last_updated: 2026-10-24
+last_updated: 2026-10-26
+review_due: 2027-04-26
 verification: [AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3]
 ---
 
@@ -60,3 +61,4 @@ Gestohlene oder fremdgesteuerte Sitzungen erlauben Zugriff auf private Chats und
 | 2.0 | 2026-10-23 | Lösungsneutral formuliert (Technik in ADR), Widerrufsfälle und Prüftabelle ergänzt |
 | 3.0 | 2026-10-23 | Review v0.2: R-03 `class: constraint`; R-22 Akzeptanzkriterien ohne Cookie-Attribute, von außen beobachtbar; R-15 moscow_reason |
 | 3.1 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3 bestanden bzw. ausgeführt); Status → verified |
+| 3.2 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |

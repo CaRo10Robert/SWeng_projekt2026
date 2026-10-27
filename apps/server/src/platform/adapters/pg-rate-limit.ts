@@ -14,9 +14,9 @@ export function createPgRateLimit(db: Db): RateLimitStore {
         INSERT INTO platform.rate_limit (key, window_start, count) VALUES (${key}, ${start}, 1)
         ON CONFLICT (key, window_start) DO UPDATE SET count = platform.rate_limit.count + 1
         RETURNING count`);
-      const allowed = (row?.count ?? 1) <= limit;
+      const count = row?.count ?? 1;
       const retryAfterSeconds = Math.ceil((start.getTime() + windowSeconds * 1000 - Date.now()) / 1000);
-      return { allowed, retryAfterSeconds };
+      return { allowed: count <= limit, retryAfterSeconds, limit, remaining: Math.max(0, limit - count), windowSeconds };
     },
     async reset(key) {
       await db.exec(sql`DELETE FROM platform.rate_limit WHERE key = ${key}`);

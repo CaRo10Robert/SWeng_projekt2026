@@ -1,11 +1,12 @@
 ---
 id: OPS-INCIDENT
 type: process
-status: in-review
+status: approved
 owner: architecture-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
 last_updated: 2026-10-26
+review_due: 2027-04-26
 ---
 
 # Incident-Prozess
@@ -56,6 +57,16 @@ flowchart LR
 - Notfallfunktion bei kompromittierten Sitzungen: „alle Sitzungen beenden“ (Betriebshandbuch, Abschnitt 6.2).
 
 Textbaustein: „Derzeit ist [Funktion] gestört. Wir arbeiten an einer Lösung und melden uns bis [Uhrzeit] mit einem neuen Stand.“
+
+## Meldungen zu Sicherheitslücken
+
+Externe Meldungen kommen über die Adresse aus `/.well-known/security.txt` (REQ-SEC-012, Variable `SECURITY_CONTACT`, im Muster fiktiv `security@hwg-lu.example`).
+
+1. **Eingang bestätigen** innerhalb von 3 Werktagen; Meldende erhalten eine Vorgangsnummer.
+2. **Bewerten** durch security-lead: reproduzieren, Schweregrad nach CVSS, betroffene Versionen. Kritisch oder hoch wird als SEV-1 bzw. SEV-2 nach diesem Prozess behandelt.
+3. **Beheben** mit Regressionstest; bei Verdacht auf Datenabfluss zusätzlich [Datenpannen-Prozess](../06-recht/datenpannen-prozess.md).
+4. **Veröffentlichen** im Changelog nach der Behebung, spätestens 90 Tage nach Eingang (koordinierte Offenlegung); Dank an die Meldenden, wenn gewünscht.
+5. **Rechtlicher Schutz:** Wer in gutem Glauben meldet und die Regeln aus `security.txt` einhält (keine Daten anderer abrufen, keine Störung des Betriebs), wird nicht verfolgt (Policy, fiktiv).
 
 ## Postmortem-Vorlage
 

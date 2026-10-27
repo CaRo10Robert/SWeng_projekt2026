@@ -12,9 +12,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 5 Abs. 2, Art. 30, Art. 32, Q-23
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-DOC-VVT, CTRL-DOC-TOM]
 ---
 
@@ -38,8 +38,8 @@ Rechenschaftspflicht (Art. 5 Abs. 2), Verzeichnis (Art. 30) und Sicherheit der V
 | TOM verweist auf eine nicht umgesetzte Anforderung | als „geplant“ mit Backlog-Eintrag gekennzeichnet |
 
 ## Nachweis
-- `CTRL-DOC-VVT`: Kontrolle `docs/06-recht/vvt.md` – alle genannten Verarbeitungen mit allen Pflichtfeldern, Abgleich mit der Datenschutzerklärung.
-- `CTRL-DOC-TOM`: Kontrolle `docs/06-recht/toms.md` – Gliederung nach Art. 32, jede Maßnahme mit Anforderung und Nachweis.
+- `CTRL-DOC-VVT`: Kontrolle `docs/06-recht/vvt.md` – alle genannten Verarbeitungen mit allen Pflichtfeldern, Abgleich mit der Datenschutzerklärung – Protokoll [CTRL-DOC-VVT](../../05-umsetzung/nachweise/CTRL-DOC-VVT.md).
+- `CTRL-DOC-TOM`: Kontrolle `docs/06-recht/toms.md` – Gliederung nach Art. 32, jede Maßnahme mit Anforderung und Nachweis – Protokoll [CTRL-DOC-TOM](../../05-umsetzung/nachweise/CTRL-DOC-TOM.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -48,3 +48,4 @@ Rechenschaftspflicht (Art. 5 Abs. 2), Verzeichnis (Art. 30) und Sicherheit der V
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-R-01, RV-R-02, RV-R-06): Status nach Umsetzung; VVT und TOMs an Ist-Stand (Logs ohne IP, Pseudonymisierung, Löschjournal, Deals) angeglichen |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-VVT, CTRL-DOC-TOM bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

@@ -69,3 +69,13 @@ describe('Tokens', () => {
     expect(a.hash).not.toContain(a.token);
   });
 });
+
+describe('Randfälle der Adress- und Passwortprüfung (Zweigabdeckung kritischer Pfade)', () => {
+  it.each(['.max@hwg-lu.de', 'max.@hwg-lu.de', '+nur-suffix@hwg-lu.de'])('lehnt %s als ungültiges Format ab', (email) => {
+    expect(checkRegistrationEmail(email, rules)).toEqual({ ok: false, reason: 'invalid_format' });
+  });
+
+  it('lehnt Passwörter über 256 Zeichen ab', () => {
+    expect(checkPassword('a1'.repeat(129), { blocklist: new Set() }).ok).toBe(false);
+  });
+});

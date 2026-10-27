@@ -1,11 +1,12 @@
 ---
 id: DSFA-CAMPUSMARKT
 type: dpia
-status: done
+status: approved
 owner: product-owner
-version: 1.0
+version: 1.1
 created: 2026-10-25
-last_updated: 2026-10-25
+last_updated: 2026-10-26
+review_due: 2027-10-25
 ---
 
 # Datenschutz-Folgenabschätzung CampusMarkt HWG LU (Übung)

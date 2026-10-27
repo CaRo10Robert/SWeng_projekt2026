@@ -163,10 +163,18 @@ const regStatuses = [];
 for (let i = 0; i < 4; i++) regStatuses.push((await register(limitAddr)).status);
 check('[AT-SEC-005-2] 4. Registrierung derselben Adresse in einer Stunde → 429', regStatuses.join() === '202,202,202,429', regStatuses);
 const loginStatuses = [];
+const loginHeaders = [];
 for (let i = 0; i < 6; i++) {
-  loginStatuses.push((await anon.call('POST', '/auth/login', { email: `niemand.${TS}@studmail.hwg-lu.de`, password: 'falsch-falsch-falsch' })).status);
+  const res = await anon.call('POST', '/auth/login', { email: `niemand.${TS}@studmail.hwg-lu.de`, password: 'falsch-falsch-falsch' });
+  loginStatuses.push(res.status);
+  loginHeaders.push(['limit', 'remaining', 'reset', 'policy'].map((h) => res.headers.get(`ratelimit-${h}`)));
 }
 check('[AT-SEC-005] 5 Fehlversuche, die 6. Anmeldung → 429', loginStatuses.join() === '401,401,401,401,401,429', loginStatuses);
+// Informative Header statt stillem Abweisen (Guideline Kap. 06, GL-14)
+check('RateLimit-Header: Limit 5, Rest zählt herunter, Reset und Policy gesetzt',
+  loginHeaders[0][0] === '5' && loginHeaders[0][1] === '4' && loginHeaders[4][1] === '0' && loginHeaders[5][1] === '0' &&
+  Number(loginHeaders[0][2]) > 0 && loginHeaders[0][3] === '5;w=900',
+  loginHeaders);
 // Upload-Quote je Mitglied: 100 Bilder je Stunde, danach 429 (ASVS 12.1.3, Pentest PT-UP-07)
 const jonas = await login('jonas.weber@hwg-lu.de');
 const eightPngs = () => {
@@ -440,10 +448,20 @@ check('[AT-MOD-004] Drei Meldungen blenden die Anzeige aus der Suche aus; Betrof
 const admin = await login('admin@hwg-lu.de');
 const roleUp = await admin.call('POST', `/admin/users/${miaId}/role`, { role: 'moderator' });
 const roleDown = await admin.call('POST', `/admin/users/${miaId}/role`, { role: 'member' });
-const auditLog = (await admin.call('GET', '/admin/audit')).data;
+const auditLog = (await admin.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 check('[AT-MOD-007] Rollenwechsel durch Admin, im Audit-Log protokolliert',
   roleUp.status === 204 && roleDown.status === 204 && auditLog.some((a) => a.action === 'role.changed' && a.targetId === miaId));
 check('[AT-MOD-007-2] Mitglied erhält 403 auf die Nutzerverwaltung', (await lea.call('GET', '/admin/users')).status === 403);
+// Keyset-Paginierung des Audit-Logs (Guideline Kap. 06, GL-14): zwei Seiten à 1 Eintrag, lückenlos und ohne Doppelung
+const auditPage1 = (await admin.call('GET', '/admin/audit?limit=1')).data;
+const auditPage2 = (await admin.call('GET', `/admin/audit?limit=1&cursor=${encodeURIComponent(auditPage1?.nextCursor ?? '')}`)).data;
+const auditFirstTwo = (await admin.call('GET', '/admin/audit?limit=2')).data?.items ?? [];
+const badCursor = await admin.call('GET', '/admin/audit?cursor=kaputt');
+check('Audit-Log paginiert: Cursor liefert die nächste Seite, ungültiger Cursor → 422',
+  auditPage1?.items.length === 1 && !!auditPage1.nextCursor && auditPage2?.items.length === 1 &&
+  auditPage1.items[0].id === auditFirstTwo[0]?.id && auditPage2.items[0].id === auditFirstTwo[1]?.id &&
+  badCursor.status === 422 && badCursor.data.code === 'invalid_cursor',
+  { page1: auditPage1?.items.map((a) => a.id), page2: auditPage2?.items.map((a) => a.id), firstTwo: auditFirstTwo.map((a) => a.id), bad: badCursor.status });
 check('[AT-MOD-003] Audit-Log protokolliert die Moderationsentscheidung', auditLog.some((a) => a.action === 'moderation.remove'));
 
 // ------------------------------------------------------------------ DSA: Begründung, Widerspruch, Straftatverdacht (REQ-LEGAL-006..008)
@@ -490,7 +508,7 @@ const reversal = await admin.call('POST', `/moderation/appeals/${appealOne.data?
 const restored = await user.call('GET', `/listings/${reported.data?.id}`);
 const userResult = (await user.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision?.id === subjectNotice?.decision.id);
 const leaAppealResult = (await lea.call('GET', '/me/notices')).data?.find((n) => n.kind === 'appeal_result' && n.decision?.id === subjectNotice?.decision.id);
-const appealAudit = (await admin.call('GET', '/admin/audit')).data;
+const appealAudit = (await admin.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 check('[AT-LEGAL-007-3] Stattgeben stellt die Anzeige wieder her; beide Seiten erhalten eine Mitteilung; Audit-Log',
   reversal.status === 204 && restored.data?.status === 'active' && userResult?.appeal.status === 'reversed' &&
   leaAppealResult?.appeal.status === 'reversed' && !!userResult?.appeal.outcomeReason &&
@@ -510,8 +528,8 @@ const crimeDecision = await mod.call('POST', `/moderation/cases/${crimeCase?.id}
 const crimeAlert = await waitForMails('admin@hwg-lu.de', 'Verdacht auf Straftat');
 const crimeSubjectMail = (await waitForMails(email, 'Entscheidung der Moderation', 3)).find((m) => m.Text.includes(crimeTitle));
 const crimeNotice = (await user.call('GET', '/me/notices')).data?.find((n) => n.decision?.targetTitle === crimeTitle);
-const hold = (await admin.call('GET', '/admin/evidence-holds')).data?.find((h) => h.targetId === crimeListing.data?.id);
-const crimeAudit = (await admin.call('GET', '/admin/audit')).data;
+const hold = (await admin.call('GET', '/admin/evidence-holds?limit=200')).data?.items?.find((h) => h.targetId === crimeListing.data?.id);
+const crimeAudit = (await admin.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 const holdRelease = await admin.call('POST', `/admin/evidence-holds/${hold?.id}/release`);
 check('[AT-LEGAL-008] Kennzeichnung „Verdacht auf Straftat“: Audit-Log, Mail an Admins, Beweissicherung; ohne Begründung 422; nicht in der Mitteilung an Betroffene',
   crimeNoReason.status === 422 && crimeNoReason.data.code === 'criminal_reason_required' && memberFlag.status === 403 &&
@@ -537,7 +555,7 @@ const dac7Csv = await admin.call('GET', `/admin/reports/dac7?year=${year}&format
 const dac7CsvText = await dac7Csv.text();
 const dac7Member = await lea.call('GET', `/admin/reports/dac7?year=${year}`);
 const dac7Future = await admin.call('GET', `/admin/reports/dac7?year=${year + 1}`);
-const dac7Audit = (await admin.call('GET', '/admin/audit')).data;
+const dac7Audit = (await admin.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 check('[AT-LEGAL-009-2] DAC7-Auswertung als JSON und CSV nur für Admins, Mitglied 403, Zukunft 422, Abruf im Audit-Log',
   dac7.status === 200 && dac7.data.thresholds.sales === 30 && dac7.data.thresholds.amountCents === 200_000 && Array.isArray(dac7.data.sellers) &&
   dac7.headers.get('cache-control') === 'no-store' &&
@@ -697,7 +715,7 @@ const memberAnnouncement = await lea.call('PUT', '/admin/announcement', { text: 
 const setAnnouncement = await admin.call('PUT', '/admin/announcement', { text: announcementText });
 const publicAnnouncement = (await anon.call('GET', '/status')).data?.announcement?.text;
 const removeAnnouncement = await admin.call('DELETE', '/admin/announcement');
-const announcementAudit = (await admin.call('GET', '/admin/audit')).data;
+const announcementAudit = (await admin.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 check('[AT-OPS-006-2] Admin setzt und entfernt eine Ankündigung (Mitglied 403), öffentlich abrufbar, im Audit-Log',
   memberAnnouncement.status === 403 && setAnnouncement.status === 200 && publicAnnouncement === announcementText &&
   removeAnnouncement.status === 200 && removeAnnouncement.data.announcement === null &&
@@ -740,7 +758,7 @@ const endAll = await admin.call('POST', '/admin/security/end-sessions', { forceP
 const leaAfterEnd = await lea.call('GET', '/me');
 const adminAfterEnd = await admin.call('GET', '/me');
 const adminAgain = await login('admin@hwg-lu.de');
-const endAudit = (await adminAgain.call('GET', '/admin/audit')).data ?? [];
+const endAudit = (await adminAgain.call('GET', '/admin/audit?limit=200')).data?.items ?? [];
 check('Notfall: Admin beendet alle Sitzungen (Mitglied 403), danach 401 für alle, Eintrag im Audit-Log',
   memberEnd.status === 403 && endAll.status === 200 && endAll.data.sessions >= 2 && endAll.data.accounts === 0 &&
   leaAfterEnd.status === 401 && adminAfterEnd.status === 401 && endAudit.some((a) => a.action === 'security.end_all_sessions'),

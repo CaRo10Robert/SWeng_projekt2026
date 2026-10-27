@@ -1,11 +1,11 @@
 ---
 id: LEGAL-TOM
 type: privacy
-status: in-review
+status: approved
 owner: security-lead
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Technische und organisatorische Maßnahmen (Art. 32 DSGVO)
@@ -74,7 +74,7 @@ Die Maßnahmen beschreiben die **tatsächliche Architektur** des Docker-Beispiel
 | Automatisierte Prüfungen | CI bei jeder Änderung: Unit-, E2E-, Smoke-Tests, Modulgrenzen, Nachverfolgbarkeit | REQ-OPS-004 | umgesetzt |
 | Threat Model | Registrierung, Chat, Upload | REQ-SEC-009 | geplant |
 | Penetrationstest | vor dem Go-live nach ASVS L2 | REQ-SEC-013 | Echtbetrieb ([Plan](../07-betrieb/pentest-plan.md)) |
-| Löschkonzept | täglicher Lauf löscht nach Fristen; Löschjournal außerhalb der Datenbank für Wiederherstellungen | REQ-PRIV-003, ADR-0018 | umgesetzt (Löschläufe für Meldungen, Widersprüche und Mitteilungen geplant) |
+| Löschkonzept | täglicher Lauf löscht nach Fristen; Löschjournal außerhalb der Datenbank für Wiederherstellungen | REQ-PRIV-003, ADR-0019 | umgesetzt (Löschläufe für Meldungen, Widersprüche und Mitteilungen geplant) |
 | Jährliche Überprüfung | VVT, TOMs, Rechtstexte durch DSB | REQ-LEGAL-011 | Echtbetrieb |
 
 ## 6. Organisatorische Maßnahmen

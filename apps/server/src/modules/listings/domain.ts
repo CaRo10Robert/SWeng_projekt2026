@@ -6,6 +6,13 @@ export type StoredStatus = ListingStatus | 'deleted';
 export const MAX_ACTIVE_LISTINGS = 30;
 export const LISTING_LIFETIME_DAYS = 60;
 export const EXPIRY_REMINDER_DAYS = 7;
+/** Reservierungen fallen nach 30 Tagen ohne Abgabe auf „aktiv“ zurück (REQ-LST-008, REQ-PRIV-003). */
+export const RESERVATION_FALLBACK_DAYS = 30;
+
+/** true, wenn eine reservierte Anzeige wieder aktiv werden muss. Grenzfall: genau 30 Tage zählen noch nicht. */
+export function reservationLapsed(status: StoredStatus, statusChangedAt: Date, now: Date): boolean {
+  return status === 'reserved' && now.getTime() - statusChangedAt.getTime() > RESERVATION_FALLBACK_DAYS * 86_400_000;
+}
 /** Höchstens so viele Bilder je Mitglied und Stunde (ASVS 12.1.3). */
 export const UPLOAD_QUOTA = { limit: 100, windowSeconds: 3600 };
 /** Status, die gegen das Limit von 30 aktiven Anzeigen zählen (REQ-LST-011). */

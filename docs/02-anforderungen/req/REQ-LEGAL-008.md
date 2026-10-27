@@ -8,15 +8,16 @@ owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
 release: R1
-moscow: S
+moscow: M
+moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSA Art. 18, Q-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002, REQ-MOD-003]
-version: 1.3
+version: 1.5
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-008, CTRL-DOC-DSA]
 ---
 
@@ -48,7 +49,7 @@ Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopi
 
 ## Nachweis
 - `AT-LEGAL-008`: Smoke-Test – Entscheidung mit Kennzeichnung „Verdacht auf Straftat“ erzeugt Audit-Log-Eintrag und E-Mail an Administratoren; ohne Begründung 422; Mitteilung an Betroffene enthält die Kennzeichnung nicht.
-- `CTRL-DOC-DSA`: Kontrolle `docs/06-recht/dsa-prozesse.md` – Melde- und Abhilfeverfahren, Begründung, Widerspruch, Art. 18 und Kontaktstellen beschrieben, Zuständigkeiten als Platzhalter markiert.
+- `CTRL-DOC-DSA`: Kontrolle `docs/06-recht/dsa-prozesse.md` – Melde- und Abhilfeverfahren, Begründung, Widerspruch, Art. 18 und Kontaktstellen beschrieben, Zuständigkeiten als fiktive Rollen (Q-28) – Protokoll [CTRL-DOC-DSA](../../05-umsetzung/nachweise/CTRL-DOC-DSA.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -57,3 +58,5 @@ Beweissicherung: Von gekennzeichneten Inhalten wird eine **pseudonymisierte Kopi
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-15, RV-R-20, RV-C-05): Beweissicherung als pseudonymisierte Kopie mit Kontext, keine Zurückstellung von Löschungen, preservedItems; Begründung der Einstufung Should; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-008, CTRL-DOC-DSA bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-15 Must wegen Rechtspflicht (DSA Art. 18), moscow_reason [2] |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

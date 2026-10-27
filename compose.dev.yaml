@@ -6,7 +6,7 @@ name: campusmarkt-dev
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:17-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
     environment:
       POSTGRES_USER: campusmarkt
       POSTGRES_PASSWORD: campusmarkt
@@ -17,7 +17,7 @@ services:
       - pgdata-dev:/var/lib/postgresql/data
 
   mailpit:
-    image: axllent/mailpit:v1.27
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
     ports:
       - "127.0.0.1:${DEV_SMTP_PORT:-1025}:1025"
       - "127.0.0.1:${DEV_MAILPIT_PORT:-8025}:8025"

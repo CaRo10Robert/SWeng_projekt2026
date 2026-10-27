@@ -1,16 +1,17 @@
 ---
 id: OPS-BACKUP
 type: operational
-status: in-review
+status: approved
 owner: architecture-lead
-version: 1.3
+version: 1.4
 created: 2026-10-24
 last_updated: 2026-10-26
+review_due: 2027-04-26
 ---
 
 # Datensicherung und Wiederherstellung
 
-> **Muster im Rahmen einer Übungsaufgabe.** Anforderungen: REQ-AVAIL-003 (Docker-Beispiel), REQ-AVAIL-002 (Ziele im Echtbetrieb). Architekturentscheidung: ADR-0018.
+> **Muster im Rahmen einer Übungsaufgabe.** Anforderungen: REQ-AVAIL-003 (Docker-Beispiel), REQ-AVAIL-002 (Ziele im Echtbetrieb). Architekturentscheidungen: ADR-0018 (Sicherung), ADR-0019 (Wiederherstellung und Löschjournal).
 
 ## Was wird gesichert?
 
@@ -72,6 +73,16 @@ Eine Wiederherstellung würde sonst Daten zurückbringen, die nach dem Sicherung
 | Aufbewahrung | 35 Tage (länger als die älteste Sicherung) |
 | Anwendung | nach jeder Wiederherstellung automatisch (Schritt 8), idempotent |
 | Grenzen | Gehen **alle** Volumes verloren (`down -v` ohne Wiederherstellung des Journals), stehen nur die Einträge bis zur letzten Sicherung zur Verfügung (aus der Kopie). Sperren und Entsperren stehen nicht im Journal; nach einer Wiederherstellung gilt der Stand der Sicherung |
+
+## Zuständigkeiten
+
+| Aufgabe | Verantwortlich (fiktive Rollen, Q-28) |
+|---|---|
+| Sicherungen planen, überwachen (Alarm `BackupMissing`) und rotieren | Betrieb (architecture-lead als Owner dieses Dokuments) |
+| Entscheidung über eine Wiederherstellung | Incident-Lead nach dem [Incident-Prozess](incident-prozess.md) |
+| Durchführung und Protokoll der Wiederherstellung | Betrieb |
+| Zugriff auf Sicherungen, Kopien außerhalb des Servers | nur Betrieb und Incident-Leitung, jeder Zugriff protokolliert (siehe [Datenpannen-Prozess](../06-recht/datenpannen-prozess.md#sicherungen-und-zugriff-befunde-t-1-t-6)) |
+| Restore-Übung halbjährlich | Betrieb mit qa-lead |
 
 ## Echtbetrieb
 

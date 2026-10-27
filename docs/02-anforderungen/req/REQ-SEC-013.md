@@ -12,9 +12,10 @@ kano: n/a
 epic: EPIC-13
 source: REQ-SEC-001, OWASP WSTG, Q-23
 depends_on: [REQ-SEC-001, REQ-SEC-009]
-version: 1.4
+version: 1.6
 created: 2026-10-24
 last_updated: 2026-10-26
+review_due: 2027-04-26
 verification: [CTRL-DOC-PENTEST, MAN-SEC-013]
 ---
 
@@ -36,7 +37,7 @@ Automatisierte Scans (REQ-SEC-008) und Threat Model (REQ-SEC-009) finden nicht a
 | Kritischer Befund kurz vor dem Go-live | Go-live verschoben |
 
 ## Nachweis
-- `CTRL-DOC-PENTEST`: Kontrolle `docs/07-betrieb/pentest-plan.md` – Umfang, Methode, Befundbehandlung vorhanden.
+- `CTRL-DOC-PENTEST`: Kontrolle `docs/07-betrieb/pentest-plan.md` – Umfang, Methode, Befundbehandlung vorhanden – Protokoll [CTRL-DOC-PENTEST](../../05-umsetzung/nachweise/CTRL-DOC-PENTEST.md).
 - `MAN-SEC-013`: Abschlussbericht des Penetrationstests – als Übungs-Pentest durchgeführt (kein externer Tester): [MAN-SEC-013](../../05-umsetzung/nachweise/MAN-SEC-013.md), Rohdaten `pentest-results.json`, ZAP-Zusammenfassungen in `zap/`. 49 gezielte Prüfungen, 47 bestanden, 2 akzeptierte Demo-Befunde (PT-F-17 API-Doku im Demo-Modus, PT-F-18 `/metrics` am lokalen Port); kein kritischer oder hoher Befund. Behoben: PT-F-01, 02, 03, 13, 14, 15, 16. Offen als Backlog: PT-F-04 bis PT-F-12 (B-59 bis B-63).
 
 ## Änderungshistorie
@@ -47,3 +48,5 @@ Automatisierte Scans (REQ-SEC-008) und Threat Model (REQ-SEC-009) finden nicht a
 | 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
 | 1.3 | 2026-10-26 | Übungs-Pentest MAN-SEC-013 verlinkt; offene Empfehlungen als B-59…B-63 |
 | 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-PENTEST, MAN-SEC-013 bestanden bzw. ausgeführt); Status → verified |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |
+| 1.6 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

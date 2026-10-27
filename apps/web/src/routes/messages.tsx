@@ -28,6 +28,7 @@ const systemCodes: Record<SystemCode, MessageKey> = {
   deal_reserved: 'chat.system.reserved',
   deal_completed: 'chat.system.completed',
   deal_cancelled: 'chat.system.cancelled',
+  reservation_expired: 'chat.system.reservationExpired',
   message_removed: 'chat.system.removed',
   message_deleted: 'chat.system.deleted',
 };

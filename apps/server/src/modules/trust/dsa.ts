@@ -6,6 +6,7 @@ import type {
   DecisionBody,
   DecisionStatement,
   EvidenceHold,
+  EvidenceHoldPage,
   ModerationDecisionType,
   ModerationNotice,
   ModerationRule,
@@ -16,7 +17,8 @@ import { audit } from '../../platform/audit.js';
 import type { Tx } from '../../platform/db.js';
 import { AppError, conflict, isUniqueViolation, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
-import { sql } from '../../platform/sql.js';
+import { toPage } from '../../platform/http/pagination.js';
+import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import {
   addMonths,
@@ -602,7 +604,8 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
     },
 
     // ------------------------------------------------------------ Beweissicherung (REQ-LEGAL-008)
-    async evidenceHolds(): Promise<EvidenceHold[]> {
+    /** Aktive Sicherungen zuerst, dann neueste; Keyset über (freigegeben, created_at, id). */
+    async evidenceHolds(page: { limit: number; after?: (string | number)[] }): Promise<EvidenceHoldPage> {
       const rows = await db.query<{
         id: string;
         decision_id: string;
@@ -615,8 +618,15 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         preserved: number;
       }>(sql`
         SELECT h.*, (SELECT count(*) FROM trust.evidence_copy e WHERE e.hold_id = h.id) AS preserved
-        FROM trust.evidence_hold h ORDER BY released_at NULLS FIRST, created_at DESC LIMIT 200`);
-      return rows.map((r) => ({
+        FROM trust.evidence_hold h
+        ${page.after
+          ? sql`WHERE (h.released_at IS NOT NULL)::int > ${Number(page.after[0])}
+                  OR ((h.released_at IS NOT NULL)::int = ${Number(page.after[0])}
+                      AND (date_trunc('milliseconds', h.created_at), h.id) < (${page.after[1]}::timestamptz, ${page.after[2]}::uuid))`
+          : empty}
+        ORDER BY (h.released_at IS NOT NULL)::int ASC, date_trunc('milliseconds', h.created_at) DESC, h.id DESC
+        LIMIT ${page.limit + 1}`);
+      return toPage(rows, page.limit, (r): EvidenceHold => ({
         id: r.id,
         decisionId: r.decision_id,
         targetType: r.target_type,
@@ -626,7 +636,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         releasedAt: r.released_at,
         createdAt: r.created_at,
         preservedItems: Number(r.preserved),
-      }));
+      }), (r) => [r.released_at ? 1 : 0, r.created_at, r.id]);
     },
 
     async releaseEvidenceHold(auth: AuthContext, id: string): Promise<void> {

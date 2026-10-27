@@ -12,11 +12,12 @@ moscow: M
 moscow_reason: [2]
 kano: n/a
 epic: EPIC-01
-source: ASVS
+source: OWASP ASVS 4.0.3 (EX-01)
 use_cases: [UC-01, UC-02, UC-03]
-version: 3.1
+version: 3.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
+review_due: 2027-04-26
 verification: [AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3]
 ---
 
@@ -64,3 +65,4 @@ Ohne Begrenzung sind Passwort-Raten, Spam und das Fluten von Hochschulpostfäche
 | 2.0 | 2026-10-23 | Speichertechnik entfernt (ADR-0010/0011), Grenze für „erneut senden“ und Akzeptanzkriterien ergänzt |
 | 3.0 | 2026-10-23 | Review v0.2: R-25 Entscheidungstabelle Schlüssel/Grenze/Fenster/Wirkung nach Q-18 (Campus-NAT, keine Kontosperre); R-26 Pseudonymisierung statt „gehasht“; R-03 `class: constraint`; R-04 Fehler- und Missbrauchsfälle; Status `approved`, weil die neuen Grenzen noch nicht umgesetzt sind |
 | 3.1 | 2026-10-23 | Umgesetzt (Schritt 6): Registrierungsgrenzen nach Q-18 (3 je Adresse, 30 je IP und Stunde); Status → implemented |
+| 3.2 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |

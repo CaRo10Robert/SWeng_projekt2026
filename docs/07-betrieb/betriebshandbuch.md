@@ -1,11 +1,12 @@
 ---
 id: OPS-RUNBOOK
 type: operational
-status: in-review
+status: approved
 owner: architecture-lead
-version: 1.3
+version: 1.4
 created: 2026-10-24
 last_updated: 2026-10-26
+review_due: 2027-04-26
 ---
 
 # Betriebshandbuch
@@ -61,7 +62,7 @@ App, Mailpit, Prometheus und Alertmanager sind nur an `127.0.0.1` gebunden. Nach
 | `SEED_DEMO`, `DEMO_MODE` | `true` | Demo-Daten und Demo-Werkzeuge; im Echtbetrieb **false**. Mit `SEED_DEMO=true` hebt jeder Start die Demo-Konten auf die aktuelle Fassung der Rechtstexte und legt fehlende Demo-Konten an (Tim bleibt auf der alten Fassung) |
 | `UNSUBSCRIBE_SECRET` | leer | optionaler Override; ohne Wert erzeugt die App beim ersten Start ein zufälliges Geheimnis in `platform.setting` (kein öffentlicher Standardwert) |
 | `SECURITY_CONTACT` | `mailto:security@hwg-lu.example` | Kontakt in `security.txt`; im Echtbetrieb echte Adresse |
-| `JOURNAL_DIR` | `/data/journal` (Volume `journal`) | Ablage des Löschjournals (ADR-0018) |
+| `JOURNAL_DIR` | `/data/journal` (Volume `journal`) | Ablage des Löschjournals (ADR-0019) |
 | `MAINTENANCE_MODE` / `MAINTENANCE_UNTIL` | `false` / leer | harter Wartungsmodus mit voraussichtlichem Ende (Neustart nötig); daneben gibt es den weichen Modus über die Admin-Oberfläche, siehe [Wartung](wartung-statusseite.md) |
 | `LOG_LEVEL` | `info` | Protokollstufe; das Request-Log enthält Methode, Route ohne Query, Status, Dauer und Request-ID, keine IP-Adresse. Eine Request-ID vom Client (`x-request-id`) wird nur übernommen, wenn sie eine UUID ist; unbekannte Pfade erscheinen als `unmatched`. Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme |
 | `PROMETHEUS_PORT`, `ALERTMANAGER_PORT`, `PROXY_HTTPS_PORT`, `PROXY_HTTP_PORT` | 9090, 9093, 8443, 8088 | Host-Ports der Profile `monitoring` und `proxy` |
@@ -122,5 +123,61 @@ Ergebnis der Störungsübung [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011
 ### 6.2 Notfall: alle Sitzungen beenden
 
 Bei Verdacht auf gestohlene Sitzungen oder Zugangsdaten beendet ein Administrator in der Admin-Oberfläche (Bereich „Sicherheit“, zweistufige Bestätigung) **alle** Sitzungen einschließlich der eigenen (`POST /api/v1/admin/security/end-sessions`, Eintrag im Audit-Log). Optional wird beim nächsten Login ein Passwortwechsel erzwungen: Die Anmeldung antwortet dann mit `password_change_required` und schickt einen Link zum Zurücksetzen. Für die Information **aller** Mitglieder gibt es bewusst keine Rundmail (Missbrauchsrisiko); genutzt wird das Ankündigungsbanner bzw. bei ausgefallener App der Ausweichkanal.
+
+### 6.3 Runbook AppDown
+
+Alarm: Prometheus erreicht `/metrics` der App seit 2 min nicht (SEV-1).
+
+- **Diagnose:** `docker compose ps -a app` (läuft der Container, Neustarts?), `docker compose logs --tail 200 app` (Absturz, Fehler beim Start, Migration). Erreichbarkeit von außen: `curl -i http://localhost:8080/health/live`.
+- **Maßnahme:** Absturz beim Start → Ursache im Log beheben (z. B. fehlende Variable, Migration, siehe REQ-OPS-005), dann `docker compose up -d app`. Container läuft, aber `/metrics` nicht erreichbar → Netzwerk bzw. Prometheus-Ziel prüfen (`http://127.0.0.1:9090/targets`). Nach einem fehlerhaften Release: vorheriges Image-Tag starten.
+- **Entwarnung:** `/health/live` 200, `/health/ready` 200, Ziel in Prometheus „up“; die Entwarnung kommt mit bis zu 5 min Verzögerung (`group_interval`). Danach Postmortem nach dem [Incident-Prozess](incident-prozess.md).
+
+### 6.4 Runbook HighErrorRate
+
+Alarm: mehr als 5 % Serverfehler (5xx) über 5 min bei mindestens 0,1 Anfragen/s, nicht im Wartungsmodus (SEV-2).
+
+- **Diagnose:** In Prometheus `sum by (route, status) (rate(http_request_duration_seconds_count{status=~"5.."}[5m]))` – welche Route? Im Log nach `"level":50` und der `requestId` aus Fehlermeldungen suchen: `docker compose logs --since 15m app`. Datenbank und Mail prüfen (`/api/v1/status`).
+- **Maßnahme:** Abhängigkeit gestört → passendes Runbook (6.1 Datenbank, „keine E-Mails“ in der Tabelle oben). Fehler seit einem Release → Rollback auf das vorherige Image-Tag ([Update-Prozess](update-prozess.md)). Bei länger dauernder Behebung Wartungsmodus mit Ankündigung (REQ-OPS-006).
+- **Entwarnung:** Fehlerquote 15 min unter 1 %; Ursache im Postmortem.
+
+### 6.5 Runbook SlowSearch
+
+Alarm: p95 der Suche (`GET /api/v1/listings`) über 500 ms für 10 min (SEV-3, Ziel aus REQ-PERF-001).
+
+- **Diagnose:** Last prüfen (`rate(http_request_duration_seconds_count{route="/api/v1/listings"}[5m])`); langsame Abfragen in PostgreSQL: `docker compose exec db psql -U campusmarkt -c "SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 5"` (falls die Erweiterung aktiv ist), sonst `SELECT * FROM pg_stat_activity WHERE state <> 'idle'`. CPU und Speicher: `docker stats`.
+- **Maßnahme:** Ungewöhnliche Last durch einzelne Clients → Rate-Limits greifen lassen, ggf. Grenzen senken. Fehlender Index bzw. Abfrageplan → `EXPLAIN ANALYZE` der Suchabfrage, Index als Migration nachziehen. Ressourcen zu knapp → Container-Limits anheben.
+- **Entwarnung:** p95 30 min unter 500 ms; dauerhafte Maßnahme als Backlog-Eintrag.
+
+### 6.6 Runbook JobFailures
+
+Alarm: mindestens ein Hintergrund-Job ist in den letzten 15 min endgültig gescheitert (`outcome="dead"`, SEV-3).
+
+- **Diagnose:** Admin-Oberfläche → Abschnitt „Dead-Letter-Queue“ (Queue, Fehlermeldung, Zeitpunkt); Log mit `docker compose logs --since 30m app`. Häufigste Ursache: Mail-Relay bzw. Mailpit nicht erreichbar (CTRL-DLQ).
+- **Maßnahme:** Ursache beheben (Relay starten, Konfiguration). Betroffene Mitglieder können Mails selbst neu anfordern (Bestätigung, Passwort); für Benachrichtigungen ist kein erneuter Versand nötig. Im Demo-Modus können fällige Jobs über „Fällige Jobs jetzt ausführen“ angestoßen werden.
+- **Entwarnung:** keine neuen Dead Letters in 30 min; Einträge in der Dead-Letter-Ansicht dokumentiert und bewertet.
+
+### 6.7 Runbook WebSocketDrop
+
+Alarm: offene Echtzeitverbindungen fallen innerhalb von 5 min auf unter 20 %, bei zuvor mindestens 5 Verbindungen (SEV-2).
+
+- **Diagnose:** Neustart der App? (`docker compose ps app`, Startzeit). Proxy-Profil aktiv → `docker compose logs proxy` (Timeouts, Zertifikat). Browser-Konsole eines Testkontos: Verbindungsfehler bzw. Statuscodes beim Upgrade.
+- **Maßnahme:** Nach einem Neustart verbinden sich Clients automatisch neu, Chat läuft über Polling weiter (REQ-PERF-002) – beobachten. Proxy-Problem → Proxy-Konfiguration prüfen ([TLS und Reverse Proxy](tls-reverse-proxy.md)) und neu laden.
+- **Entwarnung:** Verbindungszahl wieder auf dem Niveau vor dem Abfall; Nachrichten wurden laut Stichprobe vollständig zugestellt.
+
+### 6.8 Runbook MaintenanceModeOn
+
+Alarm: Wartungsmodus seit mehr als 2 h aktiv (SEV-3).
+
+- **Diagnose:** Ist eine Wartung angekündigt und läuft sie noch (Ankündigung in der Admin-Oberfläche, Audit-Log „maintenance“)? Weicher Modus (Einstellung) oder harter Modus (`MAINTENANCE_MODE`)?
+- **Maßnahme:** Wartung beendet → Modus ausschalten (Tabelle oben, Zeile „alle Anfragen 503“). Wartung dauert länger → Ankündigung und `Retry-After` anpassen ([Wartung und Statusseite](wartung-statusseite.md)).
+- **Entwarnung:** `campusmarkt_maintenance_mode` = 0, Statusseite „normal“.
+
+### 6.9 Runbook BackupMissing
+
+Alarm: seit mehr als 26 h keine erfolgreiche Sicherung (SEV-2; RPO ≤ 24 h aus REQ-AVAIL-003).
+
+- **Diagnose:** Letzte Sicherung in `backups/` (Verzeichnisse mit `manifest.json`; `.partial` bedeutet abgebrochen); Zeitplan bzw. Cronjob des Betriebs prüfen; freien Speicher prüfen.
+- **Maßnahme:** Sicherung von Hand starten: `node scripts/backup.mjs` ([Datensicherung](backup-restore.md)); bei vollem Datenträger Platz schaffen, keine gültigen Sicherungen löschen. Abgebrochene `.partial`-Verzeichnisse nach Prüfung entfernen.
+- **Entwarnung:** Metrik `campusmarkt_backup_last_success_timestamp_seconds` aktuell; Ursache des Ausfalls behoben.
 
 Weitere Hinweise: README des Repos, Abschnitt Fehlerbehebung (REQ-OPS-003).

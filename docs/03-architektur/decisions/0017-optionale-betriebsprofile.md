@@ -1,6 +1,6 @@
 # ADR-0017: Optionale Compose-Profile für Reverse Proxy und Überwachung
 
-- **Status:** Accepted (vorläufig, Q-27; Bestätigung mit dem Architektur-Review ausstehend)
+- **Status:** Accepted (2026-10-26; bestätigt durch Review v1.3 und Guideline-Review; fachlich Q-27). Die datierten Nachträge gleichen Pfade, Versionen und Alarmregeln an; die Entscheidung für optionale Profile bleibt unverändert.
 - **Datum:** 2026-10-24
 - **Bezug:** REQ-OPS-008, REQ-OPS-009, REQ-OPS-002, REQ-ARCH-005, ADR-0010 (erweitert, nicht ersetzt), Backlog B-54, B-55; Betrieb in [docs/07-betrieb/](../../07-betrieb/README.md)
 

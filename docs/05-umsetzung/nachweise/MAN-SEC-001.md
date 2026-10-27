@@ -25,14 +25,14 @@ last_updated: 2026-10-26
 ## Grundlage und Abweichung
 
 - **Katalog:** Die Checkliste folgt **ASVS 4.0.3**. Dessen Kontrollnummern sind stabil und in Werkzeugen wie ZAP verbreitet.
-- **Abweichung:** REQ-SEC-001 nennt ASVS 5.0. Die Prüfinhalte der anwendbaren Kapitel (Authentisierung, Sitzung, Zugriffskontrolle, Validierung und Kodierung, Dateien, Konfiguration, Datenschutz, Protokollierung) decken sich inhaltlich. Eine Umstellung der Nummern auf 5.0 bleibt ein offener Punkt; die Anforderung muss das nachziehen.
+- **Abweichung:** Die aktuelle Hauptversion ist ASVS 5.0 (Guideline Kap. 07, Standards-Register). REQ-SEC-001 legt 4.0.3 als geprüfte Fassung fest; die Abweichung ist als Ausnahme [EX-01](../../03-architektur/ausnahmen.md#ex-01-asvs-fassung-403-statt-50) mit Ablauf 2027-04-30 erfasst. Die Prüfinhalte der anwendbaren Kapitel decken sich weitgehend.
 - **Umfang:** Aufgeführt sind die Kontrollen der Stufen L1 und L2 je Kapitel V1 bis V14. Kontrollen, die nur für L3 gelten, entfallen.
 - **Statuswerte:**
   - ✅ erfüllt
   - ◐ teilweise bzw. mit befristeter Ausnahme
   - ❌ nicht erfüllt
   - N/A nicht anwendbar, mit Begründung
-- **Ausnahmen:** Jede Ausnahme hat einen Genehmigungsvermerk (fiktiv: security-lead, 2026-10-26) und ein Ablaufdatum, nämlich spätestens den Go-live (EPIC-12).
+- **Ausnahmen:** Alle ◐-Kontrollen sind als [EX-03](../../03-architektur/ausnahmen.md#ex-03-befristete-asvs-ausnahmen-im-docker-beispiel) (Ablauf 2027-03-31), alle ❌-Kontrollen als [EX-04](../../03-architektur/ausnahmen.md#ex-04-nicht-erfüllte-asvs-kontrollen-mit-backlog-eintrag) (Ablauf 2027-02-28) im Ausnahmeregister erfasst, jeweils mit Genehmigung (fiktiv: security-lead, 2026-10-26). „Bis Go-live“ in den Tabellen bedeutet: spätestens zum Ablaufdatum der jeweiligen Ausnahme.
 
 ## V1 Architektur, Design, Threat Modeling
 
@@ -324,9 +324,9 @@ Die Zahlen unten zählen die Zeilen dieser Checkliste. Zeilen mit Bereichen (z. 
 
 **Bewertung gegen das Akzeptanzkriterium von REQ-SEC-001** („100 % der anwendbaren Kontrollen erfüllt oder mit begründeter, befristeter Ausnahme; 0 offene hohe Befunde aus dem Pentest“):
 - **Pentest:** keine hohen oder kritischen Befunde.
-- **Ausnahmen:** Alle ◐-Kontrollen sind begründet und bis zum Go-live befristet. Freigabe fiktiv durch security-lead am 2026-10-26.
-- **Nicht erfüllt:** Die ❌-Kontrollen sind Komfort- und Härtungslücken mit niedrigem Risiko (Pentest-Befunde PT-F-04 bis PT-F-06 und PT-F-09). Sie sind ins Backlog übernommen (siehe [MAN-SEC-013](MAN-SEC-013.md), Abschnitt Empfehlungen).
-- **Ergebnis:** REQ-SEC-001 ist **bedingt erfüllt**. Für „erfüllt“ müssen die ❌-Kontrollen behoben oder als befristete Ausnahme genehmigt sein.
+- **Ausnahmen:** Alle ◐-Kontrollen sind begründet und über EX-03 bis 2027-03-31 befristet. Freigabe fiktiv durch security-lead am 2026-10-26.
+- **Nicht erfüllt:** Die ❌-Kontrollen sind Komfort- und Härtungslücken mit niedrigem Risiko (Pentest-Befunde PT-F-04 bis PT-F-06 und PT-F-09). Sie sind ins Backlog übernommen (siehe [MAN-SEC-013](MAN-SEC-013.md), Abschnitt Empfehlungen) und über EX-04 bis 2027-02-28 befristet ausgenommen.
+- **Ergebnis:** REQ-SEC-001 ist **erfüllt**: Jede anwendbare Kontrolle ist erfüllt oder durch eine genehmigte, befristete Ausnahme (EX-03, EX-04) abgedeckt, und der Pentest hat keinen offenen Befund „hoch“. `scripts/trace.mjs` überwacht die Ablaufdaten (Stand nach Guideline-Review, 2026-10-26).
 
 ## Review-Vermerk
 

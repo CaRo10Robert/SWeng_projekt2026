@@ -13,7 +13,7 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 33, Art. 34, Q-23
-version: 1.4
+version: 1.5
 created: 2026-10-24
 last_updated: 2026-10-26
 verification: [CTRL-DOC-DATENPANNE, MAN-LEGAL-013]
@@ -38,7 +38,7 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 | Unklar, ob personenbezogene Daten betroffen | wird als Verletzung behandelt, bis das Gegenteil feststeht |
 
 ## Nachweis
-- `CTRL-DOC-DATENPANNE`: Kontrolle `docs/06-recht/datenpannen-prozess.md` – Rollen, Fristen, Bewertung, Vorlagen vorhanden.
+- `CTRL-DOC-DATENPANNE`: Kontrolle `docs/06-recht/datenpannen-prozess.md` – Rollen, Fristen, Bewertung, Vorlagen vorhanden – Protokoll [CTRL-DOC-DATENPANNE](../../05-umsetzung/nachweise/CTRL-DOC-DATENPANNE.md).
 - `MAN-LEGAL-013`: Protokoll einer Tabletop-Übung – [MAN-LEGAL-013](../../05-umsetzung/nachweise/MAN-LEGAL-013.md): fiktives Szenario, Bewertung nach 1 h 50 min, Meldung nach 28 h 50 min (Frist 72 h). Die Befunde T-1, T-3, T-4 und T-6 sind im Datenpannen-Prozess eingearbeitet.
 
 ## Änderungshistorie
@@ -49,3 +49,4 @@ Art. 33 (Meldung binnen 72 h, Dokumentation jeder Verletzung) und Art. 34 (Benac
 | 1.2 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
 | 1.3 | 2026-10-26 | Nachweis MAN-LEGAL-013 mit Protokoll verlinkt |
 | 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-DATENPANNE, MAN-LEGAL-013 bestanden bzw. ausgeführt); Status → verified |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

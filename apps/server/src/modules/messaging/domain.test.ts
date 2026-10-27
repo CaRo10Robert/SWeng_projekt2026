@@ -102,7 +102,7 @@ describe('Systemnachrichten als Code (MAN-UX-002 T-2)', () => {
   it('jeder Code hat einen deutschen Klartext', () => {
     for (const [code, text] of Object.entries(SYSTEM_TEXT)) expect(text.length, code).toBeGreaterThan(5);
     expect(Object.keys(SYSTEM_TEXT).sort()).toEqual(
-      ['contact_exchanged', 'deal_cancelled', 'deal_completed', 'deal_reserved', 'message_deleted', 'message_removed'],
+      ['contact_exchanged', 'deal_cancelled', 'deal_completed', 'deal_reserved', 'message_deleted', 'message_removed', 'reservation_expired'],
     );
   });
 });

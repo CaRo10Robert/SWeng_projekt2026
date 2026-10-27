@@ -16,9 +16,9 @@ source: LGGBehM RLP, Landesverordnung über barrierefreie Informationstechnik (�
 use_cases: [UC-08]
 depends_on: [REQ-A11Y-001]
 review_due: 2027-10-24
-version: 1.3
+version: 1.5
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE]
 ---
 
@@ -50,9 +50,18 @@ Szenario: Barriere melden
   Und eine Kontaktmöglichkeit, um eine Barriere zu melden
 ```
 
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Datenbank oder Server gestört | Erklärung ist statischer, gebündelter Inhalt und bleibt erreichbar (AT-OPS-001-3) |
+| Erklärung veraltet | `last_updated` sichtbar; jährliche Überprüfung und nach größeren Änderungen (review_due); bekannte Barrieren werden mit dem Testbericht aktualisiert |
+| Feedback geht nicht ein (Postfach überlastet, Mail-Ausfall) | zweiter Kontaktweg (Telefon, fiktiv) und Kontaktstelle (REQ-LEGAL-005); Antwortfrist in der Erklärung |
+| Missbrauch des Feedback-Kanals | kein Formular in der Anwendung, nur E-Mail-Adresse; keine Speicherung in der Plattform |
+| Englische Lesefassung abweichend | deutsche Fassung verbindlich; `check-i18n` prüft Version und Anker der englischen Fassung |
+
 ## Nachweis
 - `AT-LEGAL-004`: E2E-Test – Erklärung von jeder Seite per Tastatur erreichbar, 5 Pflichtabschnitte und Kontaktmöglichkeit vorhanden.
-- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001).
+- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001) – Protokoll [CTRL-DOC-LEGAL-TEXTE](../../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -61,3 +70,5 @@ Szenario: Barriere melden
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-18): Rechtsquelle LGGBehM RLP und RL (EU) 2016/2102 statt BITV 2.0/LBGG; Methode ehrlich (manuelle Prüfung offen); Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-004, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

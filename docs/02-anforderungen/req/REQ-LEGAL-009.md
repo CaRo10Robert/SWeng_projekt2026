@@ -13,9 +13,9 @@ epic: EPIC-13
 source: PStTG (DAC7), Q-26
 use_cases: [UC-43]
 depends_on: [REQ-CHAT-011]
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7]
 ---
 
@@ -52,7 +52,7 @@ I: nur lesend auf vorhandenen Deals · N: Zählregeln für Tausch verhandelbar �
 ## Nachweis
 - `AT-LEGAL-009`: Unit-Test – Schwellenfunktion mit den Grenzfällen der Tabelle.
 - `AT-LEGAL-009-2`: Smoke-Test – Auswertung als JSON und CSV nur für Administratoren, Mitglied 403, Abruf im Audit-Log.
-- `CTRL-DOC-DAC7`: Kontrolle `docs/06-recht/dac7-konzept.md` – Zählregeln, Schwellen, fehlende Stammdaten und Meldeweg beschrieben.
+- `CTRL-DOC-DAC7`: Kontrolle `docs/06-recht/dac7-konzept.md` – Zählregeln, Schwellen, fehlende Stammdaten und Meldeweg beschrieben – Protokoll [CTRL-DOC-DAC7](../../05-umsetzung/nachweise/CTRL-DOC-DAC7.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -61,3 +61,4 @@ I: nur lesend auf vorhandenen Deals · N: Zählregeln für Tausch verhandelbar �
 | 1.1 | 2026-10-25 | Review v1.3 (RV-C-12, RV-R-17): JSON ohne E-Mail-Adresse, nur CSV; Tausch als offener Prüfpunkt; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7 bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

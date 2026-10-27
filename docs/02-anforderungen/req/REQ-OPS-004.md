@@ -13,9 +13,9 @@ moscow_reason: [3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 10
-version: 2.4
+version: 2.5
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-CI-IMAGE]
 ---
 
@@ -36,6 +36,15 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | Messkontext | CI bei jedem Tag `v*` |
 | Verhalten bei Verfehlung | Kein Release |
 
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Abhängigkeit ändert sich unbemerkt | `pnpm install --frozen-lockfile`; Build bricht bei abweichendem Lockfile ab |
+| Basis-Image mit Schwachstellen | Trivy-Scan in CI bricht bei behebbaren Funden HIGH/CRITICAL ab (REQ-SEC-008) |
+| Manipuliertes Artefakt | Build-Provenance-Attestation in CI; Images per Digest gepinnt (REQ-OPS-012); Signatur in einer Registry: Ausnahme EX-05 |
+| Build auf einer Architektur scheitert | Release-Blocker (REQ-PORT-002) |
+| Version nicht erhöht | Tag aus `package.json` und Commit-Hash; doppelte Version ist im Changelog sichtbar |
+
 ## Nachweis
 - `CTRL-CI-IMAGE`: CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24).
 
@@ -49,3 +58,4 @@ Das Anwendungs-Image muss automatisch und reproduzierbar gebaut und mit einer se
 | 2.2 | 2026-10-23 | Umgesetzt (Schritt 6): GitHub-Actions-Workflow .github/workflows/ci.yml (Prüfungen, Diagramme, Compose mit E2E und Smoke); Status → implemented |
 | 2.3 | 2026-10-24 | Nachweis CTRL-CI-IMAGE im CI-Workflow umgesetzt (Tag aus package.json, Archiv als Artefakt) |
 | 2.4 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-CI-IMAGE bestanden bzw. ausgeführt); Status → verified |
+| 2.5 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |

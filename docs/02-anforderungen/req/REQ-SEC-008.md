@@ -12,9 +12,10 @@ moscow_reason: [2, 4]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 07, NIST SSDF
-version: 1.4
+version: 1.5
 created: 2026-10-20
 last_updated: 2026-10-26
+review_due: 2027-10-26
 verification: [CTRL-CI-SCAN]
 ---
 
@@ -51,3 +52,4 @@ Lieferkettenrisiken und versehentlich eingecheckte Geheimnisse sind ohne Automat
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason (Kriterium 4: Guideline); Status `approved` |
 | 1.3 | 2026-10-26 | Security-Scans in CI eingerichtet (B-06), Befunde und Ausnahmen dokumentiert; Status → implemented |
 | 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-CI-SCAN bestanden bzw. ausgeführt); Status → verified |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-06 review_due (NIST SSDF, jährlich) |

@@ -1,9 +1,9 @@
 ---
 id: LEGAL-VVT
 type: privacy
-status: in-review
+status: approved
 owner: product-owner
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-26
 ---

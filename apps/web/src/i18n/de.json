@@ -1,4 +1,5 @@
 {
+  "admin.loadMore": "Weitere laden",
   "admin.audit.empty": "Noch keine Einträge.",
   "admin.audit.system": "System",
   "admin.col.email": "E-Mail",
@@ -170,6 +171,7 @@
   "chat.system.contactExchanged": "Kontaktdaten wurden ausgetauscht. Ihr seht die Hochschul-E-Mail-Adresse des anderen oben im Chat.",
   "chat.system.deleted": "[Nachricht gelöscht – Konto des Absenders wurde gelöscht]",
   "chat.system.removed": "[Nachricht wurde von der Moderation entfernt]",
+  "chat.system.reservationExpired": "Die Reservierung ist nach 30 Tagen ohne Abgabe abgelaufen. Die Anzeige ist wieder für alle sichtbar.",
   "chat.system.reserved": "Die Anzeige wurde für dich reserviert.",
   "chat.unavailable": "Unterhaltung nicht verfügbar",
   "chat.unread": "ungelesen",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkPrice, findProhibitedTerms, nextStatus, sniffImageType } from './domain.js';
+import { checkPrice, findProhibitedTerms, nextStatus, reservationLapsed, sniffImageType } from './domain.js';
 
 describe('[AT-LST-002] Preisregeln (REQ-LST-002)', () => {
   it.each([
@@ -67,5 +67,21 @@ describe('[AT-SEC-007-3] [AT-LST-003-2] Magic Bytes (REQ-SEC-007)', () => {
     expect(sniffImageType(Buffer.from('0000ftypmif10000', 'ascii'))).toBe('heic');
     expect(sniffImageType(Buffer.from('0000ftypisom0000', 'ascii'))).toBeNull();
     expect(sniffImageType(Buffer.from([0xff, 0xd8, 0xff]))).toBeNull();
+  });
+});
+
+describe('Rückfall reservierter Anzeigen nach 30 Tagen (REQ-LST-008, REQ-PRIV-003)', () => {
+  const now = new Date('2026-10-26T12:00:00Z');
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000);
+  it.each([
+    ['reserved', 31, true],
+    ['reserved', 30.01, true],
+    ['reserved', 30, false],
+    ['reserved', 1, false],
+    ['active', 40, false],
+    ['paused', 40, false],
+    ['completed', 40, false],
+  ] as const)('%s seit %s Tagen → Rückfall %s', (status, days, expected) => {
+    expect(reservationLapsed(status, daysAgo(days), now)).toBe(expected);
   });
 });

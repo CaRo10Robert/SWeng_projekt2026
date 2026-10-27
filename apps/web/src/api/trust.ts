@@ -1,16 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   Accepted,
   AdminUser,
   Appeal,
   AppealDecisionBody,
   AppealReceipt,
-  AuditEntry,
+  AuditPage,
   BlockedUser,
   CreateReportBody,
   Dac7Report,
   DecisionBody,
-  EvidenceHold,
+  EvidenceHoldPage,
   JobOverview,
   ModerationCase,
   ModerationNotice,
@@ -67,8 +67,14 @@ export function useSetRole() {
   });
 }
 
+/** Keyset-Paginierung (GL-14): weitere Seiten per `fetchNextPage`. */
 export const useAudit = () =>
-  useQuery({ queryKey: ['admin', 'audit'], queryFn: () => api<AuditEntry[]>('/admin/audit') });
+  useInfiniteQuery({
+    queryKey: ['admin', 'audit'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam, signal }) => api<AuditPage>(`/admin/audit${qs({ cursor: pageParam, limit: 50 })}`, { signal }),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
 
 export const useJobs = () =>
   useQuery({ queryKey: ['admin', 'jobs'], queryFn: () => api<JobOverview>('/admin/jobs'), refetchInterval: 5_000 });
@@ -148,7 +154,13 @@ export const useDac7 = (year: number) =>
   });
 
 export const useEvidenceHolds = () =>
-  useQuery({ queryKey: ['admin', 'evidence-holds'], queryFn: () => api<EvidenceHold[]>('/admin/evidence-holds') });
+  useInfiniteQuery({
+    queryKey: ['admin', 'evidence-holds'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam, signal }) =>
+      api<EvidenceHoldPage>(`/admin/evidence-holds${qs({ cursor: pageParam, limit: 50 })}`, { signal }),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+  });
 
 export function useReleaseHold() {
   const qc = useQueryClient();

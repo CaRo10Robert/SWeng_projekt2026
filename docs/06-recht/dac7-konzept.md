@@ -1,11 +1,11 @@
 ---
 id: LEGAL-DAC7
 type: concept
-status: in-review
+status: approved
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Konzept Steuermeldepflicht für Plattformen (DAC7 / PStTG)

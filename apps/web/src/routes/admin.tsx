@@ -88,25 +88,34 @@ function Users() {
 }
 
 function Audit() {
-  const { data, isPending, isError, error } = useAudit();
+  const audit = useAudit();
+  const { isPending, isError, error } = audit;
   if (isPending) return <Loading />;
   if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
-  if (!data.length) return <EmptyState>{t('admin.audit.empty')}</EmptyState>;
+  const entries = audit.data.pages.flatMap((p) => p.items);
+  if (!entries.length) return <EmptyState>{t('admin.audit.empty')}</EmptyState>;
   return (
-    <ol className="divide-y divide-slate-200 text-sm">
-      {data.map((a) => (
-        <li key={a.id} className="py-2">
-          <p>
-            <time className="text-slate-600">{formatDateTime(a.createdAt)}</time> · <strong>{a.actorName ?? t('admin.audit.system')}</strong> · {a.action}
-          </p>
-          <p className="text-slate-600">
-            {a.targetType}
-            {a.targetId && ` ${a.targetId}`}
-            {Object.keys(a.details).length > 0 && ` · ${JSON.stringify(a.details)}`}
-          </p>
-        </li>
-      ))}
-    </ol>
+    <div className="space-y-3">
+      <ol className="divide-y divide-slate-200 text-sm">
+        {entries.map((a) => (
+          <li key={a.id} className="py-2">
+            <p>
+              <time className="text-slate-600">{formatDateTime(a.createdAt)}</time> · <strong>{a.actorName ?? t('admin.audit.system')}</strong> · {a.action}
+            </p>
+            <p className="text-slate-600">
+              {a.targetType}
+              {a.targetId && ` ${a.targetId}`}
+              {Object.keys(a.details).length > 0 && ` · ${JSON.stringify(a.details)}`}
+            </p>
+          </li>
+        ))}
+      </ol>
+      {audit.hasNextPage && (
+        <Button variant="secondary" busy={audit.isFetchingNextPage} onClick={() => void audit.fetchNextPage()}>
+          {t('admin.loadMore')}
+        </Button>
+      )}
+    </div>
   );
 }
 

@@ -68,6 +68,11 @@ export function loadConfig() {
     demoMode: bool('DEMO_MODE', false),
     // Interaktive API-Doku nur im Demo-Modus, sonst ausdrücklich einschalten (Pentest PT-INFO-01)
     apiDocs: bool('API_DOCS', bool('DEMO_MODE', false)),
+    /**
+     * Hebt alle Rate-Limits um diesen Faktor an, nur für Lasttests (REQ-PERF-002/-004: „Rate-Limit für den Test
+     * angehoben“). Wirkt ausschließlich mit DEMO_MODE=true; im Echtbetrieb bleibt der Faktor 1.
+     */
+    rateLimitFactor: bool('DEMO_MODE', false) ? Math.max(1, int('RATE_LIMIT_FACTOR', 1)) : 1,
     logLevel: env('LOG_LEVEL', 'info'),
     passwordBlocklistFile: env('PASSWORD_BLOCKLIST_FILE', resolve(APP_ROOT, 'assets/password-blocklist.txt')),
     shutdownTimeoutMs: int('SHUTDOWN_TIMEOUT_MS', 25_000),

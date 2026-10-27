@@ -12,7 +12,7 @@ groups:
         annotations:
           summary: CampusMarkt ist nicht erreichbar
           description: Prometheus erreicht app:8080/metrics seit 2 Minuten nicht (REQ-OPS-001).
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#63-runbook-appdown
 
       - alert: NotReady
         expr: app_ready == 0
@@ -40,7 +40,7 @@ groups:
         annotations:
           summary: Mehr als 5 % der Anfragen enden mit 5xx
           description: 'Fehlerquote {{ $value | humanizePercentage }} über 5 Minuten (REQ-AVAIL-001).'
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#64-runbook-higherrorrate
 
       - alert: SlowSearch
         expr: |
@@ -53,7 +53,7 @@ groups:
         annotations:
           summary: Suche langsam (p95 > 500 ms)
           description: 'p95 der Suche {{ $value | humanizeDuration }} über 10 Minuten (QS-7, REQ-PERF-001).'
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/monitoring-alarmierung.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#65-runbook-slowsearch
 
       - alert: JobFailures
         # Nur endgültig gescheiterte Jobs (Dead-Letter-Queue); Wiederholungen nach kurzen Ausfällen sind normal (RV-A-18)
@@ -63,7 +63,7 @@ groups:
         annotations:
           summary: 'Endgültig gescheiterte Jobs in Queue {{ $labels.queue }}'
           description: 'In den letzten 15 Minuten sind Jobs nach allen Wiederholungen gescheitert und liegen in der Dead-Letter-Queue, z. B. Mailversand (QS-3, REQ-NOTI-005).'
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#66-runbook-jobfailures
 
       - alert: WebSocketDrop
         # Einbruch um mehr als 80 % gegenüber vor 5 Minuten; erst ab 5 Verbindungen, damit die Demo nicht dauernd alarmiert
@@ -73,7 +73,7 @@ groups:
         annotations:
           summary: WebSocket-Verbindungen eingebrochen
           description: Die Zahl offener WebSocket-Verbindungen ist in 5 Minuten um mehr als 80 % gefallen (QS-4, REQ-CHAT-003).
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/incident-prozess.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#67-runbook-websocketdrop
 
       - alert: MaintenanceModeOn
         expr: campusmarkt_maintenance_mode == 1
@@ -83,7 +83,7 @@ groups:
         annotations:
           summary: Wartungsmodus länger als 2 Stunden aktiv
           description: Der Wartungsmodus ist seit mehr als 2 Stunden aktiv – geplantes Ende prüfen (REQ-OPS-006).
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/wartung-statusseite.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#68-runbook-maintenancemodeon
 
       - alert: BackupMissing
         # Wert 0 = noch nie gesichert: erst alarmieren, wenn die App länger als 26 h läuft (kein Alarm direkt nach dem
@@ -103,4 +103,4 @@ groups:
         annotations:
           summary: Seit mehr als 26 Stunden keine erfolgreiche Sicherung
           description: 'Seit {{ $value | humanizeDuration }} keine erfolgreiche Sicherung (REQ-AVAIL-003).'
-          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/backup-restore.md
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#69-runbook-backupmissing

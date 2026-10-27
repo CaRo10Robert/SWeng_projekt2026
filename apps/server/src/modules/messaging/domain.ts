@@ -106,6 +106,7 @@ export const SYSTEM_TEXT: Record<SystemCode, string> = {
   deal_reserved: 'Die Anzeige wurde für dich reserviert.',
   deal_completed: 'Die Anzeige wurde als an dich abgegeben markiert.',
   deal_cancelled: 'Die Reservierung wurde aufgehoben.',
+  reservation_expired: 'Die Reservierung ist nach 30 Tagen ohne Abgabe abgelaufen. Die Anzeige ist wieder für alle sichtbar.',
   message_removed: '[Nachricht wurde von der Moderation entfernt]',
   message_deleted: '[Nachricht gelöscht – Konto des Absenders wurde gelöscht]',
 };

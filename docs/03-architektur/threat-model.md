@@ -86,7 +86,7 @@ flowchart LR
 | 1 → 2 | Proxy ↔ App | Header des Proxys nur für genau einen Hop (`trustProxy`, `server.ts:61`); App-Port nur an `127.0.0.1` |
 | 2 | Jede Anfrage | Sitzung (`resolveSession`), CSRF (`server.ts:99-104`), Schemaprüfung (TypeBox), `requireAuth`/`requireRole` (`auth.ts:21-33`), Wartungsmodus |
 | 2 → 3 | App ↔ Daten | nur parametrisiertes SQL (`platform/sql.ts:25`); Modulgrenzen per dependency-cruiser (`CTRL-DEPCRUISE`) |
-| 3 → 4 | Daten ↔ Betrieb | Sicherungen mit SHA-256-Manifest; Restore über temporäre DB (ADR-0018); Logs ohne IP, Query und Inhalte (REQ-OPS-002) |
+| 3 → 4 | Daten ↔ Betrieb | Sicherungen mit SHA-256-Manifest; Restore über temporäre DB (ADR-0019); Logs ohne IP, Query und Inhalte (REQ-OPS-002) |
 
 ## 3. Abläufe
 

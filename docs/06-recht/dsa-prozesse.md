@@ -1,11 +1,11 @@
 ---
 id: LEGAL-DSA
 type: process
-status: in-review
+status: approved
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 ---
 
 # Prozesse nach dem Digital Services Act (Verordnung (EU) 2022/2065)
@@ -101,12 +101,9 @@ Ab drei Meldungen wird eine Anzeige automatisch vorläufig ausgeblendet. Die Bet
 
 ## Transparenzbericht (Art. 15, 24)
 
-Seit 2025 gelten für Transparenzberichte verbindliche Vorlagen der Durchführungsverordnung (EU) 2024/2835 (Übungsannahme Q-28: anwendbar, Vorlagen werden genutzt). Die Zahlen (Meldungen, Entscheidungen, Widersprüche, Bearbeitungszeiten) lassen sich aus dem Audit-Log ermitteln; im Beispiel gibt es keinen Bericht.
+Jährlich zum 17. Februar (Übungswert) erscheint ein Bericht mit der Anzahl der Meldungen je Grund, den Maßnahmen, Zahl und Ergebnis der Widersprüche, der mittleren Bearbeitungsdauer und dem Einsatz automatisierter Mittel. Seit 2025 gelten dafür verbindliche Vorlagen der Durchführungsverordnung (EU) 2024/2835 (Übungsannahme Q-28: anwendbar, Vorlagen werden genutzt). Die Zahlen lassen sich aus Audit-Log und Moderationsfällen ohne Personenbezug ermitteln; im Beispiel gibt es keinen Bericht.
 
 ## Kontaktstelle (Art. 11, 12)
 
 Siehe Rechtstext `kontakt.de.md`. Anfragen werden im Muster per E-Mail bearbeitet (im Echtbetrieb: Ticketsystem der Hochschule, fiktiv „MusterTicket“); Meldungen ohne Konto werden von der Moderation manuell in die Queue übernommen.
 
-## Transparenzbericht
-
-Jährlich zum 17. Februar (Übungswert): Anzahl der Meldungen je Grund, Maßnahmen, Zahl und Ergebnis der Widersprüche, mittlere Bearbeitungsdauer, Einsatz automatisierter Mittel. Die Zahlen lassen sich aus Audit-Log und Moderationsfällen ohne Personenbezug auswerten.

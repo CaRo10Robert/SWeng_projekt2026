@@ -7,14 +7,15 @@ status: verified
 owner: team-produkt
 risk: low
 release: R1
-moscow: S
+moscow: M
+moscow_reason: [2]
 kano: n/a
 epic: EPIC-13
 source: DSGVO Art. 28, Q-23
 depends_on: [REQ-PRIV-005]
-version: 1.3
+version: 1.5
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [CTRL-DOC-AVV]
 ---
 
@@ -33,7 +34,7 @@ Ohne Vertrag zur Auftragsverarbeitung (AVV) ist die Weitergabe an Hosting-, E-Ma
 N/A – Dokumentationspflicht; Risiko niedrig.
 
 ## Nachweis
-- `CTRL-DOC-AVV`: Kontrolle `docs/06-recht/auftragsverarbeitung.md` – Kategorien, Ort, Vertragsstatus und Checkliste vorhanden.
+- `CTRL-DOC-AVV`: Kontrolle `docs/06-recht/auftragsverarbeitung.md` – Kategorien, Ort, Vertragsstatus und Checkliste vorhanden – Protokoll [CTRL-DOC-AVV](../../05-umsetzung/nachweise/CTRL-DOC-AVV.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -42,3 +43,5 @@ N/A – Dokumentationspflicht; Risiko niedrig.
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11): Status nach Umsetzung (Dokument vorhanden) |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (CTRL-DOC-AVV bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-15 Must wegen Rechtspflicht (DSGVO Art. 28), moscow_reason [2] |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

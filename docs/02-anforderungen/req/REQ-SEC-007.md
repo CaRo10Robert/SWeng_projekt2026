@@ -11,12 +11,13 @@ moscow: M
 moscow_reason: [2]
 kano: basis
 epic: EPIC-02
-source: ASVS
+source: OWASP ASVS 4.0.3 (EX-01)
 use_cases: [UC-10]
 depends_on: [REQ-LST-003]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
+review_due: 2027-04-26
 verification: [AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4]
 ---
 
@@ -61,3 +62,4 @@ Uploads sind ein typischer Angriffsweg; Fotos verraten über GPS-Daten oft den W
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | „Signierte URLs“ als Lösung entfernt (Fallstudie FS-M5); Ziel „nur angemeldete Mitglieder“ formuliert |
 | 3.0 | 2026-10-23 | Review v0.2: R-29 keine Gast-Ausnahme (Q-1); Malware-Prüfung Won't (Q-16); R-03 `class: constraint`; HEIC-Hinweis entfällt (HEIC jetzt REQ-LST-012, R2) |
+| 3.1 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |

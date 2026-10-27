@@ -16,6 +16,13 @@
  *  6. Jede in Tests markierte AT-ID ist im Katalog; jede in Doku/Code erwähnte REQ-ID existiert
  *  7. Must hat moscow_reason; Klasse passt zum Typ; interne Markdown-Links und Anker sind gültig
  *  8. Kano/Risiko im Backlog stimmen mit dem Front Matter überein; offene R1-Must stehen im Backlog
+ *  9. Risiko mittel/hoch ⇒ Abschnitt „Fehler- und Missbrauchsfälle“ (Guideline Kap. 01 „Failure and misuse analysis“)
+ * 10. Zeitkritische Standards ⇒ review_due; überschrittenes review_due ist ein Fehler, < 30 Tage eine Warnung
+ *     (Guideline Kap. 01 „Requirement lifecycle“)
+ * 11. Ausnahmeregister docs/03-architektur/ausnahmen.md: Pflichtfelder, abgelaufene Ausnahmen sind Fehler
+ *     (Guideline README „Guideline exceptions“)
+ *
+ * Stichtag für 10 und 11 ist heute; für reproduzierbare Läufe per TRACE_TODAY=JJJJ-MM-TT überschreibbar.
  */
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -50,6 +57,12 @@ const CLASS_BY_TYPE = {
   discovery: ['functional', 'constraint'],
 };
 const BACKLOG = join(ROOT, 'docs/02-anforderungen/03-backlog.md');
+const EXCEPTIONS = join(ROOT, 'docs/03-architektur/ausnahmen.md');
+const TODAY = process.env.TRACE_TODAY ?? new Date().toISOString().slice(0, 10);
+const DAY_MS = 86_400_000;
+const daysUntil = (iso) => Math.round((Date.parse(iso) - Date.parse(TODAY)) / DAY_MS);
+/** Standards mit Review-Zyklus im Standards-Register der Guideline (Ausgaben ändern sich, Parameter veralten). */
+const TIME_SENSITIVE = /\b(ASVS|OWASP Top 10|WCAG|NIST SSDF|SP 800-|SLSA|RFC 8058|BITV)\b/;
 const RISK_DE = { niedrig: 'low', mittel: 'medium', hoch: 'high' };
 /** Zuordnung Lebenszyklus (Guideline) → Stufenmodell der Vorlesung (Folie 26). */
 const STAGE = {
@@ -121,8 +134,15 @@ for (const file of files) {
   if (!new RegExp(`^# ${fm.id} `, 'm').test(text)) err(file, 'Überschrift „# <ID> <Titel>“ fehlt');
   if (fm.type === 'user-story' && !/^## Akzeptanzkriterien/m.test(text)) err(file, 'User Story ohne Akzeptanzkriterien');
   if (fm.class === 'quality' && !/^## Qualitätsmerkmal, Metrik, Messverfahren/m.test(text)) err(file, 'Qualitätsanforderung ohne Merkmal/Metrik/Messverfahren');
-  if (['medium', 'high'].includes(fm.risk) && fm.type !== 'quality' && fm.class !== 'quality' && !/^## Fehler- und Missbrauchsfälle/m.test(text)) {
-    warnings.push(`${file}: Risiko ${fm.risk} ohne Abschnitt „Fehler- und Missbrauchsfälle“`);
+  if (['medium', 'high'].includes(fm.risk) && !/^## Fehler- und Missbrauchsfälle/m.test(text)) {
+    err(file, `Risiko ${fm.risk} ohne Abschnitt „Fehler- und Missbrauchsfälle“`);
+  }
+  const active = !['rejected', 'deprecated', 'obsolete'].includes(fm.status);
+  if (active && TIME_SENSITIVE.test(text) && !fm.review_due) err(file, 'zeitkritischer Standard ohne review_due');
+  if (active && fm.review_due) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fm.review_due)) err(file, `review_due "${fm.review_due}" ist kein Datum`);
+    else if (daysUntil(fm.review_due) < 0) err(file, `review_due ${fm.review_due} überschritten`);
+    else if (daysUntil(fm.review_due) < 30) warnings.push(`${file}: review_due ${fm.review_due} in weniger als 30 Tagen`);
   }
   for (const key of ['depends_on', 'use_cases', 'reviewers', 'verification']) {
     if (fm[key] !== undefined && !Array.isArray(fm[key])) fm[key] = [fm[key]];
@@ -238,6 +258,28 @@ for (const r of reqs.values()) {
   }
 }
 
+// ------------------------------------------------------------------ Ausnahmeregister
+const EXCEPTION_FIELDS = ['ID', 'Regel', 'Betroffen', 'Grund', 'Risiko', 'Kompensation', 'Genehmigt von', 'Ablauf', 'Plan'];
+const exceptionIds = new Set();
+let exceptionText = '';
+try { exceptionText = readFileSync(EXCEPTIONS, 'utf8'); } catch { err('ausnahmen.md', 'Ausnahmeregister fehlt'); }
+for (const block of exceptionText.split(/^### /m).slice(1)) {
+  const id = block.match(/^(EX-\d{2,})/)?.[1];
+  if (!id) continue;
+  if (exceptionIds.has(id)) err('ausnahmen.md', `doppelte ID ${id}`);
+  exceptionIds.add(id);
+  const fields = Object.fromEntries([...block.matchAll(/^\| ([^|]+?) \| (.*?) \|$/gm)].map((m) => [m[1].trim(), m[2].trim()]));
+  for (const f of EXCEPTION_FIELDS.slice(1)) if (!fields[f] || fields[f] === '–') err('ausnahmen.md', `${id}: Pflichtfeld „${f}“ fehlt`);
+  const expiry = fields.Ablauf?.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+  if (!expiry) err('ausnahmen.md', `${id}: Ablaufdatum fehlt`);
+  else if (daysUntil(expiry) < 0) err('ausnahmen.md', `${id}: abgelaufen seit ${expiry} – verlängern (mit Begründung) oder Abweichung beheben`);
+  else if (daysUntil(expiry) < 30) warnings.push(`ausnahmen.md: ${id} läuft am ${expiry} ab`);
+}
+for (const r of reqs.values()) {
+  const text = readFileSync(join(REQ_DIR, r.file), 'utf8');
+  for (const ex of new Set(text.match(/\bEX-\d{2,}\b/g) ?? [])) if (!exceptionIds.has(ex)) err(r.file, `verweist auf unbekannte Ausnahme ${ex}`);
+}
+
 // ------------------------------------------------------------------ Bericht und Index
 const list = [...reqs.values()];
 const count = (pred) => list.filter(pred).length;
@@ -254,6 +296,7 @@ function summary() {
   }
   lines.push(`R1-Must verifiziert: ${count((r) => r1Must.includes(r) && done(r))}/${r1Must.length} (${pct(count((r) => r1Must.includes(r) && done(r)), r1Must.length)})`);
   lines.push(`Gesamt verifiziert: ${pct(count(done), list.length)}`);
+  lines.push(`Ausnahmen (Guideline): ${exceptionIds.size}`);
   return lines.join('\n');
 }
 

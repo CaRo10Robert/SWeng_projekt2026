@@ -13,9 +13,9 @@ kano: basis
 epic: EPIC-13
 source: DDG § 5, MStV § 18 Abs. 2, Q-23
 use_cases: [UC-08]
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE]
 ---
 
@@ -58,7 +58,7 @@ Szenario: Impressum ohne Anmeldung
 
 ## Nachweis
 - `AT-LEGAL-001`: E2E-Test – Impressum ohne Anmeldung aus dem Seitenfuß erreichbar, HTTP 200 bei Direktaufruf, alle Pflichtabschnitte und der Muster-Hinweis sichtbar.
-- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als fiktiver Übungswert erkennbar (Muster-Hinweis, „(fiktiv)“, Domain `.example`, Q-28), Version und Datum im Front Matter, Review protokolliert.
+- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als fiktiver Übungswert erkennbar (Muster-Hinweis, „(fiktiv)“, Domain `.example`, Q-28), Version und Datum im Front Matter, Review protokolliert – Protokoll [CTRL-DOC-LEGAL-TEXTE](../../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -67,3 +67,4 @@ Szenario: Impressum ohne Anmeldung
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-22): Anwendbarkeit § 5 DDG als offener Prüfpunkt, § 18 Abs. 1 MStV als Auffangnorm, Begriff digitale Dienste; Status nach Umsetzung |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

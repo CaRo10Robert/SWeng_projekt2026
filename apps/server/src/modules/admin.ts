@@ -3,20 +3,22 @@ import { Type } from '@sinclair/typebox';
 import {
   Accepted,
   AnnouncementBody,
-  AuditEntry,
+  AuditPage,
   EndSessionsBody,
   EndSessionsResult,
-  EvidenceHold,
+  EvidenceHoldPage,
   IdParams,
   JobOverview,
   MaintenanceBody,
+  PageQuery,
   SystemStatus,
 } from '@campusmarkt/contracts';
 import { audit } from '../platform/audit.js';
 import { notFound, unprocessable } from '../platform/errors.js';
 import { requireRole, SESSION_COOKIE } from '../platform/http/auth.js';
+import { decodeCursor, pageLimit, toPage } from '../platform/http/pagination.js';
 import { SETTING } from '../platform/settings.js';
-import { sql } from '../platform/sql.js';
+import { empty, sql } from '../platform/sql.js';
 import { LISTINGS_MAINTENANCE } from './listings/index.js';
 import { PRIVACY_PURGE } from './privacy/index.js';
 import type { ModuleDeps } from './shared.js';
@@ -30,8 +32,12 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
   return async (app) => {
     const tags = ['admin'];
 
-    app.get('/admin/audit', { schema: { tags, response: { 200: Type.Array(AuditEntry) } } }, async (req) => {
+    app.get('/admin/audit', { schema: { tags, querystring: PageQuery, response: { 200: AuditPage } } }, async (req) => {
       requireRole(req, 'admin');
+      const limit = pageLimit(req.query.limit);
+      const after = decodeCursor(req.query.cursor, 2);
+      if (after === null) throw unprocessable('invalid_cursor', 'Ungültiger Cursor.');
+      // Sortierung auf Millisekunden gekürzt: der Cursor trägt den ISO-Zeitstempel des Pools (ms), sonst gingen Einträge verloren
       const rows = await db.query<{
         id: string;
         actor_id: string | null;
@@ -40,11 +46,14 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
         target_id: string | null;
         details: Record<string, unknown>;
         created_at: string;
-      }>(sql`SELECT * FROM platform.audit_log ORDER BY created_at DESC LIMIT 200`);
+      }>(sql`
+        SELECT * FROM platform.audit_log
+        ${after ? sql`WHERE (date_trunc('milliseconds', created_at), id) < (${after[0]}::timestamptz, ${after[1]}::uuid)` : empty}
+        ORDER BY date_trunc('milliseconds', created_at) DESC, id DESC LIMIT ${limit + 1}`);
       const actors = await deps.modules.identity.getPublicUsers(
         [...new Set(rows.map((r) => r.actor_id).filter((id): id is string => !!id))],
       );
-      return rows.map((r) => ({
+      return toPage(rows, limit, (r) => ({
         id: r.id,
         actorId: r.actor_id,
         actorName: r.actor_id ? (actors.get(r.actor_id)?.displayName ?? null) : null,
@@ -53,7 +62,7 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
         targetId: r.target_id,
         details: r.details,
         createdAt: r.created_at,
-      }));
+      }), (r) => [r.created_at, r.id]);
     });
 
     app.get('/admin/jobs', { schema: { tags, response: { 200: JobOverview } } }, async (req) => {
@@ -120,9 +129,11 @@ export function adminRoutes(deps: ModuleDeps): FastifyPluginAsyncTypebox {
     });
 
     // ---------------------------------------------------------- Beweissicherung (REQ-LEGAL-008)
-    app.get('/admin/evidence-holds', { schema: { tags, response: { 200: Type.Array(EvidenceHold) } } }, async (req) => {
+    app.get('/admin/evidence-holds', { schema: { tags, querystring: PageQuery, response: { 200: EvidenceHoldPage } } }, async (req) => {
       requireRole(req, 'admin');
-      return deps.modules.trust.evidenceHolds();
+      const after = decodeCursor(req.query.cursor, 3);
+      if (after === null) throw unprocessable('invalid_cursor', 'Ungültiger Cursor.');
+      return deps.modules.trust.evidenceHolds({ limit: pageLimit(req.query.limit), after });
     });
 
     app.post('/admin/evidence-holds/:id/release', { schema: { tags, params: IdParams } }, async (req, reply) => {

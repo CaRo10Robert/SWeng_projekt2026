@@ -1,11 +1,12 @@
 ---
 id: LEGAL-BREACH
 type: process
-status: in-review
+status: approved
 owner: security-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
 last_updated: 2026-10-26
+review_due: 2027-04-26
 ---
 
 # Prozess bei Verletzungen des Schutzes personenbezogener Daten (Art. 33/34 DSGVO)

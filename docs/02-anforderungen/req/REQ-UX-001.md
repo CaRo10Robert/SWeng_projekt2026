@@ -13,9 +13,9 @@ moscow_reason: [1]
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 verification: [AT-UX-001, AT-UX-001-2]
 ---
 
@@ -36,6 +36,15 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 | Messkontext | Docker-Beispiel, Chromium/Edge mit Mobil-Emulation |
 | Verhalten bei Verfehlung | Fehler gilt als Release-Blocker für die betroffene Route |
 
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Sehr schmale Bildschirme, Zoom 200 % | kein horizontaler Überlauf (AT-UX-001); Tabellen in scrollbaren Bereichen mit Tastaturzugang |
+| Offline oder schwaches Netz | App-Shell aus dem Service-Worker-Cache; Daten brauchen Netz, Offline-Hinweis statt leerer Seite |
+| Veralteter Service Worker nach einem Release | `registerType: autoUpdate`: neue Version wird beim nächsten Laden aktiv |
+| Browser ohne Installationsunterstützung | normale Nutzung im Browser, keine Funktion hängt an der Installation |
+| Große Bilder über Mobilfunk | Server erzeugt verkleinerte WebP-Varianten; Upload begrenzt (REQ-LST-003) |
+
 ## Nachweis
 - `AT-UX-001`: E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben).
 - `AT-UX-001-2`: E2E-Test – Manifest und Service Worker sind vorhanden und registriert.
@@ -47,3 +56,4 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Metrik und Messverfahren ergänzt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15, R-16 |
+| 2.2 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |

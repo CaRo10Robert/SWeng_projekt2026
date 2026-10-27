@@ -15,9 +15,9 @@ epic: EPIC-13
 source: DSGVO Art. 12–14, LDSG RLP, TDDDG § 25, Q-23
 use_cases: [UC-01, UC-08]
 depends_on: [REQ-PRIV-003, REQ-LEGAL-010]
-version: 1.4
+version: 1.5
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-002, AT-LEGAL-002-2, AT-LEGAL-002-3, CTRL-DOC-LEGAL-TEXTE]
 ---
 
@@ -71,7 +71,7 @@ Szenario: Jede Speicherung ist erklärt
 - `AT-LEGAL-002-3`: E2E-Test – bei neuer Fassung der Datenschutzerklärung erscheint für Mitglieder mit älterer Kenntnisnahme ein Hinweis mit Link; „Zur Kenntnis genommen“ per Tastatur speichert die Version im Konto, der Hinweis verschwindet.
 - `AT-LEGAL-002`: E2E-Test – Datenschutzerklärung ohne Anmeldung erreichbar, aus dem Registrierungsformular verlinkt, Abschnitte 1–12 und Version vorhanden.
 - `AT-LEGAL-002-2`: E2E-Test – jede nach den Kernabläufen vorhandene Speicherung im Browser steht im Abschnitt „Cookies und lokale Speicherung“.
-- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001).
+- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001) – Protokoll [CTRL-DOC-LEGAL-TEXTE](../../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -81,3 +81,4 @@ Szenario: Jede Speicherung ist erklärt
 | 1.2 | 2026-10-25 | Nachweis AT-LEGAL-002-3 vergeben; Rechtstexte Datenschutz, Nutzungsbedingungen und Community-Regeln wegen inhaltlicher Änderung auf Version 2026-10-25 |
 | 1.3 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-002, AT-LEGAL-002-2, AT-LEGAL-002-3, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
 | 1.4 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

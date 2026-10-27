@@ -10,12 +10,12 @@ release: R1
 moscow: S
 kano: n/a
 epic: EPIC-13
-source: BSI TR-02102-2, OWASP ASVS V9, Q-27
+source: BSI TR-02102-2, OWASP ASVS 4.0.3 V9 (EX-01), Q-27
 depends_on: [REQ-SEC-004]
-review_due: 2027-10-24
-version: 1.4
+review_due: 2027-04-26
+version: 1.5
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-OPS-009]
 ---
 
@@ -51,3 +51,4 @@ Sitzungscookies sind `Secure` (REQ-SEC-004) und werden ohne TLS nicht übertrage
 | 1.2 | 2026-10-24 | App- und Mailpit-Port nur an 127.0.0.1 gebunden; Kriterium „Direktzugriff“ entsprechend präzisiert |
 | 1.3 | 2026-10-25 | Review v1.3 (RV-A-07, RV-R-10): TRUST_PROXY wird ausgewertet (ein Hop), mitgelieferte Datei .env.proxy.example; offener Vermerk aus 1.1 erledigt |
 | 1.4 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-OPS-009 bestanden bzw. ausgeführt); Status → verified |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-02 ASVS-Fassung 4.0.3 (EX-01) genannt |

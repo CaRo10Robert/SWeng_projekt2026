@@ -74,11 +74,11 @@ export const ROUTES = {
   // admin
   adminUsers: 'GET /admin/users?q= → AdminUser[] (Rolle admin)',
   setRole: 'POST /admin/users/:id/role SetRoleBody → 204',
-  audit: 'GET /admin/audit → AuditEntry[] (Rolle admin)',
+  audit: 'GET /admin/audit?cursor&limit → Page<AuditEntry> (Rolle admin, neueste zuerst)',
   jobs: 'GET /admin/jobs → JobOverview (Rolle admin)',
   runDueJobs: 'POST /admin/demo/run-due-jobs → 202 Accepted (nur DEMO_MODE=true)',
   dac7: 'GET /admin/reports/dac7?year=&format=json|csv → Dac7Report | text/csv (Rolle admin, Audit-Log)',
-  evidenceHolds: 'GET /admin/evidence-holds → EvidenceHold[] (Rolle admin)',
+  evidenceHolds: 'GET /admin/evidence-holds?cursor&limit → Page<EvidenceHold> (Rolle admin, aktive zuerst)',
   releaseHold: 'POST /admin/evidence-holds/:id/release → 204',
   maintenance: 'PUT /admin/maintenance MaintenanceBody → SystemStatus (Rolle admin, Audit-Log)',
   endSessions: 'POST /admin/security/end-sessions EndSessionsBody → EndSessionsResult (Rolle admin, Audit-Log; beendet auch die eigene Sitzung)',

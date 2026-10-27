@@ -1,6 +1,6 @@
 # ADR-0015: Rechtstexte als versionierte Markdown-Inhalte im Repository
 
-- **Status:** Accepted (vorläufig, Q-23; Bestätigung mit dem Architektur-Review ausstehend)
+- **Status:** Accepted (2026-10-26; bestätigt durch Review v1.3 und Guideline-Review; fachlich Q-23, Q-28)
 - **Datum:** 2026-10-24
 - **Bezug:** REQ-LEGAL-001…005, REQ-LEGAL-010, REQ-UX-006, REQ-PRIV-001, Backlog B-43; Inhalte in `apps/web/src/content/legal/`, Pflegeprozess in [docs/06-recht/README.md](../../06-recht/README.md)
 

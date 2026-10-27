@@ -438,6 +438,35 @@ export function createMessagingService(deps: ModuleDeps) {
       }
     },
 
+    /**
+     * Rückfall einer Reservierung nach 30 Tagen (REQ-LST-008): offenen Deal stornieren (DealCancelled mit eventId)
+     * und die Konversation des Interessenten per Systemnachricht informieren. Idempotent: ohne offenen Deal passiert nichts.
+     * Liefert die Teilnehmer für Echtzeit-Ereignisse nach dem Commit.
+     */
+    async expireReservation(tx: Tx, listingId: string): Promise<{ message: Message; participants: string[] }[]> {
+      const deals = await tx.db.query<DealRow>(sql`
+        UPDATE messaging.deal SET status = 'cancelled', updated_at = now()
+        WHERE listing_id = ${listingId} AND status = 'agreed' RETURNING *`);
+      const result: { message: Message; participants: string[] }[] = [];
+      for (const deal of deals) {
+        await tx.enqueue(DEAL_EVENTS, dealEvent('DealCancelled', deal, () => crypto.randomUUID()));
+        const conv = await tx.db.one<ConversationRow>(sql`SELECT * FROM messaging.conversation WHERE id = ${deal.conversation_id}`);
+        if (!conv) continue;
+        const { message } = await insertMessage(tx, conv, conv.seller_id, crypto.randomUUID(),
+          SYSTEM_TEXT.reservation_expired, 'system', 'reservation_expired');
+        result.push({ message: toMessage(message), participants: [conv.buyer_id, conv.seller_id] });
+      }
+      return result;
+    },
+
+    /** Echtzeit-Ereignisse nach dem Commit eines Wartungslaufs. */
+    async publishSystemMessages(items: { message: Message; participants: string[] }[]): Promise<void> {
+      for (const item of items) {
+        await publish(item.participants, { type: 'message', message: item.message });
+        await publish(item.participants, { type: 'conversation', conversationId: item.message.conversationId });
+      }
+    },
+
     // ------------------------------------------------------------ Moderation / Datenschutz
     /** Gemeldete Nachricht ± 5 (REQ-PRIV-004). */
     async messageContext(messageId: string): Promise<{ senderId: string; messages: Message[] } | null> {

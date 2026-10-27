@@ -109,7 +109,12 @@ export interface SearchPort {
 // ----------------------------------------------------------------- RateLimitStore (REQ-SEC-005)
 export interface RateLimitResult {
   allowed: boolean;
+  /** Sekunden bis zum Ende des Zeitfensters (auch Basis für `Retry-After` und `RateLimit-Reset`). */
   retryAfterSeconds: number;
+  limit: number;
+  /** Verbleibende Anfragen im Fenster, nie negativ. */
+  remaining: number;
+  windowSeconds: number;
 }
 
 export interface RateLimitStore {

@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-13
 source: DSA Art. 11, Art. 12, Q-23
 use_cases: [UC-08]
-version: 1.4
+version: 1.5
 created: 2026-10-24
 last_updated: 2026-10-26
 verification: [AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE]
@@ -44,7 +44,7 @@ N/A – reine Informationsseite; Risiko niedrig.
 
 ## Nachweis
 - `AT-LEGAL-005`: E2E-Test – Kontaktseite ohne Anmeldung erreichbar, alle 7 Anliegen mit Weg sichtbar.
-- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001).
+- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001) – Protokoll [CTRL-DOC-LEGAL-TEXTE](../../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md).
 - Antworten auf E-Mails der Plattform erreichen die Kontaktstelle: `Reply-To` ist die Support-Adresse (`MAIL_REPLY_TO`, fiktiv `campusmarkt-support@hwg-lu.example`).
 
 ## Änderungshistorie
@@ -55,3 +55,4 @@ N/A – reine Informationsseite; Risiko niedrig.
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Q-28: Platzhalter durch fiktive Übungswerte und offene Prüfpunkte durch Übungsannahmen ersetzt |
 | 1.4 | 2026-10-26 | Reply-To der E-Mails als Weg zur Kontaktstelle |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |

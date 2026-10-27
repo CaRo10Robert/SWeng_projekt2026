@@ -17,15 +17,26 @@
   },
   "customManagers": [
     {
-      "description": "Werkzeug-Versionen im env-Block der CI (RV-A-16)",
+      "description": "Werkzeug-Versionen im env-Block der CI, gepinnt per Digest (RV-A-16, GL-07)",
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/ci\\.yml$/"
+        "/^\\.github/workflows/(ci|ops-weekly)\\.yml$/"
       ],
       "matchStrings": [
-        "[A-Z_]+_IMAGE: (?<depName>[^:\\s]+):(?<currentValue>[^\\s#]+) # renovate: datasource=(?<datasource>\\S+)",
+        "[A-Z_]+_IMAGE: (?<depName>[^:\\s]+):(?<currentValue>[^\\s@#]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))? # renovate: datasource=(?<datasource>\\S+)",
         "RENOVATE_VERSION: (?<currentValue>\\S+) # renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)"
       ]
+    },
+    {
+      "description": "k6-Image der Lasttests (tests/load/run.mjs), gepinnt per Digest (GL-11)",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^tests/load/run\\.mjs$/"
+      ],
+      "matchStrings": [
+        "K6_IMAGE = '(?<depName>[^:']+):(?<currentValue>[^@']+)@(?<currentDigest>sha256:[a-f0-9]+)'"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [

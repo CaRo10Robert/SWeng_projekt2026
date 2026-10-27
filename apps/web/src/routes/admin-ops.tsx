@@ -218,10 +218,12 @@ function EndAllSessions() {
 // ------------------------------------------------------------------ Beweissicherung (REQ-LEGAL-008)
 
 export function EvidenceHolds() {
-  const { data, isPending, isError, error } = useEvidenceHolds();
+  const holds = useEvidenceHolds();
+  const { isPending, isError, error } = holds;
   const release = useReleaseHold();
   if (isPending) return <Loading />;
   if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
+  const data = holds.data.pages.flatMap((p) => p.items);
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-700">{t('evidence.intro')}</p>
@@ -251,6 +253,11 @@ export function EvidenceHolds() {
             </li>
           ))}
         </ul>
+      )}
+      {holds.hasNextPage && (
+        <Button variant="secondary" busy={holds.isFetchingNextPage} onClick={() => void holds.fetchNextPage()}>
+          {t('admin.loadMore')}
+        </Button>
       )}
     </div>
   );

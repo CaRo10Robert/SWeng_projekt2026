@@ -25,6 +25,13 @@ export const Page = <T extends TSchema>(item: T) =>
     nextCursor: Type.Union([Type.String(), Type.Null()]),
   });
 
+/** Keyset-Paginierung für Listen (Guideline Kap. 06, GL-14): opaker Cursor aus `nextCursor` der vorigen Seite. */
+export const PageQuery = Type.Object({
+  cursor: Type.Optional(Type.String({ maxLength: 200 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
+});
+export type PageQuery = Static<typeof PageQuery>;
+
 export const IdParams = Type.Object({ id: Uuid });
 export type IdParams = Static<typeof IdParams>;
 

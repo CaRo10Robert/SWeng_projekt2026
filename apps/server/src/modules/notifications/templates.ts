@@ -14,6 +14,7 @@ export type EmailTemplate =
   | 'password_reset'
   | 'new_message'
   | 'listing_expiry'
+  | 'reservation_expired'
   | 'moderation_decision'
   | 'moderation_report_result'
   | 'provisional_hide'
@@ -38,6 +39,7 @@ export const templateCategory: Record<EmailTemplate, EmailCategory> = {
   password_reset: 'security',
   new_message: 'newMessage',
   listing_expiry: 'listingExpiry',
+  reservation_expired: 'service',
   moderation_decision: 'service',
   moderation_report_result: 'service',
   provisional_hide: 'service',
@@ -201,6 +203,16 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
     ],
     action: { label: 'Anzeige verlängern', url: p.link! },
   }),
+  // Rückfall einer Reservierung nach 30 Tagen (REQ-LST-008)
+  reservation_expired: (p) => ({
+    subject: `Reservierung für „${p.listingTitle}“ abgelaufen`,
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `die Reservierung deiner Anzeige „${p.listingTitle}“ ist nach 30 Tagen ohne Abgabe abgelaufen. Die Anzeige ist wieder aktiv und für alle sichtbar; die Person, für die sie reserviert war, wurde im Chat informiert.`,
+      'Wurde der Artikel inzwischen übergeben, markiere die Anzeige bitte als abgegeben oder lösche sie.',
+    ],
+    action: { label: 'Anzeige ansehen', url: p.link! },
+  }),
   // Begründung an Betroffene nach DSA Art. 17 Abs. 3 (REQ-LEGAL-006), Vorlage in docs/06-recht/dsa-prozesse.md
   moderation_decision: (p) => ({
     subject: `Entscheidung der Moderation: ${p.measure}`,
@@ -324,6 +336,15 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `your listing “${p.listingTitle}” expires on ${p.date}. You can extend it by 60 days with one click.`,
     ],
     action: { label: 'Extend listing', url: p.link! },
+  }),
+  reservation_expired: (p) => ({
+    subject: `Reservation for “${p.listingTitle}” has expired`,
+    paragraphs: [
+      `Hi ${p.name},`,
+      `the reservation of your listing “${p.listingTitle}” expired after 30 days without handover. The listing is active and visible to everyone again; the person it was reserved for has been informed in the chat.`,
+      'If the item has been handed over in the meantime, please mark the listing as handed over or delete it.',
+    ],
+    action: { label: 'View listing', url: p.link! },
   }),
   moderation_decision: (p) => ({
     subject: `Moderation decision: ${p.measure}`,

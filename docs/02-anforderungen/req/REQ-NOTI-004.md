@@ -13,7 +13,7 @@ kano: basis
 epic: EPIC-12
 source: Zustellbarkeit an Hochschul-Postfächer
 use_cases: [UC-23]
-version: 1.4
+version: 1.5
 created: 2026-10-20
 last_updated: 2026-10-26
 verification: [MAN-NOTI-004]
@@ -38,6 +38,15 @@ Ohne Absenderauthentifizierung landen Verifikationsmails im Spam; ohne Verifikat
 | Messverfahren | Versand je einer Verifikations- und einer Benachrichtigungsmail aus der Produktionskonfiguration |
 | Messkontext | Echtbetrieb vor Go-Live, danach bei jeder Änderung der Mailkonfiguration |
 
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| SPF/DKIM/DMARC falsch konfiguriert | Mails landen im Spam oder werden abgelehnt; DMARC-Berichte (`rua`) an das Betriebspostfach; Prüfung vor Go-live (MAN-NOTI-004) |
+| Fremde versenden mit der Absenderdomain (Spoofing) | DMARC-Richtlinie mindestens `quarantine` |
+| DKIM-Schlüssel kompromittiert oder veraltet | Rotation über neuen Selektor; alter Schlüssel nach Übergangszeit entfernt |
+| Relay nicht erreichbar | Wiederholung mit Backoff (ADR-0005), danach Dead Letter (CTRL-DLQ) |
+| Unzustellbare Adressen (Bounces) | im Echtbetrieb Bounce-Verarbeitung (EPIC-12); im Beispiel nicht anwendbar |
+
 ## Nachweis
 - `MAN-NOTI-004`: Protokoll des mail-tester-Laufs und der Testzustellung – als Übung: [MAN-NOTI-004](../../05-umsetzung/nachweise/MAN-NOTI-004.md). Header in Mailpit echt geprüft, DNS-Einträge syntaktisch gültig, mail-tester-Werte fiktiv (Q-28). Befunde behoben: Absender `no-reply@campusmarkt.example` (`MAIL_FROM`) passt zu den Beispiel-DNS-Einträgen, `Reply-To` ist die Kontaktstelle (`MAIL_REPLY_TO`).
 
@@ -49,3 +58,4 @@ Ohne Absenderauthentifizierung landen Verifikationsmails im Spam; ohne Verifikat
 | 1.2 | 2026-10-23 | Review v0.2: Reviewer nach Fachgebiet (R-16); Status in-review → approved nach Review |
 | 1.3 | 2026-10-26 | Nachweis MAN-NOTI-004 als Übung verlinkt; Absenderdomain und Reply-To behoben |
 | 1.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (MAN-NOTI-004 bestanden bzw. ausgeführt); Status → verified |
+| 1.5 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |

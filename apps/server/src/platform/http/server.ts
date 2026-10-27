@@ -16,6 +16,7 @@ import type { Metrics } from '../metrics.js';
 import type { Ops } from '../ops.js';
 import { isSameOrigin, SESSION_COOKIE, type AuthContext } from './auth.js';
 import { isMaintenanceExempt, maintenancePage, retryAfterSeconds } from './maintenance.js';
+import { rateLimitHeaders, runWithRateLimitState, type RateLimitState } from './rate-limit-headers.js';
 import { isKnownSpaPath } from './spa-routes.js';
 import { requiresCurrentTerms } from './terms.js';
 
@@ -104,6 +105,14 @@ export async function createHttpServer(options: HttpServerOptions) {
     done(null, Object.fromEntries(new URLSearchParams(body as string)));
   });
 
+  // Request-Kontext für RateLimit-Header (GL-14); Callback-Stil, damit Hooks und Handler den Kontext erben
+  const rateLimitStates = new WeakMap<object, RateLimitState>();
+  app.addHook('onRequest', (req, _reply, done) => {
+    const state: RateLimitState = {};
+    rateLimitStates.set(req, state);
+    runWithRateLimitState(state, done);
+  });
+
   app.addHook('onRequest', async (req, reply) => {
     reply.header('x-request-id', req.id);
     const token = req.cookies[SESSION_COOKIE];
@@ -160,6 +169,8 @@ export async function createHttpServer(options: HttpServerOptions) {
       reply.header('content-security-policy', cspFor(payload, reply.getHeader('content-type') as string | undefined));
     }
     if (req.url.startsWith('/api/') && !reply.hasHeader('cache-control')) reply.header('cache-control', 'no-store');
+    const limited = rateLimitStates.get(req)?.result;
+    if (limited) reply.headers(rateLimitHeaders(limited));
     return payload;
   });
 

@@ -3,9 +3,10 @@ id: OPS-TLS
 type: operational
 status: in-review
 owner: security-lead
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
+review_due: 2027-04-26
 ---
 
 # TLS und Reverse Proxy

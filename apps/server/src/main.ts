@@ -10,6 +10,7 @@ import { createPgSearch } from './platform/adapters/pg-search.js';
 import { createSmtpMail } from './platform/adapters/smtp-mail.js';
 import { createDatabase, createPool } from './platform/db.js';
 import { createDeletionJournal, parseJournal } from './platform/deletion-journal.js';
+import { withRateLimitHeaders } from './platform/http/rate-limit-headers.js';
 import { createHttpServer } from './platform/http/server.js';
 import { createLogger } from './platform/logger.js';
 import { createMetrics } from './platform/metrics.js';
@@ -98,7 +99,7 @@ async function main() {
     jobs,
     storage: createFsStorage(config.uploadsDir),
     realtime: createInProcessRealtime(),
-    rateLimit: createPgRateLimit(database.db),
+    rateLimit: withRateLimitHeaders(createPgRateLimit(database.db), config.rateLimitFactor),
     settings,
     ops,
     pseudonym: createPseudonymizer(database.db),

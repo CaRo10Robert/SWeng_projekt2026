@@ -154,7 +154,7 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 132 Anforderungen · R1-Must verifiziert: 49 von 83 (59 %)
+**Stand:** 132 Anforderungen · R1-Must verifiziert: 51 von 85 (60 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
@@ -208,11 +208,11 @@ flowchart LR
 | [REQ-LEGAL-005](req/REQ-LEGAL-005.md) | Zentrale Kontaktstelle | constraint | M | basis | low | verified | AT-LEGAL-005, CTRL-DOC-LEGAL-TEXTE |
 | [REQ-LEGAL-006](req/REQ-LEGAL-006.md) | Begründung an Betroffene bei Moderationsentscheidungen | functional | M | basis | high | verified | AT-LEGAL-006, AT-LEGAL-006-2 |
 | [REQ-LEGAL-007](req/REQ-LEGAL-007.md) | Widerspruch gegen Moderationsentscheidungen | functional | M | basis | high | verified | AT-LEGAL-007, AT-LEGAL-007-2, AT-LEGAL-007-3, AT-LEGAL-007-4 |
-| [REQ-LEGAL-008](req/REQ-LEGAL-008.md) | Verdacht auf Straftaten kennzeichnen und eskalieren | functional | S | n/a | high | verified | AT-LEGAL-008, CTRL-DOC-DSA |
+| [REQ-LEGAL-008](req/REQ-LEGAL-008.md) | Verdacht auf Straftaten kennzeichnen und eskalieren | functional | M | n/a | high | verified | AT-LEGAL-008, CTRL-DOC-DSA |
 | [REQ-LEGAL-009](req/REQ-LEGAL-009.md) | Auswertung meldepflichtiger Anbieter (DAC7) | functional | S | n/a | medium | verified | AT-LEGAL-009, AT-LEGAL-009-2, CTRL-DOC-DAC7 |
 | [REQ-LEGAL-010](req/REQ-LEGAL-010.md) | Einwilligung vor nicht notwendiger Speicherung auf Endgeräten | constraint | M | basis | medium | verified | AT-LEGAL-010 |
 | [REQ-LEGAL-011](req/REQ-LEGAL-011.md) | Verzeichnis der Verarbeitungstätigkeiten und TOMs | constraint | M | n/a | medium | verified | CTRL-DOC-VVT, CTRL-DOC-TOM |
-| [REQ-LEGAL-012](req/REQ-LEGAL-012.md) | Auftragsverarbeitung dokumentiert | constraint | S | n/a | low | verified | CTRL-DOC-AVV |
+| [REQ-LEGAL-012](req/REQ-LEGAL-012.md) | Auftragsverarbeitung dokumentiert | constraint | M | n/a | low | verified | CTRL-DOC-AVV |
 | [REQ-LEGAL-013](req/REQ-LEGAL-013.md) | Prozess für Datenschutzverletzungen | constraint | M | n/a | high | verified | CTRL-DOC-DATENPANNE, MAN-LEGAL-013 |
 | [REQ-LST-001](req/REQ-LST-001.md) | Angebot oder Gesuch schnell erstellen | functional | M | basis | medium | implemented | AT-LST-001, MAN-LST-001 |
 | [REQ-LST-002](req/REQ-LST-002.md) | Preistypen und Preisgrenzen | domain | M | basis | low | verified | AT-LST-002, AT-LST-002-2 |

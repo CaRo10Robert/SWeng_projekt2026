@@ -1,6 +1,6 @@
 # ADR-0016: Internationalisierung mit react-intl (ICU MessageFormat)
 
-- **Status:** Accepted (vorläufig, Q-25; Bestätigung mit dem Architektur-Review ausstehend)
+- **Status:** Accepted (2026-10-26; bestätigt durch Review v1.3 und Guideline-Review; fachlich Q-25). Die datierten Nachträge präzisieren die Umsetzung (Reihenfolge der Sprachwahl, Systemnachrichten), ohne die Entscheidung für react-intl/ICU zu ändern.
 - **Datum:** 2026-10-24
 - **Bezug:** REQ-UX-007, REQ-UX-002, REQ-A11Y-001, REQ-LEGAL-002, REQ-LEGAL-010, Guideline Kap. 03 (BCP 47 + ICU MessageFormat), Backlog B-51
 

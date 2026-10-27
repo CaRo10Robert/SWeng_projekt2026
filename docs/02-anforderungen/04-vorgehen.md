@@ -3,9 +3,9 @@ id: PROCESS
 type: process
 status: in-review
 owner: team-produkt
-version: 1.1
+version: 1.2
 created: 2026-10-23
-last_updated: 2026-10-23
+last_updated: 2026-10-26
 ---
 
 # Vorgehen: iterative Entwicklung und Anforderungsmanagement
@@ -166,13 +166,32 @@ Der Status im Front Matter folgt der Guideline; die Zuordnung zum Stufenmodell d
 | `operational` | Freigabe/Lieferung | In einem freigegebenen Release (Docker-Image mit Tag) enthalten |
 | `rejected`, `deprecated`, `obsolete` | – | Bleiben als Datei erhalten; Ersatz über `supersedes` |
 
+### Darstellung nichtfunktionaler Anforderungen (Abweichung von der Guideline-Vorlage)
+
+Die Guideline empfiehlt je NFR eine Kopie von `templates/nfr-slo-template.md` mit den Typen `performance`, `reliability`, `availability` oder `capacity` (Kap. 01, „Non-functional requirements: the SLI/SLO template“). Das Projekt weicht davon in der **Form** ab, nicht im Inhalt:
+
+- **Typ und Klasse:** Die Fallstudie verlangt die Klassen funktional, Qualität, Domäne und Constraint (FS-M2). NFRs tragen deshalb `type: quality` bzw. `operational` mit `class: quality`. `scripts/trace.mjs` prüft diese Zuordnung.
+- **Tabelle statt Abschnitte:** Statt eigener Abschnitte je Feld steht im Abschnitt „Qualitätsmerkmal, Metrik, Messverfahren“ eine Tabelle nach FS-M3 (Merkmal, Metrik, Akzeptanzkriterium, Messverfahren, Messkontext). Sie ist um die Felder der Vorlage erweitert:
+  - Fehlerbudget;
+  - Last- und Datenprofil;
+  - Timeout, Retry und Idempotenz;
+  - Wiederherstellung (RTO/RPO);
+  - Verantwortung und Eskalation.
+- **Verhalten im Fehlerfall:** Degradiertes Verhalten steht im Abschnitt „Fehler- und Missbrauchsfälle“, der ab Risiko mittel Pflicht ist und von `trace.mjs` geprüft wird.
+
+Damit sind alle Mindestinhalte der Vorlage abgedeckt (Guideline-Review GL-10, 2026-10-26).
+
+### Abweichungen von der Guideline
+
+Abweichungen von MUST-Regeln stehen im [Ausnahmeregister](../03-architektur/ausnahmen.md) (ID, Regel, Grund, Risiko, Kompensation, Genehmigung, Ablaufdatum, Plan). `trace.mjs` lässt CI scheitern, wenn eine Ausnahme abgelaufen ist oder ein `review_due` einer Anforderung überschritten ist. Abweichungen von SHOULD-Regeln und vom Standard-Stack werden per ADR begründet.
+
 ### Kette von der Anforderung bis zum Code
 
 1. **Anforderung** (`req/REQ-….md`) nennt ihre Nachweise in `verification`.
 2. **Test** trägt die Nachweis-ID im Namen, z. B. `check('[AT-CHAT-010] …')`.
 3. **Commit** nennt die Anforderung im Footer: `Refs: REQ-CHAT-010` (Conventional Commits). Damit führt `git log --grep REQ-CHAT-010` bzw. `git blame` vom Code zurück zur Anforderung.
 4. **Verifikationsziel:** ≥ 40 % der R1-Must nach Sprint 1, ≥ 70 % nach Sprint 3, 100 % vor der Abgabe (Kennzahl „R1-Must verifiziert“ aus dem Index).
-5. **`node scripts/trace.mjs`** prüft die Kette (IDs eindeutig, Verweise und Markdown-Links gültig, Must begründet, Typ und Klasse passend, Nachweise vorhanden, verifizierte Anforderungen haben markierte Tests, Kano/Risiko im Backlog stimmen mit den Anforderungen überein, offene R1-Must stehen im Backlog) und erzeugt den Index mit aggregierten Ständen (`--write`, z. B. „R1-Must verifiziert: x %“). In CI läuft das Skript bei jedem Pull Request.
+5. **`node scripts/trace.mjs`** prüft die Kette (IDs eindeutig, Verweise und Markdown-Links gültig, Must begründet, Typ und Klasse passend, Nachweise vorhanden, verifizierte Anforderungen haben markierte Tests, Kano/Risiko im Backlog stimmen mit den Anforderungen überein, offene R1-Must stehen im Backlog, Risiko mittel/hoch hat Fehler- und Missbrauchsfälle, zeitkritische Standards haben ein nicht überschrittenes `review_due`, das Ausnahmeregister ist vollständig und nicht abgelaufen) und erzeugt den Index mit aggregierten Ständen (`--write`, z. B. „R1-Must verifiziert: x %“). In CI läuft das Skript bei jedem Pull Request.
 
 ## 7. Change-Management
 

@@ -7,8 +7,16 @@
 #   docker compose --profile monitoring up -d  → Prometheus :9090, Alertmanager :9093 (nur 127.0.0.1)
 name: campusmarkt
 
+# Log-Rotation für alle Dienste: höchstens 3 × 10 MB je Container, damit Logs die Platte nicht füllen (Betrieb, REQ-OPS-002)
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
 services:
   app:
+    logging: *default-logging
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -26,6 +34,8 @@ services:
       MAIL_REPLY_TO: CampusMarkt Support <campusmarkt-support@hwg-lu.example>
       SEED_DEMO: ${SEED_DEMO:-true}
       DEMO_MODE: ${DEMO_MODE:-true}
+      # Nur für Lasttests (tests/load), wirkt nur mit DEMO_MODE=true
+      RATE_LIMIT_FACTOR: ${RATE_LIMIT_FACTOR:-1}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       # Wartungsmodus (REQ-OPS-006) und Vertrauen in X-Forwarded-* hinter dem Proxy (Profil proxy)
@@ -50,7 +60,8 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:17-alpine
+    logging: *default-logging
+    image: postgres:17-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
     environment:
       POSTGRES_USER: campusmarkt
       POSTGRES_PASSWORD: campusmarkt
@@ -65,14 +76,16 @@ services:
     restart: unless-stopped
 
   mailpit:
-    image: axllent/mailpit:v1.27
+    logging: *default-logging
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
     ports:
       - "127.0.0.1:${MAILPIT_PORT:-8025}:8025"
     restart: unless-stopped
 
   # ------------------------------------------------------------ Profil proxy (REQ-OPS-009)
   proxy:
-    image: caddy:2.11.6-alpine
+    logging: *default-logging
+    image: caddy:2.11.6-alpine@sha256:d44355d3c2149dc580ce2cac735955d1c08d3d00882c30489c241aa51a5c10d9
     profiles: [proxy]
     ports:
       - "${PROXY_HTTPS_PORT:-8443}:443"
@@ -90,7 +103,8 @@ services:
 
   # ------------------------------------------------------------ Profil monitoring (REQ-OPS-008)
   prometheus:
-    image: prom/prometheus:v3.15.0
+    logging: *default-logging
+    image: prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
     profiles: [monitoring]
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -107,7 +121,8 @@ services:
     restart: unless-stopped
 
   alertmanager:
-    image: prom/alertmanager:v0.34.1
+    logging: *default-logging
+    image: prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a
     profiles: [monitoring]
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml

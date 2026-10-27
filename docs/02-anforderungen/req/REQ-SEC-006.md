@@ -12,10 +12,11 @@ moscow: M
 moscow_reason: [2]
 kano: basis
 epic: EPIC-00
-source: OWASP Top 10 A01 (Broken Access Control), QS-2
-version: 1.2
+source: OWASP Top 10:2021 A01 (Broken Access Control), QS-2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-10-26
+review_due: 2027-04-26
 verification: [AT-SEC-006, AT-SEC-006-2]
 ---
 
@@ -57,3 +58,4 @@ Direkte Objektreferenzen (IDOR) sind die häufigste Ursache für Datenabflüsse;
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Autorisierungsmatrix |
 | 1.2 | 2026-10-23 | Review v0.2: R-03 `class: constraint` (Kontrollmatrix); R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason |
+| 1.3 | 2026-10-26 | Guideline-Review: GL-06 Ausgabe der OWASP Top 10 genannt, review_due |

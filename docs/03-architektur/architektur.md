@@ -1,9 +1,9 @@
 ---
 id: ARC-001
 type: architecture
-status: draft
+status: approved
 owner: team-architektur
-version: 1.4
+version: 1.5
 created: 2026-10-20
 last_updated: 2026-10-26
 review_due: 2027-01-31
@@ -17,6 +17,8 @@ review_due: 2027-01-31
 >
 > **v1.2:** Recht, Auftritt und Betrieb als Übung mit Platzhaltern (EPIC-13, Q-23): Rechtstexte als versionierte Markdown-Inhalte ([ADR-0015](decisions/0015-rechtstexte-als-markdown.md)), englische Oberfläche ([ADR-0016](decisions/0016-internationalisierung.md)), optionale Compose-Profile für Reverse Proxy mit TLS/HSTS und Überwachung ([ADR-0017](decisions/0017-optionale-betriebsprofile.md)), Datensicherung mit getesteter Wiederherstellung ([ADR-0018](decisions/0018-datensicherung.md)). Neu: DSA-Begründung und Widerspruch (Vier-Augen), Wartungsmodus und Statusseite, DAC7-Auswertung, Fehlerseiten mit korrekten Statuscodes, Laufzeitsichten 6.5/6.6, Verteilungssicht 7.3, Querschnitt 8.8–8.11. Alle neuen Bausteine sind **geplant** (Spalte „Stand“ mit Backlog-ID B-43 … B-58; Sprint-Zuordnung im [Backlog](../02-anforderungen/03-backlog.md)). Prozessartefakte: [Recht](../06-recht/README.md), [Betrieb](../07-betrieb/README.md).
 >
+> **v1.5:** Guideline-Review (GL-01…GL-17): [Ausnahmeregister](ausnahmen.md) für MUST-Abweichungen (ASVS-Fassung, OpenTelemetry, befristete ASVS-Ausnahmen, SLSA Level 3); [ADR-0019](decisions/0019-wiederherstellung-und-loeschjournal.md) ersetzt die geänderten Teile von ADR-0018; [ADR-0020](decisions/0020-datenzugriff-pg-sql-template.md) begründet den Datenzugriff ohne Query Builder; ADR-0014 bis 0018 auf Accepted; Status des Dokuments `approved`.
+
 > **v1.1:** Befunde aus dem [Architektur-Review v1.0](../04-review/review-v1.0-architektur.md) behoben: Soll und Ist getrennt (Spalte „Stand“ mit Backlog-ID), Datenbankzugriff und Modulabhängigkeiten in der Komponentensicht, Löschung und Anonymisierung im Datenmodell, Schlüsselkonzept für die IP-Pseudonymisierung ([ADR-0014](decisions/0014-ip-pseudonymisierung.md)), Laufzeitsichten an den Code angeglichen, Qualitätsszenarien an die Anforderungen angeglichen.
 >
 > **v1.0:** Bausteinsicht, Kontext und Verteilung im **C4-Modell** (Mermaid-C4, [ADR-0012](decisions/0012-c4-notation.md)); angeglichen an Anforderungen v1 und die Fallstudie (Kontaktfreigabe, Anmeldung hinter `IdentityProviderPort`, [ADR-0013](decisions/0013-anmeldung-identity-provider-port.md)).
@@ -53,7 +55,7 @@ Ein Marktplatz für Angehörige der HWG LU zum Verkaufen, Tauschen, Verschenken 
 | Typ | Randbedingung |
 |---|---|
 | Organisatorisch | Studienprojekt, kleines Team, Semester-Zeitrahmen, kein Budget |
-| Organisatorisch | DEV Guideline ist verbindlich. Abweichungen nur per ADR oder Exception |
+| Organisatorisch | DEV Guideline ist verbindlich. Abweichungen von SHOULD-Regeln und vom Standard-Stack per ADR, von MUST-Regeln nur über das [Ausnahmeregister](ausnahmen.md) mit Ablaufdatum (von `scripts/trace.mjs` geprüft) |
 | **Technisch** | **Kein öffentliches Hosting. Auslieferung als Docker-Image + Compose-Datei, lokal lauffähig, ohne Internetzugang** (ADR-0010) |
 | Technisch | Web-first (PWA). Keine native App |
 | Rechtlich | Kein Produktivbetrieb. DSGVO, DSA und BITV werden **konzeptionell** berücksichtigt (Privacy by Design). Betreiberpflichten (Impressum, Datenschutzerklärung, Nutzungsbedingungen, Barrierefreiheitserklärung, DSA-Prozesse, DAC7) werden als **Übung mit Platzhaltern** umgesetzt; Betreiber im Muster ist die Hochschule als öffentliche Stelle in Rheinland-Pfalz (Q-23, [Rechtskataster](../06-recht/rechtskataster.md)). Kein Rechtsrat; vor einem Echtbetrieb prüft der/die Datenschutzbeauftragte |
@@ -1031,7 +1033,7 @@ flowchart LR
 | Audit-Log (Admin- und Moderationsaktionen) | vertraulich | platform | Frist geplant B-12 |
 | Zählerspeicher Rate-Limit (pseudonymisierte IP und Adresse) | vertraulich | platform | täglich in `privacy-purge` |
 | IP-Pseudonymisierungsschlüssel | geheim | platform | Rotation täglich, Vorgänger nach 1 h gelöscht (ADR-0014, umgesetzt) |
-| Löschjournal | intern (nur IDs) | platform, Volume `journal` | 35 Tage, außerhalb der Datenbank (ADR-0018) |
+| Löschjournal | intern (nur IDs) | platform, Volume `journal` | 35 Tage, außerhalb der Datenbank (ADR-0019) |
 | Anwendungs-Logs | intern, **ohne PII** | – | Container-Logs, nicht persistiert |
 | Widersprüche | vertraulich | trust | wie Moderationsentscheidungen, Fristen geplant B-12 |
 | DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach § 22 PStTG (Übungswert, Q-28), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
@@ -1112,7 +1114,7 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten sind barrierefrei: Überschrift mit Fokus und verständlicher Text ohne Fachjargon. Fehlerseiten werden nicht indexiert (siehe 8.1).
 
 ### 8.11 Betrieb: Sicherung, Überwachung, Wartung, Aktualisierung
-- **Sicherung und Wiederherstellung (ADR-0018, REQ-AVAIL-003):** Skripte außerhalb der Anwendung, Wiederherstellung in CI getestet (QS-15).
+- **Sicherung und Wiederherstellung (ADR-0018, ADR-0019, REQ-AVAIL-003):** Skripte außerhalb der Anwendung, Wiederherstellung in CI getestet (QS-15).
 - **Überwachung und Alarmierung (ADR-0017, REQ-OPS-008):** siehe 8.6, Alarm innerhalb von 5 min (QS-16).
 - **Wartungsmodus und Ankündigung (REQ-OPS-006):**
   - *Weich:* Der Admin schaltet ihn in der Oberfläche ein, gespeichert in `platform.setting` mit 10 s Cache.
@@ -1129,7 +1131,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | ADR | Titel | Status |
 |---|---|---|
 | [0001](decisions/0001-modularer-monolith.md) | Modularer Monolith statt Microservices | Accepted |
-| [0002](decisions/0002-tech-stack.md) | Tech-Stack: TypeScript, React-SPA + Fastify, PostgreSQL, pg-boss (teilweise präzisiert durch 0011) | Accepted |
+| [0002](decisions/0002-tech-stack.md) | Tech-Stack: TypeScript, React-SPA + Fastify, PostgreSQL, pg-boss (teilweise präzisiert durch 0011, Query-Layer ersetzt durch 0020) | Accepted |
 | [0003](decisions/0003-authentifizierung.md) | Eigene Authentifizierung mit Hochschul-E-Mail-Verifikation (ergänzt durch 0013) | Accepted |
 | [0004](decisions/0004-chat-echtzeit.md) | Chat über WebSocket, Fan-out hinter einem Port | Accepted |
 | [0005](decisions/0005-email-versand.md) | E-Mail über transaktionale pg-boss-Jobs und MailPort | Accepted |
@@ -1141,11 +1143,13 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | [0011](decisions/0011-mvp-umsetzung.md) | Umsetzungsentscheidungen im MVP (SQL ohne ORM, Schema-first-Vertrag, CSRF, HEIC) | Accepted |
 | [0012](decisions/0012-c4-notation.md) | C4-Modell als Notation, Mermaid-C4-Diagramme | Accepted |
 | [0013](decisions/0013-anmeldung-identity-provider-port.md) | Anmeldung hinter einem IdentityProviderPort (Hochschulkennung, Q-12) | Proposed (Abstimmung mit Dozent/in) |
-| [0014](decisions/0014-ip-pseudonymisierung.md) | Pseudonymisierung von IP-Adressen mit rotierendem Schlüssel | Proposed |
-| [0015](decisions/0015-rechtstexte-als-markdown.md) | Rechtstexte als versionierte Markdown-Inhalte im Repository | Accepted (vorläufig, Q-23) |
-| [0016](decisions/0016-internationalisierung.md) | Internationalisierung mit react-intl (ICU MessageFormat) | Accepted (vorläufig, Q-25) |
-| [0017](decisions/0017-optionale-betriebsprofile.md) | Optionale Compose-Profile für Reverse Proxy und Überwachung (erweitert 0010) | Accepted (vorläufig, Q-27) |
-| [0018](decisions/0018-datensicherung.md) | Datensicherung mit pg_dump und Uploads-Archiv, Wiederherstellung in CI getestet | Accepted (vorläufig, Q-23) |
+| [0014](decisions/0014-ip-pseudonymisierung.md) | Pseudonymisierung von IP-Adressen mit rotierendem Schlüssel | Accepted |
+| [0015](decisions/0015-rechtstexte-als-markdown.md) | Rechtstexte als versionierte Markdown-Inhalte im Repository | Accepted |
+| [0016](decisions/0016-internationalisierung.md) | Internationalisierung mit react-intl (ICU MessageFormat) | Accepted |
+| [0017](decisions/0017-optionale-betriebsprofile.md) | Optionale Compose-Profile für Reverse Proxy und Überwachung (erweitert 0010) | Accepted |
+| [0018](decisions/0018-datensicherung.md) | Datensicherung mit pg_dump und Uploads-Archiv, Wiederherstellung in CI getestet (Nr. 2 und 5 ersetzt durch 0019) | Accepted |
+| [0019](decisions/0019-wiederherstellung-und-loeschjournal.md) | Wiederherstellung über temporäre Datenbank mit Rückfall, Löschjournal außerhalb der Datenbank | Accepted |
+| [0020](decisions/0020-datenzugriff-pg-sql-template.md) | Datenzugriff mit `pg` und parametrisierendem `sql`-Template statt Query Builder (ersetzt Teil von 0002 und 0011 Nr. 1) | Accepted |
 
 ## 10. Qualitätsszenarien
 

@@ -121,6 +121,8 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 6 | [Architekturdokumentation (arc42 + C4)](docs/03-architektur/architektur.md) | C4-Systemkontext, -Container, -Komponenten und -Verteilung (Mermaid-C4), Laufzeitsicht, Konzepte | Explanation |
 | 7 | [Architekturentscheidungen (ADRs)](docs/03-architektur/decisions/) | Eine Datei pro Entscheidung | Explanation |
 | 7a | [Threat Model](docs/03-architektur/threat-model.md) | STRIDE je Vertrauensgrenze, 39 Bedrohungen mit Maßnahmen | Explanation |
+| 7b | [Ausnahmeregister](docs/03-architektur/ausnahmen.md) | Abweichungen von MUST-Regeln der Guideline mit Ablaufdatum (von `trace.mjs` geprüft) | Reference |
+| 7c | [Changelog](CHANGELOG.md) | Änderungen je Version (Keep a Changelog, SemVer) | Reference |
 | 8 | [Review v0.1](docs/04-review/review-v0.1.md) | Kritisches Review dieses Entwurfs, offene Fragen | – |
 | 8a | [Requirements-Review v0.2](docs/04-review/review-v0.2-anforderungen.md) | 32 Befunde zu den Anforderungen und ihre Behebung | – |
 | 8b | [Architektur-Review v1.0](docs/04-review/review-v1.0-architektur.md) | 23 Befunde zur C4-Architektur und ihre Behebung | – |

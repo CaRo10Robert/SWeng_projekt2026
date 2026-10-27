@@ -14,9 +14,9 @@ epic: EPIC-13
 source: DSA Art. 14, BGB §§ 305 ff., Q-23
 use_cases: [UC-01, UC-08]
 depends_on: [REQ-PRIV-001]
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 verification: [AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE]
 ---
 
@@ -68,7 +68,7 @@ Szenario: Erneute Zustimmung nach Versionswechsel
 ## Nachweis
 - `AT-LEGAL-003`: E2E-Test – Nutzungsbedingungen und Community-Regeln ohne Anmeldung erreichbar, Version sichtbar, aus dem Registrierungsformular verlinkt.
 - `AT-LEGAL-003-2`: Smoke- oder Unit-Test – Mitglied mit älterer Zustimmung muss erneut zustimmen; schreibende Anfrage vorher 403 `terms_required`; danach Version gespeichert.
-- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001).
+- `CTRL-DOC-LEGAL-TEXTE`: Kontrolle der Rechtstexte (siehe REQ-LEGAL-001) – Protokoll [CTRL-DOC-LEGAL-TEXTE](../../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -77,3 +77,4 @@ Szenario: Erneute Zustimmung nach Versionswechsel
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-06): Status nach Umsetzung; Schutzrechte (Melden, Blockieren, Kontaktfreigabe widerrufen/ablehnen, Benachrichtigungen, Sprache) bleiben ohne aktuelle Zustimmung möglich |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE bestanden bzw. ausgeführt); Status → verified |
 | 1.3 | 2026-10-25 | Demo-Modus: Abgleich der Demo-Konten mit der aktuellen Fassung beim Start (`syncDemoLegalVersions`), Tim bleibt Testfall |
+| 1.4 | 2026-10-26 | Guideline-Review: GL-07 Kontrollprotokoll verlinkt |
