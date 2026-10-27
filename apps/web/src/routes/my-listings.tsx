@@ -3,16 +3,17 @@ import { useFavorites, useMyListings } from '../api/listings';
 import { errorMessage } from '../api/client';
 import { ListingGrid } from '../components/ListingCard';
 import { Alert, buttonClass, EmptyState, Loading, PageHeader } from '../components/ui';
+import { t } from '../i18n';
 
 export function MyListingsPage() {
   const { data, isPending, isError, error } = useMyListings();
   return (
     <div>
       <PageHeader
-        title="Meine Anzeigen"
+        title={t('nav.myListings')}
         actions={
           <Link to="/listings/new" className={buttonClass('primary')}>
-            Neue Anzeige
+            {t('myListings.new')}
           </Link>
         }
       />
@@ -21,7 +22,7 @@ export function MyListingsPage() {
       ) : isError ? (
         <Alert tone="error">{errorMessage(error)}</Alert>
       ) : data.length === 0 ? (
-        <EmptyState>Du hast noch keine Anzeigen. Was liegt bei dir herum, das jemand anderes brauchen könnte?</EmptyState>
+        <EmptyState>{t('myListings.empty')}</EmptyState>
       ) : (
         <ListingGrid items={data} showStatus />
       )}
@@ -33,13 +34,13 @@ export function FavoritesPage() {
   const { data, isPending, isError, error } = useFavorites();
   return (
     <div>
-      <PageHeader title="Merkliste" />
+      <PageHeader title={t('nav.favorites')} />
       {isPending ? (
         <Loading />
       ) : isError ? (
         <Alert tone="error">{errorMessage(error)}</Alert>
       ) : data.length === 0 ? (
-        <EmptyState>Noch nichts gemerkt. Tippe in einer Anzeige auf „Merken“.</EmptyState>
+        <EmptyState>{t('favorites.empty')}</EmptyState>
       ) : (
         <ListingGrid items={data} />
       )}

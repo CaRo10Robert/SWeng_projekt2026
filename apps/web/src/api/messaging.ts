@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type {
+  ContactActionBody,
+  ContactShare,
   ConversationSummary,
   Deal,
   DealActionBody,
@@ -25,8 +27,14 @@ export function useConversations() {
   });
 }
 
-export const useConversation = (id: string) =>
-  useQuery({ queryKey: ['conversation', id], queryFn: () => api<ConversationSummary>(`/conversations/${id}`) });
+export function useConversation(id: string) {
+  const refetchInterval = usePollInterval();
+  return useQuery({
+    queryKey: ['conversation', id],
+    queryFn: () => api<ConversationSummary>(`/conversations/${id}`),
+    refetchInterval,
+  });
+}
 
 export function useMessages(id: string) {
   const qc = useQueryClient();
@@ -96,6 +104,26 @@ export function useDealAction(conversationId: string) {
       void qc.invalidateQueries({ queryKey: ['messages', conversationId] });
       void qc.invalidateQueries({ queryKey: ['listing'] });
       void qc.invalidateQueries({ queryKey: ['myListings'] });
+    },
+  });
+}
+
+/** Kontaktfreigabe (REQ-CHAT-010): zustimmen, zurückziehen, ablehnen. */
+export function useContactAction(conversationId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ContactActionBody) =>
+      api<ContactShare>(`/conversations/${conversationId}/contact`, { method: 'POST', body }),
+    onSuccess: (contact) => {
+      qc.setQueryData<ConversationSummary>(['conversation', conversationId], (old) => (old ? { ...old, contact } : old));
+      void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
+      void qc.invalidateQueries({ queryKey: ['conversations'] });
+      void qc.invalidateQueries({ queryKey: ['messages', conversationId] });
+    },
+    // Zustand hat sich zwischenzeitlich geändert (z. B. Gegenüber hat abgelehnt): aktuellen Stand nachladen
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
+      void qc.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
 }

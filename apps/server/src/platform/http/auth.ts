@@ -8,6 +8,8 @@ export interface AuthContext {
   institutionId: string;
   displayName: string;
   sessionHash: string;
+  /** Zustimmung zur aktuellen Fassung der Nutzungsbedingungen liegt vor (REQ-LEGAL-003). */
+  termsCurrent: boolean;
 }
 
 declare module 'fastify' {
@@ -31,3 +33,16 @@ export function requireRole(req: FastifyRequest, min: Role): AuthContext {
 }
 
 export const SESSION_COOKIE = 'cm_session';
+
+/**
+ * Origin-Prüfung für CSRF und WebSocket: fehlender Origin gilt als eigener Ursprung, ein nicht parsebarer Origin
+ * (z. B. „null“ aus Sandbox-iframes) als fremd – nie als Serverfehler (Pentest PT-CSRF-03).
+ */
+export function isSameOrigin(origin: string | undefined, host: string | undefined): boolean {
+  if (!origin) return true;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}

@@ -1,0 +1,19 @@
+# Prometheus für das Compose-Profil `monitoring` (REQ-OPS-008, ADR-0017, docs/07-betrieb/monitoring-alarmierung.md)
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - alerts.yml # relativ zu dieser Datei
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+  # /metrics ist nur im internen Compose-Netz erreichbar (am Proxy gesperrt)
+  - job_name: campusmarkt
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['app:8080']

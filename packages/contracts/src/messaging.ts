@@ -4,6 +4,18 @@ import { ListingStatus } from './listings.js';
 
 export const MessageBody = Type.String({ minLength: 1, maxLength: 2000 });
 
+/** Systemnachrichten als Code; der Client übersetzt, body bleibt als deutscher Klartext (ADR-0016, MAN-UX-002 T-2). */
+export const SystemCode = Type.Union([
+  Type.Literal('contact_exchanged'),
+  Type.Literal('deal_reserved'),
+  Type.Literal('deal_completed'),
+  Type.Literal('deal_cancelled'),
+  Type.Literal('reservation_expired'),
+  Type.Literal('message_removed'),
+  Type.Literal('message_deleted'),
+]);
+export type SystemCode = Static<typeof SystemCode>;
+
 export const Message = Type.Object({
   id: Uuid,
   conversationId: Uuid,
@@ -15,6 +27,8 @@ export const Message = Type.Object({
   readAt: Type.Union([Timestamp, Type.Null()]),
   /** Sicherheitshinweis bei Links, IBAN oder Telefonnummern (REQ-CHAT-006). */
   safetyHint: Type.Boolean(),
+  /** Nur bei kind = system; ältere Systemnachrichten haben keinen Code. */
+  systemCode: Type.Optional(Type.Union([SystemCode, Type.Null()])),
 });
 export type Message = Static<typeof Message>;
 
@@ -29,6 +43,37 @@ export const Deal = Type.Object({
   createdAt: Timestamp,
 });
 export type Deal = Static<typeof Deal>;
+
+/**
+ * Kontaktfreigabe (REQ-CHAT-010, Fallstudie FS-C1). Zustand je Teilnehmer aus dessen Sicht:
+ * `none` noch nichts, `granted` stimmt zu, `withdrawn` hat zurückgezogen, `declined` eigene Anfrage wurde abgelehnt.
+ */
+export const ContactState = Type.Union([
+  Type.Literal('none'),
+  Type.Literal('granted'),
+  Type.Literal('withdrawn'),
+  Type.Literal('declined'),
+]);
+export type ContactState = Static<typeof ContactState>;
+
+export const ContactShare = Type.Object({
+  mine: ContactState,
+  theirs: ContactState,
+  /** Nur gesetzt, wenn beide zugestimmt haben und kein Hinderungsgrund besteht. Nie Teil einer Nachricht. */
+  counterpartEmail: Type.Union([Type.String(), Type.Null()]),
+  /** Ob ich jetzt zustimmen bzw. anfragen darf (Sperrfrist, Höchstzahl, Blockierung). */
+  canGrant: Type.Boolean(),
+  /** Frühester Zeitpunkt für eine erneute Anfrage, falls gesperrt. */
+  retryAfter: Type.Union([Timestamp, Type.Null()]),
+  /** Verbleibende Anfragen in dieser Konversation (höchstens 3). */
+  requestsLeft: Type.Integer(),
+});
+export type ContactShare = Static<typeof ContactShare>;
+
+export const ContactActionBody = Type.Object({
+  action: Type.Union([Type.Literal('grant'), Type.Literal('withdraw'), Type.Literal('decline')]),
+});
+export type ContactActionBody = Static<typeof ContactActionBody>;
 
 export const ConversationSummary = Type.Object({
   id: Uuid,
@@ -48,6 +93,7 @@ export const ConversationSummary = Type.Object({
   deal: Type.Union([Deal, Type.Null()]),
   /** true, wenn einer der beiden den anderen blockiert hat. */
   blocked: Type.Boolean(),
+  contact: ContactShare,
 });
 export type ConversationSummary = Static<typeof ConversationSummary>;
 

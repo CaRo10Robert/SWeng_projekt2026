@@ -1,17 +1,11 @@
-import type {
-  BlockedUser,
-  CreateReportBody,
-  ModerationCase,
-  ModerationDecisionType,
-  ReportReason,
-  ReportTargetType,
-} from '@campusmarkt/contracts';
+import type { BlockedUser, CreateReportBody, ModerationCase, ReportReason, ReportTargetType } from '@campusmarkt/contracts';
 import { audit } from '../../platform/audit.js';
 import type { Tx } from '../../platform/db.js';
 import { conflict, notFound, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
+import { createDsa } from './dsa.js';
 
 /** REQ-MOD-004: ab 3 Meldungen unterschiedlicher Mitglieder vorläufig ausblenden. */
 export const HIDE_THRESHOLD = 3;
@@ -26,18 +20,6 @@ interface CaseRow {
   created_at: string;
 }
 
-const DECISION_LABEL: Record<ModerationDecisionType, string> = {
-  no_action: 'keine Maßnahme',
-  remove: 'Inhalt entfernt',
-  warn: 'Verwarnung',
-  ban: 'Konto gesperrt',
-};
-
-const TARGET_LABEL: Record<ReportTargetType, string> = {
-  listing: 'einer Anzeige',
-  message: 'einer Chatnachricht',
-  user: 'einem Profil',
-};
 
 export function createTrustService(deps: ModuleDeps) {
   const { database, modules } = deps;
@@ -73,7 +55,11 @@ export function createTrustService(deps: ModuleDeps) {
     return id;
   }
 
+  const dsa = createDsa(deps, { openCase });
+
   return {
+    ...dsa,
+
     async report(auth: AuthContext, body: CreateReportBody): Promise<{ id: string }> {
       if (body.reason === 'auto_filter') throw unprocessable('invalid_reason', 'Ungültiger Grund.');
       const subject = await resolveTarget(auth, body.targetType, body.targetId);
@@ -88,7 +74,11 @@ export function createTrustService(deps: ModuleDeps) {
           SELECT count(DISTINCT reporter_id) AS n FROM trust.report WHERE case_id = ${kase.id} AND reporter_id IS NOT NULL`);
         if ((reporters?.n ?? 0) >= HIDE_THRESHOLD && !kase.hidden) {
           await tx.db.exec(sql`UPDATE trust.moderation_case SET hidden = true WHERE id = ${kase.id}`);
-          if (body.targetType === 'listing') await modules.listings.setHidden(tx, body.targetId, true);
+          if (body.targetType === 'listing') {
+            await modules.listings.setHidden(tx, body.targetId, true);
+            // Betroffene informieren: vorläufig, automatisch, Entscheidung folgt (REQ-MOD-004, RV-R-04)
+            await dsa.provisionalHide(tx, kase);
+          }
         }
         return { id: report.id };
       });
@@ -157,59 +147,6 @@ export function createTrustService(deps: ModuleDeps) {
       return result;
     },
 
-    /** REQ-MOD-002/003: Entscheidung, Begründung an Betroffene, unveränderliches Protokoll. */
-    async decide(auth: AuthContext, caseId: string, decision: ModerationDecisionType, reason: string): Promise<void> {
-      await database.tx(async (tx) => {
-        const kase = await tx.db.one<CaseRow>(sql`
-          SELECT * FROM trust.moderation_case WHERE id = ${caseId} FOR UPDATE`);
-        if (!kase) throw notFound();
-        if (kase.status !== 'open') throw conflict('already_decided', 'Dieser Fall wurde bereits entschieden.');
-        if (kase.subject_user_id === auth.userId) throw unprocessable('own_case', 'Eigene Fälle dürfen nicht entschieden werden.');
-
-        await tx.db.exec(sql`
-          INSERT INTO trust.decision (case_id, moderator_id, decision, reason)
-          VALUES (${caseId}, ${auth.userId}, ${decision}, ${reason})`);
-        await tx.db.exec(sql`
-          UPDATE trust.moderation_case SET status = 'decided', decided_at = now() WHERE id = ${caseId}`);
-
-        const removeContent = decision === 'remove' || decision === 'ban';
-        if (kase.target_type === 'listing') {
-          if (removeContent) await modules.listings.removeByModeration(tx, kase.target_id);
-          else {
-            await modules.listings.approveFromReview(tx, kase.target_id);
-            await modules.listings.setHidden(tx, kase.target_id, false);
-          }
-        }
-        if (kase.target_type === 'message' && removeContent) {
-          await modules.messaging.removeByModeration(tx, kase.target_id);
-        }
-        if (decision === 'ban' && kase.subject_user_id) {
-          await modules.identity.suspend(tx, kase.subject_user_id, `Moderationsentscheidung ${caseId}`);
-          await modules.listings.setOwnerSuspended(tx, kase.subject_user_id);
-        }
-
-        await audit(tx.db, {
-          actorId: auth.userId,
-          action: `moderation.${decision}`,
-          targetType: kase.target_type,
-          targetId: kase.target_id,
-          details: { caseId, reason },
-        });
-
-        const params = { decision: DECISION_LABEL[decision], reason, target: TARGET_LABEL[kase.target_type] };
-        const autoFilterOnly = !(await tx.db.one(sql`
-          SELECT 1 FROM trust.report WHERE case_id = ${caseId} AND reporter_id IS NOT NULL`));
-        if (kase.subject_user_id && (decision !== 'no_action' || autoFilterOnly)) {
-          await modules.notifications.email(tx, { userId: kase.subject_user_id }, 'moderation_decision', params);
-        }
-        const reporters = await tx.db.query<{ reporter_id: string }>(sql`
-          SELECT DISTINCT reporter_id FROM trust.report WHERE case_id = ${caseId} AND reporter_id IS NOT NULL`);
-        for (const r of reporters) {
-          await modules.notifications.email(tx, { userId: r.reporter_id }, 'moderation_decision', params);
-        }
-      });
-    },
-
     async isBlockedEither(a: string, b: string): Promise<boolean> {
       return !!(await db.one(sql`
         SELECT 1 FROM trust.block
@@ -248,6 +185,9 @@ export function createTrustService(deps: ModuleDeps) {
 
     async deleteForUser(tx: Tx, userId: string): Promise<void> {
       await tx.db.exec(sql`DELETE FROM trust.block WHERE blocker_id = ${userId} OR blocked_id = ${userId}`);
+      await tx.db.exec(sql`DELETE FROM trust.notice WHERE user_id = ${userId}`);
+      await tx.db.exec(sql`DELETE FROM trust.appeal_token WHERE user_id = ${userId}`);
+      await tx.db.exec(sql`UPDATE trust.appeal SET appellant_id = NULL WHERE appellant_id = ${userId}`);
       // Meldungen bleiben für die Aufbewahrungsfrist erhalten, aber ohne Bezug zur Person
       await tx.db.exec(sql`UPDATE trust.report SET reporter_id = NULL WHERE reporter_id = ${userId}`);
     },
@@ -258,7 +198,15 @@ export function createTrustService(deps: ModuleDeps) {
         FROM trust.report r JOIN trust.moderation_case c ON c.id = r.case_id WHERE r.reporter_id = ${userId}`);
       const blocks = await db.query(sql`
         SELECT blocked_id AS "userId", created_at AS "createdAt" FROM trust.block WHERE blocker_id = ${userId}`);
-      return { reports, blocks };
+      // Widersprüche und Mitteilungen gehören zur eigenen Datenkopie (Art. 15), ohne Daten Dritter
+      const appeals = await db.query(sql`
+        SELECT a.decision_id AS "decisionId", a.appellant_role AS role, a.reason, a.status,
+               a.outcome_reason AS "outcomeReason", a.created_at AS "createdAt", a.decided_at AS "decidedAt"
+        FROM trust.appeal a WHERE a.appellant_id = ${userId}`);
+      const notices = await db.query(sql`
+        SELECT n.kind, n.recipient_role AS role, n.decision_id AS "decisionId", n.created_at AS "createdAt"
+        FROM trust.notice n WHERE n.user_id = ${userId}`);
+      return { reports, blocks, appeals, notices };
     },
   };
 }

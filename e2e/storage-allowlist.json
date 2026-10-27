@@ -1,0 +1,26 @@
+{
+  "$comment": "Zulässige Speicherungen auf dem Endgerät (REQ-LEGAL-010, TDDDG § 25 Abs. 2 Nr. 2). Jede Zeile muss in der Datenschutzerklärung unter „Cookies und lokale Speicherung“ stehen (privacyTerm). Neue Speicherung → hier und in apps/web/src/content/legal/datenschutz.de.md eintragen, sonst schlägt AT-LEGAL-010 fehl.",
+  "entries": [
+    {
+      "type": "cookie",
+      "pattern": "^cm_session$",
+      "purpose": "Anmeldung",
+      "classification": "unbedingt erforderlich",
+      "privacyTerm": "cm_session"
+    },
+    {
+      "type": "cache",
+      "pattern": "^workbox-precache-v2-",
+      "purpose": "App-Shell des Service Workers (PWA)",
+      "classification": "unbedingt erforderlich",
+      "privacyTerm": "Service Worker"
+    },
+    {
+      "type": "localStorage",
+      "pattern": "^cm_locale$",
+      "purpose": "Ausdrücklich gewählte Sprache (ADR-0016, REQ-UX-007); wird erst nach Klick auf die Sprachwahl gesetzt",
+      "classification": "unbedingt erforderlich (auf ausdrücklichen Wunsch)",
+      "privacyTerm": "cm_locale"
+    }
+  ]
+}

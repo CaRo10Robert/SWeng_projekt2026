@@ -1,6 +1,6 @@
 # ADR-0008: Suche mit PostgreSQL-Volltext statt separater Suchmaschine
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
 - **Datum:** 2026-10-20
 - **Bezug:** REQ-SRCH-001…003, REQ-PERF-001
 

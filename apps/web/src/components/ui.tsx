@@ -1,18 +1,19 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { t } from '../i18n';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800 disabled:bg-slate-400',
-  secondary: 'bg-white text-slate-900 border border-slate-400 hover:bg-slate-100 disabled:text-slate-500',
-  danger: 'bg-red-700 text-white hover:bg-red-800 disabled:bg-slate-400',
-  ghost: 'text-brand-700 hover:bg-brand-50 disabled:text-slate-500',
+  primary: 'bg-brand-700 text-white hover:bg-brand-800 disabled:bg-slate-400 aria-disabled:bg-slate-400',
+  secondary: 'bg-white text-slate-900 border border-slate-400 hover:bg-slate-100 disabled:text-slate-500 aria-disabled:text-slate-500',
+  danger: 'bg-red-700 text-white hover:bg-red-800 disabled:bg-slate-400 aria-disabled:bg-slate-400',
+  ghost: 'text-brand-700 hover:bg-brand-50 disabled:text-slate-500 aria-disabled:text-slate-500',
 };
 
 export const buttonClass = (variant: Variant = 'primary', extra?: string) =>
   cx(
-    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed',
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed aria-disabled:cursor-not-allowed',
     variants[variant],
     extra,
   );
@@ -24,17 +25,33 @@ export function Button({
   children,
   disabled,
   type = 'button',
+  onClick,
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean }) {
+  // Während busy bleibt die Schaltfläche fokussierbar (aria-disabled statt disabled), damit der Fokus nicht auf body fällt (WCAG 2.4.3)
   return (
-    <button type={type} className={buttonClass(variant, className)} disabled={disabled || busy} aria-busy={busy || undefined} {...rest}>
+    <button
+      type={type}
+      className={buttonClass(variant, className)}
+      disabled={disabled}
+      aria-disabled={busy || undefined}
+      aria-busy={busy || undefined}
+      onClick={(e) => {
+        if (busy) {
+          e.preventDefault();
+          return;
+        }
+        onClick?.(e);
+      }}
+      {...rest}
+    >
       {busy && <Spinner small />}
       {children}
     </button>
   );
 }
 
-export function Spinner({ small, label = 'Wird geladen …' }: { small?: boolean; label?: string }) {
+export function Spinner({ small, label = t('common.loading') }: { small?: boolean; label?: string }) {
   return (
     <span role="status" className="inline-flex items-center gap-2">
       <span

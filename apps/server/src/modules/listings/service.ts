@@ -13,7 +13,7 @@ import type {
   UpdateListingBody,
 } from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
-import { AppError, conflict, forbidden, notFound, unprocessable } from '../../platform/errors.js';
+import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
@@ -29,6 +29,8 @@ import {
   nextStatus,
   PUBLIC_STATUSES,
   sniffImageType,
+  UPLOAD_QUOTA,
+  RESERVATION_FALLBACK_DAYS,
 } from './domain.js';
 
 export const PROCESS_IMAGE = 'process-image';
@@ -86,8 +88,11 @@ export const toCard = (r: ListingRow): ListingCard => ({
   expiresAt: r.expires_at,
 });
 
+
+/** Bilder dieser Anzeigen sind für andere Mitglieder nicht abrufbar (Pentest PT-AC-11). */
+const MEDIA_HIDDEN_STATUSES: ListingRow['status'][] = ['in_review', 'removed'];
 export function createListingsService(deps: ModuleDeps) {
-  const { database, storage, modules } = deps;
+  const { database, storage, modules, rateLimit } = deps;
   const { db } = database;
 
   async function load(id: string, tx?: Tx) {
@@ -139,7 +144,10 @@ export function createListingsService(deps: ModuleDeps) {
     }
     const removed = await tx.db.query<ImageRow>(sql`
       DELETE FROM listings.image WHERE listing_id = ${listingId} AND NOT (id = ANY(${unique}::uuid[])) RETURNING *`);
-    for (const image of removed) await deleteImageFiles(image);
+    for (const image of removed) {
+      await deleteImageFiles(image);
+      deps.journal.record(tx, 'image_deleted', image.id);
+    }
 
     for (const [position, id] of unique.entries()) {
       const row = rows.find((r) => r.id === id)!;
@@ -365,8 +373,11 @@ export function createListingsService(deps: ModuleDeps) {
 
     // ------------------------------------------------------------ Moderation (trust)
     async removeByModeration(tx: Tx, id: string) {
+      // Vorherigen Status merken, damit eine Stattgabe ihn wiederherstellt (RV-C-09)
       await tx.db.exec(sql`
-        UPDATE listings.listing SET status = 'removed', status_changed_at = now() WHERE id = ${id}`);
+        UPDATE listings.listing SET status_before_removal = status, status = 'removed', status_changed_at = now()
+        WHERE id = ${id} AND status NOT IN ('removed', 'deleted')`);
+      deps.journal.record(tx, 'listing_removed', id);
     },
     async approveFromReview(tx: Tx, id: string) {
       await tx.db.exec(sql`
@@ -378,8 +389,46 @@ export function createListingsService(deps: ModuleDeps) {
     async setHidden(tx: Tx, id: string, hidden: boolean) {
       await tx.db.exec(sql`UPDATE listings.listing SET hidden = ${hidden} WHERE id = ${id}`);
     },
-    async setOwnerSuspended(tx: Tx, ownerId: string) {
-      await tx.db.exec(sql`UPDATE listings.listing SET owner_suspended = true WHERE owner_id = ${ownerId}`);
+    async setOwnerSuspended(tx: Tx, ownerId: string, suspended: boolean) {
+      await tx.db.exec(sql`UPDATE listings.listing SET owner_suspended = ${suspended} WHERE owner_id = ${ownerId}`);
+    },
+    /**
+     * Widerspruch stattgegeben (REQ-LEGAL-007): Status vor der Entfernung wiederherstellen (reserviert, pausiert und
+     * abgelaufen bleiben es); aktive Anzeigen und solche aus der Prüfung erhalten die volle Laufzeit. Liefert false,
+     * wenn nichts wiederhergestellt werden konnte (z. B. inzwischen gelöscht).
+     */
+    async restoreByModeration(tx: Tx, id: string): Promise<boolean> {
+      const restored = await tx.db.exec(sql`
+        UPDATE listings.listing SET
+          status = CASE WHEN status_before_removal IN ('reserved', 'paused', 'expired', 'completed') THEN status_before_removal ELSE 'active' END,
+          expires_at = CASE WHEN status_before_removal IN ('reserved', 'paused', 'expired', 'completed') THEN expires_at
+                            ELSE now() + make_interval(days => ${LISTING_LIFETIME_DAYS}) END,
+          hidden = false, status_changed_at = now(), status_before_removal = NULL
+        WHERE id = ${id} AND status = 'removed'`);
+      if (restored) deps.journal.record(tx, 'listing_restored', id);
+      return restored > 0;
+    },
+
+    /** Beweissicherung (REQ-LEGAL-008): Inhalt der Anzeige als Kopie, ohne Kontaktdaten. */
+    async evidenceSnapshot(id: string): Promise<Record<string, unknown> | null> {
+      const row = await db.one<ListingRow>(sql`SELECT * FROM listings.listing WHERE id = ${id}`);
+      return row
+        ? { kind: 'listing', listingId: row.id, title: row.title, description: row.description, priceCents: row.price_cents, createdAt: row.created_at }
+        : null;
+    },
+
+    // ------------------------------------------------------------ Löschjournal nach Wiederherstellung (ADR-0018)
+    async replayDelete(tx: Tx, id: string): Promise<boolean> {
+      const row = await tx.db.one<{ id: string }>(sql`
+        SELECT id FROM listings.listing WHERE id = ${id} AND status <> 'deleted' FOR UPDATE`);
+      if (!row) return false;
+      await softDelete(tx, [id]);
+      return true;
+    },
+    async replayImageDelete(tx: Tx, imageId: string): Promise<boolean> {
+      const images = await tx.db.query<ImageRow>(sql`DELETE FROM listings.image WHERE id = ${imageId} RETURNING *`);
+      for (const image of images) await deleteImageFiles(image);
+      return images.length > 0;
     },
     async deleteAllForOwner(tx: Tx, ownerId: string) {
       const rows = await tx.db.query<{ id: string }>(sql`SELECT id FROM listings.listing WHERE owner_id = ${ownerId}`);
@@ -406,6 +455,11 @@ export function createListingsService(deps: ModuleDeps) {
           throw new AppError(415, 'heic_unsupported', 'HEIC wird noch nicht unterstützt. Bitte das Foto als JPEG speichern.');
         }
       }
+      // Quote je Mitglied gegen das Füllen des Speichers (ASVS 12.1.3, Pentest PT-UP-07); zählt jedes Bild
+      for (let i = 0; i < files.length; i++) {
+        const quota = await rateLimit.hit(`upload:${auth.userId}`, UPLOAD_QUOTA.limit, UPLOAD_QUOTA.windowSeconds);
+        if (!quota.allowed) throw rateLimited(quota.retryAfterSeconds);
+      }
       for (const file of files) {
         const id = randomUUID();
         const key = `quarantine/${id}`;
@@ -418,12 +472,15 @@ export function createListingsService(deps: ModuleDeps) {
     },
 
     async media(viewer: AuthContext, imageId: string, size: keyof typeof IMAGE_SIZES): Promise<Buffer> {
-      const row = await db.one<ImageRow & { listing_status: ListingRow['status']; owner: string; hidden: boolean }>(sql`
-        SELECT i.*, l.status AS listing_status, l.owner_id AS owner, l.hidden
+      const row = await db.one<ImageRow & { listing_status: ListingRow['status']; owner: string; hidden: boolean; owner_suspended: boolean }>(sql`
+        SELECT i.*, l.status AS listing_status, l.owner_id AS owner, l.hidden, l.owner_suspended
         FROM listings.image i JOIN listings.listing l ON l.id = i.listing_id
         WHERE i.id = ${imageId} AND i.status = 'ready'`);
       if (!row || row.listing_status === 'deleted') throw notFound();
-      const mayView = row.owner === viewer.userId || viewer.role !== 'member' || (!row.hidden && row.listing_status !== 'removed');
+      // Wie die Anzeige selbst: in Prüfung, entfernt, ausgeblendet oder gesperrt nur für Anbieter und Moderation.
+      // Reservierte, abgegebene und abgelaufene Anzeigen bleiben sichtbar (Vorschaubild in Konversationen).
+      const mayView = row.owner === viewer.userId || viewer.role !== 'member' ||
+        (!row.hidden && !row.owner_suspended && !MEDIA_HIDDEN_STATUSES.includes(row.listing_status));
       if (!mayView) throw notFound();
       const data = await storage.get(`public/${row.listing_id}/${row.id}-${size}.webp`);
       if (!data) throw notFound();
@@ -466,7 +523,7 @@ export function createListingsService(deps: ModuleDeps) {
       for (const r of reminders) {
         await modules.notifications.email(undefined, { userId: r.owner_id }, 'listing_expiry', {
           listingTitle: r.title,
-          date: new Date(r.expires_at).toLocaleDateString('de-DE'),
+          dateIso: new Date(r.expires_at).toISOString(),
           link: `${deps.config.publicUrl}/listings/${r.id}`,
         });
       }
@@ -474,16 +531,55 @@ export function createListingsService(deps: ModuleDeps) {
       stats.expired = await db.exec(sql`
         UPDATE listings.listing SET status = 'expired', status_changed_at = now()
         WHERE status = 'active' AND expires_at < now()`);
-      // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell)
+      // Reservierungen fallen nach 30 Tagen ohne Abgabe zurück (REQ-LST-008, REQ-PRIV-003): offener Deal wird storniert,
+      // der Anbieter erhält einen Hinweis. Gesicherte Anzeigen (REQ-LEGAL-008) bleiben unverändert.
+      const heldForFallback = await modules.trust.heldTargetIds('listing');
+      const lapsed = await db.query<{ id: string }>(sql`
+        SELECT id FROM listings.listing
+        WHERE status = 'reserved' AND status_changed_at < now() - make_interval(days => ${RESERVATION_FALLBACK_DAYS})
+          AND id <> ALL(${heldForFallback}::uuid[])`);
+      let fallbacks = 0;
+      for (const { id } of lapsed) {
+        const outcome = await database.tx(async (tx) => {
+          // Bedingtes Update macht den Lauf idempotent, auch bei parallelen Wartungsläufen
+          const row = await tx.db.one<{ owner_id: string; title: string }>(sql`
+            UPDATE listings.listing SET status = 'active', status_changed_at = now(), updated_at = now()
+            WHERE id = ${id} AND status = 'reserved'
+              AND status_changed_at < now() - make_interval(days => ${RESERVATION_FALLBACK_DAYS})
+            RETURNING owner_id, title`);
+          if (!row) return null;
+          const messages = await modules.messaging.expireReservation(tx, id);
+          await modules.notifications.email(tx, { userId: row.owner_id }, 'reservation_expired', {
+            listingTitle: row.title,
+            link: `${deps.config.publicUrl}/listings/${id}`,
+          });
+          return messages;
+        });
+        if (!outcome) continue;
+        fallbacks++;
+        await modules.messaging.publishSystemMessages(outcome);
+      }
+      stats.reservationFallback = fallbacks;
+      // Pausierte Anzeigen laufen nach 90 Tagen Pause ab (REQ-PRIV-003, Zustandsmodell)
+      stats.pausedExpired = await db.exec(sql`
+        UPDATE listings.listing SET status = 'expired', status_changed_at = now()
+        WHERE status = 'paused' AND status_changed_at < now() - interval '90 days'`);
+      // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell); gesicherte Anzeigen
+      // (Verdacht auf Straftat, REQ-LEGAL-008) bleiben bis zur Freigabe erhalten
+      const held = await modules.trust.heldTargetIds('listing');
       const purge = await db.query<{ id: string }>(sql`
         UPDATE listings.listing SET status = 'deleted', status_changed_at = now()
-        WHERE (status = 'expired' AND status_changed_at < now() - interval '90 days')
+        WHERE ((status = 'expired' AND status_changed_at < now() - interval '90 days')
            OR (status = 'completed' AND status_changed_at < now() - interval '30 days')
+           -- von der Moderation entfernt: 12 Monate nach der Entscheidung (REQ-PRIV-003)
+           OR (status = 'removed' AND status_changed_at < now() - interval '12 months'))
+          AND id <> ALL(${held}::uuid[])
         RETURNING id`);
       stats.purged = purge.length;
       for (const { id } of purge) await storage.deletePrefix(`public/${id}`);
       stats.hardDeleted = await db.exec(sql`
-        DELETE FROM listings.listing WHERE status = 'deleted' AND status_changed_at < now() - interval '1 day'`);
+        DELETE FROM listings.listing WHERE status = 'deleted' AND status_changed_at < now() - interval '1 day'
+          AND id <> ALL(${held}::uuid[])`);
       const stale = await db.query<ImageRow>(sql`
         DELETE FROM listings.image WHERE listing_id IS NULL AND created_at < now() - interval '24 hours' RETURNING *`);
       for (const image of stale) await deleteImageFiles(image);
@@ -503,6 +599,7 @@ export function createListingsService(deps: ModuleDeps) {
     for (const id of ids) await storage.deletePrefix(`public/${id}`);
     await tx.db.exec(sql`
       UPDATE listings.listing SET status = 'deleted', status_changed_at = now() WHERE id = ANY(${ids}::uuid[])`);
+    for (const id of ids) deps.journal.record(tx, 'listing_deleted', id);
   }
 }
 

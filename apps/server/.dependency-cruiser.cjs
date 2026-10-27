@@ -29,6 +29,14 @@ module.exports = {
       to: { path: 'node_modules/(nodemailer|pg-boss|pg)/' },
     },
     {
+      name: 'no-payment-sdk-in-modules',
+      comment:
+        'Zahlungsdienstleister nur hinter dem PaymentPort in einem Adapter (ADR-0006, QS-5); Fachmodule importieren keine PSP-SDKs.',
+      severity: 'error',
+      from: { path: '^src/modules/' },
+      to: { path: ['^(stripe|mollie|@mollie/|@paypal/|@adyen/|@braintree/|braintree)', 'node_modules/(stripe|@mollie|@paypal|@adyen|@braintree|braintree)/'] },
+    },
+    {
       name: 'domain-is-pure',
       comment: 'domain.ts importiert keine Frameworks und keine Plattform.',
       severity: 'error',

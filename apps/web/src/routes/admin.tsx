@@ -5,6 +5,8 @@ import { useAdminUsers, useAudit, useJobs, useRunDueJobs, useSetRole } from '../
 import { errorMessage } from '../api/client';
 import { Alert, Button, Card, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
 import { formatDate, formatDateTime, roleLabels } from '../lib/format';
+import { Dac7, EvidenceHolds, Operations } from './admin-ops';
+import { t, type MessageKey } from '../i18n';
 
 const roles: Role[] = ['member', 'moderator', 'admin'];
 
@@ -25,10 +27,10 @@ function Users() {
         }}
       >
         <label htmlFor="user-q" className="sr-only">
-          Nutzer suchen
+          {t('admin.users.search')}
         </label>
-        <input id="user-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name oder E-Mail" className="flex-1 rounded-lg border border-slate-400 px-3 py-2" />
-        <Button type="submit">Suchen</Button>
+        <input id="user-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('admin.users.placeholder')} className="flex-1 rounded-lg border border-slate-400 px-3 py-2" />
+        <Button type="submit">{t('common.search')}</Button>
       </form>
       <FormError error={setRole.isError ? errorMessage(setRole.error) : null} />
       {isPending ? (
@@ -36,18 +38,18 @@ function Users() {
       ) : isError ? (
         <Alert tone="error">{errorMessage(error)}</Alert>
       ) : data.length === 0 ? (
-        <EmptyState>Keine Nutzer gefunden.</EmptyState>
+        <EmptyState>{t('admin.users.none')}</EmptyState>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <caption className="sr-only">Nutzerliste</caption>
+            <caption className="sr-only">{t('admin.users.caption')}</caption>
             <thead className="border-b border-slate-300">
               <tr>
-                <th scope="col" className="p-2">Name</th>
-                <th scope="col" className="p-2">E-Mail</th>
-                <th scope="col" className="p-2">Status</th>
-                <th scope="col" className="p-2">Seit</th>
-                <th scope="col" className="p-2">Rolle</th>
+                <th scope="col" className="p-2">{t('admin.col.name')}</th>
+                <th scope="col" className="p-2">{t('admin.col.email')}</th>
+                <th scope="col" className="p-2">{t('admin.col.status')}</th>
+                <th scope="col" className="p-2">{t('admin.col.since')}</th>
+                <th scope="col" className="p-2">{t('admin.col.role')}</th>
               </tr>
             </thead>
             <tbody>
@@ -59,7 +61,7 @@ function Users() {
                   <td className="p-2">{formatDate(u.createdAt)}</td>
                   <td className="p-2">
                     <label className="sr-only" htmlFor={`role-${u.id}`}>
-                      Rolle von {u.displayName}
+                      {t('admin.users.roleOf', { name: u.displayName })}
                     </label>
                     <select
                       id={`role-${u.id}`}
@@ -86,25 +88,34 @@ function Users() {
 }
 
 function Audit() {
-  const { data, isPending, isError, error } = useAudit();
+  const audit = useAudit();
+  const { isPending, isError, error } = audit;
   if (isPending) return <Loading />;
   if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
-  if (!data.length) return <EmptyState>Noch keine Einträge.</EmptyState>;
+  const entries = audit.data.pages.flatMap((p) => p.items);
+  if (!entries.length) return <EmptyState>{t('admin.audit.empty')}</EmptyState>;
   return (
-    <ol className="divide-y divide-slate-200 text-sm">
-      {data.map((a) => (
-        <li key={a.id} className="py-2">
-          <p>
-            <time className="text-slate-600">{formatDateTime(a.createdAt)}</time> · <strong>{a.actorName ?? 'System'}</strong> · {a.action}
-          </p>
-          <p className="text-slate-600">
-            {a.targetType}
-            {a.targetId && ` ${a.targetId}`}
-            {Object.keys(a.details).length > 0 && ` · ${JSON.stringify(a.details)}`}
-          </p>
-        </li>
-      ))}
-    </ol>
+    <div className="space-y-3">
+      <ol className="divide-y divide-slate-200 text-sm">
+        {entries.map((a) => (
+          <li key={a.id} className="py-2">
+            <p>
+              <time className="text-slate-600">{formatDateTime(a.createdAt)}</time> · <strong>{a.actorName ?? t('admin.audit.system')}</strong> · {a.action}
+            </p>
+            <p className="text-slate-600">
+              {a.targetType}
+              {a.targetId && ` ${a.targetId}`}
+              {Object.keys(a.details).length > 0 && ` · ${JSON.stringify(a.details)}`}
+            </p>
+          </li>
+        ))}
+      </ol>
+      {audit.hasNextPage && (
+        <Button variant="secondary" busy={audit.isFetchingNextPage} onClick={() => void audit.fetchNextPage()}>
+          {t('admin.loadMore')}
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -117,9 +128,9 @@ function Jobs() {
       {meta?.demoMode && (
         <div className="space-y-2">
           <Button onClick={() => run.mutate()} busy={run.isPending}>
-            Fällige Jobs jetzt ausführen
+            {t('admin.jobs.runDue')}
           </Button>
-          <p className="text-sm text-slate-600">Demo-Modus: löst Ablauf von Anzeigen, Erinnerungen, Re-Verifikation und Löschfristen sofort aus.</p>
+          <p className="text-sm text-slate-600">{t('admin.jobs.runDueHint')}</p>
           <div aria-live="polite">{run.isSuccess && <Alert tone="success">{run.data.message}</Alert>}</div>
           <FormError error={run.isError ? errorMessage(run.error) : null} />
         </div>
@@ -132,14 +143,14 @@ function Jobs() {
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Job-Queues</caption>
+              <caption className="sr-only">{t('admin.jobs.caption')}</caption>
               <thead className="border-b border-slate-300">
                 <tr>
-                  <th scope="col" className="p-2">Queue</th>
-                  <th scope="col" className="p-2">Wartend</th>
-                  <th scope="col" className="p-2">Aktiv</th>
-                  <th scope="col" className="p-2">Fehlgeschlagen</th>
-                  <th scope="col" className="p-2">Erledigt</th>
+                  <th scope="col" className="p-2">{t('admin.jobs.queue')}</th>
+                  <th scope="col" className="p-2">{t('admin.jobs.queued')}</th>
+                  <th scope="col" className="p-2">{t('admin.jobs.active')}</th>
+                  <th scope="col" className="p-2">{t('admin.jobs.failed')}</th>
+                  <th scope="col" className="p-2">{t('admin.jobs.completed')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,9 +166,9 @@ function Jobs() {
               </tbody>
             </table>
           </div>
-          <h3 className="font-semibold">Dead-Letter-Queue</h3>
+          <h3 className="font-semibold">{t('admin.jobs.deadLetter')}</h3>
           {data.deadLetters.length === 0 ? (
-            <EmptyState>Keine endgültig fehlgeschlagenen Jobs.</EmptyState>
+            <EmptyState>{t('admin.jobs.noDeadLetters')}</EmptyState>
           ) : (
             <ul className="space-y-2 text-sm">
               {data.deadLetters.map((d) => (
@@ -174,24 +185,31 @@ function Jobs() {
   );
 }
 
-const tabs = { users: 'Nutzer & Rollen', audit: 'Audit-Log', jobs: 'Jobs' } as const;
+const tabs = {
+  users: 'admin.tab.users',
+  audit: 'admin.tab.audit',
+  jobs: 'admin.tab.jobs',
+  operations: 'admin.tab.operations',
+  dac7: 'admin.tab.dac7',
+  evidence: 'admin.tab.evidence',
+} as const satisfies Record<string, MessageKey>;
 
 export function AdminPage() {
   const [tab, setTab] = useState<keyof typeof tabs>('users');
   return (
     <div className="space-y-4">
-      <PageHeader title="Administration" />
-      <div role="tablist" aria-label="Bereiche" className="flex flex-wrap gap-2">
-        {(Object.keys(tabs) as (keyof typeof tabs)[]).map((t) => (
+      <PageHeader title={t('admin.title')} />
+      <div role="tablist" aria-label={t('admin.tabs')} className="flex flex-wrap gap-2">
+        {(Object.keys(tabs) as (keyof typeof tabs)[]).map((key) => (
           <button
-            key={t}
+            key={key}
             role="tab"
             type="button"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={cx('rounded-lg px-4 py-2 text-sm font-semibold', tab === t ? 'bg-brand-700 text-white' : 'bg-white ring-1 ring-slate-300')}
+            aria-selected={tab === key}
+            onClick={() => setTab(key)}
+            className={cx('rounded-lg px-4 py-2 text-sm font-semibold', tab === key ? 'bg-brand-700 text-white' : 'bg-white ring-1 ring-slate-300')}
           >
-            {tabs[t]}
+            {t(tabs[key])}
           </button>
         ))}
       </div>
@@ -200,6 +218,9 @@ export function AdminPage() {
           {tab === 'users' && <Users />}
           {tab === 'audit' && <Audit />}
           {tab === 'jobs' && <Jobs />}
+          {tab === 'operations' && <Operations />}
+          {tab === 'dac7' && <Dac7 />}
+          {tab === 'evidence' && <EvidenceHolds />}
         </div>
       </Card>
     </div>

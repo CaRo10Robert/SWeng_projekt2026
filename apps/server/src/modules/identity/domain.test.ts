@@ -9,7 +9,7 @@ const rules: DomainRule[] = [
 ];
 
 // Entscheidungstabelle BR-01 (Anforderungskatalog §1.1), Zeile für Zeile
-describe('BR-01 Domain-Prüfung', () => {
+describe('[AT-AUTH-001] [AT-AUTH-003] BR-01 Domain-Prüfung und Nutzertyp', () => {
   it.each([
     ['max.muster@studmail.hwg-lu.de', true, 'student'],
     ['M.Muster@HWG-LU.DE', true, 'staff'],
@@ -39,7 +39,7 @@ describe('BR-01 Domain-Prüfung', () => {
   });
 });
 
-describe('Passwortrichtlinie (REQ-SEC-003)', () => {
+describe('[AT-SEC-003] Passwortrichtlinie (REQ-SEC-003)', () => {
   const blocklist = new Set(['password1234']);
 
   it('verlangt mindestens 12 Zeichen, ohne Kompositionsregeln', () => {
@@ -67,5 +67,15 @@ describe('Tokens', () => {
     expect(a.token).not.toBe(b.token);
     expect(a.hash).toBe(hashToken(a.token));
     expect(a.hash).not.toContain(a.token);
+  });
+});
+
+describe('Randfälle der Adress- und Passwortprüfung (Zweigabdeckung kritischer Pfade)', () => {
+  it.each(['.max@hwg-lu.de', 'max.@hwg-lu.de', '+nur-suffix@hwg-lu.de'])('lehnt %s als ungültiges Format ab', (email) => {
+    expect(checkRegistrationEmail(email, rules)).toEqual({ ok: false, reason: 'invalid_format' });
+  });
+
+  it('lehnt Passwörter über 256 Zeichen ab', () => {
+    expect(checkPassword('a1'.repeat(129), { blocklist: new Set() }).ok).toBe(false);
   });
 });

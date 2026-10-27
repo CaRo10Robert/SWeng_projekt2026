@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { checkPrice, findProhibitedTerms, nextStatus, sniffImageType } from './domain.js';
+import { checkPrice, findProhibitedTerms, nextStatus, reservationLapsed, sniffImageType } from './domain.js';
 
-describe('Preisregeln (REQ-LST-002)', () => {
+describe('[AT-LST-002] Preisregeln (REQ-LST-002)', () => {
   it.each([
     ['fixed', 1, true],
     ['fixed', 1_000_000, true],
@@ -19,7 +19,7 @@ describe('Preisregeln (REQ-LST-002)', () => {
   });
 });
 
-describe('Zustandsmodell Anzeige', () => {
+describe('[AT-LST-006] [AT-LST-007] Zustandsmodell Anzeige', () => {
   it.each([
     ['active', 'pause', 'paused'],
     ['paused', 'resume', 'active'],
@@ -42,7 +42,7 @@ describe('Zustandsmodell Anzeige', () => {
   });
 });
 
-describe('Wortfilter (REQ-LST-010)', () => {
+describe('[AT-LST-010] Inhaltsprüfung (REQ-LST-010)', () => {
   it('findet verbotene Begriffe unabhängig von Groß-/Kleinschreibung', () => {
     expect(findProhibitedTerms('Verkaufe KLAUSURLÖSUNGEN für Mikro')).toContain('klausurlösungen');
     expect(findProhibitedTerms('Schreckschuss-Pistole', '')).toEqual(expect.arrayContaining(['pistole', 'schreckschuss']));
@@ -53,12 +53,35 @@ describe('Wortfilter (REQ-LST-010)', () => {
   });
 });
 
-describe('Magic Bytes (REQ-SEC-007)', () => {
+describe('[AT-SEC-007-3] [AT-LST-003-2] Magic Bytes (REQ-SEC-007)', () => {
   it('erkennt Bildformate am Inhalt, nicht an der Endung', () => {
     expect(sniffImageType(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]))).toBe('jpeg');
     expect(sniffImageType(Buffer.from('89504e470d0a1a0a0000000d', 'hex'))).toBe('png');
     expect(sniffImageType(Buffer.from('RIFF0000WEBPVP8 ', 'ascii'))).toBe('webp');
     expect(sniffImageType(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg">'))).toBeNull();
     expect(sniffImageType(Buffer.from('MZ\x90\x00 ausführbare Datei'))).toBeNull();
+  });
+
+  it('erkennt HEIC an der ftyp-Box und lehnt zu kurze Dateien ab', () => {
+    expect(sniffImageType(Buffer.from('0000ftypheic0000', 'ascii'))).toBe('heic');
+    expect(sniffImageType(Buffer.from('0000ftypmif10000', 'ascii'))).toBe('heic');
+    expect(sniffImageType(Buffer.from('0000ftypisom0000', 'ascii'))).toBeNull();
+    expect(sniffImageType(Buffer.from([0xff, 0xd8, 0xff]))).toBeNull();
+  });
+});
+
+describe('Rückfall reservierter Anzeigen nach 30 Tagen (REQ-LST-008, REQ-PRIV-003)', () => {
+  const now = new Date('2026-10-26T12:00:00Z');
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000);
+  it.each([
+    ['reserved', 31, true],
+    ['reserved', 30.01, true],
+    ['reserved', 30, false],
+    ['reserved', 1, false],
+    ['active', 40, false],
+    ['paused', 40, false],
+    ['completed', 40, false],
+  ] as const)('%s seit %s Tagen → Rückfall %s', (status, days, expected) => {
+    expect(reservationLapsed(status, daysAgo(days), now)).toBe(expected);
   });
 });

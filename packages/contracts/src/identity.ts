@@ -7,6 +7,10 @@ export type UserType = Static<typeof UserType>;
 export const Role = Type.Union([Type.Literal('member'), Type.Literal('moderator'), Type.Literal('admin')]);
 export type Role = Static<typeof Role>;
 
+/** Sprache der Oberfläche und der E-Mails (BCP 47, ADR-0016). */
+export const Locale = Type.Union([Type.Literal('de'), Type.Literal('en')]);
+export type Locale = Static<typeof Locale>;
+
 export const NotificationPrefs = Type.Object({
   newMessage: Type.Boolean(),
   listingExpiry: Type.Boolean(),
@@ -22,6 +26,16 @@ export const Me = Type.Object({
   studyProgram: Type.Union([Type.String(), Type.Null()]),
   preferredLocationIds: Type.Array(Uuid),
   notificationPrefs: NotificationPrefs,
+  locale: Locale,
+  /** Version der Nutzungsbedingungen, der das Mitglied zuletzt zugestimmt hat (REQ-LEGAL-003). */
+  termsAcceptedVersion: Type.Union([Type.String(), Type.Null()]),
+  /** true, wenn eine neuere Fassung gilt: schreibende Aktionen erst nach erneuter Zustimmung (403 terms_required). */
+  termsRequired: Type.Boolean(),
+  /**
+   * Neue Fassung der Datenschutzerklärung, die das Mitglied noch nicht zur Kenntnis genommen hat (nur Information,
+   * keine Einwilligung; REQ-LEGAL-002, RV-R-08); `null`, wenn die aktuelle Fassung bekannt ist.
+   */
+  privacyNoticeVersion: Type.Union([Type.String(), Type.Null()]),
   createdAt: Timestamp,
   /** Gesetzt, wenn eine Kontolöschung beim Login abgebrochen wurde (Karenzzeit). */
   deletionCancelled: Type.Optional(Type.Boolean()),
@@ -45,6 +59,8 @@ export const RegisterBody = Type.Object({
   displayName: Type.String({ minLength: 2, maxLength: 40 }),
   acceptTerms: Type.Literal(true),
   termsVersion: Type.String(),
+  /** Gewählte Sprache: Bestätigungsmail und Konto in dieser Sprache (ADR-0016). */
+  locale: Type.Optional(Locale),
 });
 export type RegisterBody = Static<typeof RegisterBody>;
 
@@ -66,9 +82,18 @@ export const UpdateMeBody = Type.Partial(
     studyProgram: Type.Union([Type.String({ maxLength: 80 }), Type.Null()]),
     preferredLocationIds: Type.Array(Uuid, { maxItems: 10 }),
     notificationPrefs: NotificationPrefs,
+    locale: Locale,
   }),
 );
 export type UpdateMeBody = Static<typeof UpdateMeBody>;
 
 export const DeleteAccountBody = Type.Object({ password: Type.String({ minLength: 1, maxLength: 256 }) });
 export type DeleteAccountBody = Static<typeof DeleteAccountBody>;
+
+/** Erneute Zustimmung zu einer neuen Fassung der Nutzungsbedingungen (REQ-LEGAL-003). */
+export const AcceptTermsBody = Type.Object({ version: Type.String({ minLength: 1, maxLength: 20 }) });
+export type AcceptTermsBody = Static<typeof AcceptTermsBody>;
+
+/** Kenntnisnahme einer neuen Datenschutzerklärung (RV-R-08). */
+export const PrivacyAckBody = Type.Object({ version: Type.String({ minLength: 1, maxLength: 20 }) });
+export type PrivacyAckBody = Static<typeof PrivacyAckBody>;

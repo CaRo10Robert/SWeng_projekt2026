@@ -1,20 +1,47 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ConversationSummary, DealStatus, Message } from '@campusmarkt/contracts';
+import type { ConversationSummary, DealStatus, Message, SystemCode } from '@campusmarkt/contracts';
 import { useMe } from '../api/auth';
 import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage, NetworkError } from '../api/client';
 import { ImagePlaceholder, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
+import { ContactShare } from '../components/ContactShare';
 import { Alert, Badge, Button, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
 import { formatChatTime, newId } from '../lib/format';
+import { t, type MessageKey } from '../i18n';
 
-const dealLabels: Record<DealStatus, string> = {
-  agreed: 'Reservierung vereinbart',
-  completed: 'Übergabe abgeschlossen',
-  cancelled: 'Reservierung aufgehoben',
+const dealLabels: Record<DealStatus, MessageKey> = {
+  agreed: 'chat.deal.agreed',
+  completed: 'chat.deal.completed',
+  cancelled: 'chat.deal.cancelled',
+};
+
+/**
+ * Systemnachrichten tragen einen Code (Migration 0005); der Client übersetzt per Code. Ältere Nachrichten ohne Code
+ * werden über ihren deutschen Text erkannt, unbekannte Texte unverändert angezeigt.
+ */
+const systemCodes: Record<SystemCode, MessageKey> = {
+  contact_exchanged: 'chat.system.contactExchanged',
+  deal_reserved: 'chat.system.reserved',
+  deal_completed: 'chat.system.completed',
+  deal_cancelled: 'chat.system.cancelled',
+  reservation_expired: 'chat.system.reservationExpired',
+  message_removed: 'chat.system.removed',
+  message_deleted: 'chat.system.deleted',
+};
+const systemMessages: Record<string, MessageKey> = {
+  'Kontaktdaten wurden ausgetauscht. Ihr seht die Hochschul-E-Mail-Adresse des anderen oben im Chat.': 'chat.system.contactExchanged',
+  'Die Anzeige wurde für dich reserviert.': 'chat.system.reserved',
+  'Die Anzeige wurde als an dich abgegeben markiert.': 'chat.system.completed',
+  'Die Reservierung wurde aufgehoben.': 'chat.system.cancelled',
+  '[Nachricht wurde von der Moderation entfernt]': 'chat.system.removed',
+};
+const systemText = (body: string, code?: SystemCode | null) => {
+  const key = (code && systemCodes[code]) || systemMessages[body];
+  return key ? t(key) : body;
 };
 
 export function ConversationsPage() {
@@ -22,13 +49,13 @@ export function ConversationsPage() {
   const { data: me } = useMe();
   return (
     <div>
-      <PageHeader title="Nachrichten" />
+      <PageHeader title={t('nav.messages')} />
       {isPending ? (
         <Loading />
       ) : isError ? (
         <Alert tone="error">{errorMessage(error)}</Alert>
       ) : data.length === 0 ? (
-        <EmptyState>Noch keine Unterhaltungen. Schreib einem Anbieter direkt aus einer Anzeige heraus.</EmptyState>
+        <EmptyState>{t('chat.empty')}</EmptyState>
       ) : (
         <ul className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white">
           {data.map((c) => (
@@ -45,8 +72,8 @@ export function ConversationsPage() {
                   <p className="truncate text-sm text-slate-700">{c.listing.title}</p>
                   {c.lastMessage && (
                     <p className="truncate text-sm text-slate-600">
-                      {c.lastMessage.senderId === me?.id && 'Du: '}
-                      {c.lastMessage.body}
+                      {c.lastMessage.senderId === me?.id && t('chat.you')}
+                      {systemText(c.lastMessage.body)}
                     </p>
                   )}
                 </div>
@@ -54,11 +81,11 @@ export function ConversationsPage() {
                   {c.unreadCount > 0 && (
                     <span className="rounded-full bg-red-700 px-2 text-xs font-bold text-white">
                       {c.unreadCount}
-                      <span className="sr-only"> ungelesen</span>
+                      <span className="sr-only"> {t('chat.unread')}</span>
                     </span>
                   )}
-                  {c.deal && c.deal.status !== 'cancelled' && <Badge tone="info">{dealLabels[c.deal.status]}</Badge>}
-                  {c.blocked && <Badge tone="danger">Blockiert</Badge>}
+                  {c.deal && c.deal.status !== 'cancelled' && <Badge tone="info">{t(dealLabels[c.deal.status])}</Badge>}
+                  {c.blocked && <Badge tone="danger">{t('chat.blocked')}</Badge>}
                 </div>
               </Link>
             </li>
@@ -88,16 +115,16 @@ function DealActions({ conversation }: { conversation: ConversationSummary }) {
       <div className="flex flex-wrap gap-2">
         {status !== 'agreed' && conversation.listing.status === 'active' && (
           <Button variant="secondary" busy={deal.isPending} onClick={() => deal.mutate({ action: 'reserve' })}>
-            Reservieren für diese Person
+            {t('chat.deal.reserve')}
           </Button>
         )}
         {status === 'agreed' && (
           <>
             <Button variant="secondary" busy={deal.isPending} onClick={() => deal.mutate({ action: 'complete' })}>
-              Als abgegeben markieren
+              {t('listing.action.complete')}
             </Button>
             <Button variant="ghost" busy={deal.isPending} onClick={() => deal.mutate({ action: 'cancel' })}>
-              Reservierung aufheben
+              {t('listing.action.unreserve')}
             </Button>
           </>
         )}
@@ -111,7 +138,7 @@ function MessageBubble({ message, mine, onReport }: { message: Message; mine: bo
   if (message.kind === 'system') {
     return (
       <li className="my-2 text-center text-xs text-slate-600">
-        <span className="rounded-full bg-slate-200 px-3 py-1">{message.body}</span>
+        <span className="rounded-full bg-slate-200 px-3 py-1">{systemText(message.body, message.systemCode)}</span>
       </li>
     );
   }
@@ -122,15 +149,18 @@ function MessageBubble({ message, mine, onReport }: { message: Message; mine: bo
       </div>
       {message.safetyHint && !mine && (
         <p className="mt-1 max-w-[85%] rounded bg-amber-50 px-2 py-1 text-xs text-amber-900" role="note">
-          ⚠ Vorsicht bei Links, Bankdaten oder Telefonnummern. Übergib Dinge am besten persönlich auf dem Campus und zahle nie im Voraus.
+          {t('chat.safetyHint')}{' '}
+          <Link to="/hilfe" hash="welche-betrugsmaschen-gibt-es" className="font-medium underline">
+            {t('chat.moreScams')}
+          </Link>
         </p>
       )}
       <div className="mt-0.5 flex gap-2 text-xs text-slate-600">
         <time dateTime={message.createdAt}>{formatChatTime(message.createdAt)}</time>
-        {mine && message.readAt && <span>· gelesen</span>}
+        {mine && message.readAt && <span>· {t('chat.read')}</span>}
         {!mine && (
           <button type="button" className="underline" onClick={onReport}>
-            Melden
+            {t('listing.report')}
           </button>
         )}
       </div>
@@ -171,7 +201,7 @@ export function ConversationPage() {
     endRef.current?.scrollIntoView({ block: 'end' });
     if (!last) return;
     if (lastAnnounced.current && last.id !== lastAnnounced.current && last.senderId !== me?.id) {
-      setAnnouncement(`Neue Nachricht: ${last.body}`);
+      setAnnouncement(t('chat.newMessage', { body: last.kind === 'system' ? systemText(last.body, last.systemCode) : last.body }));
     }
     lastAnnounced.current = last.id;
   }, [last, me?.id, visiblePending.length]);
@@ -192,7 +222,7 @@ export function ConversationPage() {
           continue;
         }
         const error =
-          err instanceof ApiError && err.code === 'contact_not_possible' ? 'Kontakt nicht möglich.' : errorMessage(err, 'Nachricht konnte nicht gesendet werden.');
+          err instanceof ApiError && err.code === 'contact_not_possible' ? t('apiError.contact_not_possible') : errorMessage(err, t('chat.sendFailed'));
         setPending((prev) => prev.map((p) => (p.clientMsgId === msg.clientMsgId ? { ...p, state: 'failed', error } : p)));
         if (err instanceof ApiError && err.status === 403) void qc.invalidateQueries({ queryKey: ['conversation', id] });
         return;
@@ -211,7 +241,7 @@ export function ConversationPage() {
   if (conversation.isPending || messages.isPending) return <Loading />;
   if (conversation.isError) {
     return (
-      <Alert tone="error" title="Unterhaltung nicht verfügbar">
+      <Alert tone="error" title={t('chat.unavailable')}>
         {errorMessage(conversation.error)}
       </Alert>
     );
@@ -222,7 +252,7 @@ export function ConversationPage() {
     <div className="mx-auto flex max-w-3xl flex-col gap-3">
       <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
         <Link to="/messages" className="text-sm text-brand-700 underline">
-          <span aria-hidden="true">←</span> Alle
+          <span aria-hidden="true">←</span> {t('chat.all')}
         </Link>
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100">
           {c.listing.thumbnailUrl ? <img src={c.listing.thumbnailUrl} alt="" className="h-full w-full object-cover" /> : <ImagePlaceholder label="" />}
@@ -235,7 +265,7 @@ export function ConversationPage() {
         </div>
         <div className="flex flex-col items-end gap-1">
           {c.deal && c.deal.status !== 'cancelled' ? (
-            <Badge tone="info">{dealLabels[c.deal.status]}</Badge>
+            <Badge tone="info">{t(dealLabels[c.deal.status])}</Badge>
           ) : (
             <StatusBadge status={c.listing.status} />
           )}
@@ -243,8 +273,9 @@ export function ConversationPage() {
       </div>
 
       <DealActions conversation={c} />
+      <ContactShare conversation={c} />
 
-      <section aria-label="Nachrichtenverlauf" className="max-h-[60vh] min-h-64 overflow-y-auto rounded-xl bg-slate-100 p-3">
+      <section aria-label={t('chat.history')} className="max-h-[60vh] min-h-64 overflow-y-auto rounded-xl bg-slate-100 p-3">
         {messages.isError && <Alert tone="error">{errorMessage(messages.error)}</Alert>}
         <ol className="space-y-2">
           {list.map((m) => (
@@ -257,12 +288,12 @@ export function ConversationPage() {
               </div>
               <p className="mt-0.5 text-xs text-slate-600">
                 {p.state === 'sending' ? (
-                  'Wird gesendet …'
+                  t('chat.sending')
                 ) : (
                   <>
                     <span className="text-red-700">{p.error}</span>{' '}
                     <button type="button" className="underline" onClick={() => void deliver(p)}>
-                      Erneut senden
+                      {t('chat.resend')}
                     </button>
                   </>
                 )}
@@ -277,11 +308,11 @@ export function ConversationPage() {
       </div>
 
       {c.blocked ? (
-        <Alert tone="warning">Kontakt nicht möglich.</Alert>
+        <Alert tone="warning">{t('apiError.contact_not_possible')}</Alert>
       ) : (
         <form onSubmit={submit} className="space-y-1">
           <label htmlFor="chat-input" className="sr-only">
-            Nachricht
+            {t('chat.message')}
           </label>
           <div className="flex gap-2">
             <textarea
@@ -298,14 +329,14 @@ export function ConversationPage() {
               }}
               aria-describedby="chat-counter"
               className="block flex-1 rounded-lg border border-slate-400 bg-white px-3 py-2 text-base"
-              placeholder="Nachricht schreiben …"
+              placeholder={t('chat.placeholder')}
             />
             <Button type="submit" disabled={!body.trim()}>
-              Senden
+              {t('chat.send')}
             </Button>
           </div>
           <p id="chat-counter" className="text-right text-xs text-slate-600">
-            {body.length}/2000 · Enter sendet, Umschalt+Enter für neue Zeile
+            {t('chat.counter', { count: body.length, max: 2000 })}
           </p>
         </form>
       )}
@@ -313,7 +344,7 @@ export function ConversationPage() {
       <div className="flex flex-wrap gap-2">
         {!c.blocked && (
           <Button variant="ghost" busy={block.isPending} onClick={() => block.mutate({ userId: c.counterpart.id, blocked: true })}>
-            {c.counterpart.displayName} blockieren
+            {t('chat.block', { name: c.counterpart.displayName })}
           </Button>
         )}
       </div>

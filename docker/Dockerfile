@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Multi-Stage-Build: ein Image "campusmarkt" mit REST-API, WebSocket, React-SPA und Job-Worker (ADR-0002, ADR-0010).
 
-FROM node:22-bookworm-slim AS base
+FROM node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true
 RUN corepack enable
 WORKDIR /repo
@@ -12,6 +12,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.js
 COPY packages/contracts/package.json packages/contracts/
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
+COPY e2e/package.json e2e/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY packages packages
 COPY apps apps
@@ -24,15 +25,20 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
  && rm -rf /out/src /out/test /out/*.config.ts /out/tsconfig*.json /out/.dependency-cruiser.cjs
 
 # ---------------------------------------------------------------- Runtime
-FROM node:22-bookworm-slim AS runtime
+FROM node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS runtime
 ENV NODE_ENV=production \
     PORT=8080 \
     UPLOADS_DIR=/data/uploads \
+    JOURNAL_DIR=/data/journal \
     WEB_DIST_DIR=/app/web/dist
 WORKDIR /app
 COPY --from=build --chown=root:root /out ./server
 COPY --from=build --chown=root:root /repo/apps/web/dist ./web/dist
-RUN mkdir -p /data/uploads && chown node:node /data/uploads
+# npm, npx, corepack und yarn werden zur Laufzeit nicht gebraucht; die in npm gebündelten Pakete waren die
+# einzigen Node-Funde des Image-Scans (CTRL-CI-SCAN). Entfernen verkleinert zugleich die Angriffsfläche (REQ-SEC-010).
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+ && mkdir -p /data/uploads /data/journal && chown node:node /data/uploads /data/journal
 # Non-root, Code gehört root und ist damit für den Prozess schreibgeschützt (REQ-SEC-010)
 USER node
 EXPOSE 8080

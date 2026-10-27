@@ -1,6 +1,7 @@
 # ADR-0002: Tech-Stack (TypeScript durchgängig, schlank für das Docker-Beispiel)
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23); teilweise ersetzt: Query-Layer durch [ADR-0020](0020-datenzugriff-pg-sql-template.md), Umsetzungsdetails durch [ADR-0011](0011-mvp-umsetzung.md)
+- **Teilweise präzisiert durch:** [ADR-0011](0011-mvp-umsetzung.md) Nr. 1 (SQL ohne ORM statt Drizzle), Nr. 3 (E-Mail-Templates ohne MJML), Nr. 6 (keine eigene UI-Bibliothek)
 - **Datum:** 2026-10-20 (überarbeitet für ADR-0010)
 
 ## Kontext
@@ -13,7 +14,7 @@ Die Guideline (Kap. 14) definiert einen Default-Stack. Abweichungen brauchen ein
 | UI | Tailwind + shadcn/ui (Radix, zugänglich) | – | – |
 | API | **Node.js 22 LTS + Fastify**, `@fastify/websocket`, `@fastify/static` | Fastify | nein |
 | DB | **PostgreSQL 17** | PostgreSQL | nein |
-| Query-Layer | **Drizzle ORM** + drizzle-kit | Type-safe Query Builder | nein |
+| Query-Layer | ~~Drizzle ORM~~ → **`pg` mit `sql`-Template** und SQL-Migrationen | Type-safe Query Builder | **Ja**, [ADR-0020](0020-datenzugriff-pg-sql-template.md) |
 | Job-Queue / Scheduler | **pg-boss** (Postgres-basiert) | Redis Streams / Queue-Bibliothek | nein (Option „lightweight queue library“) |
 | Cache / Rate-Limit / Sessions | Postgres bzw. im Speicher hinter Ports | Redis | **Ja**, ADR-0010 |
 | Bildverarbeitung | sharp | – | – |
@@ -22,7 +23,7 @@ Die Guideline (Kap. 14) definiert einen Default-Stack. Abweichungen brauchen ein
 | Monorepo | pnpm workspaces + Turborepo | pnpm + Turborepo | nein |
 | Tests | Vitest, Testcontainers, Playwright, axe-core | – | – |
 | CI | GitHub Actions (Build, Test, Image-Build) | GitHub Actions | nein |
-| Logs/Metriken | pino (JSON, stdout), `/metrics` (Prometheus-Format), OTel optional | OpenTelemetry | teilweise |
+| Logs/Metriken | pino (JSON, stdout), `/metrics` (Prometheus-Format), OTel noch nicht umgesetzt | OpenTelemetry (normativ) | **Ja**, Ausnahme [EX-02](../ausnahmen.md#ex-02-kein-verteiltes-tracing-mit-opentelemetry) |
 
 **Abweichung Next.js → Vite-SPA:** Next.js bringt SSR, SSG und SEO. Diese Vorteile sind hier wertlos: Alle Inhalte sind nur für angemeldete Mitglieder sichtbar, es gibt also kein SEO. Next.js bräuchte außerdem einen eigenen Node-Prozess neben Fastify. Eine SPA, die als statische Dateien von Fastify ausgeliefert wird, ergibt **einen Prozess und ein Image** (ADR-0010) und weniger Konzepte zum Lernen. Wird später Public-SEO gebraucht (Gäste-Vorschau, Q-1), wird diese Entscheidung neu bewertet.
 

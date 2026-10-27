@@ -1,9 +1,13 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import type { Config } from '../config.js';
 import type { Database } from '../platform/db.js';
+import type { DeletionJournal } from '../platform/deletion-journal.js';
 import type { Logger } from '../platform/logger.js';
 import type { Metrics } from '../platform/metrics.js';
+import type { Ops } from '../platform/ops.js';
 import type { JobQueue, RateLimitStore, RealtimeBroker, StoragePort } from '../platform/ports/index.js';
+import type { Pseudonymizer } from '../platform/pseudonym.js';
+import type { SettingsStore } from '../platform/settings.js';
 import type { IdentityApi } from './identity/index.js';
 import type { ListingsApi } from './listings/index.js';
 import type { MessagingApi } from './messaging/index.js';
@@ -31,6 +35,13 @@ export interface ModuleDeps {
   storage: StoragePort;
   realtime: RealtimeBroker;
   rateLimit: RateLimitStore;
+  /** Einstellungen (Wartungsmodus, Ankündigung) und Betriebsfunktionen (REQ-OPS-006/007). */
+  settings: SettingsStore;
+  ops: Ops;
+  /** Pseudonyme für IP- und E-Mail-Adressen in Rate-Limit-Schlüsseln (ADR-0014). */
+  pseudonym: Pseudonymizer;
+  /** Löschjournal für die Wiederherstellung (ADR-0018). */
+  journal: DeletionJournal;
   /** Wird nach dem Erzeugen aller Module befüllt (späte Bindung, vermeidet Zyklen beim Start). */
   modules: Modules;
 }

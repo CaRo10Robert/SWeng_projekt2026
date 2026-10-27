@@ -11,6 +11,8 @@ export const Problem = Type.Object({
   detail: Type.Optional(Type.String()),
   code: Type.Optional(Type.String()),
   errors: Type.Optional(Type.Array(Type.Object({ path: Type.String(), message: Type.String() }))),
+  /** Korrelations-ID der Anfrage (auch im Header `x-request-id`), für Rückfragen und das Log (REQ-UX-003). */
+  requestId: Type.Optional(Type.String()),
 });
 export type Problem = Static<typeof Problem>;
 
@@ -22,6 +24,13 @@ export const Page = <T extends TSchema>(item: T) =>
     items: Type.Array(item),
     nextCursor: Type.Union([Type.String(), Type.Null()]),
   });
+
+/** Keyset-Paginierung für Listen (Guideline Kap. 06, GL-14): opaker Cursor aus `nextCursor` der vorigen Seite. */
+export const PageQuery = Type.Object({
+  cursor: Type.Optional(Type.String({ maxLength: 200 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
+});
+export type PageQuery = Static<typeof PageQuery>;
 
 export const IdParams = Type.Object({ id: Uuid });
 export type IdParams = Static<typeof IdParams>;

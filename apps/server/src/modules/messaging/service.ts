@@ -1,10 +1,23 @@
-import type { ConversationSummary, Deal, DealActionBody, Message, ServerEvent } from '@campusmarkt/contracts';
+import type { ContactShare, ConversationSummary, Deal, DealActionBody, Message, ServerEvent, SystemCode } from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
 import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
-import { MESSAGE_RATE, needsSafetyHint, NEW_CONVERSATION_RATE, NOTIFY_DELAY_SECONDS } from './domain.js';
+import {
+  CONTACT_ACTION_RATE,
+  contactView,
+  dealEvent,
+  decideContactAction,
+  MESSAGE_RATE,
+  needsSafetyHint,
+  NEW_CONVERSATION_RATE,
+  NOTIFY_DELAY_SECONDS,
+  SYSTEM_TEXT,
+  type ContactAction,
+  type ContactContext,
+  type ContactRow,
+} from './domain.js';
 
 export const NOTIFY_UNREAD = 'notify-unread';
 export const DEAL_EVENTS = 'deal-events';
@@ -27,6 +40,7 @@ interface MessageRow {
   body: string;
   created_at: string;
   read_at: string | null;
+  system_code: SystemCode | null;
 }
 
 interface DealRow {
@@ -51,6 +65,7 @@ const toMessage = (m: MessageRow): Message => ({
   createdAt: m.created_at,
   readAt: m.read_at,
   safetyHint: m.kind === 'text' && needsSafetyHint(m.body),
+  systemCode: m.kind === 'system' ? (m.system_code ?? null) : null,
 });
 
 const toDeal = (d: DealRow): Deal => ({
@@ -62,6 +77,22 @@ const toDeal = (d: DealRow): Deal => ({
 });
 
 const NOT_POSSIBLE = () => new AppError(403, 'contact_not_possible', 'Kontakt nicht möglich.');
+
+interface ContactRowDb {
+  conversation_id: string;
+  user_id: string;
+  state: ContactRow['state'];
+  request_count: number;
+  changed_at: string;
+}
+
+const CONTACT_ERRORS = {
+  contact_not_possible: () => NOT_POSSIBLE(),
+  contact_request_limit: () =>
+    new AppError(429, 'contact_request_limit', 'Eine erneute Anfrage ist derzeit nicht möglich.'),
+  invalid_contact_action: () =>
+    conflict('invalid_contact_action', 'Diese Aktion ist im aktuellen Zustand nicht möglich.'),
+};
 
 export function createMessagingService(deps: ModuleDeps) {
   const { database, realtime, rateLimit, modules, config } = deps;
@@ -94,10 +125,11 @@ export function createMessagingService(deps: ModuleDeps) {
     clientMsgId: string,
     body: string,
     kind: 'text' | 'system' = 'text',
+    systemCode: SystemCode | null = null,
   ): Promise<{ message: MessageRow; created: boolean }> {
     const inserted = await tx.db.one<MessageRow>(sql`
-      INSERT INTO messaging.message (conversation_id, sender_id, client_msg_id, kind, body)
-      VALUES (${conv.id}, ${senderId}, ${clientMsgId}, ${kind}, ${body})
+      INSERT INTO messaging.message (conversation_id, sender_id, client_msg_id, kind, body, system_code)
+      VALUES (${conv.id}, ${senderId}, ${clientMsgId}, ${kind}, ${body}, ${systemCode})
       ON CONFLICT (conversation_id, client_msg_id) DO NOTHING RETURNING *`);
     if (!inserted) {
       const existing = await tx.db.one<MessageRow>(sql`
@@ -129,38 +161,148 @@ export function createMessagingService(deps: ModuleDeps) {
     return dto;
   }
 
-  async function dealFor(conversationId: string) {
-    return db.one<DealRow>(sql`
-      SELECT * FROM messaging.deal WHERE conversation_id = ${conversationId}
-      ORDER BY (status = 'agreed') DESC, created_at DESC LIMIT 1`);
+  /** Neueste Deals mehrerer Konversationen in einer Abfrage, offene zuerst. */
+  async function dealsFor(conversationIds: string[]): Promise<Map<string, DealRow>> {
+    if (conversationIds.length === 0) return new Map();
+    const rows = await db.query<DealRow>(sql`
+      SELECT DISTINCT ON (conversation_id) * FROM messaging.deal WHERE conversation_id = ANY(${conversationIds}::uuid[])
+      ORDER BY conversation_id, (status = 'agreed') DESC, created_at DESC`);
+    return new Map(rows.map((d) => [d.conversation_id, d]));
+  }
+
+  /** Zustimmungen mehrerer Konversationen in einer Abfrage; in einer Transaktion gesperrt (REQ-CHAT-010). */
+  async function contactRows(conversationIds: string[], tx?: Tx): Promise<Map<string, ContactRowDb[]>> {
+    const byConversation = new Map<string, ContactRowDb[]>();
+    if (conversationIds.length === 0) return byConversation;
+    const rows = await (tx?.db ?? db).query<ContactRowDb>(sql`
+      SELECT conversation_id, user_id, state, request_count, changed_at FROM messaging.contact_consent
+      WHERE conversation_id = ANY(${conversationIds}::uuid[]) ${tx ? sql`FOR UPDATE` : empty}`);
+    for (const r of rows) byConversation.set(r.conversation_id, [...(byConversation.get(r.conversation_id) ?? []), r]);
+    return byConversation;
+  }
+
+  function contactContext(
+    rows: ContactRowDb[] | undefined,
+    me: string,
+    counterpartId: string,
+    status: { blocked: boolean; bothActive: boolean },
+  ): ContactContext {
+    const toRow = (r?: ContactRowDb): ContactRow | undefined =>
+      r && { state: r.state, requestCount: r.request_count, changedAt: new Date(r.changed_at) };
+    return {
+      mine: toRow(rows?.find((r) => r.user_id === me)),
+      theirs: toRow(rows?.find((r) => r.user_id === counterpartId)),
+      ...status,
+      now: new Date(),
+    };
+  }
+
+  /** Sichten mehrerer Konversationen; Adressen nur über das schmale identity-API und nur bei gegenseitiger Sichtbarkeit. */
+  async function contactShares(items: { ctx: ContactContext; counterpartId: string }[]): Promise<ContactShare[]> {
+    const views = items.map((item) => contactView(item.ctx));
+    const addresses = await modules.identity.getSharedContactAddresses(
+      items.filter((_, i) => views[i]!.visible).map((item) => item.counterpartId),
+    );
+    return views.map((view, i) => ({
+      mine: view.mine,
+      theirs: view.theirs,
+      counterpartEmail: view.visible ? (addresses.get(items[i]!.counterpartId) ?? null) : null,
+      canGrant: view.canGrant,
+      retryAfter: view.retryAfter?.toISOString() ?? null,
+      requestsLeft: view.requestsLeft,
+    }));
+  }
+
+  type ConversationListRow = ConversationRow & {
+    last_body: string | null;
+    last_at: string | null;
+    last_sender: string | null;
+    unread: number;
+  };
+
+  async function conversationRows(auth: AuthContext, onlyId?: string): Promise<ConversationListRow[]> {
+    return db.query<ConversationListRow>(sql`
+      SELECT c.*, m.body AS last_body, m.created_at AS last_at, m.sender_id AS last_sender,
+        (SELECT count(*) FROM messaging.message u
+          WHERE u.conversation_id = c.id AND u.sender_id <> ${auth.userId} AND u.read_at IS NULL) AS unread
+      FROM messaging.conversation c
+      LEFT JOIN LATERAL (
+        SELECT body, created_at, sender_id FROM messaging.message
+        WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) m ON true
+      WHERE (c.buyer_id = ${auth.userId} OR c.seller_id = ${auth.userId}) ${onlyId ? sql`AND c.id = ${onlyId}` : empty}
+      ORDER BY c.last_message_at DESC LIMIT 200`);
   }
 
   return {
     send,
 
-    async list(auth: AuthContext): Promise<ConversationSummary[]> {
-      const rows = await db.query<ConversationRow & {
-        last_body: string | null;
-        last_at: string | null;
-        last_sender: string | null;
-        unread: number;
-      }>(sql`
-        SELECT c.*, m.body AS last_body, m.created_at AS last_at, m.sender_id AS last_sender,
-          (SELECT count(*) FROM messaging.message u
-            WHERE u.conversation_id = c.id AND u.sender_id <> ${auth.userId} AND u.read_at IS NULL) AS unread
-        FROM messaging.conversation c
-        LEFT JOIN LATERAL (
-          SELECT body, created_at, sender_id FROM messaging.message
-          WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) m ON true
-        WHERE c.buyer_id = ${auth.userId} OR c.seller_id = ${auth.userId}
-        ORDER BY c.last_message_at DESC LIMIT 200`);
-      return summarize(auth, rows);
+    /** REQ-CHAT-010: zustimmen, zurückziehen oder eine Anfrage ablehnen. */
+    async contactAction(auth: AuthContext, conversationId: string, action: ContactAction): Promise<ContactShare> {
+      const { conv, counterpartId } = await participant(auth, conversationId);
+      await limit(`contact:${auth.userId}`, CONTACT_ACTION_RATE);
+      // Vor der Transaktion lesen: keine zweite Pool-Verbindung, während die Zeilensperre gehalten wird
+      const status = {
+        blocked: await modules.trust.isBlockedEither(auth.userId, counterpartId),
+        bothActive: (await modules.identity.activeUserIds([auth.userId, counterpartId])).size === 2,
+      };
+      const exchanged = await database.tx(async (tx) => {
+        // Die Sperre serialisiert parallele Aktionen beider Teilnehmer; fehlt die Zeile, wurde die Konversation gelöscht
+        const locked = await tx.db.one(sql`SELECT 1 FROM messaging.conversation WHERE id = ${conv.id} FOR UPDATE`);
+        if (!locked) throw notFound('Konversation nicht gefunden');
+        const rows = (await contactRows([conv.id], tx)).get(conv.id);
+        const decision = decideContactAction(action, contactContext(rows, auth.userId, counterpartId, status));
+        if (!decision.ok) throw CONTACT_ERRORS[decision.code]();
+        if (decision.set === 'mine') {
+          await tx.db.exec(sql`
+            INSERT INTO messaging.contact_consent (conversation_id, user_id, state, request_count, granted_at, withdrawn_at)
+            VALUES (${conv.id}, ${auth.userId}, ${decision.state}, ${decision.countsAsRequest ? 1 : 0},
+                    ${decision.state === 'granted' ? sql`now()` : sql`NULL`}, ${decision.state === 'withdrawn' ? sql`now()` : sql`NULL`})
+            ON CONFLICT (conversation_id, user_id) DO UPDATE SET
+              state = EXCLUDED.state,
+              request_count = messaging.contact_consent.request_count + ${decision.countsAsRequest ? 1 : 0},
+              granted_at = COALESCE(EXCLUDED.granted_at, messaging.contact_consent.granted_at),
+              withdrawn_at = COALESCE(EXCLUDED.withdrawn_at, messaging.contact_consent.withdrawn_at),
+              changed_at = now()`);
+        } else {
+          await tx.db.exec(sql`
+            UPDATE messaging.contact_consent SET state = 'declined', declined_at = now(), changed_at = now()
+            WHERE conversation_id = ${conv.id} AND user_id = ${counterpartId}`);
+        }
+        if (decision.exchanged) {
+          // Systemnachricht ohne Adressen; die Adressen erscheinen nur als Angabe zur Konversation
+          const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(),
+            SYSTEM_TEXT.contact_exchanged, 'system', 'contact_exchanged');
+          return message;
+        }
+        return null;
+      });
+      if (exchanged) await publish([conv.buyer_id, conv.seller_id], { type: 'message', message: toMessage(exchanged) });
+      await publish([conv.buyer_id, conv.seller_id], { type: 'conversation', conversationId: conv.id });
+      const rows = (await contactRows([conv.id])).get(conv.id);
+      const [share] = await contactShares([{ ctx: contactContext(rows, auth.userId, counterpartId, status), counterpartId }]);
+      return share!;
     },
 
+    /** Datenexport (REQ-ACC-003): eigene Zustimmungen und die Anfragen, die ich abgelehnt habe. */
+    async exportContactConsents(userId: string) {
+      return db.query(sql`
+        SELECT conversation_id AS "conversationId", 'own' AS kind, state, request_count AS "requestCount",
+               granted_at AS "grantedAt", withdrawn_at AS "withdrawnAt", declined_at AS "declinedAt"
+        FROM messaging.contact_consent WHERE user_id = ${userId}
+        UNION ALL
+        SELECT cc.conversation_id, 'declined_by_me', cc.state, NULL, NULL, NULL, cc.declined_at
+        FROM messaging.contact_consent cc JOIN messaging.conversation c ON c.id = cc.conversation_id
+        WHERE cc.user_id <> ${userId} AND cc.state = 'declined' AND (c.buyer_id = ${userId} OR c.seller_id = ${userId})`);
+    },
+
+    async list(auth: AuthContext): Promise<ConversationSummary[]> {
+      return summarize(auth, await conversationRows(auth));
+    },
+
+    /** Einzelabfrage, unabhängig davon, ob die Konversation unter den neuesten 200 ist. */
     async get(auth: AuthContext, id: string): Promise<ConversationSummary> {
       await participant(auth, id);
-      const all = await this.list(auth);
-      const found = all.find((c) => c.id === id);
+      const [found] = await summarize(auth, await conversationRows(auth, id));
       if (!found) throw notFound('Konversation nicht gefunden');
       return found;
     },
@@ -234,7 +376,7 @@ export function createMessagingService(deps: ModuleDeps) {
         const open = await tx.db.one<DealRow>(sql`
           SELECT * FROM messaging.deal WHERE listing_id = ${conv.listing_id} AND status = 'agreed' FOR UPDATE`);
         let deal: DealRow;
-        let systemText: string;
+        let systemCode: SystemCode;
 
         if (body.action === 'reserve') {
           if (open) throw conflict('already_reserved', 'Die Anzeige ist bereits reserviert.');
@@ -245,7 +387,7 @@ export function createMessagingService(deps: ModuleDeps) {
                     ${body.agreedPriceCents ?? listing.priceCents}, ${listing.currency}, 'agreed')
             RETURNING *`))!;
           await modules.listings.setStatusFromDeal(tx, conv.listing_id, 'reserved');
-          systemText = 'Die Anzeige wurde für dich reserviert.';
+          systemCode = 'deal_reserved';
         } else if (body.action === 'complete') {
           if (open && open.conversation_id !== conv.id) {
             throw conflict('reserved_for_other', 'Die Anzeige ist für eine andere Person reserviert.');
@@ -260,18 +402,18 @@ export function createMessagingService(deps: ModuleDeps) {
                         ${body.agreedPriceCents ?? listing.priceCents}, ${listing.currency}, 'completed')
                 RETURNING *`))!;
           await modules.listings.setStatusFromDeal(tx, conv.listing_id, 'completed');
-          systemText = 'Die Anzeige wurde als an dich abgegeben markiert.';
+          systemCode = 'deal_completed';
         } else {
           if (!open || open.conversation_id !== conv.id) throw conflict('no_open_deal', 'Es gibt keine offene Reservierung.');
           deal = (await tx.db.one<DealRow>(sql`
             UPDATE messaging.deal SET status = 'cancelled', updated_at = now() WHERE id = ${open.id} RETURNING *`))!;
           await modules.listings.setStatusFromDeal(tx, conv.listing_id, 'active');
-          systemText = 'Die Reservierung wurde aufgehoben.';
+          systemCode = 'deal_cancelled';
         }
 
-        const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(), systemText, 'system');
-        const eventType = { agreed: 'DealAgreed', completed: 'DealCompleted', cancelled: 'DealCancelled' }[deal.status];
-        await tx.enqueue(DEAL_EVENTS, { type: eventType, ...toDeal(deal), listingId: deal.listing_id, sellerId: deal.seller_id, buyerId: deal.buyer_id });
+        const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(), SYSTEM_TEXT[systemCode], 'system', systemCode);
+        const eventType = ({ agreed: 'DealAgreed', completed: 'DealCompleted', cancelled: 'DealCancelled' } as const)[deal.status];
+        await tx.enqueue(DEAL_EVENTS, dealEvent(eventType, deal, () => crypto.randomUUID()));
         return { deal, message };
       });
 
@@ -292,13 +434,36 @@ export function createMessagingService(deps: ModuleDeps) {
         UPDATE messaging.deal SET status = ${target}, updated_at = now()
         WHERE listing_id = ${listingId} AND status = 'agreed' RETURNING *`);
       for (const deal of deals) {
-        await tx.enqueue(DEAL_EVENTS, {
-          type: target === 'completed' ? 'DealCompleted' : 'DealCancelled',
-          ...toDeal(deal),
-          listingId,
-          sellerId: deal.seller_id,
-          buyerId: deal.buyer_id,
-        });
+        await tx.enqueue(DEAL_EVENTS, dealEvent(target === 'completed' ? 'DealCompleted' : 'DealCancelled', deal, () => crypto.randomUUID()));
+      }
+    },
+
+    /**
+     * Rückfall einer Reservierung nach 30 Tagen (REQ-LST-008): offenen Deal stornieren (DealCancelled mit eventId)
+     * und die Konversation des Interessenten per Systemnachricht informieren. Idempotent: ohne offenen Deal passiert nichts.
+     * Liefert die Teilnehmer für Echtzeit-Ereignisse nach dem Commit.
+     */
+    async expireReservation(tx: Tx, listingId: string): Promise<{ message: Message; participants: string[] }[]> {
+      const deals = await tx.db.query<DealRow>(sql`
+        UPDATE messaging.deal SET status = 'cancelled', updated_at = now()
+        WHERE listing_id = ${listingId} AND status = 'agreed' RETURNING *`);
+      const result: { message: Message; participants: string[] }[] = [];
+      for (const deal of deals) {
+        await tx.enqueue(DEAL_EVENTS, dealEvent('DealCancelled', deal, () => crypto.randomUUID()));
+        const conv = await tx.db.one<ConversationRow>(sql`SELECT * FROM messaging.conversation WHERE id = ${deal.conversation_id}`);
+        if (!conv) continue;
+        const { message } = await insertMessage(tx, conv, conv.seller_id, crypto.randomUUID(),
+          SYSTEM_TEXT.reservation_expired, 'system', 'reservation_expired');
+        result.push({ message: toMessage(message), participants: [conv.buyer_id, conv.seller_id] });
+      }
+      return result;
+    },
+
+    /** Echtzeit-Ereignisse nach dem Commit eines Wartungslaufs. */
+    async publishSystemMessages(items: { message: Message; participants: string[] }[]): Promise<void> {
+      for (const item of items) {
+        await publish(item.participants, { type: 'message', message: item.message });
+        await publish(item.participants, { type: 'conversation', conversationId: item.message.conversationId });
       }
     },
 
@@ -324,14 +489,105 @@ export function createMessagingService(deps: ModuleDeps) {
         WHERE m.id = ${messageId} AND (c.buyer_id = ${userId} OR c.seller_id = ${userId})`));
     },
 
+    /**
+     * Entfernen durch die Moderation: Der Text bleibt für Widerspruch und Beweissicherung erhalten, ist aber nur
+     * für die Wiederherstellung lesbar (REQ-LEGAL-007/008) und wird nach Ablauf der Frist geleert.
+     */
     async removeByModeration(tx: Tx, messageId: string): Promise<void> {
       await tx.db.exec(sql`
-        UPDATE messaging.message SET body = '[Nachricht wurde von der Moderation entfernt]', kind = 'system'
-        WHERE id = ${messageId}`);
+        UPDATE messaging.message SET original_body = body, original_kind = kind, removed_at = now(),
+          body = ${SYSTEM_TEXT.message_removed}, kind = 'system', system_code = 'message_removed'
+        WHERE id = ${messageId} AND removed_at IS NULL`);
+      deps.journal.record(tx, 'message_removed', messageId);
     },
 
+    /** Liefert false, wenn der Originaltext nicht mehr vorhanden ist (RV-C-03): Die Stattgabe meldet dann einen Konflikt. */
+    async restoreByModeration(tx: Tx, messageId: string): Promise<boolean> {
+      const restored = await tx.db.exec(sql`
+        UPDATE messaging.message SET body = original_body, kind = original_kind, system_code = NULL,
+          removed_at = NULL, original_body = NULL, original_kind = NULL
+        WHERE id = ${messageId} AND removed_at IS NOT NULL AND original_body IS NOT NULL`);
+      if (restored) deps.journal.record(tx, 'message_restored', messageId);
+      return restored > 0;
+    },
+
+    /** Originaltext einer entfernten Nachricht, nur für die Prüfung eines Widerspruchs (RV-C-10). */
+    async originalBody(messageId: string): Promise<string | null> {
+      const row = await db.one<{ text: string | null }>(sql`
+        SELECT COALESCE(original_body, CASE WHEN removed_at IS NULL THEN body END) AS text
+        FROM messaging.message WHERE id = ${messageId}`);
+      return row?.text ?? null;
+    },
+
+    /**
+     * Beweissicherung (REQ-LEGAL-008, RV-R-15): gemeldete Nachricht mit +-5 Nachrichten Kontext als Kopie mit
+     * Originaltexten; Absender nur als Rolle (gemeldete Person / Gegenüber), keine Kontaktdaten.
+     */
+    async evidenceSnapshot(messageId: string): Promise<Record<string, unknown> | null> {
+      const target = await db.one<MessageRow>(sql`SELECT * FROM messaging.message WHERE id = ${messageId}`);
+      if (!target) return null;
+      const rows = await db.query<MessageRow & { original_body: string | null }>(sql`
+        (SELECT * FROM messaging.message WHERE conversation_id = ${target.conversation_id}
+          AND (created_at, id) < (${target.created_at}::timestamptz, ${target.id}::uuid) ORDER BY created_at DESC, id DESC LIMIT 5)
+        UNION ALL (SELECT * FROM messaging.message WHERE id = ${target.id})
+        UNION ALL
+        (SELECT * FROM messaging.message WHERE conversation_id = ${target.conversation_id}
+          AND (created_at, id) > (${target.created_at}::timestamptz, ${target.id}::uuid) ORDER BY created_at ASC, id ASC LIMIT 5)`);
+      rows.sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+      return {
+        kind: 'message',
+        messageId,
+        messages: rows.map((m) => ({
+          reported: m.id === messageId,
+          sender: m.sender_id === target.sender_id ? 'gemeldete Person' : 'Gegenüber',
+          body: m.original_body ?? m.body,
+          createdAt: m.created_at,
+        })),
+      };
+    },
+
+    /** Gespeicherte Originaltexte nach Ende der Widerspruchsfrist leeren, außer bei Beweissicherung oder offenem Widerspruch. */
+    async purgeRemovedOriginals(protectedMessageIds: string[]): Promise<number> {
+      return db.exec(sql`
+        UPDATE messaging.message SET original_body = NULL
+        WHERE original_body IS NOT NULL AND removed_at < now() - interval '6 months'
+          AND id <> ALL(${protectedMessageIds}::uuid[])`);
+    },
+
+    /**
+     * Fristlöschung (REQ-PRIV-003, Q-7): Konversationen 12 Monate nach der letzten Nachricht, samt Nachrichten,
+     * Deals und Kontaktfreigaben. Nachrichten, deren Original noch gebraucht wird, halten die Konversation.
+     */
+    async purgeInactiveConversations(before: Date, protectedMessageIds: string[]): Promise<number> {
+      return db.exec(sql`
+        DELETE FROM messaging.conversation c
+        WHERE c.last_message_at < ${before}
+          AND NOT EXISTS (SELECT 1 FROM messaging.message m
+                          WHERE m.conversation_id = c.id AND m.id = ANY(${protectedMessageIds}::uuid[]))`);
+    },
+
+    /** DAC7 (REQ-LEGAL-009): abgeschlossene Deals mit Gegenleistung je Anbieter in einem Kalenderjahr. */
+    async completedSales(year: number): Promise<{ sellerId: string; priceCents: number; completedAt: string }[]> {
+      return db.query(sql`
+        SELECT seller_id AS "sellerId", agreed_price_cents AS "priceCents", updated_at AS "completedAt"
+        FROM messaging.deal
+        WHERE status = 'completed' AND agreed_price_cents > 0
+          AND updated_at >= make_timestamptz(${year}, 1, 1, 0, 0, 0, 'Europe/Berlin')
+          AND updated_at < make_timestamptz(${year + 1}, 1, 1, 0, 0, 0, 'Europe/Berlin')`);
+    },
+
+    /**
+     * Kontolöschung (REQ-PRIV-003, UC-05): nur die eigenen Nachrichtentexte und Zustimmungen verschwinden; die
+     * Konversation bleibt für das Gegenüber lesbar, der Absender erscheint als „Ehemaliges Mitglied“. Die Konversation
+     * selbst folgt der 12-Monats-Frist.
+     */
     async deleteForUser(tx: Tx, userId: string): Promise<void> {
-      await tx.db.exec(sql`DELETE FROM messaging.conversation WHERE buyer_id = ${userId} OR seller_id = ${userId}`);
+      await tx.db.exec(sql`
+        UPDATE messaging.message SET body = ${SYSTEM_TEXT.message_deleted}, kind = 'system', system_code = 'message_deleted',
+          original_body = NULL, original_kind = NULL
+        WHERE sender_id = ${userId} AND COALESCE(system_code, '') <> 'message_deleted'`);
+      await tx.db.exec(sql`DELETE FROM messaging.contact_consent WHERE user_id = ${userId}`);
+      await tx.db.exec(sql`DELETE FROM messaging.notification_state WHERE user_id = ${userId}`);
     },
 
     async exportForUser(userId: string) {
@@ -365,19 +621,31 @@ export function createMessagingService(deps: ModuleDeps) {
     },
   };
 
-  async function summarize(
-    auth: AuthContext,
-    rows: (ConversationRow & { last_body: string | null; last_at: string | null; last_sender: string | null; unread: number })[],
-  ): Promise<ConversationSummary[]> {
-    const listings = await modules.listings.summaries([...new Set(rows.map((r) => r.listing_id))]);
+  /** Feste Zahl von Abfragen je Liste, unabhängig von der Anzahl der Konversationen. */
+  async function summarize(auth: AuthContext, rows: ConversationListRow[]): Promise<ConversationSummary[]> {
+    const ids = rows.map((r) => r.id);
     const counterpartIds = rows.map((r) => (r.buyer_id === auth.userId ? r.seller_id : r.buyer_id));
-    const users = await modules.identity.getPublicUsers([...new Set(counterpartIds)]);
-    const blocked = new Set(await modules.trust.blockRelations(auth.userId));
+    const [listings, users, blockedIds, deals, consents, active] = await Promise.all([
+      modules.listings.summaries([...new Set(rows.map((r) => r.listing_id))]),
+      modules.identity.getPublicUsers([...new Set(counterpartIds)]),
+      modules.trust.blockRelations(auth.userId),
+      dealsFor(ids),
+      contactRows(ids),
+      modules.identity.activeUserIds([...new Set([auth.userId, ...counterpartIds])]),
+    ]);
+    const blocked = new Set(blockedIds);
+    const contacts = await contactShares(
+      rows.map((r, i) => {
+        const counterpartId = counterpartIds[i]!;
+        const status = { blocked: blocked.has(counterpartId), bothActive: active.has(auth.userId) && active.has(counterpartId) };
+        return { ctx: contactContext(consents.get(r.id), auth.userId, counterpartId, status), counterpartId };
+      }),
+    );
     const result: ConversationSummary[] = [];
     for (const [i, r] of rows.entries()) {
       const counterpartId = counterpartIds[i]!;
       const listing = listings.get(r.listing_id);
-      const deal = await dealFor(r.id);
+      const deal = deals.get(r.id);
       result.push({
         id: r.id,
         role: r.buyer_id === auth.userId ? 'buyer' : 'seller',
@@ -392,6 +660,7 @@ export function createMessagingService(deps: ModuleDeps) {
         unreadCount: r.unread,
         deal: deal ? toDeal(deal) : null,
         blocked: blocked.has(counterpartId),
+        contact: contacts[i]!,
       });
     }
     return result;

@@ -1,0 +1,61 @@
+---
+id: OPS-GOLIVE
+type: checklist
+status: in-review
+owner: product-owner
+version: 1.2
+created: 2026-10-24
+last_updated: 2026-10-26
+---
+
+# Go-live-Checkliste
+
+> **Muster im Rahmen einer Übungsaufgabe.** Diese Liste fasst zusammen, was vor einem echten Betrieb (EPIC-12) erledigt sein muss. Im Docker-Beispiel bleibt sie bewusst offen.
+
+## Recht und Datenschutz
+
+- [ ] Betreiber festgelegt (Hochschule, Organisationseinheit) und alle fiktiven Übungswerte (Q-28) in `apps/web/src/content/legal/`, `docs/06-recht/` und `docs/07-betrieb/` durch echte Angaben ersetzt (Suche nach `fiktiv`, `fictitious`, `Übungswert`, `Übungsannahme`, `.example` und `Platzhalter`); Muster-Hinweis entfernt
+- [ ] Hinweis „Muster im Rahmen einer Übungsaufgabe“ aus allen Rechtstexten entfernt
+- [ ] Impressum, Datenschutzerklärung, Nutzungsbedingungen, Community-Regeln vom Justiziariat und DSB freigegeben
+- [ ] Erklärung zur Barrierefreiheit nach manueller Prüfung (MAN-A11Y-001) aktualisiert, Durchsetzungsstelle eingetragen
+- [ ] VVT und TOMs freigegeben, DSFA-Schwellwertanalyse unterschrieben; **DSFA durchgeführt** (nach der Schwellwertanalyse erforderlich, Kriterien 4 und 7)
+- [ ] Auftragsverarbeitungsverträge abgeschlossen
+- [ ] Rechtsgrundlagen im LDSG/Hochschulgesetz geprüft
+- [ ] DAC7: Einstufung als meldender Plattformbetreiber geklärt; Zugang zum BZSt-Portal
+- [ ] DSA: Kontaktstelle besetzt, Moderationsteam geschult, Bereitschaft für Art. 18 geregelt
+- [ ] `version` im Front Matter der freigegebenen Rechtstexte gesetzt; `TERMS_VERSION` **nicht** gesetzt (nur Override)
+- [ ] `LEGAL_STRICT=true` – die App startet erst, wenn keine Platzhalter mehr in den Rechtstexten stehen
+
+## Sicherheit
+
+- [ ] Penetrationstest durchgeführt, keine offenen kritischen/hohen Befunde ([Plan](pentest-plan.md))
+- [ ] Sicherheitsscans in CI aktiv (B-06), keine offenen kritischen Funde
+- [ ] `security.txt` mit echter Kontaktadresse (`SECURITY_CONTACT`) und gültigem `Expires`; `Policy` und `Canonical` erscheinen nur mit HTTPS-`PUBLIC_URL`
+- [ ] Datenbankpasswort aus `compose.yaml` ersetzt; Geheimnisse (DB-Passwort, SMTP, ggf. `UNSUBSCRIBE_SECRET`) im Secret-Store, nicht im Repo
+- [ ] `DEMO_MODE=false`, `SEED_DEMO=false`; Demo-Konten nicht vorhanden
+- [ ] `API_DOCS=false` (keine OpenAPI-Doku im Echtbetrieb, PT-F-17)
+- [ ] `MAIL_FROM` mit der echten, per SPF/DKIM/DMARC abgesicherten Domain; `MAIL_REPLY_TO` = echte Kontaktstelle
+- [ ] Pentest-Empfehlungen B-59 bis B-63 umgesetzt oder als Ausnahme genehmigt; ASVS-Checkliste ohne „nicht erfüllt“
+- [ ] Screenreader- und Usability-Test (MAN-A11Y-001/002, MAN-LST-001) mit echten Personen durchgeführt (damit entfällt auch der automatische Abgleich der Demo-Konten mit neuen Rechtstexten)
+- [ ] Admin- und Moderationskonten personalisiert, Rollenliste geprüft
+
+## Betrieb
+
+- [ ] Domain und DNS eingerichtet; TLS-Zertifikat, HSTS ([TLS](tls-reverse-proxy.md))
+- [ ] SPF, DKIM, DMARC eingerichtet; Testmails an Hochschul-Postfächer kommen an ([Zustellbarkeit](mail-zustellbarkeit.md))
+- [ ] Backups täglich, verschlüsselt, an zweitem Standort; Restore-Übung erfolgreich protokolliert ([Backup](backup-restore.md))
+- [ ] Monitoring und Alarmierung aktiv, echte Empfänger in `ops/alertmanager/alertmanager.yml`, Rufbereitschaft benannt ([Monitoring](monitoring-alarmierung.md))
+- [ ] Statusseite erreichbar, externe Spiegelung eingerichtet
+- [ ] Betriebshandbuch und Incident-Prozess dem Betriebsteam bekannt
+- [ ] Renovate aktiv, Verantwortliche für Updates benannt
+- [ ] `api` und `worker` ggf. getrennt; hinter dem Proxy `TRUST_PROXY=true` und `PUBLIC_URL` mit `https://`
+- [ ] Weicher Wartungsmodus und Ankündigung in der Admin-Oberfläche erprobt; `MAINTENANCE_UNTIL` für geplante Wartungen bekannt
+- [ ] Lasttest gegen die Produktivumgebung (QS-7, QS-12)
+
+## Produkt
+
+- [ ] Englische Oberfläche geprüft (Muttersprachler/in)
+- [ ] Hilfe/FAQ mit echten Kontaktwegen
+- [ ] Kommunikationsplan für den Start (Hochschul-Newsletter, AStA)
+
+Freigabe: entfällt (Übungsaufgabe, kein Echtbetrieb – Q-28)

@@ -10,10 +10,14 @@ export interface MailMessage {
   subject: string;
   text: string;
   html: string;
+  /** Zusätzliche Kopfzeilen, z. B. List-Unsubscribe (REQ-OPS-010). */
+  headers?: Record<string, string>;
 }
 
 export interface MailPort {
   send(message: MailMessage): Promise<void>;
+  /** Erreichbarkeit des Versanddienstes für die Statusseite (REQ-OPS-007). */
+  verify(): Promise<boolean>;
 }
 
 // ----------------------------------------------------------------- StoragePort (ADR-0007)
@@ -60,6 +64,8 @@ export interface QueueOptions {
 export interface JobContext {
   id: string;
   name: string;
+  /** Letzter Versuch: scheitert er, landet der Job in der Dead-Letter-Queue (Metrik outcome=dead, RV-A-18). */
+  finalAttempt: boolean;
 }
 
 export type JobHandler<T> = (data: T, ctx: JobContext) => Promise<void>;
@@ -103,14 +109,17 @@ export interface SearchPort {
 // ----------------------------------------------------------------- RateLimitStore (REQ-SEC-005)
 export interface RateLimitResult {
   allowed: boolean;
+  /** Sekunden bis zum Ende des Zeitfensters (auch Basis für `Retry-After` und `RateLimit-Reset`). */
   retryAfterSeconds: number;
+  limit: number;
+  /** Verbleibende Anfragen im Fenster, nie negativ. */
+  remaining: number;
+  windowSeconds: number;
 }
 
 export interface RateLimitStore {
   /** Zählt einen Treffer für `key` im festen Zeitfenster und prüft gegen `limit`. */
   hit(key: string, limit: number, windowSeconds: number): Promise<RateLimitResult>;
-  /** Zählerstand ohne Erhöhung (z. B. Login-Fehlversuche). */
-  peek(key: string, windowSeconds: number): Promise<number>;
   reset(key: string): Promise<void>;
   /** Löscht abgelaufene Zähler; Schlüssel können IP-Hashes enthalten (REQ-PRIV-002: max. 7 Tage). */
   purge(olderThanSeconds: number): Promise<number>;

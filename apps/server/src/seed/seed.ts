@@ -39,6 +39,30 @@ export async function seedBaseData(database: Database): Promise<void> {
 }
 
 /** Demo-Daten (REQ-DEMO-001), nur bei SEED_DEMO=true und nur in eine leere Datenbank. */
+/**
+ * Bei jedem Start im Demo-Modus: Demo-Konten auf die aktuelle Fassung der Rechtstexte heben, damit eine neue
+ * Version (ADR-0015) bestehende Installationen nicht blockiert. Konten mit festgelegter alter Fassung (Tim, Testfall
+ * für REQ-LEGAL-003) bleiben unverändert.
+ */
+export async function syncDemoLegalVersions(deps: ModuleDeps): Promise<void> {
+  const { database, modules, logger } = deps;
+  const created: string[] = [];
+  const updated: string[] = [];
+  for (const u of DEMO_USERS) {
+    // Später ergänzte Demo-Konten (z. B. Tim) auch in bestehenden Installationen anlegen, ohne Anzeigen und Chats
+    if (!(await database.db.one(sql`SELECT 1 FROM identity."user" WHERE email = ${u.email}`))) {
+      await database.tx((tx) => modules.identity.createVerifiedUser(tx, { ...u, password: DEMO_PASSWORD }));
+      created.push(u.email);
+      continue;
+    }
+    if (u.termsVersion || u.privacyAckVersion) continue;
+    if (await modules.identity.syncDemoLegalVersions(u.email)) updated.push(u.email);
+  }
+  if (created.length || updated.length) {
+    logger.info({ created: created.length, updated: updated.length }, 'Demo-Konten mit aktuellen Rechtstexten abgeglichen');
+  }
+}
+
 export async function seedDemoData(deps: ModuleDeps): Promise<void> {
   const { database, modules, logger } = deps;
   const { db } = database;
@@ -58,6 +82,7 @@ export async function seedDemoData(deps: ModuleDeps): Promise<void> {
         institutionId: HWG_INSTITUTION_ID,
         displayName: u.displayName,
         sessionHash: 'seed',
+        termsCurrent: true,
       });
     }
   });

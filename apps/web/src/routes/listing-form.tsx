@@ -6,6 +6,7 @@ import { uploadImages, useCreateListing, useListing, useUpdateListing } from '..
 import { ApiError, errorMessage } from '../api/client';
 import { Alert, Button, FormError, Field, Loading, PageHeader, Select, TextArea } from '../components/ui';
 import { centsToEuroInput, conditionLabels, kindLabels, parseEuroToCents, priceTypeLabels } from '../lib/format';
+import { t } from '../i18n';
 
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -37,7 +38,7 @@ function EditLoader({ id }: { id: string }) {
   const { data, isPending, isError, error } = useListing(id);
   if (isPending) return <Loading />;
   if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
-  if (!data.isOwner) return <Alert tone="error">Du kannst nur eigene Anzeigen bearbeiten.</Alert>;
+  if (!data.isOwner) return <Alert tone="error">{t('form.onlyOwn')}</Alert>;
   return <ListingForm initial={data} />;
 }
 
@@ -89,13 +90,13 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
     const files = Array.from(e.target.files ?? []);
     e.target.value = '';
     const free = maxImages - images.length;
-    if (files.length > free) setFormError(`Maximal ${maxImages} Bilder pro Anzeige.`);
+    if (files.length > free) setFormError(t('form.maxImages', { max: maxImages }));
     const accepted: { file: File; img: FormImage }[] = [];
     const rejected: FormImage[] = [];
     for (const file of files.slice(0, Math.max(0, free))) {
       const img: FormImage = { key: crypto.randomUUID(), preview: URL.createObjectURL(file), state: 'uploading' };
-      if (!ACCEPTED.includes(file.type)) rejected.push({ ...img, state: 'error', error: 'Nur JPEG, PNG oder WebP.' });
-      else if (file.size > maxBytes) rejected.push({ ...img, state: 'error', error: 'Datei größer als 10 MB.' });
+      if (!ACCEPTED.includes(file.type)) rejected.push({ ...img, state: 'error', error: t('form.image.type') });
+      else if (file.size > maxBytes) rejected.push({ ...img, state: 'error', error: t('form.image.size') });
       else accepted.push({ file, img });
     }
     setImages((prev) => [...prev, ...accepted.map((a) => a.img), ...rejected]);
@@ -110,7 +111,7 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
         }),
       );
     } catch (err) {
-      const msg = errorMessage(err, 'Upload fehlgeschlagen.');
+      const msg = errorMessage(err, t('form.image.uploadFailed'));
       setImages((prev) => prev.map((p) => (accepted.some((a) => a.img.key === p.key) ? { ...p, state: 'error', error: msg } : p)));
     }
   };
@@ -139,16 +140,16 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
     setFormError(null);
     const errors: Record<string, string> = {};
     const priceCents = needsPrice ? parseEuroToCents(price) : null;
-    if (title.trim().length < 3) errors.title = 'Mindestens 3 Zeichen.';
-    if (description.trim().length < 10) errors.description = 'Mindestens 10 Zeichen.';
-    if (!categoryId) errors.categoryId = 'Bitte wähle eine Kategorie.';
+    if (title.trim().length < 3) errors.title = t('form.minChars', { n: 3 });
+    if (description.trim().length < 10) errors.description = t('form.minChars', { n: 10 });
+    if (!categoryId) errors.categoryId = t('form.chooseCategory');
     if (needsPrice && (priceCents == null || priceCents < 1 || priceCents > 1_000_000))
-      errors.priceCents = 'Bitte gib einen Preis zwischen 0,01 € und 10.000 € an.';
-    if (!locationIds.length) errors.locationIds = 'Bitte wähle mindestens einen Übergabeort.';
-    if (images.some((i) => i.state === 'uploading')) errors.images = 'Bitte warte, bis alle Bilder hochgeladen sind.';
+      errors.priceCents = t('form.priceRange');
+    if (!locationIds.length) errors.locationIds = t('form.chooseLocation');
+    if (images.some((i) => i.state === 'uploading')) errors.images = t('form.waitUploads');
     setClientErrors(errors);
     if (Object.keys(errors).length) {
-      setFormError('Bitte prüfe die markierten Felder.');
+      setFormError(t('form.checkFields'));
       return;
     }
 
@@ -179,7 +180,7 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
   const err = (key: string) => clientErrors[key] ?? serverErrors[key];
   const serverMessage = mutation.isError
     ? mutation.error instanceof ApiError && mutation.error.code === 'listing_limit'
-      ? 'Du hast bereits die maximale Anzahl aktiver Anzeigen (30).'
+      ? t('form.listingLimit')
       : errorMessage(mutation.error)
     : null;
 
@@ -187,10 +188,10 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title={initial ? 'Anzeige bearbeiten' : 'Neue Anzeige'} />
+      <PageHeader title={initial ? t('form.editTitle') : t('myListings.new')} />
       <form onSubmit={submit} noValidate className="space-y-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-slate-800">Art der Anzeige</legend>
+          <legend className="text-sm font-medium text-slate-800">{t('form.kind')}</legend>
           <div className="flex gap-4">
             {(['offer', 'wanted'] as const).map((k) => (
               <label key={k} className="flex items-center gap-2">
@@ -201,21 +202,21 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
           </div>
         </fieldset>
 
-        <Field label="Titel" required maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} error={err('title')} />
+        <Field label={t('form.title')} required maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} error={err('title')} />
         <TextArea
-          label="Beschreibung"
+          label={t('listing.description')}
           required
           rows={6}
           maxLength={4000}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           error={err('description')}
-          hint={`${description.length}/4000 Zeichen`}
+          hint={t('form.charCount', { count: description.length, max: 4000 })}
         />
         <Select
-          label="Kategorie"
+          label={t('search.category')}
           required
-          placeholder="Bitte wählen"
+          placeholder={t('form.pleaseChoose')}
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           options={meta.categories.map((c) => ({ value: c.id, label: c.name }))}
@@ -224,28 +225,28 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
 
         {category?.hasStudyAttributes && (
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="Studiengang" maxLength={80} value={studyProgram} onChange={(e) => setStudyProgram(e.target.value)} error={err('attributes')} />
-            <Field label="Modul" maxLength={80} value={module} onChange={(e) => setModule(e.target.value)} />
+            <Field label={t('listing.studyProgram')} maxLength={80} value={studyProgram} onChange={(e) => setStudyProgram(e.target.value)} error={err('attributes')} />
+            <Field label={t('listing.module')} maxLength={80} value={module} onChange={(e) => setModule(e.target.value)} />
             <Field label="ISBN" maxLength={17} inputMode="numeric" value={isbn} onChange={(e) => setIsbn(e.target.value)} />
           </div>
         )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Select
-            label="Preistyp"
+            label={t('search.priceType')}
             required
             value={priceType}
             onChange={(e) => setPriceType(e.target.value as PriceType)}
             options={(Object.keys(priceTypeLabels) as PriceType[]).map((p) => ({ value: p, label: priceTypeLabels[p] }))}
           />
           {needsPrice && (
-            <Field label="Preis in €" required inputMode="decimal" placeholder="z. B. 12,50" value={price} onChange={(e) => setPrice(e.target.value)} error={err('priceCents')} />
+            <Field label={t('form.price')} required inputMode="decimal" placeholder={t('form.pricePlaceholder')} value={price} onChange={(e) => setPrice(e.target.value)} error={err('priceCents')} />
           )}
         </div>
 
         <Select
-          label="Zustand"
-          placeholder="Keine Angabe"
+          label={t('search.condition')}
+          placeholder={t('form.noInfo')}
           value={condition}
           onChange={(e) => setCondition(e.target.value as Condition | '')}
           options={(Object.keys(conditionLabels) as Condition[]).map((c) => ({ value: c, label: conditionLabels[c] }))}
@@ -253,7 +254,7 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
 
         <fieldset className="space-y-2" aria-describedby={err('locationIds') ? 'loc-err' : undefined}>
           <legend className="text-sm font-medium text-slate-800">
-            Übergabeorte <span aria-hidden="true" className="text-red-700">*</span>
+            {t('form.locations')} <span aria-hidden="true" className="text-red-700">*</span>
           </legend>
           {meta.locations.map((l) => (
             <label key={l.id} className="flex items-center gap-2">
@@ -270,29 +271,29 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
 
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-slate-800">
-            Bilder ({images.length}/{maxImages})
+            {t('form.images', { count: images.length, max: maxImages })}
           </legend>
-          <p className="text-sm text-slate-600">JPEG, PNG oder WebP, je höchstens 10 MB. Standortdaten (EXIF) werden automatisch entfernt.</p>
+          <p className="text-sm text-slate-600">{t('form.imagesHint')}</p>
           {images.length > 0 && (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {images.map((img, i) => (
                 <li key={img.key} className="space-y-1 rounded-lg border border-slate-200 p-1">
                   <div className="aspect-square overflow-hidden rounded bg-slate-100">
-                    {img.preview && <img src={img.preview} alt={`Bild ${i + 1}`} className="h-full w-full object-cover" />}
+                    {img.preview && <img src={img.preview} alt={t('form.image.alt', { n: i + 1 })} className="h-full w-full object-cover" />}
                   </div>
                   <p className="text-xs" aria-live="polite">
-                    {img.state === 'uploading' && 'Wird hochgeladen …'}
+                    {img.state === 'uploading' && t('form.image.uploading')}
                     {img.state === 'error' && <span className="text-red-700">{img.error}</span>}
-                    {img.state === 'ready' && i === 0 && 'Titelbild'}
+                    {img.state === 'ready' && i === 0 && t('form.image.cover')}
                   </p>
                   <div className="flex justify-between gap-1">
-                    <button type="button" className="rounded px-2 py-1 text-sm hover:bg-slate-100 disabled:opacity-40" onClick={() => moveImage(i, -1)} disabled={i === 0} aria-label={`Bild ${i + 1} nach vorne`}>
+                    <button type="button" className="rounded px-2 py-1 text-sm hover:bg-slate-100 disabled:opacity-40" onClick={() => moveImage(i, -1)} disabled={i === 0} aria-label={t('form.image.forward', { n: i + 1 })}>
                       ←
                     </button>
-                    <button type="button" className="rounded px-2 py-1 text-sm text-red-700 hover:bg-red-50" onClick={() => removeImage(img.key)} aria-label={`Bild ${i + 1} entfernen`}>
-                      Entfernen
+                    <button type="button" className="rounded px-2 py-1 text-sm text-red-700 hover:bg-red-50" onClick={() => removeImage(img.key)} aria-label={t('form.image.remove', { n: i + 1 })}>
+                      {t('form.image.removeShort')}
                     </button>
-                    <button type="button" className="rounded px-2 py-1 text-sm hover:bg-slate-100 disabled:opacity-40" onClick={() => moveImage(i, 1)} disabled={i === images.length - 1} aria-label={`Bild ${i + 1} nach hinten`}>
+                    <button type="button" className="rounded px-2 py-1 text-sm hover:bg-slate-100 disabled:opacity-40" onClick={() => moveImage(i, 1)} disabled={i === images.length - 1} aria-label={t('form.image.backward', { n: i + 1 })}>
                       →
                     </button>
                   </div>
@@ -300,9 +301,9 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
               ))}
             </ul>
           )}
-          <input ref={fileInput} type="file" accept={ACCEPTED.join(',')} multiple className="sr-only" id="file-input" onChange={(e) => void onFiles(e)} tabIndex={-1} />
+          <input ref={fileInput} type="file" accept={ACCEPTED.join(',')} multiple className="sr-only" id="file-input" aria-label={t('form.image.chooseFiles')} onChange={(e) => void onFiles(e)} tabIndex={-1} />
           <Button variant="secondary" onClick={() => fileInput.current?.click()} disabled={images.length >= maxImages}>
-            Bilder hinzufügen
+            {t('form.image.add')}
           </Button>
           {err('images') && <p className="text-sm font-medium text-red-700">{err('images')}</p>}
         </fieldset>
@@ -310,13 +311,13 @@ function ListingForm({ initial }: { initial?: ListingDetail }) {
         <FormError error={formError ?? serverMessage} />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={() => window.history.back()}>
-            Abbrechen
+            {t('common.cancel')}
           </Button>
           <Button type="submit" busy={mutation.isPending}>
-            {initial ? 'Änderungen speichern' : 'Veröffentlichen'}
+            {initial ? t('form.saveChanges') : t('form.publish')}
           </Button>
         </div>
-        <p className="text-xs text-slate-600">Anzeigen mit bestimmten Begriffen werden vor der Veröffentlichung von der Moderation geprüft.</p>
+        <p className="text-xs text-slate-600">{t('form.reviewHint')}</p>
       </form>
     </div>
   );

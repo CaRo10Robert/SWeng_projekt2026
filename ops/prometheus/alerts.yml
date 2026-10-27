@@ -1,0 +1,106 @@
+# Alarmregeln (REQ-OPS-008, Nachweis CTRL-ALERT-RULES; Tabelle in docs/07-betrieb/monitoring-alarmierung.md)
+# Alarme auf Symptome, die eine handelnde Person brauchen; jede Regel verweist auf ihr Runbook.
+# Schwellwerte sind Beispielwerte und werden nach den ersten Betriebswochen angepasst.
+groups:
+  - name: campusmarkt
+    rules:
+      - alert: AppDown
+        expr: up{job="campusmarkt"} == 0
+        for: 2m
+        labels:
+          severity: SEV-1
+        annotations:
+          summary: CampusMarkt ist nicht erreichbar
+          description: Prometheus erreicht app:8080/metrics seit 2 Minuten nicht (REQ-OPS-001).
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#63-runbook-appdown
+
+      - alert: NotReady
+        expr: app_ready == 0
+        for: 5m
+        labels:
+          severity: SEV-1
+        annotations:
+          summary: CampusMarkt meldet „nicht bereit“
+          description: Die Readiness-Prüfung schlägt seit 5 Minuten fehl, meist ist die Datenbank nicht erreichbar (REQ-OPS-001).
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#61-runbook-datenbank-nicht-erreichbar
+
+      - alert: HighErrorRate
+        # Nicht während des Wartungsmodus (503 sind dann gewollt) und erst ab Mindestlast von 0,1 Anfragen/s,
+        # damit wenige Fehler bei kaum Verkehr nicht alarmieren (RV-A-04)
+        expr: |
+          (
+            sum(rate(http_request_duration_seconds_count{job="campusmarkt",status=~"5.."}[5m]))
+              / sum(rate(http_request_duration_seconds_count{job="campusmarkt"}[5m])) > 0.05
+          )
+          and on() sum(rate(http_request_duration_seconds_count{job="campusmarkt"}[5m])) > 0.1
+          unless on() max(campusmarkt_maintenance_mode{job="campusmarkt"}) == 1
+        for: 5m
+        labels:
+          severity: SEV-2
+        annotations:
+          summary: Mehr als 5 % der Anfragen enden mit 5xx
+          description: 'Fehlerquote {{ $value | humanizePercentage }} über 5 Minuten (REQ-AVAIL-001).'
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#64-runbook-higherrorrate
+
+      - alert: SlowSearch
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket{job="campusmarkt",method="GET",route="/api/v1/listings"}[10m]))
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: SEV-3
+        annotations:
+          summary: Suche langsam (p95 > 500 ms)
+          description: 'p95 der Suche {{ $value | humanizeDuration }} über 10 Minuten (QS-7, REQ-PERF-001).'
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#65-runbook-slowsearch
+
+      - alert: JobFailures
+        # Nur endgültig gescheiterte Jobs (Dead-Letter-Queue); Wiederholungen nach kurzen Ausfällen sind normal (RV-A-18)
+        expr: increase(jobs_processed_total{job="campusmarkt",outcome="dead"}[15m]) > 0
+        labels:
+          severity: SEV-3
+        annotations:
+          summary: 'Endgültig gescheiterte Jobs in Queue {{ $labels.queue }}'
+          description: 'In den letzten 15 Minuten sind Jobs nach allen Wiederholungen gescheitert und liegen in der Dead-Letter-Queue, z. B. Mailversand (QS-3, REQ-NOTI-005).'
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#66-runbook-jobfailures
+
+      - alert: WebSocketDrop
+        # Einbruch um mehr als 80 % gegenüber vor 5 Minuten; erst ab 5 Verbindungen, damit die Demo nicht dauernd alarmiert
+        expr: ws_connections{job="campusmarkt"} < 0.2 * (ws_connections{job="campusmarkt"} offset 5m) and (ws_connections{job="campusmarkt"} offset 5m) >= 5
+        labels:
+          severity: SEV-2
+        annotations:
+          summary: WebSocket-Verbindungen eingebrochen
+          description: Die Zahl offener WebSocket-Verbindungen ist in 5 Minuten um mehr als 80 % gefallen (QS-4, REQ-CHAT-003).
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#67-runbook-websocketdrop
+
+      - alert: MaintenanceModeOn
+        expr: campusmarkt_maintenance_mode == 1
+        for: 2h
+        labels:
+          severity: SEV-3
+        annotations:
+          summary: Wartungsmodus länger als 2 Stunden aktiv
+          description: Der Wartungsmodus ist seit mehr als 2 Stunden aktiv – geplantes Ende prüfen (REQ-OPS-006).
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#68-runbook-maintenancemodeon
+
+      - alert: BackupMissing
+        # Wert 0 = noch nie gesichert: erst alarmieren, wenn die App länger als 26 h läuft (kein Alarm direkt nach dem
+        # Start). NaN = nicht lesbar (Datenbank weg): kein Alarm, dafür sorgt NotReady (RV-A-05).
+        expr: |
+          (
+            time() - campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} > 26 * 3600
+            and campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} > 0
+          )
+          or
+          (
+            time() - process_start_time_seconds{job="campusmarkt"} > 26 * 3600
+            and on(job, instance) campusmarkt_backup_last_success_timestamp_seconds{job="campusmarkt"} == 0
+          )
+        labels:
+          severity: SEV-2
+        annotations:
+          summary: Seit mehr als 26 Stunden keine erfolgreiche Sicherung
+          description: 'Seit {{ $value | humanizeDuration }} keine erfolgreiche Sicherung (REQ-AVAIL-003).'
+          runbook_url: https://github.com/CaRo10Robert/SWeng_projekt2026/blob/main/docs/07-betrieb/betriebshandbuch.md#69-runbook-backupmissing

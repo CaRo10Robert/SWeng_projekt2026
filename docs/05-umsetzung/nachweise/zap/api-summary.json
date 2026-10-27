@@ -1,0 +1,68 @@
+{
+  "zapVersion": "2.16.1",
+  "generated": "Mon, 26 Oct 2026 08:08:04",
+  "target": "http://app:8080 (OpenAPI, angemeldet als Mitglied, ohne /auth/logout und /me/delete)",
+  "alerts": [
+    {
+      "pluginId": "100001",
+      "name": "Unexpected Content-Type was returned",
+      "risk": "Low (High)",
+      "count": 204,
+      "examples": [
+        "http://app:8080",
+        "http://app:8080/",
+        "http://app:8080/5326309694404080054"
+      ]
+    },
+    {
+      "pluginId": "10116",
+      "name": "ZAP is Out of Date",
+      "risk": "Low (High)",
+      "count": 1,
+      "examples": [
+        "http://app:8080/api/v1/auth/password-reset/confirm"
+      ]
+    },
+    {
+      "pluginId": "100000",
+      "name": "A Client Error response code was returned by the server",
+      "risk": "Informational (High)",
+      "count": 2368,
+      "examples": [
+        "http://app:8080/api/v1/admin/announcement",
+        "http://app:8080/api/v1/admin/announcement/",
+        "http://app:8080/api/v1/listings/"
+      ]
+    },
+    {
+      "pluginId": "10111",
+      "name": "Authentication Request Identified",
+      "risk": "Informational (High)",
+      "count": 1,
+      "examples": [
+        "http://app:8080/api/v1/auth/login"
+      ]
+    },
+    {
+      "pluginId": "10024",
+      "name": "Information Disclosure - Sensitive Information in URL",
+      "risk": "Informational (Medium)",
+      "count": 2,
+      "examples": [
+        "http://app:8080/api/v1/notifications/unsubscribe?token=",
+        "http://app:8080/api/v1/notifications/unsubscribe?token="
+      ]
+    },
+    {
+      "pluginId": "10049",
+      "name": "Non-Storable Content",
+      "risk": "Informational (Medium)",
+      "count": 12,
+      "examples": [
+        "http://app:8080/api/v1/admin/users?q=",
+        "http://app:8080/api/v1/me",
+        "http://app:8080/api/v1/status"
+      ]
+    }
+  ]
+}

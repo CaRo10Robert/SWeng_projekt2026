@@ -6,3 +6,15 @@ dist/
 coverage/
 apps/web/dev-dist/
 .data/
+e2e/test-results/
+e2e/playwright-report/
+
+# Datensicherungen (scripts/backup.mjs, ADR-0018) – enthalten personenbezogene Daten
+backups/
+
+# StrykerJS (CTRL-MUTATION)
+apps/server/.stryker-tmp/
+apps/server/reports/
+
+# Ergebnisse der Lasttests (k6), nur als CI-Artefakt
+tests/load/results/

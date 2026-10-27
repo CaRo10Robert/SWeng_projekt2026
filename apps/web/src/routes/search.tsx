@@ -7,6 +7,7 @@ import { errorMessage } from '../api/client';
 import { ListingGrid } from '../components/ListingCard';
 import { Alert, Button, EmptyState, Field, Loading, Select } from '../components/ui';
 import { centsToEuroInput, conditionLabels, kindLabels, parseEuroToCents, priceTypeLabels } from '../lib/format';
+import { t, type MessageKey } from '../i18n';
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
 const int = (v: unknown) => {
@@ -19,11 +20,11 @@ const kinds = ['offer', 'wanted'] as const satisfies readonly ListingKind[];
 const priceTypes = ['fixed', 'negotiable', 'free', 'swap'] as const satisfies readonly PriceType[];
 const conditions = ['new', 'like_new', 'good', 'acceptable', 'defective'] as const satisfies readonly Condition[];
 const sorts = ['relevance', 'newest', 'price_asc', 'price_desc'] as const satisfies readonly SearchSort[];
-const sortLabels: Record<SearchSort, string> = {
-  relevance: 'Relevanz',
-  newest: 'Neueste zuerst',
-  price_asc: 'Preis aufsteigend',
-  price_desc: 'Preis absteigend',
+const sortLabels: Record<SearchSort, MessageKey> = {
+  relevance: 'search.sort.relevance',
+  newest: 'search.sort.newest',
+  price_asc: 'search.sort.price_asc',
+  price_desc: 'search.sort.price_desc',
 };
 
 export function validateSearchFilters(s: Record<string, unknown>): SearchFilters {
@@ -78,12 +79,12 @@ export function SearchPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="sr-only">Anzeigen suchen</h1>
+      <h1 className="sr-only">{t('search.title')}</h1>
       <form role="search" onSubmit={submit} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex gap-2">
           <div className="flex-1">
             <label htmlFor="q" className="sr-only">
-              Suchbegriff
+              {t('search.term')}
             </label>
             <input
               id="q"
@@ -91,11 +92,11 @@ export function SearchPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               maxLength={100}
-              placeholder="Was suchst du? z. B. Statistik Buch"
+              placeholder={t('search.placeholder')}
               className="block w-full rounded-lg border border-slate-400 px-3 py-2 text-base"
             />
           </div>
-          <Button type="submit">Suchen</Button>
+          <Button type="submit">{t('common.search')}</Button>
         </div>
         <button
           type="button"
@@ -104,80 +105,80 @@ export function SearchPage() {
           aria-controls="filters"
           onClick={() => setShowFilters((s) => !s)}
         >
-          {showFilters ? 'Filter ausblenden' : 'Filter anzeigen'}
+          {showFilters ? t('search.hideFilters') : t('search.showFilters')}
         </button>
         <fieldset id="filters" className={`${showFilters ? 'grid' : 'hidden'} grid-cols-1 gap-3 sm:grid-cols-2 md:grid lg:grid-cols-4`}>
-          <legend className="sr-only">Filter</legend>
+          <legend className="sr-only">{t('search.filters')}</legend>
           <Select
-            label="Kategorie"
-            placeholder="Alle Kategorien"
+            label={t('search.category')}
+            placeholder={t('search.allCategories')}
             value={filters.categoryId ?? ''}
             onChange={(e) => update({ categoryId: e.target.value || undefined })}
             options={(meta?.categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
           />
           <Select
-            label="Art"
-            placeholder="Angebote und Gesuche"
+            label={t('search.kind')}
+            placeholder={t('search.allKinds')}
             value={filters.kind ?? ''}
             onChange={(e) => update({ kind: (e.target.value || undefined) as ListingKind | undefined })}
             options={kinds.map((k) => ({ value: k, label: kindLabels[k] }))}
           />
           <Select
-            label="Preistyp"
-            placeholder="Alle Preistypen"
+            label={t('search.priceType')}
+            placeholder={t('search.allPriceTypes')}
             value={filters.priceType ?? ''}
             onChange={(e) => update({ priceType: (e.target.value || undefined) as PriceType | undefined })}
             options={priceTypes.map((p) => ({ value: p, label: priceTypeLabels[p] }))}
           />
           <Select
-            label="Übergabeort"
-            placeholder="Alle Standorte"
+            label={t('search.location')}
+            placeholder={t('search.allLocations')}
             value={filters.locationId ?? ''}
             onChange={(e) => update({ locationId: e.target.value || undefined })}
             options={(meta?.locations ?? []).map((l) => ({ value: l.id, label: l.name }))}
           />
           <Select
-            label="Zustand"
-            placeholder="Jeder Zustand"
+            label={t('search.condition')}
+            placeholder={t('search.anyCondition')}
             value={filters.condition ?? ''}
             onChange={(e) => update({ condition: (e.target.value || undefined) as Condition | undefined })}
             options={conditions.map((c) => ({ value: c, label: conditionLabels[c] }))}
           />
-          <Field label="Preis von (€)" inputMode="decimal" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => update({ minPriceCents: parseEuroToCents(minPrice) ?? undefined })} />
-          <Field label="Preis bis (€)" inputMode="decimal" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => update({ maxPriceCents: parseEuroToCents(maxPrice) ?? undefined })} />
+          <Field label={t('search.priceFrom')} inputMode="decimal" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => update({ minPriceCents: parseEuroToCents(minPrice) ?? undefined })} />
+          <Field label={t('search.priceTo')} inputMode="decimal" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => update({ maxPriceCents: parseEuroToCents(maxPrice) ?? undefined })} />
           <Select
-            label="Sortierung"
+            label={t('search.sort')}
             value={filters.sort ?? (filters.q ? 'relevance' : 'newest')}
             onChange={(e) => update({ sort: e.target.value as SearchSort })}
-            options={sorts.map((s) => ({ value: s, label: sortLabels[s] }))}
+            options={sorts.map((s) => ({ value: s, label: t(sortLabels[s]) }))}
           />
           <div className="flex items-end">
             <Button variant="ghost" onClick={reset}>
-              Filter zurücksetzen
+              {t('search.resetFilters')}
             </Button>
           </div>
         </fieldset>
       </form>
 
-      {degraded && <Alert tone="warning">Eingeschränkte Suche: Es wird vorübergehend nur im Titel gesucht.</Alert>}
+      {degraded && <Alert tone="warning">{t('search.degraded')}</Alert>}
 
       <section aria-labelledby="results-heading" aria-busy={search.isFetching}>
         <h2 id="results-heading" className="mb-3 text-lg font-semibold">
-          {filters.q ? `Ergebnisse für „${filters.q}“` : 'Aktuelle Anzeigen'}
+          {filters.q ? t('search.resultsFor', { q: filters.q }) : t('search.latest')}
         </h2>
         {search.isPending ? (
           <Loading />
         ) : search.isError ? (
           <Alert tone="error">{errorMessage(search.error)}</Alert>
         ) : items.length === 0 ? (
-          <EmptyState>Keine passenden Anzeigen gefunden.</EmptyState>
+          <EmptyState>{t('search.noResults')}</EmptyState>
         ) : (
           <>
             <ListingGrid items={items} />
             {search.hasNextPage && (
               <div className="mt-4 flex justify-center">
                 <Button variant="secondary" busy={search.isFetchingNextPage} onClick={() => void search.fetchNextPage()}>
-                  Mehr laden
+                  {t('search.loadMore')}
                 </Button>
               </div>
             )}

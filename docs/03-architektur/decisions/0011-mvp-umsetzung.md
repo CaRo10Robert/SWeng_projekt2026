@@ -1,6 +1,6 @@
 # ADR-0011: Umsetzungsentscheidungen im MVP (Abweichungen von ADR-0002, 0003, 0007, 0009)
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23); Nr. 1 ersetzt durch [ADR-0020](0020-datenzugriff-pg-sql-template.md). Diese Sammelentscheidung wird nicht weiter ergänzt: Jede Änderung einer Teilentscheidung bekommt einen eigenen ADR mit Optionen (Guideline Kap. 02, Guideline-Review GL-09).
 - **Datum:** 2026-10-23
 - **Bezug:** ADR-0002, ADR-0007, ADR-0009, ADR-0010, REQ-LST-003, REQ-SEC-004; Guideline Kap. 05, 06, 14
 
@@ -26,6 +26,6 @@ Offene Frage Q-11 (ADR-0010: „ein Container“ wörtlich?) wird für den MVP m
 ## Konsequenzen
 - (+) Das MVP startet mit `docker compose up --build` vollständig offline (Smoke-Test `scripts/smoke-test.mjs`).
 - (+) Modulgrenzen bleiben technisch geprüft (`pnpm lint:deps`, dependency-cruiser).
-- (−) Kein ORM-Typabgleich zwischen SQL-Schema und Code. Gegenmaßnahme: Integrationstests gegen echtes Postgres (Testcontainers) sind der nächste Schritt.
+- (−) Kein ORM-Typabgleich zwischen SQL-Schema und Code. Gegenmaßnahme und Abwägung: [ADR-0020](0020-datenzugriff-pg-sql-template.md) (Integrationstests gegen eine echte PostgreSQL).
 - (−) HEIC-Fotos (iPhone-Standard) müssen vorerst als JPEG exportiert werden.
-- ADR-0002 und ADR-0009 bleiben gültig. Diese ADR präzisiert ihre Umsetzung und ersetzt sie nicht.
+- ADR-0002, ADR-0007 und ADR-0009 bleiben gültig; diese ADR präzisiert bzw. ersetzt die genannten Teile. Die betroffenen ADRs tragen einen Hinweis darauf. Künftig gilt: eine Entscheidung je ADR.

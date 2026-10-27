@@ -1,0 +1,70 @@
+---
+id: REQ-AUTH-005
+title: Anmelden und Abmelden
+type: user-story
+class: functional
+status: verified
+owner: team-identity
+risk: medium
+release: R1
+moscow: M
+moscow_reason: [1]
+kano: basis
+epic: EPIC-01
+source: BG-1
+use_cases: [UC-02]
+depends_on: [REQ-AUTH-002]
+version: 1.3
+created: 2026-10-20
+last_updated: 2026-10-24
+verification: [AT-AUTH-005, AT-AUTH-005-2]
+---
+
+# REQ-AUTH-005 Anmelden und Abmelden
+
+## Anforderung
+Als Mitglied möchte ich mich mit meiner Hochschuladresse und meinem Passwort anmelden und wieder abmelden, damit ich die Plattform nutzen und meine Sitzung beenden kann.
+
+## Begründung
+Zugang zu allen Mitgliederfunktionen (BG-1). Die Art der Anmeldung ist über REQ-AUTH-009 austauschbar (Q-12).
+
+## Akzeptanzkriterien
+```gherkin
+Szenario: Anmeldung
+  Angenommen mein Konto ist bestätigt
+  Wenn ich mich mit "lea@studmail.hwg-lu.de" und meinem Passwort anmelde
+  Dann bin ich angemeldet und sehe die Suche
+
+Szenario: Falsches Passwort
+  Wenn ich ein falsches Passwort eingebe
+  Dann sehe ich "E-Mail-Adresse oder Passwort ist falsch"
+
+Szenario: Abmelden
+  Angenommen ich bin angemeldet
+  Wenn ich "Abmelden" wähle
+  Dann ist meine Sitzung serverseitig beendet
+  Und eine erneute Anfrage mit der alten Sitzung wird als nicht angemeldet behandelt
+```
+
+## Fehler- und Missbrauchsfälle
+| Fall | Verhalten |
+|---|---|
+| Brute Force | 5 Fehlversuche je (Adresse, IP) in 15 min, danach Wartezeit statt Kontosperre (REQ-SEC-005) |
+| Unbestätigtes Konto, korrektes Passwort | „Bitte bestätige zuerst deine E-Mail-Adresse“ |
+| Gesperrtes Konto, korrektes Passwort | „Dieses Konto ist gesperrt“ |
+| Löschung beantragt | Anmeldung bricht die Löschung ab (REQ-ACC-002) |
+
+## INVEST
+I: ja · N: Sitzungsdauer verhandelbar · V: Zugang · E: klein · S: ja · T: automatisierbar.
+
+## Nachweis
+- `AT-AUTH-005`: Smoke-Test – Anmeldung der Demo-Konten liefert das Profil und eine Sitzung.
+- `AT-AUTH-005-2`: neu zu schreiben – nach Abmelden liefert `/me` mit der alten Sitzung 401.
+
+## Änderungshistorie
+| Version | Datum | Änderung |
+|---|---|---|
+| 1.0 | 2026-10-20 | Erstfassung im Katalog |
+| 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien ergänzt |
+| 1.2 | 2026-10-23 | Review v0.2: R-25 Rate-Limit-Schlüssel nach Q-18; R-15 moscow_reason |
+| 1.3 | 2026-10-24 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-AUTH-005, AT-AUTH-005-2 bestanden bzw. ausgeführt); Status → verified |

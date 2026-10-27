@@ -1,14 +1,16 @@
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { hash as argonHash, verify as argonVerify } from '@node-rs/argon2';
-import type { AdminUser, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
+import type { AdminUser, Locale, Me, NotificationPrefs, PublicUser, RegisterBody, Role, UpdateMeBody, UserType } from '@campusmarkt/contracts';
 import { audit } from '../../platform/audit.js';
-import type { Tx } from '../../platform/db.js';
-import { AppError, badRequest, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
+import type { Db, Tx } from '../../platform/db.js';
+import { AppError, badRequest, conflict, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
+import { ensureSecret } from '../../platform/pseudonym.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import { checkPassword, checkRegistrationEmail, hashToken, newToken, normalizeEmail, type DomainRule } from './domain.js';
+import { resolveLogin, type IdentityProviderPort } from './identity-provider.js';
 
 // OWASP Password Storage Cheat Sheet: Argon2id, m = 19 MiB, t = 2, p = 1 (REQ-SEC-002)
 const ARGON = { memoryCost: 19_456, timeCost: 2, parallelism: 1 };
@@ -29,8 +31,11 @@ interface UserRow {
   study_program: string | null;
   preferred_location_ids: string[];
   notification_prefs: NotificationPrefs;
+  locale: Locale;
   created_at: string;
   deletion_requested_at: string | null;
+  privacy_ack_version: string | null;
+  password_change_required: boolean;
 }
 
 export interface Contact {
@@ -38,9 +43,10 @@ export interface Contact {
   displayName: string;
   status: UserRow['status'];
   notificationPrefs: NotificationPrefs;
+  locale: Locale;
 }
 
-const toMe = (u: UserRow): Me => ({
+const toMe = (u: UserRow, terms: { accepted: string | null; current: string }, privacyVersion: string): Me => ({
   id: u.id,
   email: u.email,
   displayName: u.display_name,
@@ -49,8 +55,17 @@ const toMe = (u: UserRow): Me => ({
   studyProgram: u.study_program,
   preferredLocationIds: u.preferred_location_ids,
   notificationPrefs: u.notification_prefs,
+  locale: u.locale,
+  termsAcceptedVersion: terms.accepted,
+  termsRequired: terms.accepted !== terms.current,
+  privacyNoticeVersion: u.privacy_ack_version === privacyVersion ? null : privacyVersion,
   createdAt: u.created_at,
 });
+
+/** Zuletzt zugestimmte Fassung der Nutzungsbedingungen (REQ-PRIV-001, REQ-LEGAL-003). */
+const LATEST_TERMS = (userId: unknown) => sql`
+  SELECT version FROM identity.consent WHERE user_id = ${userId} AND kind = 'terms_privacy'
+  ORDER BY given_at DESC LIMIT 1`;
 
 export function createIdentityService(deps: ModuleDeps) {
   const { database, rateLimit, config } = deps;
@@ -59,9 +74,31 @@ export function createIdentityService(deps: ModuleDeps) {
   // Für gleiche Antwortzeiten, wenn ein Konto nicht existiert (REQ-AUTH-004)
   const dummyHash = argonHash('timing-equalizer-not-a-password', ARGON);
 
-  const ipKey = (ip: string) => createHash('sha256').update(config.ipHashSalt + ip).digest('hex').slice(0, 32);
+  // ADR-0014: Rate-Limit-Schlüssel ohne Klartext-IP und ohne Klartext-Adresse (HMAC mit rotiertem Schlüssel)
+  const pseudo = (value: string) => deps.pseudonym.pseudonymize(value);
   const link = (path: string, token: string) => `${config.publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const notify = deps.modules;
+
+  async function meOf(executor: Db, user: UserRow): Promise<Me> {
+    const terms = await executor.one<{ version: string }>(LATEST_TERMS(user.id));
+    return toMe(user, { accepted: terms?.version ?? null, current: config.termsVersion }, config.privacyVersion);
+  }
+
+  /** Passwortverfahren als interner Adapter des IdentityProviderPort (ADR-0013 Nr. 2). */
+  const passwordProvider: IdentityProviderPort = {
+    id: 'password',
+    async begin() {
+      return { kind: 'form' };
+    },
+    async complete(input) {
+      const { email: rawEmail, password } = input as { email: string; password: string };
+      const email = normalizeEmail(rawEmail);
+      const user = email ? await findByCanonical(email.canonical) : undefined;
+      // Hash auch bei unbekannter Adresse prüfen: gleiche Antwortzeit (REQ-AUTH-004)
+      const valid = await argonVerify(user?.password_hash ?? (await dummyHash), password);
+      return user && valid ? { email: user.email, attributes: {} } : null;
+    },
+  };
 
   async function limit(key: string, max: number, windowSeconds: number) {
     const result = await rateLimit.hit(key, max, windowSeconds);
@@ -91,6 +128,16 @@ export function createIdentityService(deps: ModuleDeps) {
     return token;
   }
 
+  /** Zustimmungen ohne Profilbezug behalten: HMAC der kanonischen Adresse mit festem Geheimnis (REQ-PRIV-003, S-4). */
+  async function anonymizeConsents(tx: Tx, userId: string) {
+    const user = await tx.db.one<{ email_canonical: string }>(sql`SELECT email_canonical FROM identity."user" WHERE id = ${userId}`);
+    if (!user) return;
+    const secret = await ensureSecret(tx.db, 'secret.consent-proof');
+    const subjectRef = createHmac('sha256', secret).update(user.email_canonical.toLowerCase()).digest('base64url');
+    await tx.db.exec(sql`
+      UPDATE identity.consent SET subject_ref = ${subjectRef}, anonymized_at = now() WHERE user_id = ${userId}`);
+  }
+
   async function createSession(tx: Tx, userId: string) {
     const { token, hash } = newToken();
     await tx.db.exec(sql`
@@ -112,7 +159,10 @@ export function createIdentityService(deps: ModuleDeps) {
 
   return {
     async register(body: RegisterBody, ip: string): Promise<void> {
-      await limit(`register:${ipKey(ip)}`, 5, 3600);
+      // REQ-SEC-005 / Q-18: großzügig je IP (Campus-NAT), streng je Adresse
+      await limit(`register-ip:${await pseudo(ip)}`, 30, 3600);
+      const normalized = normalizeEmail(body.email);
+      if (normalized) await limit(`register-addr:${await pseudo(normalized.canonical)}`, 3, 3600);
       const check = checkRegistrationEmail(body.email, await domainRules());
       if (!check.ok) {
         throw unprocessable(
@@ -142,14 +192,14 @@ export function createIdentityService(deps: ModuleDeps) {
         );
         if (existing?.status === 'unverified') {
           const token = await issueToken(tx, existing.id, 'verify', VERIFY_TTL_HOURS);
-          await notify.notifications.email(tx, { address: existing.email }, 'verify', {
+          await notify.notifications.email(tx, { address: existing.email, locale: existing.locale }, 'verify', {
             name: existing.display_name,
             link: link('/verify', token),
           });
           return;
         }
         if (existing) {
-          await notify.notifications.email(tx, { address: existing.email }, 'account_exists', {
+          await notify.notifications.email(tx, { address: existing.email, locale: existing.locale }, 'account_exists', {
             name: existing.display_name,
             loginLink: `${config.publicUrl}/login`,
             resetLink: `${config.publicUrl}/forgot-password`,
@@ -158,13 +208,15 @@ export function createIdentityService(deps: ModuleDeps) {
         }
 
         const user = await tx.db.one<{ id: string }>(sql`
-          INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type)
-          VALUES (${check.institutionId}, ${email}, ${canonical}, ${passwordHash}, ${body.displayName.trim()}, ${check.userType})
+          INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type,
+                                       locale, privacy_ack_version)
+          VALUES (${check.institutionId}, ${email}, ${canonical}, ${passwordHash}, ${body.displayName.trim()}, ${check.userType},
+                  ${body.locale ?? 'de'}, ${config.privacyVersion})
           RETURNING id`);
         await tx.db.exec(sql`
           INSERT INTO identity.consent (user_id, kind, version) VALUES (${user!.id}, 'terms_privacy', ${body.termsVersion})`);
         const token = await issueToken(tx, user!.id, 'verify', VERIFY_TTL_HOURS);
-        await notify.notifications.email(tx, { address: email }, 'verify', {
+        await notify.notifications.email(tx, { address: email, locale: body.locale ?? 'de' }, 'verify', {
           name: body.displayName.trim(),
           link: link('/verify', token),
         });
@@ -179,21 +231,21 @@ export function createIdentityService(deps: ModuleDeps) {
           WHERE id = ${userId} AND status = 'unverified' RETURNING *`);
         if (!user) throw badRequest('token_used', 'Das Konto ist bereits bestätigt.');
         const sessionToken = await createSession(tx, userId);
-        return { me: toMe(user), sessionToken };
+        return { me: await meOf(tx.db, user), sessionToken };
       });
     },
 
     async resendVerification(rawEmail: string): Promise<void> {
       const email = normalizeEmail(rawEmail);
       if (!email) return;
-      await limit(`resend:${email.canonical}`, 3, 3600);
+      await limit(`resend:${await pseudo(email.canonical)}`, 3, 3600);
       await database.tx(async (tx) => {
         const user = await tx.db.one<UserRow>(
           sql`SELECT * FROM identity."user" WHERE email_canonical = ${email.canonical} AND status = 'unverified'`,
         );
         if (!user) return;
         const token = await issueToken(tx, user.id, 'verify', VERIFY_TTL_HOURS);
-        await notify.notifications.email(tx, { address: user.email }, 'verify', {
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'verify', {
           name: user.display_name,
           link: link('/verify', token),
         });
@@ -202,23 +254,40 @@ export function createIdentityService(deps: ModuleDeps) {
 
     async login(rawEmail: string, password: string, ip: string): Promise<{ me: Me; sessionToken: string }> {
       const email = normalizeEmail(rawEmail);
-      const failKey = `login-fail:${email?.canonical ?? rawEmail.toLowerCase()}:${ipKey(ip)}`;
-      // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP
-      if ((await rateLimit.peek(failKey, 900)) >= 5) throw rateLimited(900);
+      const failKey = `login-fail:${await pseudo(email?.canonical ?? rawEmail.toLowerCase())}:${await pseudo(ip)}`;
+      // REQ-SEC-005: 5 Fehlversuche / 15 min pro Konto + IP. Erst atomar zählen, dann prüfen, damit parallele
+      // Versuche das Limit nicht gemeinsam unterlaufen; eine erfolgreiche Anmeldung setzt den Zähler zurück.
+      const attempt = await rateLimit.hit(failKey, 5, 900);
+      // Sicherheitsereignisse ohne Personenbezug: nur das täglich wechselnde Pseudonym (ASVS 7.1.3/7.2.1, REQ-OPS-002)
+      const subject = await pseudo(email?.canonical ?? rawEmail.toLowerCase());
+      if (!attempt.allowed) {
+        deps.logger.warn({ event: 'auth.login_throttled', subject }, 'Anmeldung gedrosselt');
+        throw rateLimited(attempt.retryAfterSeconds);
+      }
 
-      const user = email ? await findByCanonical(email.canonical) : undefined;
-      const valid = await argonVerify(user?.password_hash ?? (await dummyHash), password);
-      if (!user || !valid) {
-        await rateLimit.hit(failKey, 5, 900);
-        throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
-      }
-      if (user.status === 'unverified') {
-        throw new AppError(403, 'not_verified', 'Bitte bestätige zuerst deine E-Mail-Adresse.');
-      }
-      if (user.status === 'suspended') {
+      const outcome = await resolveLogin(passwordProvider, { email: rawEmail, password }, {
+        rules: await domainRules(),
+        findByCanonical,
+      });
+      if (!outcome.ok) {
+        deps.logger.warn({ event: 'auth.login_failed', reason: outcome.code, subject }, 'Anmeldung fehlgeschlagen');
+        if (outcome.code === 'invalid_credentials' || outcome.code === 'domain_not_allowed') {
+          throw new AppError(401, 'invalid_credentials', 'E-Mail-Adresse oder Passwort ist falsch.');
+        }
+        if (outcome.code === 'not_verified') {
+          throw new AppError(403, 'not_verified', 'Bitte bestätige zuerst deine E-Mail-Adresse.');
+        }
         throw new AppError(403, 'account_suspended', 'Dieses Konto ist gesperrt.');
       }
+      const user = outcome.account;
       await rateLimit.reset(failKey);
+      if ((user as Partial<UserRow>).password_change_required) {
+        // Notfall (T-5): Passwort ist richtig, aber zurückgesetzt; Link per Mail statt Sitzung
+        deps.logger.warn({ event: 'auth.password_change_required', subject }, 'Passwortwechsel erzwungen');
+        await this.requestPasswordReset(rawEmail).catch(() => undefined);
+        throw new AppError(403, 'password_change_required', 'Bitte vergib ein neues Passwort. Wir haben dir einen Link geschickt.');
+      }
+      deps.logger.info({ event: 'auth.login', subject }, 'Anmeldung erfolgreich');
 
       return database.tx(async (tx) => {
         let deletionCancelled = false;
@@ -227,10 +296,11 @@ export function createIdentityService(deps: ModuleDeps) {
           await tx.db.exec(sql`
             UPDATE identity."user" SET status = 'active', deletion_requested_at = NULL, updated_at = now()
             WHERE id = ${user.id}`);
+          deps.journal.record(tx, 'account_deletion_cancelled', user.id);
           deletionCancelled = true;
         }
         const sessionToken = await createSession(tx, user.id);
-        return { me: { ...toMe(user), deletionCancelled }, sessionToken };
+        return { me: { ...(await meOf(tx.db, user)), deletionCancelled }, sessionToken };
       });
     },
 
@@ -240,8 +310,8 @@ export function createIdentityService(deps: ModuleDeps) {
 
     async resolveSession(token: string): Promise<AuthContext | null> {
       const sessionHash = hashToken(token);
-      const row = await db.one<{ id: string; role: Role; institution_id: string; display_name: string }>(sql`
-        SELECT u.id, u.role, u.institution_id, u.display_name
+      const row = await db.one<{ id: string; role: Role; institution_id: string; display_name: string; terms_version: string | null }>(sql`
+        SELECT u.id, u.role, u.institution_id, u.display_name, (${LATEST_TERMS(sql`u.id`)}) AS terms_version
         FROM identity.session s JOIN identity."user" u ON u.id = s.user_id
         WHERE s.token_hash = ${sessionHash} AND s.expires_at > now() AND u.status = 'active'`);
       if (!row) return null;
@@ -251,20 +321,21 @@ export function createIdentityService(deps: ModuleDeps) {
         institutionId: row.institution_id,
         displayName: row.display_name,
         sessionHash,
+        termsCurrent: row.terms_version === config.termsVersion,
       };
     },
 
     async requestPasswordReset(rawEmail: string): Promise<void> {
       const email = normalizeEmail(rawEmail);
       if (!email) return;
-      await limit(`reset:${email.canonical}`, 3, 3600);
+      await limit(`reset:${await pseudo(email.canonical)}`, 3, 3600);
       await database.tx(async (tx) => {
         const user = await tx.db.one<UserRow>(
           sql`SELECT * FROM identity."user" WHERE email_canonical = ${email.canonical} AND status = 'active'`,
         );
         if (!user) return;
         const token = await issueToken(tx, user.id, 'reset', RESET_TTL_HOURS);
-        await notify.notifications.email(tx, { address: user.email }, 'password_reset', {
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'password_reset', {
           name: user.display_name,
           link: link('/reset-password', token),
         });
@@ -279,7 +350,8 @@ export function createIdentityService(deps: ModuleDeps) {
         if (!pw.ok) throw unprocessable('weak_password', pw.reason, [{ path: 'password', message: pw.reason }]);
         const passwordHash = await argonHash(password, ARGON);
         await tx.db.exec(sql`
-          UPDATE identity."user" SET password_hash = ${passwordHash}, updated_at = now() WHERE id = ${userId}`);
+          UPDATE identity."user" SET password_hash = ${passwordHash}, password_change_required = false, updated_at = now()
+          WHERE id = ${userId}`);
         // Alle Sitzungen widerrufen
         await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
       });
@@ -288,7 +360,33 @@ export function createIdentityService(deps: ModuleDeps) {
     async getMe(userId: string): Promise<Me> {
       const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
       if (!user) throw notFound();
-      return toMe(user);
+      return meOf(db, user);
+    },
+
+    /** REQ-LEGAL-003: Zustimmung zur aktuellen Fassung der Nutzungsbedingungen, versioniert gespeichert. */
+    async acceptTerms(userId: string, version: string): Promise<Me> {
+      if (version !== config.termsVersion) {
+        throw conflict('terms_outdated', 'Diese Fassung ist nicht mehr aktuell. Bitte lade die Seite neu.');
+      }
+      const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
+      if (!user) throw notFound();
+      const current = await db.one<{ version: string }>(LATEST_TERMS(userId));
+      if (current?.version !== version) {
+        await db.exec(sql`
+          INSERT INTO identity.consent (user_id, kind, version) VALUES (${userId}, 'terms_privacy', ${version})`);
+      }
+      return meOf(db, user);
+    },
+
+    /** RV-R-08: Kenntnisnahme der aktuellen Datenschutzerklärung (keine Einwilligung). */
+    async acknowledgePrivacy(userId: string, version: string): Promise<Me> {
+      if (version !== config.privacyVersion) {
+        throw conflict('privacy_outdated', 'Diese Fassung ist nicht mehr aktuell. Bitte lade die Seite neu.');
+      }
+      const user = await db.one<UserRow>(sql`
+        UPDATE identity."user" SET privacy_ack_version = ${version} WHERE id = ${userId} RETURNING *`);
+      if (!user) throw notFound();
+      return meOf(db, user);
     },
 
     async updateMe(userId: string, body: UpdateMeBody): Promise<Me> {
@@ -301,10 +399,11 @@ export function createIdentityService(deps: ModuleDeps) {
           study_program = CASE WHEN ${body.studyProgram !== undefined} THEN ${body.studyProgram ?? null} ELSE study_program END,
           preferred_location_ids = COALESCE(${body.preferredLocationIds ?? null}::uuid[], preferred_location_ids),
           notification_prefs = COALESCE(${body.notificationPrefs ? JSON.stringify(body.notificationPrefs) : null}::jsonb, notification_prefs),
+          locale = COALESCE(${body.locale ?? null}, locale),
           updated_at = now()
         WHERE id = ${userId} RETURNING *`);
       if (!user) throw notFound();
-      return toMe(user);
+      return meOf(db, user);
     },
 
     async getPublicUsers(ids: string[]): Promise<Map<string, PublicUser>> {
@@ -324,7 +423,43 @@ export function createIdentityService(deps: ModuleDeps) {
         displayName: row.display_name,
         status: row.status,
         notificationPrefs: row.notification_prefs,
+        locale: row.locale,
       };
+    },
+
+    /** Abmeldung einer Benachrichtigungskategorie über den signierten Link (REQ-NOTI-003, REQ-OPS-010). */
+    async disableNotification(userId: string, category: keyof NotificationPrefs): Promise<boolean> {
+      const changed = await db.exec(sql`
+        UPDATE identity."user"
+        SET notification_prefs = jsonb_set(notification_prefs, ${`{${category}}`}::text[], 'false'::jsonb), updated_at = now()
+        WHERE id = ${userId}`);
+      return changed > 0;
+    },
+
+    /** Aktive Administratoren, z. B. für die Eskalation nach DSA Art. 18 (REQ-LEGAL-008). */
+    async adminIds(): Promise<string[]> {
+      const rows = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE role = 'admin' AND status = 'active'`);
+      return rows.map((r) => r.id);
+    },
+
+    /**
+     * Schmales API für die Kontaktfreigabe (REQ-CHAT-010, Architektur §8.1): nur die bei der Registrierung
+     * eingegebene Adresse eines aktiven Kontos. Die Zustimmungsprüfung liegt im Modul messaging.
+     */
+    async getSharedContactAddresses(userIds: string[]): Promise<Map<string, string>> {
+      if (userIds.length === 0) return new Map();
+      const rows = await db.query<{ id: string; email: string }>(sql`
+        SELECT id, email FROM identity."user" WHERE id = ANY(${userIds}::uuid[]) AND status = 'active'`);
+      return new Map(rows.map((r) => [r.id, r.email]));
+    },
+
+    /** Aktive Konten unter den angegebenen, gesammelt für Konversationslisten. */
+    async activeUserIds(userIds: string[]): Promise<Set<string>> {
+      if (userIds.length === 0) return new Set();
+      const rows = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE id = ANY(${userIds}::uuid[]) AND status = 'active'`);
+      return new Set(rows.map((r) => r.id));
     },
 
     async isActive(userId: string): Promise<boolean> {
@@ -347,6 +482,14 @@ export function createIdentityService(deps: ModuleDeps) {
       await tx.db.exec(sql`
         INSERT INTO identity.banned_email (email_canonical, reason) VALUES (${user.email_canonical}, ${reason})
         ON CONFLICT DO NOTHING`);
+    },
+
+    /** Sperre aufheben, z. B. nach erfolgreichem Widerspruch (REQ-LEGAL-007). */
+    async unsuspend(tx: Tx, userId: string): Promise<void> {
+      const user = await tx.db.one<UserRow>(sql`
+        UPDATE identity."user" SET status = 'active', updated_at = now()
+        WHERE id = ${userId} AND status = 'suspended' RETURNING *`);
+      if (user) await tx.db.exec(sql`DELETE FROM identity.banned_email WHERE email_canonical = ${user.email_canonical}`);
     },
 
     async listUsers(query: string | undefined): Promise<AdminUser[]> {
@@ -397,26 +540,94 @@ export function createIdentityService(deps: ModuleDeps) {
           UPDATE identity."user" SET status = 'pending_deletion', deletion_requested_at = now(), updated_at = now()
           WHERE id = ${userId}`);
         await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
-        const date = new Date(Date.now() + DELETION_GRACE_DAYS * 86_400_000).toLocaleDateString('de-DE');
-        await notify.notifications.email(tx, { address: user.email }, 'deletion_scheduled', {
+        deps.journal.record(tx, 'account_deletion_requested', userId);
+        const dateIso = new Date(Date.now() + DELETION_GRACE_DAYS * 86_400_000).toISOString();
+        await notify.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_scheduled', {
           name: user.display_name,
-          date,
+          dateIso,
           loginLink: `${config.publicUrl}/login`,
         });
       });
     },
 
-    async dueDeletions(): Promise<{ id: string; email: string; displayName: string }[]> {
+    async dueDeletions(): Promise<{ id: string; email: string; displayName: string; locale: Locale }[]> {
       return db.query(sql`
-        SELECT id, email, display_name AS "displayName" FROM identity."user"
+        SELECT id, email, display_name AS "displayName", locale FROM identity."user"
         WHERE status = 'pending_deletion'
           AND deletion_requested_at < now() - make_interval(days => ${DELETION_GRACE_DAYS})`);
     },
 
     async deleteUser(tx: Tx, userId: string): Promise<void> {
-      // Sessions, Tokens und Einwilligungen werden per ON DELETE CASCADE entfernt
+      // Sessions und Tokens per ON DELETE CASCADE; Zustimmungen bleiben ohne Profilbezug als Nachweis (REQ-PRIV-003, S-4)
+      await anonymizeConsents(tx, userId);
       await tx.db.exec(sql`DELETE FROM identity."user" WHERE id = ${userId}`);
+      deps.journal.record(tx, 'account_deleted', userId);
     },
+
+    /**
+     * Fristlöschungen nach dem Löschkonzept (REQ-PRIV-003): unbestätigte Konten, benutzte bzw. abgelaufene Links,
+     * abgelaufene Sitzungen und Zustimmungsnachweise nach Ablauf der Nachweisfrist. Idempotent.
+     */
+    async purgeExpired(c: { unverifiedAccountsBefore: Date; linksBefore: Date; consentProofsBefore: Date }) {
+      const unverified = await db.query<{ id: string }>(sql`
+        SELECT id FROM identity."user" WHERE status = 'unverified' AND created_at < ${c.unverifiedAccountsBefore}`);
+      for (const { id } of unverified) {
+        await database.tx(async (tx) => {
+          await anonymizeConsents(tx, id);
+          await tx.db.exec(sql`DELETE FROM identity."user" WHERE id = ${id} AND status = 'unverified'`);
+        });
+      }
+      return {
+        unverifiedAccounts: unverified.length,
+        links: await db.exec(sql`DELETE FROM identity.token WHERE COALESCE(used_at, expires_at) < ${c.linksBefore}`),
+        sessions: await db.exec(sql`DELETE FROM identity.session WHERE expires_at < now()`),
+        consentProofs: await db.exec(sql`
+          DELETE FROM identity.consent WHERE user_id IS NULL AND anonymized_at < ${c.consentProofsBefore}`),
+      };
+    },
+
+    /** Notfall (T-2/T-5): alle Sitzungen beenden, optional Passwortwechsel für alle Konten erzwingen. */
+    async endAllSessions(auth: AuthContext, forcePasswordChange: boolean): Promise<{ sessions: number; accounts: number }> {
+      return database.tx(async (tx) => {
+        const sessions = await tx.db.exec(sql`DELETE FROM identity.session`);
+        const accounts = forcePasswordChange
+          ? await tx.db.exec(sql`
+              UPDATE identity."user" SET password_change_required = true, updated_at = now()
+              WHERE status IN ('active', 'suspended', 'pending_deletion')`)
+          : 0;
+        await audit(tx.db, {
+          actorId: auth.userId,
+          action: 'security.end_all_sessions',
+          targetType: 'session',
+          details: { sessions, forcePasswordChange, accounts },
+        });
+        return { sessions, accounts };
+      });
+    },
+
+    // ------------------------------------------------------------ Löschjournal nach Wiederherstellung (ADR-0018)
+    /** Löschantrag erneut setzen, mit dem ursprünglichen Zeitpunkt (Karenzzeit läuft weiter). Idempotent. */
+    async replayDeletionRequest(tx: Tx, userId: string, at: string): Promise<boolean> {
+      const changed = await tx.db.exec(sql`
+        UPDATE identity."user" SET status = 'pending_deletion', deletion_requested_at = ${at}, updated_at = now()
+        WHERE id = ${userId} AND status IN ('active', 'suspended')`);
+      if (changed) await tx.db.exec(sql`DELETE FROM identity.session WHERE user_id = ${userId}`);
+      return changed > 0;
+    },
+
+    async replayDeletionCancel(tx: Tx, userId: string): Promise<boolean> {
+      return (await tx.db.exec(sql`
+        UPDATE identity."user" SET status = 'active', deletion_requested_at = NULL, updated_at = now()
+        WHERE id = ${userId} AND status = 'pending_deletion'`)) > 0;
+    },
+
+    async deletionCandidate(userId: string): Promise<{ id: string; email: string; displayName: string; locale: Locale } | null> {
+      return (
+        (await db.one<{ id: string; email: string; displayName: string; locale: Locale }>(sql`
+          SELECT id, email, display_name AS "displayName", locale FROM identity."user" WHERE id = ${userId}`)) ?? null
+      );
+    },
+
 
     async exportData(userId: string) {
       const user = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
@@ -425,7 +636,7 @@ export function createIdentityService(deps: ModuleDeps) {
         SELECT kind, version, given_at AS "givenAt" FROM identity.consent WHERE user_id = ${userId} ORDER BY given_at`);
       const sessions = await db.query(sql`
         SELECT created_at AS "createdAt", expires_at AS "expiresAt" FROM identity.session WHERE user_id = ${userId}`);
-      return { profile: toMe(user), status: user.status, consents, sessions };
+      return { profile: await meOf(db, user), status: user.status, consents, sessions };
     },
 
     /** Für den Seed: Konto direkt aktiv anlegen. */
@@ -435,19 +646,44 @@ export function createIdentityService(deps: ModuleDeps) {
       displayName: string;
       role: Role;
       studyProgram?: string;
+      termsVersion?: string;
+      privacyAckVersion?: string;
     }): Promise<string> {
       const check = checkRegistrationEmail(input.email, await domainRules());
       if (!check.ok) throw new Error(`Seed-Adresse ${input.email} nicht zugelassen`);
       const passwordHash = await argonHash(input.password, ARGON);
       const row = await tx.db.one<{ id: string }>(sql`
         INSERT INTO identity."user" (institution_id, email, email_canonical, password_hash, display_name, user_type,
-                                     role, status, verified_at, study_program)
+                                     role, status, verified_at, study_program, privacy_ack_version)
         VALUES (${check.institutionId}, ${check.email.email}, ${check.email.canonical}, ${passwordHash},
-                ${input.displayName}, ${check.userType}, ${input.role}, 'active', now(), ${input.studyProgram ?? null})
+                ${input.displayName}, ${check.userType}, ${input.role}, 'active', now(), ${input.studyProgram ?? null},
+                ${input.privacyAckVersion ?? config.privacyVersion})
         RETURNING id`);
       await tx.db.exec(sql`
-        INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${config.termsVersion})`);
+        INSERT INTO identity.consent (user_id, kind, version) VALUES (${row!.id}, 'terms_privacy', ${input.termsVersion ?? config.termsVersion})`);
       return row!.id;
+    },
+
+    /**
+     * Für den Seed: aktuelle Fassung von Nutzungsbedingungen und Datenschutzerklärung für ein Demo-Konto
+     * übernehmen. Idempotent; liefert true, wenn sich etwas geändert hat.
+     */
+    async syncDemoLegalVersions(email: string): Promise<boolean> {
+      const user = await db.one<{ id: string; privacy_ack_version: string | null }>(sql`
+        SELECT id, privacy_ack_version FROM identity."user" WHERE email = ${email} AND status = 'active'`);
+      if (!user) return false;
+      const terms = await db.one<{ version: string }>(LATEST_TERMS(user.id));
+      let changed = false;
+      if (terms?.version !== config.termsVersion) {
+        await db.exec(sql`
+          INSERT INTO identity.consent (user_id, kind, version) VALUES (${user.id}, 'terms_privacy', ${config.termsVersion})`);
+        changed = true;
+      }
+      if (user.privacy_ack_version !== config.privacyVersion) {
+        await db.exec(sql`UPDATE identity."user" SET privacy_ack_version = ${config.privacyVersion} WHERE id = ${user.id}`);
+        changed = true;
+      }
+      return changed;
     },
   };
 }

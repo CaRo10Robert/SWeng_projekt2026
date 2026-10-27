@@ -3,6 +3,7 @@
 - **Status:** Accepted (Vorgabe des Auftraggebers, 2026-10-20)
 - **Datum:** 2026-10-20
 - **Bezug:** REQ-ARCH-005, REQ-DEMO-001, Review Q-3 / O-1 / A-1; wirkt auf ADR-0002, 0004, 0005, 0007
+- **Erweitert durch:** [ADR-0017](0017-optionale-betriebsprofile.md) (optionale Profile `proxy` und `monitoring`; der Standardstart mit `app`, `db` und `mailpit` bleibt unverändert). Betreiberpflichten werden seit Q-23 als Übung mit Platzhaltern umgesetzt (EPIC-13), ohne Echtbetrieb.
 
 ## Kontext
 Die Plattform wird **nicht öffentlich betrieben**. Das Ergebnis des Projekts ist ein lauffähiges Beispiel als Docker-Image bzw. Docker-Compose-Setup, das Prüfer/innen und Team lokal starten. Damit entfallen Betreiberpflichten (Impressum, DSA-Prozesse im Echtbetrieb, AV-Verträge, Zustellbarkeit echter E-Mails) für das Projekt. Die fachlichen Anforderungen dazu bleiben als Konzept erhalten (EPIC-12 „Produktivbetrieb“).
@@ -34,8 +35,9 @@ Folgen für andere Entscheidungen (die ADRs sind noch *Proposed* und wurden dire
 - **Jede wegfallende Infrastruktur steckt hinter einem Port.** Ein späterer Produktivbetrieb tauscht Adapter aus, nicht Fachlogik.
 
 ## Konsequenzen
-- (+) `docker compose up` startet alles in < 1 Minute, ohne externe Konten oder Schlüssel. Das System läuft offline.
+- (+) Nach dem Image-Build startet `docker compose up` bis zum Login mit Demo-Konto in ≤ 3 min, ohne externe Konten oder Schlüssel (REQ-OPS-003, QS-9). Das System läuft offline.
 - (+) Alle Use Cases inkl. Registrierung mit `@studmail.hwg-lu.de` sind vorführbar, die Verifikationsmail erscheint in Mailpit.
 - (−) Verfügbarkeits-SLOs, RTO/RPO, Monitoring-Alarme und SPF/DKIM sind für das Beispiel **nicht anwendbar** und werden explizit als N/A markiert (Guideline: N/A nicht stillschweigend weglassen).
 - (−) Skalierungsaspekte (mehrere Instanzen) werden nur konzeptionell gezeigt, nicht betrieben.
-- **Offene Bestätigung (Q-11):** Ist „ein Docker-Container“ wörtlich gemeint (dann Option C mit dokumentierter Guideline-Ausnahme) oder als „ein Docker-Setup“?
+- **Q-11 beantwortet** ([ADR-0011](0011-mvp-umsetzung.md), [Entscheidungslog](../../02-anforderungen/05-entscheidungen.md)): ein Docker-Setup mit drei Diensten (Option B).
+- *Nachtrag 2026-10-26 (REQ-SEC-008, REQ-SEC-010):* Das Runtime-Image enthält weder npm, npx, corepack noch yarn; der Prozess braucht sie nicht, und der Image-Scan meldet damit keine Befunde dieser Werkzeuge. Das Image wird zusätzlich für `linux/arm64` gebaut und in CI unter Emulation gestartet (REQ-PORT-002).

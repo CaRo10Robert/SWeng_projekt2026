@@ -1,0 +1,35 @@
+# Alertmanager für das Compose-Profil `monitoring` (REQ-OPS-008, ADR-0017)
+# Im Beispiel gehen alle Alarme per Mail an Mailpit (http://localhost:8025), ohne externe Konten.
+global:
+  smtp_smarthost: mailpit:1025
+  smtp_from: alertmanager@campusmarkt.example
+  smtp_require_tls: false
+
+route:
+  receiver: betrieb
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # SEV-1: Plattform nicht nutzbar → häufiger erinnern; im Echtbetrieb zusätzlich Rufbereitschaft (fiktiv: +49 621 555-0199)
+    - matchers: ['severity="SEV-1"']
+      receiver: rufbereitschaft
+      repeat_interval: 30m
+
+# Folgealarme unterdrücken: Ist die App weg oder nicht bereit, sind Fehlerquote, fehlende Sicherung, Jobs und
+# Suchzeit nur Folgen davon (RV-A-04)
+inhibit_rules:
+  - source_matchers: ['alertname=~"AppDown|NotReady"']
+    target_matchers: ['alertname=~"HighErrorRate|BackupMissing|JobFailures|SlowSearch|WebSocketDrop"']
+    equal: [job]
+
+receivers:
+  - name: betrieb
+    email_configs:
+      - to: betrieb@campusmarkt.example # fiktives Postfach des Betriebsteams (Übung, Q-28)
+        send_resolved: true
+  - name: rufbereitschaft
+    email_configs:
+      - to: rufbereitschaft@campusmarkt.example # fiktives Postfach der Rufbereitschaft (Übung, Q-28)
+        send_resolved: true

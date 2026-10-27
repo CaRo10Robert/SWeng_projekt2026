@@ -1,6 +1,8 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import {
+  ContactActionBody,
+  ContactShare,
   ConversationSummary,
   Deal,
   DealActionBody,
@@ -15,7 +17,7 @@ import {
   type ServerEvent,
 } from '@campusmarkt/contracts';
 import { AppError } from '../../platform/errors.js';
-import { requireAuth } from '../../platform/http/auth.js';
+import { isSameOrigin, requireAuth } from '../../platform/http/auth.js';
 import type { ModuleDeps } from '../shared.js';
 import type { MessagingService } from './service.js';
 
@@ -64,6 +66,12 @@ export function messagingRoutes(service: MessagingService, deps: ModuleDeps): Fa
       async (req) => service.deal(requireAuth(req), req.params.id, req.body),
     );
 
+    app.post(
+      '/conversations/:id/contact',
+      { schema: { tags, params: IdParams, body: ContactActionBody, response: { 200: ContactShare } } },
+      async (req) => service.contactAction(requireAuth(req), req.params.id, req.body.action),
+    );
+
     app.get('/me/unread', { schema: { tags, response: { 200: UnreadCount } } }, async (req) => ({
       count: await service.unreadCount(requireAuth(req)),
     }));
@@ -77,8 +85,7 @@ export function messagingRoutes(service: MessagingService, deps: ModuleDeps): Fa
 export function websocketRoute(service: MessagingService, deps: ModuleDeps): FastifyPluginAsyncTypebox {
   return async (app) => {
     app.get('/ws', { websocket: true, schema: { hide: true } }, (socket, req) => {
-      const origin = req.headers.origin;
-      if (!req.auth || (origin && new URL(origin).host !== req.headers.host)) {
+      if (!req.auth || !isSameOrigin(req.headers.origin, req.headers.host)) {
         socket.close(4401, 'unauthenticated');
         return;
       }

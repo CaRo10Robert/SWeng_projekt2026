@@ -1,6 +1,7 @@
 # ADR-0009: REST + OpenAPI 3.1 (Design-first), AsyncAPI für den Chat
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
+- **Teilweise präzisiert durch:** [ADR-0011](0011-mvp-umsetzung.md) Nr. 2 (Vertrag schema-first als TypeBox-Schemas in `packages/contracts`, OpenAPI daraus erzeugt; WebSocket-Ereignisse als TypeScript-Typen statt AsyncAPI-Dokument)
 - **Datum:** 2026-10-20
 - **Bezug:** Guideline Kap. 06
 

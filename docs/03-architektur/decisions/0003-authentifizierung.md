@@ -1,6 +1,7 @@
 # ADR-0003: Eigene Authentifizierung mit Hochschul-E-Mail-Verifikation
 
-- **Status:** Proposed
+- **Status:** Accepted (nach Architektur-Review v1.0, 2026-10-23)
+- **Erweitert durch:** [ADR-0013](0013-anmeldung-identity-provider-port.md) (Anmeldung hinter IdentityProviderPort, Hochschul-SSO als späterer Adapter); [ADR-0014](0014-ip-pseudonymisierung.md) (Pseudonymisierung der IP-Adressen für Rate-Limits)
 - **Datum:** 2026-10-20
 - **Bezug:** REQ-AUTH-*, REQ-SEC-002…005; Guideline Kap. 07 / 14 (Default: managed IdP)
 

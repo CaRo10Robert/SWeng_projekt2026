@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { Role } from '@campusmarkt/contracts';
-import { meQuery } from './api/auth';
+import { meQuery, useMe } from './api/auth';
 import { Layout, NotFound, RouteError } from './components/Layout';
 import { LoginPage, RegisterPage, VerifyPage, ForgotPasswordPage, ResetPasswordPage } from './routes/auth';
 import { SearchPage, validateSearchFilters } from './routes/search';
@@ -12,6 +13,11 @@ import { ConversationsPage, ConversationPage } from './routes/messages';
 import { ProfilePage } from './routes/profile';
 import { ModerationPage } from './routes/moderation';
 import { AdminPage } from './routes/admin';
+import { HomePage } from './routes/home';
+import { HelpPage, LegalPage } from './routes/legal';
+import { NoticesPage, TokenAppealPage } from './routes/notices';
+import { StatusPage } from './routes/status';
+import { Loading } from './components/ui';
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -46,6 +52,62 @@ const resetRoute = createRoute({
   component: ResetPasswordPage,
 });
 
+// Rechtsseiten, Hilfe und Status: ohne Anmeldung erreichbar (REQ-LEGAL-001…005, REQ-UX-005, REQ-OPS-007).
+// Jede Route muss auch in apps/server/src/platform/http/spa-routes.ts stehen, sonst liefert der Server 404.
+const impressumRoute = createRoute({ getParentRoute: () => rootRoute, path: '/impressum', component: () => <LegalPage name="impressum" /> });
+const datenschutzRoute = createRoute({ getParentRoute: () => rootRoute, path: '/datenschutz', component: () => <LegalPage name="datenschutz" /> });
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/nutzungsbedingungen',
+  component: () => <LegalPage name="nutzungsbedingungen" />,
+});
+const communityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/community-regeln',
+  component: () => <LegalPage name="community-regeln" />,
+});
+const accessibilityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/barrierefreiheit',
+  component: () => <LegalPage name="barrierefreiheit" />,
+});
+const contactRoute = createRoute({ getParentRoute: () => rootRoute, path: '/kontakt', component: () => <LegalPage name="kontakt" /> });
+const helpRoute = createRoute({ getParentRoute: () => rootRoute, path: '/hilfe', component: HelpPage });
+const statusRoute = createRoute({ getParentRoute: () => rootRoute, path: '/status', component: StatusPage });
+const tokenAppealRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/widerspruch',
+  validateSearch: (s: Record<string, unknown>): { token?: string } => ({ token: optionalString(s.token) }),
+  component: function TokenAppealRoute() {
+    const search = tokenAppealRoute.useSearch();
+    // Der Link trägt das Token im Fragment (#token=…): Es wird nie an den Server gesendet und steht in keinem
+    // Zugriffsprotokoll (RV-C-07). Ältere Links mit ?token= funktionieren weiter. Danach aus der Adresszeile entfernen.
+    const [token] = useState(() => {
+      const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('token') ?? undefined;
+      return fromHash ?? search.token;
+    });
+    useEffect(() => {
+      if (window.location.hash || window.location.search) window.history.replaceState(null, '', '/widerspruch');
+    }, []);
+    return <TokenAppealPage token={token} />;
+  },
+});
+
+/** Startseite: Gäste sehen die Einführung (REQ-UX-004), Mitglieder direkt die Suche. */
+function IndexPage() {
+  const { data: me, isPending } = useMe();
+  if (isPending) return <Loading />;
+  return me ? <SearchPage /> : <HomePage />;
+}
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  validateSearch: validateSearchFilters,
+  beforeLoad: ({ context }) => context.queryClient.ensureQueryData(meQuery),
+  component: IndexPage,
+});
+
 // Nur für angemeldete Mitglieder
 const authRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -63,12 +125,6 @@ function requireRole(roles: Role[]) {
   };
 }
 
-const searchRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: '/',
-  validateSearch: validateSearchFilters,
-  component: SearchPage,
-});
 const newListingRoute = createRoute({ getParentRoute: () => authRoute, path: '/listings/new', component: ListingFormPage });
 const listingRoute = createRoute({ getParentRoute: () => authRoute, path: '/listings/$id', component: ListingPage });
 const editListingRoute = createRoute({ getParentRoute: () => authRoute, path: '/listings/$id/edit', component: ListingFormPage });
@@ -77,6 +133,7 @@ const favoritesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me
 const conversationsRoute = createRoute({ getParentRoute: () => authRoute, path: '/messages', component: ConversationsPage });
 const conversationRoute = createRoute({ getParentRoute: () => authRoute, path: '/messages/$id', component: ConversationPage });
 const profileRoute = createRoute({ getParentRoute: () => authRoute, path: '/profile', component: ProfilePage });
+const noticesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me/notices', component: NoticesPage });
 const moderationRoute = createRoute({
   getParentRoute: () => authRoute,
   path: '/moderation',
@@ -91,13 +148,22 @@ const adminRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
+  indexRoute,
+  impressumRoute,
+  datenschutzRoute,
+  termsRoute,
+  communityRoute,
+  accessibilityRoute,
+  contactRoute,
+  helpRoute,
+  statusRoute,
+  tokenAppealRoute,
   loginRoute,
   registerRoute,
   verifyRoute,
   forgotRoute,
   resetRoute,
   authRoute.addChildren([
-    searchRoute,
     newListingRoute,
     listingRoute,
     editListingRoute,
@@ -106,6 +172,7 @@ const routeTree = rootRoute.addChildren([
     conversationsRoute,
     conversationRoute,
     profileRoute,
+    noticesRoute,
     moderationRoute,
     adminRoute,
   ]),
@@ -117,7 +184,9 @@ export function createAppRouter(queryClient: QueryClient) {
     context: { queryClient },
     defaultErrorComponent: RouteError,
     defaultPreload: 'intent',
-    scrollRestoration: true,
+    // Keine Scroll-Wiederherstellung des Routers: sie speichert Positionen im sessionStorage, das nicht in der
+    // Allowlist der zulässigen Speicherungen steht (REQ-LEGAL-010, e2e/storage-allowlist.json)
+    scrollRestoration: false,
   });
 }
 

@@ -1,12 +1,20 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Accepted, DeleteAccountBody } from '@campusmarkt/contracts';
+import { purgeAuditLog } from '../../platform/audit.js';
+import type { DeletionEntry } from '../../platform/deletion-journal.js';
+import { entriesSince } from '../../platform/deletion-journal.js';
 import { SESSION_COOKIE, requireAuth } from '../../platform/http/auth.js';
 import type { Module, ModuleDeps } from '../shared.js';
+import { retentionCutoffs } from './domain.js';
 
 export const PRIVACY_PURGE = 'privacy-purge';
 
 export interface PrivacyApi {
   purgeDueAccounts(): Promise<number>;
+  /** Fristlöschungen nach dem Löschkonzept (REQ-PRIV-003); liefert Anzahlen je Kategorie, ohne Personenbezug. */
+  purgeExpired(now?: Date): Promise<Record<string, number>>;
+  /** Nach einer Wiederherstellung: Löschungen seit dem Sicherungszeitpunkt erneut ausführen (ADR-0018, RV-A-01). */
+  replayDeletions(entries: readonly DeletionEntry[], since: Date): Promise<number>;
 }
 
 /** Modul privacy: Datenexport (Art. 15/20) und Kontolöschung mit Karenz (Art. 17, REQ-ACC-002/003). */
@@ -21,25 +29,88 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       listings: await modules.listings.exportForUser(userId),
       favorites: await modules.search.exportForUser(userId),
       messagesSent: await modules.messaging.exportForUser(userId),
+      contactConsents: await modules.messaging.exportContactConsents(userId),
       trust: await modules.trust.exportForUser(userId),
     };
+  }
+
+  /**
+   * Konto endgültig löschen. Gesicherte Beweise (REQ-LEGAL-008) liegen als pseudonymisierte Kopie in trust und halten die
+   * Löschung nicht auf (RV-R-15, RV-C-05).
+   */
+  async function deleteAccount(user: { id: string; email: string; displayName: string; locale: 'de' | 'en' }) {
+    await database.tx(async (tx) => {
+      await modules.listings.deleteAllForOwner(tx, user.id);
+      await modules.messaging.deleteForUser(tx, user.id);
+      await modules.trust.deleteForUser(tx, user.id);
+      await modules.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_completed', { name: user.displayName });
+      await modules.identity.deleteUser(tx, user.id);
+    });
+    await modules.search.deleteForUser(user.id);
   }
 
   const api: PrivacyApi = {
     async purgeDueAccounts() {
       const due = await modules.identity.dueDeletions();
       for (const user of due) {
-        await database.tx(async (tx) => {
-          await modules.listings.deleteAllForOwner(tx, user.id);
-          await modules.messaging.deleteForUser(tx, user.id);
-          await modules.trust.deleteForUser(tx, user.id);
-          await modules.notifications.email(tx, { address: user.email }, 'deletion_completed', { name: user.displayName });
-          await modules.identity.deleteUser(tx, user.id);
-        });
-        await modules.search.deleteForUser(user.id);
+        await deleteAccount(user);
         deps.logger.info({ userId: user.id }, 'Konto endgültig gelöscht');
       }
+      await modules.messaging.purgeRemovedOriginals(await modules.trust.protectedMessageIds());
+      await modules.trust.purgeExpiredEvidence();
       return due.length;
+    },
+
+    async purgeExpired(now = new Date()) {
+      const c = retentionCutoffs(now);
+      const protectedMessages = await modules.trust.protectedMessageIds();
+      return {
+        ...(await modules.identity.purgeExpired(c)),
+        ...(await modules.trust.purgeExpired(c)),
+        conversations: await modules.messaging.purgeInactiveConversations(c.conversationsBefore, protectedMessages),
+        auditLog: await purgeAuditLog(database.db, c.auditBefore),
+      };
+    },
+
+    async replayDeletions(entries, since) {
+      let applied = 0;
+      for (const entry of entriesSince(entries, since)) {
+        let changed = false;
+        if (entry.kind === 'account_deleted') {
+          const user = await modules.identity.deletionCandidate(entry.id);
+          if (user) {
+            await deleteAccount(user);
+            changed = true;
+          }
+        } else {
+          changed = await database.tx(async (tx) => {
+            switch (entry.kind) {
+              case 'account_deletion_requested':
+                return modules.identity.replayDeletionRequest(tx, entry.id, entry.at);
+              case 'account_deletion_cancelled':
+                return modules.identity.replayDeletionCancel(tx, entry.id);
+              case 'listing_deleted':
+                return modules.listings.replayDelete(tx, entry.id);
+              case 'listing_removed':
+                await modules.listings.removeByModeration(tx, entry.id);
+                return true;
+              case 'listing_restored':
+                return modules.listings.restoreByModeration(tx, entry.id);
+              case 'message_removed':
+                await modules.messaging.removeByModeration(tx, entry.id);
+                return true;
+              case 'message_restored':
+                return modules.messaging.restoreByModeration(tx, entry.id);
+              case 'image_deleted':
+                return modules.listings.replayImageDelete(tx, entry.id);
+              default:
+                return false;
+            }
+          });
+        }
+        if (changed) applied++;
+      }
+      return applied;
     },
   };
 
@@ -74,6 +145,8 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       await deps.jobs.work(PRIVACY_PURGE, async () => {
         const count = await api.purgeDueAccounts();
         if (count) deps.logger.info({ count }, 'Fällige Kontolöschungen ausgeführt');
+        // Ergebnis ohne personenbezogene Daten: nur Anzahlen je Kategorie (REQ-PRIV-003)
+        deps.logger.info({ purged: await api.purgeExpired() }, 'Fristlöschungen ausgeführt');
         // Zähler mit IP-Hashes nach spätestens 7 Tagen löschen (REQ-PRIV-002); Fenster sind ≤ 1 h
         await deps.rateLimit.purge(86_400);
       });

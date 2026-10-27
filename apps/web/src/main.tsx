@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { ApiError } from './api/client';
 import { createAppRouter } from './router';
+import { initialLocale, loadMessages, LocaleProvider } from './i18n';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -18,10 +19,15 @@ const queryClient = new QueryClient({
 
 const router = createAppRouter(queryClient);
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
+// Texte der Startsprache vor dem ersten Rendern laden (Englisch liegt in einem eigenen Chunk)
+void loadMessages(initialLocale()).then(() =>
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <LocaleProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </LocaleProvider>
+    </StrictMode>,
+  ),
 );

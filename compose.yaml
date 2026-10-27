@@ -1,29 +1,51 @@
 # CampusMarkt HWG LU – lokales Docker-Beispiel (ADR-0010)
 #   docker compose up --build   → App http://localhost:8080, E-Mails http://localhost:8025
 #   docker compose down -v      → alle Daten löschen
+# Optionale Profile (ADR-0017, Q-27), der Standardstart bleibt app + db + mailpit:
+#   docker compose --env-file .env.proxy.example --profile proxy up -d
+#                                               → https://campusmarkt.localhost:8443 (TLS, HSTS; setzt TRUST_PROXY und PUBLIC_URL)
+#   docker compose --profile monitoring up -d  → Prometheus :9090, Alertmanager :9093 (nur 127.0.0.1)
 name: campusmarkt
+
+# Log-Rotation für alle Dienste: höchstens 3 × 10 MB je Container, damit Logs die Platte nicht füllen (Betrieb, REQ-OPS-002)
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
 
 services:
   app:
+    logging: *default-logging
     build:
       context: .
       dockerfile: docker/Dockerfile
     image: campusmarkt:local
     ports:
-      - "${APP_PORT:-8080}:8080"
+      # Nur lokal erreichbar: kein unverschlüsselter Zugriff aus dem Netz am Proxy vorbei (REQ-OPS-009)
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
     environment:
       APP_MODE: all
       DATABASE_URL: postgres://campusmarkt:campusmarkt@db:5432/campusmarkt
-      PUBLIC_URL: http://localhost:${APP_PORT:-8080}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:${APP_PORT:-8080}}
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
-      MAIL_FROM: CampusMarkt HWG LU <no-reply@campusmarkt.local>
+      MAIL_FROM: CampusMarkt HWG LU <no-reply@campusmarkt.example>
+      MAIL_REPLY_TO: CampusMarkt Support <campusmarkt-support@hwg-lu.example>
       SEED_DEMO: ${SEED_DEMO:-true}
       DEMO_MODE: ${DEMO_MODE:-true}
+      # Nur für Lasttests (tests/load), wirkt nur mit DEMO_MODE=true
+      RATE_LIMIT_FACTOR: ${RATE_LIMIT_FACTOR:-1}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Wartungsmodus (REQ-OPS-006) und Vertrauen in X-Forwarded-* hinter dem Proxy (Profil proxy)
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      # Löschjournal in eigenem Volume: übersteht eine Wiederherstellung (ADR-0018)
+      JOURNAL_DIR: /data/journal
     volumes:
       - uploads:/data/uploads
+      - journal:/data/journal
     read_only: true
     tmpfs:
       - /tmp
@@ -38,7 +60,8 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:17-alpine
+    logging: *default-logging
+    image: postgres:17-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
     environment:
       POSTGRES_USER: campusmarkt
       POSTGRES_PASSWORD: campusmarkt
@@ -53,11 +76,72 @@ services:
     restart: unless-stopped
 
   mailpit:
-    image: axllent/mailpit:v1.27
+    logging: *default-logging
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
     ports:
-      - "${MAILPIT_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILPIT_PORT:-8025}:8025"
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ Profil proxy (REQ-OPS-009)
+  proxy:
+    logging: *default-logging
+    image: caddy:2.11.6-alpine@sha256:d44355d3c2149dc580ce2cac735955d1c08d3d00882c30489c241aa51a5c10d9
+    profiles: [proxy]
+    ports:
+      - "${PROXY_HTTPS_PORT:-8443}:443"
+      - "${PROXY_HTTP_PORT:-8088}:80"
+    environment:
+      PROXY_HTTPS_PORT: ${PROXY_HTTPS_PORT:-8443}
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ Profil monitoring (REQ-OPS-008)
+  prometheus:
+    logging: *default-logging
+    image: prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      # Links in Alarm-Mails zeigen auf die erreichbare Adresse statt auf den Container-Namen (MAN-OPS-008 A-2)
+      - --web.external-url=http://127.0.0.1:${PROMETHEUS_PORT:-9090}
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./ops/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - alertmanager
+    restart: unless-stopped
+
+  alertmanager:
+    logging: *default-logging
+    image: prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --web.external-url=http://127.0.0.1:${ALERTMANAGER_PORT:-9093}
+      - --storage.path=/alertmanager
+    ports:
+      - "127.0.0.1:${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./ops/alertmanager:/etc/alertmanager:ro
+      - alertmanager_data:/alertmanager
+    depends_on:
+      - mailpit
     restart: unless-stopped
 
 volumes:
   pgdata:
   uploads:
+  journal:
+  caddy_data:
+  caddy_config:
+  prometheus_data:
+  alertmanager_data:
