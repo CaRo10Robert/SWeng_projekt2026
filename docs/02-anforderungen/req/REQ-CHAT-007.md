@@ -3,7 +3,7 @@ id: REQ-CHAT-007
 title: Begrenzung von Nachrichtenlänge und Sendehäufigkeit
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-04
 source: Abuse-Schutz, REQ-SEC-005
 use_cases: [UC-20, UC-21]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-CHAT-007, AT-CHAT-007-2]
 ---
 
@@ -50,7 +50,7 @@ Das Limit gilt über alle Geräte und Fenster eines Kontos.
 
 ## Nachweis
 - `AT-CHAT-007`: API-Test – Längengrenze (neu).
-- `AT-CHAT-007-2`: API-Test – Rate-Limits für Konversationen und Nachrichten (neu).
+- `AT-CHAT-007-2`: Integrationstest (`messaging.integration.test.ts`) – höchstens 20 neue Konversationen je Stunde und 60 Nachrichten je Minute.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -58,3 +58,4 @@ Das Limit gilt über alle Geräte und Fenster eines Kontos.
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle (Umgehung über mehrere Konten), Must-Begründung |
+| 1.3 | 2026-11-07 | Nachweis AT-CHAT-007-2 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

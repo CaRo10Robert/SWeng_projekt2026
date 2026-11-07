@@ -3,7 +3,7 @@ id: REQ-CHAT-003
 title: Nachrichten in Echtzeit empfangen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-04
 source: BG-3
 use_cases: [UC-21]
 depends_on: [REQ-PERF-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-CHAT-003, AT-CHAT-003-2]
 ---
 
@@ -59,7 +59,7 @@ I: setzt REQ-CHAT-001 voraus · N: Hinweistext verhandelbar · V: zügige Abspra
 
 ## Nachweis
 - `AT-CHAT-003`: Smoke-Test – Anbieter erhält die Nachricht in Echtzeit; zusätzlich Browser-Durchlauf mit zwei Konten.
-- `AT-CHAT-003-2`: E2E-Test – bei getrennter Verbindung erscheint die Nachricht durch Aktualisierung (neu).
+- `AT-CHAT-003-2`: E2E-Test `e2e/tests/realtime.spec.ts` – bei getrennter Echtzeitverbindung erscheint eine neue Nachricht durch Aktualisierung (Polling).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -67,3 +67,4 @@ I: setzt REQ-CHAT-001 voraus · N: Hinweistext verhandelbar · V: zügige Abspra
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Degradationsverhalten als Akzeptanzkriterium |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle, Must-Begründung |
+| 1.3 | 2026-11-07 | Nachweis AT-CHAT-003-2 als E2E-Test umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

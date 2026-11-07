@@ -3,7 +3,7 @@ id: REQ-MAINT-001
 title: Testabdeckung der Fachlogik
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -12,9 +12,9 @@ moscow: S
 kano: n/a
 epic: EPIC-00
 source: BG-5
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [CTRL-COVERAGE, CTRL-MUTATION]
 ---
 
@@ -45,7 +45,7 @@ Erweiterbarkeit ohne Umbau (BG-5) setzt belastbare Tests voraus.
 | Tests ohne Aussage (nur Abdeckung) | Mutationstests decken fehlende Prüfungen auf; Code-Review achtet auf Assertions |
 
 ## Nachweis
-- `CTRL-COVERAGE`: Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Messwerte (2026-10-26): Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen (Schwelle 95 % Zeilen, 85 % Zweige, 95 % Funktionen); **Fachmodule insgesamt 15,9 %** (Schwelle 13 % = Messwert minus 2 Pp). **Lücke zu Kriterium (1) ≥ 80 % offen:** Die Services hängen an der Datenbank und werden nur über Smoke- und E2E-Tests ausgeführt, die nicht in die Messung eingehen. Lösungsweg: Server unter Smoke- und E2E-Tests mit `NODE_V8_COVERAGE` messen und mit der Unit-Coverage zusammenführen (Backlog B-64).
+- `CTRL-COVERAGE`: Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Unit- und Integrationstests (PostgreSQL per Testcontainers) laufen in einem Lauf und gehen gemeinsam in die Messung ein ([Teststrategie](../../05-umsetzung/teststrategie.md)). Messwerte (2026-11-07): **Fachmodule insgesamt 88,65 % Zeilen**, 71,99 % Zweige, 89,2 % Funktionen (Schwellen 86/70/86 = Messwert vom 2026-10-26 minus 2 Pp) – Kriterium (1) erfüllt; Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen, 99,4 % Zweige, 100 % Funktionen (Schwelle je 95 %). In CI ist Docker Pflicht; lokal ohne Docker werden die Integrationstests mit Hinweis übersprungen und es gilt nur die Schwelle der Unit-Tests.
 - `CTRL-MUTATION`: StrykerJS 10.0.0 auf die Geschäftsregeln (`stryker.config.mjs`), Workflow `mutation.yml` montags und auf Anforderung. Score **73,8 %** (Schwelle 60 %) – Kriterium (2) erfüllt; Ausreißer `platform/pseudonym.ts` 45,9 % (datenbanknahe Mutanten) und `listings/domain.ts` 59,3 %.
 
 
@@ -57,3 +57,4 @@ Erweiterbarkeit ohne Umbau (BG-5) setzt belastbare Tests voraus.
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Codepfade in den Messkontext) |
 | 2.2 | 2026-10-26 | Coverage und Mutationstests eingerichtet; Messwerte und Lücke Fachmodule (15,9 % statt 80 %) dokumentiert, B-64; Status → implemented |
 | 2.3 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
+| 2.4 | 2026-11-07 | Integrationstests mit Testcontainers fließen in die Coverage ein: Fachmodule 88,65 % statt 15,9 %, Kriterium (1) erfüllt, B-64 erledigt (Testbericht 2026-11-07); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-SRCH-002
 title: Filtern und Sortieren
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -13,9 +13,9 @@ kano: leistung
 epic: EPIC-03
 source: BG-2, Wettbewerbsanalyse
 use_cases: [UC-13]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-SRCH-002]
 ---
 
@@ -64,7 +64,7 @@ Wird „Relevanz“ ohne Suchbegriff angefordert, gilt „Neueste zuerst“. Fil
 I: unabhängig vom Freitext · N: Filterumfang verhandelbar · V: schnellere Suche · E/S: klein · T: automatisierbar.
 
 ## Nachweis
-- `AT-SRCH-002`: API-Test – Filterkombinationen und Sortierungen gegen Seed-Daten (neu).
+- `AT-SRCH-002`: Integrationstest (`listings.integration.test.ts`) – Filterkombinationen und Sortierungen liefern passende Treffer in richtiger Reihenfolge.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -72,3 +72,4 @@ I: unabhängig vom Freitext · N: Filterumfang verhandelbar · V: schnellere Suc
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Akzeptanzkriterien; Filter „Studiengang“ aus UC-13 bewusst nicht aufgenommen |
 | 1.2 | 2026-10-23 | Review v0.2: R-07/R-24 vollständige Sortierregeln (preislose Anzeigen, Relevanz nur mit Suchbegriff, Gleichstand); Must-Begründung |
+| 1.3 | 2026-11-07 | Nachweis AT-SRCH-002 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

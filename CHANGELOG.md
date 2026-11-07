@@ -4,7 +4,7 @@ Alle wesentlichen Änderungen an CampusMarkt HWG LU. Das Format folgt [Keep a Ch
 
 Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änderungen enthalten (SemVer §4). Im Docker-Beispiel betrifft das vor allem Datenbank-Migrationen und die Versionen der Rechtstexte.
 
-## [Unreleased] – 0.4.0 (geplant, Stand 2026-10-26)
+## [Unreleased] – 0.4.0 (geplant, Stand 2026-11-07)
 
 ### Added
 - Nachweise in `docs/05-umsetzung/nachweise/`:
@@ -25,8 +25,23 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
   - [Ausnahmeregister](docs/03-architektur/ausnahmen.md) für MUST-Abweichungen.
   - ADR-0019 (Wiederherstellung und Löschjournal) und ADR-0020 (Datenzugriff).
   - Runbook je Alarm; Prozess für Meldungen zu Sicherheitslücken; dieser Changelog.
+- Testpyramide ([Teststrategie](docs/05-umsetzung/teststrategie.md)):
+  - 59 Integrationstests gegen echte PostgreSQL (Testcontainers), unter anderem vollständige Autorisierungsmatrix, Löschfristen mit vorgestellter Zeit, Rate-Limits und Benachrichtigungen.
+  - 20 Komponententests der Web-App (React Testing Library, jsdom).
+  - E2E-Test: Bei getrennter Echtzeitverbindung erscheinen neue Nachrichten per Polling.
+  - k6-Lasttests für Suche, Chat, Anzeige anlegen und Registrierung sowie die ZAP-Baseline, beide wöchentlich (`ops-weekly.yml`).
+  - JS-Budget der Web-App in CI (`scripts/check-bundle.mjs`, `CTRL-BUNDLE`).
+- Reservierte Anzeigen fallen nach 30 Tagen ohne Abgabe auf „aktiv“ zurück: Ein offener Deal wird aufgehoben, der Anbieter erhält eine Mail und im Chat erscheint eine Systemnachricht (REQ-LST-008).
+- Keyset-Paginierung für Audit-Log und Beweissicherungen; `RateLimit-*`-Header auf begrenzten Antworten (Guideline Kap. 06).
+- Lieferkette: Build-Provenance- und SBOM-Attestation für das Image-Archiv in CI (SLSA Level 2); Images in `compose.yaml`, Dockerfile und Workflows per Digest, Actions per Commit-SHA gepinnt (Renovate hält die Pins aktuell).
+- Start bricht ab, wenn die Datenbank neuer ist als der Code (unbekannte Migrationen).
+- Log-Rotation für alle Dienste im Docker-Beispiel (3 × 10 MB je Container).
+- `RATE_LIMIT_FACTOR` hebt die Rate-Limits nur für Lasttests an (wirkt nur mit `DEMO_MODE=true`).
 
 ### Changed
+- Coverage-Schwellen der Fachmodule von 13 % auf 86 % Zeilen, 70 % Zweige und 86 % Funktionen angehoben (gemessen 88,65 %); Geschäftsregeln je 95 % inklusive Zweige.
+- 24 weitere Anforderungen sind `verified` (R1-Must 84 % statt 60 %), darunter REQ-MAINT-001 (Coverage), REQ-PRIV-003 (Löschfristen) und REQ-PERF-001 bis -004 (Lasttests); Einzelheiten im [Testbericht 2026-11-07](docs/05-umsetzung/testbericht-2026-11-07.md).
+- Architektur v1.6: Lieferkette, Paginierung (neu 8.12) und Löschläufe auf dem umgesetzten Stand.
 - `scripts/trace.mjs` prüft zusätzlich:
   - Fehler- und Missbrauchsfälle ab Risiko mittel;
   - `review_due` bei zeitkritischen Standards (überschritten ist ein Fehler);
@@ -41,9 +56,12 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 - Request-IDs vom Client werden nur noch als UUID übernommen.
 - Unbekannte Pfade erscheinen im Log nicht mehr im Klartext.
 - Pentest-Befunde behoben: `Origin: null`, Bilder von Anzeigen in Prüfung, CSP ohne `unsafe-inline`.
+- Secret-Scan in CI: festes Testpasswort aus dem neuen Integrationstest begründet in die Allowlist aufgenommen (Fehlalarm von gitleaks).
+- Doku auf den umgesetzten Stand gebracht: Löschläufe (Architektur 8.4), Startabbruch bei unbekannten Migrationen (REQ-OPS-005), Log-Rotation (REQ-OPS-002).
 
 ### Security
 - 2 kritische und 9 hohe Schwachstellen in Abhängigkeiten sowie 11 hohe im Image behoben (Scans in CI).
+- Basis-Image `node:22-bookworm-slim` auf einen neuen Digest angehoben: behebt CVE-2026-109518 in `apt` (2 × hoch laut Trivy).
 
 ## [0.3.0] – 2026-10-25
 

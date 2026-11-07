@@ -3,7 +3,7 @@ id: REQ-SRCH-006
 title: Keine Anzeigen blockierter oder gesperrter Nutzer in der Suche
 type: business-rule
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-03
 source: BG-1
 use_cases: [UC-13, UC-31, UC-33]
 depends_on: [REQ-MOD-005]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-SRCH-006]
 ---
 
@@ -47,7 +47,7 @@ Blockieren und Sperren müssen wirksam sein, sonst verlieren Mitglieder das Vert
 | Blockierter versucht Kontakt | abgelehnt (REQ-CHAT-001) |
 
 ## Nachweis
-- `AT-SRCH-006`: API-Test – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus (neu).
+- `AT-SRCH-006`: Integrationstest (`listings.integration.test.ts`, PostgreSQL per Testcontainers) – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -55,3 +55,4 @@ Blockieren und Sperren müssen wirksam sein, sonst verlieren Mitglieder das Vert
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle, Merkliste und Ausblendung eingeschlossen |
 | 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 1.3 | 2026-11-07 | Nachweis AT-SRCH-006 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

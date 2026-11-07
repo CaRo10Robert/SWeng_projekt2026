@@ -3,7 +3,7 @@ id: REQ-PERF-003
 title: Antwortzeit beim Erstellen einer Anzeige
 type: quality
 class: quality
-status: approved
+status: verified
 owner: team-plattform
 risk: low
 reviewers: [qa-lead]
@@ -15,9 +15,9 @@ epic: EPIC-02
 source: BG-2
 use_cases: [UC-10]
 depends_on: [REQ-LST-001]
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-PERF-003]
 ---
 
@@ -44,7 +44,7 @@ Ziel „Anzeige in unter 2 Minuten“ (REQ-LST-001, BG-2).
 | Verantwortung und Eskalation | Service-Owner team-plattform; Eskalation über den Incident-Prozess (`docs/07-betrieb/incident-prozess.md`), Rufbereitschaft im Echtbetrieb (fiktiv) |
 
 ## Nachweis
-- `AT-PERF-003`: k6-Lasttest „Anzeige erstellen“ (neu zu schreiben; Umsetzungsstand ⬜).
+- `AT-PERF-003`: k6-Lasttest `tests/load/create-listing.js` (wöchentlich in `ops-weekly.yml`). Messung 2026-11-07, 2 Anfragen/s über 5 min, 10.000 Anzeigen: **p95 19,1 ms** (p99 31,5 ms), 0 % Fehler bei 600 Anfragen. Abweichung vom Messkontext: 12 statt 4 Kerne (Abstand zur Grenze Faktor > 40).
 
 
 ## Änderungshistorie
@@ -54,3 +54,4 @@ Ziel „Anzeige in unter 2 Minuten“ (REQ-LST-001, BG-2).
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-15 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-10 Felder aus der NFR-/SLO-Vorlage ergänzt (Fehlerbudget, Lastprofil, Timeout/Retry, Wiederherstellung, Eskalation) |
+| 2.3 | 2026-11-07 | AT-PERF-003 umgesetzt (k6) und gemessen: p95 19,1 ms, 0 % Fehler (Testbericht 2026-11-07); Status → verified |

@@ -3,9 +3,9 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 ---
 
 # Product Backlog und Release-Planung
@@ -93,6 +93,7 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-62 | Passwortformular: Stärkeanzeige und „Passwort anzeigen“ (PT-F-05; ASVS 2.1.8, 2.1.12) | Feature | REQ-SEC-003 | basis | mittel | – | 2 | 2 | 1 | 1 | 4 | 2,0 | R2 |
 | B-63 | Sicherheitsalarme und Bestätigungen: erneute Passwortabfrage für Rollenwechsel und DAC7-Export, Metrik und Alarm bei gehäuften Fehlanmeldungen, `Content-Disposition` für JSON-Antworten (PT-F-10 bis PT-F-12; ASVS 3.7.1, 4.3.3, 11.1.8, 14.4.2) | Enabler | REQ-SEC-001, REQ-OPS-008 | basis | hoch | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
 | B-64 | Coverage der Fachmodule auch unter Smoke- und E2E-Tests messen (`NODE_V8_COVERAGE`, zusammengeführt mit der Unit-Coverage), Ziel ≥ 80 % (REQ-MAINT-001 Kriterium 1) | Enabler | REQ-MAINT-001 | n/a | mittel | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
+| B-65 | Paginierung (`Page<T>`, Keyset) für die übrigen Listen-Endpunkte: eigene Anzeigen, Merkliste, Konversationen, Blockierungen, Mitteilungen, Moderationsfälle, Widersprüche, Nutzerverwaltung (Guideline Kap. 06, [Architektur 8.12](../03-architektur/architektur.md#812-listen-und-paginierung-adr-0009)) | Enabler | – (Guideline Kap. 06) | n/a | niedrig | – | 3 | 1 | 1 | 2 | 4 | 1,3 | R2 |
 
 **Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
 
@@ -135,6 +136,13 @@ gantt
 | 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung | B-54, B-53, B-51 | 14 |
 
 **Einordnung EPIC-13 (2026-10-24, Q-23):** Der Auftraggeber hat die Rechts- und Betreiberpflichten als Übung in R1 aufgenommen. Sie passen nicht in die Sprints 1–4, deren Umfang feststeht; der Feature Freeze nach Sprint 3 gilt weiter für den bisherigen R1-Umfang. EPIC-13 erweitert R1 um drei Sprints (53 SP bei ~20 SP Kapazität). **Reihenfolge:** alle Must-Einträge (B-43, B-44, B-46, B-49, B-50, B-56, B-57) in Sprint 5 und 6; Sprint 5 zuerst die Einträge mit hohem WSJF und die Rechtspflichten, die ein Besucher sofort sieht; Sprint 7 enthält nur Should/Could und ist der Puffer: Reicht die Kapazität nicht, rücken B-51, B-53 und B-54 nach R2. Die Einträge entstehen im Docker-Beispiel teilweise schon vorab als Übungsinkrement; der Sprint-Plan bleibt der Maßstab für Nachweise und Abnahme.
+
+**Stand Testpyramide und Lieferkette (2026-11-07):**
+
+- **B-12, B-22 und B-32 erledigt:** Alle Aufbewahrungsfristen laufen automatisch, die Kontolöschung entfernt nur die eigenen Nachrichtentexte, pausierte Anzeigen laufen ab und reservierte fallen nach 30 Tagen zurück. Belegt durch Integrationstests (AT-AUTH-002-4, AT-ACC-002-2, AT-LST-008, AT-PRIV-003) und den Ops-Test AT-PRIV-003-2.
+- **B-64 erledigt, anders als geplant:** Statt die Coverage unter Smoke-Tests zu messen, laufen jetzt 59 Integrationstests gegen echte PostgreSQL (Testcontainers) im selben Vitest-Lauf wie die Unit-Tests. Fachmodule 88,65 % statt 15,9 % (REQ-MAINT-001 verifiziert).
+- **Neu B-65 (R2):** Paginierung für die übrigen Listen-Endpunkte. Audit-Log und Beweissicherungen sind bereits per Keyset paginiert.
+- **Verifizierungsquote:** siehe [Testbericht 2026-11-07](../05-umsetzung/testbericht-2026-11-07.md).
 
 **Stand Nachweise und Kontrollen (2026-10-26):**
 

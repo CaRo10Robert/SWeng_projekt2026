@@ -320,7 +320,7 @@ const foreignConv = await ben.call('GET', `/conversations/${convId}`);
 const memberQueue = await lea.call('GET', '/moderation/cases');
 const reserve = await user.call('POST', `/conversations/${convId}/deal`, { action: 'reserve' });
 const buyerDeal = await lea.call('POST', `/conversations/${convId}/deal`, { action: 'complete' });
-check('[AT-CHAT-011] Anbieter reserviert aus der Konversation, Anzeige reserviert',
+check('[AT-CHAT-011] [AT-LST-007-2] Anbieter reserviert aus der Konversation, Anzeige reserviert',
   reserve.status === 200 && reserve.data.status === 'agreed' && (await user.call('GET', `/listings/${created.data.id}`)).data.status === 'reserved');
 check('[AT-CHAT-011-2] Interessent darf den Deal nicht steuern', buyerDeal.status === 403);
 check('[AT-SEC-006] Autorisierung: fremde Konversation 404, Mitglied auf Moderation 403, Interessent auf Deal 403',

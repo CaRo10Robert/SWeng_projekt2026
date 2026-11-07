@@ -3,7 +3,7 @@ id: REQ-LST-007
 title: Anzeige als reserviert oder abgegeben markieren
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-02
 source: BG-3
 use_cases: [UC-12]
 depends_on: [REQ-LST-006]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-LST-007, AT-LST-007-2]
 ---
 
@@ -61,9 +61,9 @@ I: kann ohne Chat genutzt werden · N: Kennzeichnung verhandelbar · V: weniger 
 
 ## Nachweis
 - `AT-LST-007`: Unit-Test der Übergänge reservieren, aufheben, abgeben.
-- `AT-LST-007-2`: Smoke-Test – Reservierung aus dem Chat setzt die Anzeige auf `reserviert`.
+- `AT-LST-007-2`: Smoke-Test (gemeinsam mit `AT-CHAT-011`) – Reservierung aus dem Chat setzt die Anzeige auf `reserviert`.
 
-Teilweise offen: automatischer Rückfall reservierter Anzeigen nach 30 Tagen (siehe REQ-LST-008, neu).
+Der automatische Rückfall reservierter Anzeigen nach 30 Tagen ist umgesetzt und durch `AT-LST-008` belegt (REQ-LST-008).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -71,3 +71,4 @@ Teilweise offen: automatischer Rückfall reservierter Anzeigen nach 30 Tagen (si
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.1 | 2026-10-23 | Review v0.2: R-05 Verweis auf §4 korrigiert, Rückfall nach 30 Tagen, Fehlerfälle; R-15 Reservierung für eine Person in REQ-CHAT-011 (Q-17) |
 | 2.0 | 2026-10-23 | Sichtbarkeit abgegebener Anzeigen festgelegt (sofort nicht mehr in der Suche, Löschung nach 30 Tagen) – löst Widerspruch zu UC-12 („nach 7 Tagen“) |
+| 2.2 | 2026-11-07 | AT-LST-007-2 im Smoke-Test markiert (Prüfung bestand schon als AT-CHAT-011); Rückfall nach 30 Tagen umgesetzt (REQ-LST-008); Testbericht 2026-11-07; Status → verified |

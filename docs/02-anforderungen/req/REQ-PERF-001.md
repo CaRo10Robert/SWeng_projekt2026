@@ -3,7 +3,7 @@ id: REQ-PERF-001
 title: Antwortzeit der Suche
 type: quality
 class: quality
-status: approved
+status: verified
 owner: team-marktplatz
 risk: medium
 reviewers: [qa-lead]
@@ -15,9 +15,9 @@ epic: EPIC-03
 source: BG-2
 use_cases: [UC-13]
 depends_on: [REQ-SRCH-001]
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-PERF-001]
 ---
 
@@ -53,7 +53,7 @@ Suchen ist eine der vier kritischen Nutzerreisen (Registrieren, Suchen, Anzeige 
 | Datenbankfehler bei der Volltextsuche | Fallback (siehe Degradation), kein 5xx |
 
 ## Nachweis
-- `AT-PERF-001`: k6-Lasttest `tests/load/search.js` (geplant, siehe Umsetzungsstand).
+- `AT-PERF-001`: k6-Lasttest `tests/load/search.js` (wöchentlich in `ops-weekly.yml`, Job `load`). Messung 2026-11-07, 5 min nach 1 min Aufwärmen, 10.000 Anzeigen, 20 Anfragen/s: **p95 14,9 ms, p99 37,9 ms**, 0 % Fehler bei 6.000 Anfragen. Abweichung vom Messkontext: Rechner mit 12 Kernen (Docker-VM 12 CPUs, 8 GB) statt 4 Kernen; der Abstand zur Grenze (Faktor > 30) macht das Ergebnis auf dem Referenzrechner sehr wahrscheinlich. Der wöchentliche CI-Lauf (Standard-Runner 4 vCPU, 16 GB) entspricht dem Referenzrechner.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -62,3 +62,4 @@ Suchen ist eine der vier kritischen Nutzerreisen (Registrieren, Suchen, Anzeige 
 | 2.0 | 2026-10-23 | Eigene Datei; Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Endpunkt in den Messkontext), R-15 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-10 Felder aus der NFR-/SLO-Vorlage ergänzt (Fehlerbudget, Lastprofil, Timeout/Retry, Wiederherstellung, Eskalation) |
+| 2.3 | 2026-11-07 | AT-PERF-001 umgesetzt (k6) und gemessen: p95 14,9 ms, p99 37,9 ms, 0 % Fehler (Testbericht 2026-11-07); Status → verified |

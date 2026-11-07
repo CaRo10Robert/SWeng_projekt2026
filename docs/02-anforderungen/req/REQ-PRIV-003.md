@@ -3,7 +3,7 @@ id: REQ-PRIV-003
 title: Löschkonzept mit Fristen je Datenkategorie
 type: privacy
 class: constraint
-status: approved
+status: verified
 owner: team-produkt
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 5, 17
 use_cases: [UC-01, UC-05]
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3]
 ---
 
@@ -76,11 +76,11 @@ Speicherbegrenzung (DSGVO Art. 5) und Recht auf Löschung (Art. 17); Privacy by 
 | Offene Moderationsmaßnahme bei Kontolöschung | das Konto wird gelöscht; nur die Beweissicherung bleibt als pseudonymisierte Kopie bis zum Fristende erhalten (REQ-LEGAL-008) |
 
 ## Nachweis
-- `AT-PRIV-003`: (neu) Szenario-Test mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage).
+- `AT-PRIV-003`: Integrationstest (`listings.integration.test.ts`) mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage); ein zweiter Lauf ändert nichts mehr.
 - `AT-PRIV-003-2`: Ops-Test `tests/ops/retention-test.mjs` – Datensätze werden per psql zurückdatiert, danach löst die Administration den Löschlauf aus (`POST /admin/demo/run-due-jobs`); geprüft werden Chats (12 Monate nach der letzten Nachricht), Meldungen und Entscheidungen (12 Monate nach Abschluss), Audit-Log (24 Monate), benutzte bzw. abgelaufene Links (7 Tage) und von der Moderation entfernte Anzeigen (12 Monate); jüngere Einträge bleiben. Läuft in CI im Job `compose`.
 - `AT-PRIV-003-3`: derselbe Ops-Test – Kontolöschung entfernt nur die eigenen Nachrichtentexte (Systemcode `message_deleted`), die Konversation bleibt für das Gegenüber mit „Ehemaliges Mitglied“.
 - Umgesetzt (2026-10-26): alle Fristen dieser Tabelle in `privacy/domain.ts` (`retentionCutoffs`, Unit-Tests) und im täglichen Löschlauf `privacy.purgeExpired`, der nur Anzahlen protokolliert; Beweissicherung und offene Widersprüche halten die betroffenen Datensätze zurück. Zustimmungsnachweise bleiben 3 Jahre **ohne Profilbezug**: `identity.consent.user_id` wird bei der Kontolöschung auf NULL gesetzt, `subject_ref` (HMAC der kanonischen Adresse mit festem Geheimnis) erlaubt im Streitfall die Zuordnung, wenn die Person ihre Adresse nennt (Migration 0005). Fristlöschungen nach Datum stehen bewusst nicht im Löschjournal: nach einem Restore löscht der nächste Lauf dieselben Daten erneut (ADR-0018).
-- **Offen:** reservierte Anzeigen gehen nach 30 Tagen noch nicht zurück auf „aktiv“ (braucht eine Hinweis-Mail an den Anbieter); deshalb ist `AT-PRIV-003` noch nicht markiert.
+- Umgesetzt (2026-10-27): Reservierte Anzeigen fallen nach 30 Tagen im stündlichen Lauf `listings-maintenance` auf „aktiv“ zurück. Ein offener Deal wird aufgehoben, der Anbieter erhält die Mail `reservation_expired` und im Chat erscheint eine Systemnachricht; gesicherte Anzeigen (REQ-LEGAL-008) bleiben unverändert.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -91,3 +91,4 @@ Speicherbegrenzung (DSGVO Art. 5) und Recht auf Löschung (Art. 17); Privacy by 
 | 2.1 | 2026-10-25 | Review v1.3 (RV-R-05, RV-R-13, RV-A-01): Datensicherungen 28 Tage, neue Kategorien (Pseudonymisierungsschlüssel, Löschjournal, Deals, Mitteilungen, Widersprüche, Einmal-Links, Originaltexte, Beweissicherung, Ankündigungen, Sprache/Kenntnisnahme); Wiederherstellung über Löschjournal; Stand ergänzt |
 | 2.2 | 2026-10-26 | Löschläufe umgesetzt, Nachweise AT-PRIV-003-2/-3 als Ops-Test, Zustimmungsnachweise pseudonymisiert; offen: reservierte Anzeigen |
 | 2.3 | 2026-10-26 | Guideline-Review: GL-09 Löschjournal auf ADR-0019 verwiesen |
+| 2.4 | 2026-11-07 | Rückfall reservierter Anzeigen umgesetzt; AT-PRIV-003 als Integrationstest grün (Testbericht 2026-11-07); Status → verified |

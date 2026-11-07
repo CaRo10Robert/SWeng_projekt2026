@@ -3,7 +3,7 @@ id: REQ-ACC-002
 title: Konto löschen mit Karenzzeit
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-produkt
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-07
 source: DSGVO Art. 17, BG-4
 use_cases: [UC-05]
 depends_on: [REQ-PRIV-003]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-ACC-002, AT-ACC-002-2]
 ---
 
@@ -63,8 +63,8 @@ I: unabhängig · N: Karenzdauer verhandelbar · V: Rechtspflicht · E: mittel �
 
 ## Nachweis
 - `AT-ACC-002`: Smoke-Test – Löschung beantragen, Anmeldung bricht ab.
-- `AT-ACC-002-2`: Integrationstest – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen.
-- `AT-ACC-002-2` ist neu; ebenso die Anpassung der Umsetzung: Sie löscht bisher ganze Konversationen inklusive der Nachrichten des Gegenübers. Soll ist das Löschen nur der eigenen Nachrichtentexte (UC-05, REQ-PRIV-003). Die Korrektur steht im Backlog; bis dahin bleibt der Status `approved`.
+- `AT-ACC-002-2`: Integrationstest (`privacy.integration.test.ts`) – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen.
+- Umgesetzt: Die Löschung entfernt nur die eigenen Nachrichtentexte; das Gegenüber behält die Konversation mit „Ehemaliges Mitglied“ (UC-05, REQ-PRIV-003; geprüft auch durch AT-PRIV-003-3). Der Zustimmungsnachweis bleibt ohne Profilbezug erhalten.
 
 
 ## Änderungshistorie
@@ -73,3 +73,4 @@ I: unabhängig · N: Karenzdauer verhandelbar · V: Rechtspflicht · E: mittel �
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Sollverhalten für fremde Konversationen präzisiert (Anonymisierung statt Löschung, UC-05) |
 | 3.0 | 2026-10-23 | Review v0.2: R-13 (nur eigene Nachrichtentexte löschen, Gegenüber behält Konversation), R-15, R-16 |
+| 3.1 | 2026-11-07 | Soll „nur eigene Nachrichtentexte löschen“ durch AT-ACC-002-2 belegt; Integrationstest grün (Testbericht 2026-11-07); Status → verified |

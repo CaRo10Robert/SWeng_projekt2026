@@ -3,7 +3,7 @@ id: REQ-SEC-002
 title: Passwörter mit Argon2id speichern
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ moscow_reason: [2]
 kano: n/a
 epic: EPIC-01
 source: OWASP Password Storage Cheat Sheet, ADR-0003
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-SEC-002]
 ---
 
@@ -43,7 +43,7 @@ Bei einem Datenleck dürfen Passwörter nicht praktikabel zurückgerechnet werde
 | Datenbank wird entwendet | Hashes sind ohne aufwändiges Durchprobieren nicht umkehrbar; Leak-Liste verhindert triviale Passwörter |
 
 ## Nachweis
-- `AT-SEC-002`: neu zu schreiben – Test prüft Algorithmus und Parameter eines frisch erzeugten Hashes.
+- `AT-SEC-002`: Integrationstest (`identity.integration.test.ts`) – ein frisch erzeugter Hash nutzt Argon2id mit mindestens den OWASP-Parametern.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -51,3 +51,4 @@ Bei einem Datenleck dürfen Passwörter nicht praktikabel zurückgerechnet werde
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, prüfbare Akzeptanzkriterien ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle (Parameter-Upgrade bestehender Hashes); R-16 review_due; R-15 moscow_reason |
+| 1.3 | 2026-11-07 | Nachweis AT-SEC-002 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

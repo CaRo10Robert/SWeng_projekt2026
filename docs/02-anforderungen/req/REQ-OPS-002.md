@@ -13,9 +13,9 @@ moscow_reason: [2, 3]
 kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 11, REQ-PRIV-002
-version: 2.5
+version: 2.6
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-OPS-002, MAN-OPS-002]
 ---
 
@@ -42,7 +42,7 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | Personenbezogene Daten in Anfrage-Headern oder Pfaden | Request-ID nur als UUID übernommen, unbekannte Pfade als `unmatched`, keine Query und keine IP im Log |
 | Tokens in URLs | Query wird nicht protokolliert; Widerspruchs-Token im Fragment |
 | Sicherheitsereignisse | nur mit Pseudonym (HMAC, ADR-0014), nie mit Adresse oder Passwort |
-| Log-Flut durch Angriff | Rate-Limits begrenzen Anfragen; Logs gehen an stdout. Eine Größenbegrenzung des Docker-Logtreibers (`max-size`/`max-file`) ist im Beispiel **nicht** konfiguriert (offener Punkt) |
+| Log-Flut durch Angriff | Rate-Limits begrenzen Anfragen; Logs gehen an stdout. Der Docker-Logtreiber ist für alle Dienste auf höchstens 3 × 10 MB je Container begrenzt (`x-logging` in `compose.yaml`) |
 | Metrik-Labels mit hoher Kardinalität | Labels nur Routenmuster und Statusklasse, keine IDs |
 
 ## Nachweis
@@ -61,3 +61,4 @@ Fehleranalyse ohne Datenschutzrisiko (REQ-PRIV-002, Guideline Kap. 11).
 | 2.3 | 2026-10-26 | Nachweis MAN-OPS-002 mit Protokoll verlinkt; P-1/P-2 behoben, Sicherheitsereignisse im Log |
 | 2.4 | 2026-10-26 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-OPS-002, MAN-OPS-002 bestanden bzw. ausgeführt); Status → verified |
 | 2.5 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
+| 2.6 | 2026-11-07 | Fehlerfall „Log-Flut“: Größenbegrenzung des Logtreibers in compose.yaml umgesetzt (vorher offener Punkt) |

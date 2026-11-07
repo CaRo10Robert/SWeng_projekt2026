@@ -76,7 +76,7 @@ Vite leitet API-Aufrufe an `VITE_API_TARGET` weiter; ohne diese Variable an den 
 
 | Befehl | Zweck |
 |---|---|
-| `pnpm test` | Unit-Tests der Fachregeln (u. a. Entscheidungstabelle BR-01) |
+| `pnpm test` | Unit- und Integrationstests des Servers (Integration gegen PostgreSQL per Testcontainers, braucht Docker; ohne Docker übersprungen) und Komponententests der Web-App, mit Coverage-Schwellen ([Teststrategie](docs/05-umsetzung/teststrategie.md)) |
 | `pnpm typecheck` | TypeScript in allen Paketen |
 | `pnpm lint:deps` | Fitness Function: Modulgrenzen und Ports (dependency-cruiser) |
 | `node scripts/check-diagrams.mjs` | Alle Mermaid-Diagramme der Doku rendern (Syntaxprüfung; lokal mit `CHROME_PATH` auf einen installierten Browser) |
@@ -90,6 +90,8 @@ Vite leitet API-Aufrufe an `VITE_API_TARGET` weiter; ohne diese Variable an den 
 | `node tests/ops/proxy-test.mjs [--project <name>]` | Profil `proxy`: TLS, HSTS, Weiterleitung (AT-OPS-009) |
 | `node tests/ops/dlq-test.mjs [app-url] [--project <name>]` | Dead-Letter-Ansicht bei Mailausfall (CTRL-DLQ, dauert etwa 5 min) |
 | `node scripts/check-i18n.mjs` | Übersetzungskataloge de/en vollständig und gültig |
+| `node scripts/check-bundle.mjs` | JS-Budget der Web-App nach `pnpm --filter @campusmarkt/web build` (CTRL-BUNDLE) |
+| `node tests/load/run.mjs <search\|chat\|create-listing\|signup\|all>` | k6-Lasttests (AT-PERF-001 bis -004) gegen einen Stack mit `RATE_LIMIT_FACTOR=100`, je Szenario 6 min |
 
 ### Struktur
 
@@ -114,6 +116,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 3 | [Use Cases](docs/02-anforderungen/01-use-cases.md) | Akteure, UML-Use-Case-Diagramme, Use-Case-Spezifikationen | Reference |
 | 4 | [Anforderungskatalog](docs/02-anforderungen/02-anforderungen.md) | Ziele, Scope, Constraints, Zustandsmodell, Index aller Anforderungen ([req/](docs/02-anforderungen/req/), eine Datei je Anforderung) | Reference |
 | 4a | [Nachweiskatalog](docs/02-anforderungen/nachweise.md) | Tests, manuelle Prüfungen und Kontrollen je Anforderung | Reference |
+| 4b | [Teststrategie](docs/05-umsetzung/teststrategie.md) | Testpyramide (Unit, Integration, Komponenten, Smoke, E2E), Coverage, Last-, Sicherheits- und Budgettests, CI-Testgate | Explanation |
 | 5 | [Product Backlog & Release-Planung](docs/02-anforderungen/03-backlog.md) | Epics, Backlog mit Kano, Risiko, Story Points, WSJF; Sprint-Plan | Reference |
 | 5a | [Vorgehen](docs/02-anforderungen/04-vorgehen.md) | Scrum, Definition of Ready/Done, Schätzung, Nachverfolgbarkeit, Change-Management | Explanation |
 | 5b | [Entscheidungslog](docs/02-anforderungen/05-entscheidungen.md) | Fachliche Entscheidungen Q-1 … Q-28, Übungsannahmen A-1 … A-22 | Reference |
@@ -131,6 +134,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 8e | [Review v1.3 Recht, Auftritt und Betrieb](docs/04-review/review-v1.3-recht-betrieb.md) | 63 Befunde aus drei unabhängigen Reviews (Anforderungen/Recht, Architektur/Betrieb, Code) und ihre Behebung | – |
 | 8f | [Testbericht EPIC-13](docs/05-umsetzung/testbericht-2026-10-25.md) | Finaler Lauf nach Review v1.3: Build, E2E, Smoke, Restore, Proxy, Statusänderungen | – |
 | 8h | [Testbericht Nachweise](docs/05-umsetzung/testbericht-2026-10-26.md) | Finaler Lauf nach Übungen, Sicherheitsnachweisen und Kontrollen; 15 weitere Anforderungen verified | – |
+| 8i | [Testbericht Testpyramide](docs/05-umsetzung/testbericht-2026-11-07.md) | Gesamtlauf nach Integrations-, Komponenten- und Lasttests; Statusänderungen | – |
 | 8g | [Nachweise](docs/05-umsetzung/nachweise/README.md) | Protokolle der manuellen Nachweise und Kontrollen: Übungen, Reviews, ASVS, Pentest, Leitfäden | Reference |
 | 9 | [Umsetzungsstand MVP](docs/05-umsetzung/mvp-umsetzungsstand.md) | abgelöst durch den generierten Katalog-Index | – |
 | 10 | [Recht und Datenschutz](docs/06-recht/README.md) | VVT, TOMs, Auftragsverarbeitung, DSFA-Schwellwertanalyse, Datenpannen-, DSA- und DAC7-Prozess, DSFA, Rechtskataster (Übung mit fiktiven Werten) | Reference |
@@ -144,6 +148,7 @@ compose.yaml           app + db (postgres:17) + mailpit
 | 0.2 | 2026-10-20 | Kein Hosting, nur Docker-Beispiel: ADR-0010, schlanker Stack (ohne Redis/S3, React-SPA in Fastify, pg-boss), Betriebsanforderungen N/A → EPIC-12, Demo-Anforderungen REQ-DEMO-* |
 | 0.3 | 2026-10-23 | Lauffähiger MVP als Docker-Compose-Setup (app + db + mailpit), Demo-Daten, Unit- und Smoke-Tests, ADR-0011, Umsetzungsstand |
 | 0.4 | 2026-10-26 | Fallstudie (Kontaktfreigabe, Tastatur, IdentityProviderPort), EPIC-13 Recht/Auftritt/Betrieb, englische Oberfläche, Reviews v1.1/v1.3, Nachweisrunde mit Protokollen, CI-Kontrollen (Coverage, Mutation, Scans, Multi-Arch) |
+| 0.5 | 2026-11-07 | Testpyramide (Integrationstests mit Testcontainers, Komponententests, k6-Lasttests), Bundle-Budget, Paginierung und RateLimit-Header, Lieferkette (Attestationen, Digest-Pins), Teststrategie, Testbericht |
 
 ## Diagramme
 

@@ -12,10 +12,10 @@ moscow: S
 kano: leistung
 epic: EPIC-00
 source: BG-2
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-26
-verification: [AT-PERF-005]
+last_updated: 2026-11-07
+verification: [AT-PERF-005, CTRL-BUNDLE]
 ---
 
 # REQ-PERF-005 Ladeverhalten der Oberfläche
@@ -43,7 +43,8 @@ Mobile Nutzung auf dem Campus mit wechselnder Netzqualität (REQ-UX-001).
 | Verantwortung und Eskalation | Service-Owner team-plattform; Eskalation über den Incident-Prozess (`docs/07-betrieb/incident-prozess.md`), Rufbereitschaft im Echtbetrieb (fiktiv) |
 
 ## Nachweis
-- `AT-PERF-005`: Lighthouse-CI-Lauf (neu zu schreiben; Umsetzungsstand ⬜).
+- `AT-PERF-005`: Lighthouse-CI-Lauf (neu zu schreiben, Backlog B-24, R2).
+- `CTRL-BUNDLE`: JS-Budget der Web-App in CI (`scripts/check-bundle.mjs`, gzip): initial 177 kB, größter nachgeladener Chunk 53 kB; gemessen 2026-11-07: 160,6 kB bzw. 48,0 kB. Die Kontrolle hält die Voraussetzung für LCP < 2,5 s stabil, belegt LCP aber nicht; deshalb bleibt der Status `approved`.
 
 
 ## Änderungshistorie
@@ -53,3 +54,4 @@ Mobile Nutzung auf dem Campus mit wechselnder Netzqualität (REQ-UX-001).
 | 2.0 | 2026-10-23 | Merkmal/Metrik/Akzeptanzkriterium/Messverfahren getrennt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-15 (Must → Should), R-24 (Lighthouse-Version fixiert) |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-10 Felder aus der NFR-/SLO-Vorlage ergänzt (Fehlerbudget, Lastprofil, Timeout/Retry, Wiederherstellung, Eskalation) |
+| 2.3 | 2026-11-07 | Kontrolle CTRL-BUNDLE (JS-Budget in CI, Guideline Kap. 03) ergänzt; AT-PERF-005 weiter offen (B-24) |

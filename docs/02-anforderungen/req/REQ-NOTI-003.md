@@ -3,7 +3,7 @@ id: REQ-NOTI-003
 title: Benachrichtigungen pro Kategorie abbestellen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: low
 release: R1
@@ -12,9 +12,9 @@ kano: leistung
 epic: EPIC-05
 source: DSGVO Art. 21, UWG § 7
 use_cases: [UC-24]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-NOTI-003]
 ---
 
@@ -50,7 +50,7 @@ Szenario: Sicherheitsmail
 I: unabhängig · N: Kategorien verhandelbar · V: Kontrolle · E/S: klein · T: automatisierbar.
 
 ## Nachweis
-- `AT-NOTI-003`: Szenario-Test – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmail trotzdem (neu).
+- `AT-NOTI-003`: Integrationstest (`messaging.integration.test.ts`) – eine abbestellte Kategorie erzeugt keine Mail, Sicherheitsmails kommen trotzdem.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -58,3 +58,4 @@ I: unabhängig · N: Kategorien verhandelbar · V: Kontrolle · E/S: klein · T:
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Kategorien und Akzeptanzkriterien |
 | 1.2 | 2026-10-23 | Review v0.2: formale Prüfung ohne inhaltliche Änderung |
+| 1.3 | 2026-11-07 | Nachweis AT-NOTI-003 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

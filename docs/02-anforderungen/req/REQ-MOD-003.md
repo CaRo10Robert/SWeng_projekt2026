@@ -3,7 +3,7 @@ id: REQ-MOD-003
 title: Entscheidungen begründen und unveränderlich protokollieren
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-vertrauen
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSA Art. 17, BG-4
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002]
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-11-07
 verification: [AT-MOD-003, AT-MOD-003-2]
 ---
 
@@ -46,7 +46,7 @@ DSA Art. 17 (Begründungspflicht) und Nachvollziehbarkeit bei Widerspruch (DSA A
 
 ## Nachweis
 - `AT-MOD-003`: Smoke-Test – nach der Entscheidung enthält das Audit-Log `moderation.remove` (bestehend: „Audit-Log protokolliert Entscheidung“) und Mailpit die Mitteilung an Betroffene.
-- `AT-MOD-003-2`: Integrationstest – Änderung eines Eintrags in Entscheidungs- und Audit-Protokoll schlägt fehl.
+- `AT-MOD-003-2`: Integrationstest (`trust.integration.test.ts`) – Ändern oder Löschen eines Eintrags in Entscheidungs- und Audit-Protokoll schlägt fehl.
 
 
 ## Änderungshistorie
@@ -57,3 +57,4 @@ DSA Art. 17 (Begründungspflicht) und Nachvollziehbarkeit bei Widerspruch (DSA A
 | 2.0 | 2026-10-23 | Review v0.2: R-08 (Entscheidungstabelle mit Betroffenen und Meldenden), R-15, R-16 |
 | 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Hinweis auf Widerspruch im System statt per E-Mail (Q-22); Pflichtangaben der Begründung und Mitteilung im Konto in REQ-LEGAL-006 |
 | 2.2 | 2026-10-25 | Review v1.3 (RV-R-09): Mitteilung an Meldende mit Begründung und Rechtsbehelfen (umgesetzt in 6e6fe40) |
+| 2.3 | 2026-11-07 | Nachweis AT-MOD-003-2 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

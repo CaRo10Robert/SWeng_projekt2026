@@ -3,7 +3,7 @@ id: REQ-NOTI-002
 title: Gebündelte Benachrichtigung über neue Nachrichten ohne Inhalt
 type: business-rule
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-05
 source: BG-3, DSGVO Art. 5 (Datenminimierung)
 use_cases: [UC-21, UC-23]
 depends_on: [REQ-NOTI-001]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-NOTI-002]
 ---
 
@@ -53,7 +53,7 @@ Inhalt der E-Mail: Betreff „Neue Nachricht zu ‚<Anzeigentitel>‘“, Link z
 | Massenhafte Nachrichten (Spam) | erzeugen höchstens eine E-Mail je 15 min; Sendebegrenzung REQ-CHAT-007 |
 
 ## Nachweis
-- `AT-NOTI-002`: Szenario-Test mit verkürzter Wartezeit – Bündelung, Lesen vor Versand, kein Inhalt in der Mail (neu).
+- `AT-NOTI-002`: Integrationstest (`messaging.integration.test.ts`) mit verkürzter Wartezeit – Bündelung, keine Mail nach dem Lesen, kein Inhalt in der Mail.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -61,3 +61,4 @@ Inhalt der E-Mail: Betreff „Neue Nachricht zu ‚<Anzeigentitel>‘“, Link z
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-31 Inhalt eindeutig (kein Absendername, Anzeigentitel), Anführungszeichen; Must-Begründung |
+| 1.3 | 2026-11-07 | Nachweis AT-NOTI-002 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

@@ -3,7 +3,7 @@ id: REQ-SEC-005
 title: Begrenzung von Anfragen (Rate-Limits)
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ kano: n/a
 epic: EPIC-01
 source: OWASP ASVS 4.0.3 (EX-01)
 use_cases: [UC-01, UC-02, UC-03]
-version: 3.2
+version: 3.3
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 review_due: 2027-04-26
 verification: [AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3]
 ---
@@ -53,10 +53,10 @@ Ohne Begrenzung sind Passwort-Raten, Spam und das Fluten von Hochschulpostfäche
 | Ausfall des Zählerspeichers | Anfrage wird abgelehnt (sicherer Zustand), Fehler im Log |
 
 ## Nachweis
-- `AT-SEC-005`: (neu) 5 falsche Passwörter, die 6. Anmeldung desselben Paars liefert 429 mit `Retry-After`.
-- `AT-SEC-005-2`: (neu) 4. Registrierung derselben Adresse innerhalb einer Stunde liefert 429.
-- `AT-SEC-005-3`: (neu) Registrierungen verschiedener Adressen von derselben IP: die 30. wird angenommen, die 31. liefert 429.
-- Teilweise umgesetzt: Die Registrierungsgrenzen nach Q-18 (je Adresse 3, je IP 30) und die Pseudonymisierung mit wechselndem Schlüssel fehlen noch; umgesetzt ist „5 je IP“ und ein fester Schlüssel.
+- `AT-SEC-005`: Smoke-Test – 5 falsche Passwörter, die 6. Anmeldung desselben Paars liefert 429 mit `Retry-After`; die Antworten tragen `RateLimit-*`-Header (Guideline Kap. 06).
+- `AT-SEC-005-2`: Smoke-Test – 4. Registrierung derselben Adresse innerhalb einer Stunde liefert 429.
+- `AT-SEC-005-3`: Integrationstest (`identity.integration.test.ts`) – Registrierungen verschiedener Adressen von derselben IP: die 30. wird angenommen, die 31. liefert 429.
+- Umgesetzt: Grenzen nach Q-18 (je Adresse 3, je IP 30 je Stunde) und HMAC-Pseudonyme mit täglich wechselndem Schlüssel (ADR-0014).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -66,3 +66,4 @@ Ohne Begrenzung sind Passwort-Raten, Spam und das Fluten von Hochschulpostfäche
 | 3.0 | 2026-10-23 | Review v0.2: R-25 Entscheidungstabelle Schlüssel/Grenze/Fenster/Wirkung nach Q-18 (Campus-NAT, keine Kontosperre); R-26 Pseudonymisierung statt „gehasht“; R-03 `class: constraint`; R-04 Fehler- und Missbrauchsfälle; Status `approved`, weil die neuen Grenzen noch nicht umgesetzt sind |
 | 3.1 | 2026-10-23 | Umgesetzt (Schritt 6): Registrierungsgrenzen nach Q-18 (3 je Adresse, 30 je IP und Stunde); Status → implemented |
 | 3.2 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |
+| 3.3 | 2026-11-07 | Nachweis AT-SEC-005-3 als Integrationstest grün; überholten Hinweis „teilweise umgesetzt“ entfernt; RateLimit-Header ergänzt (Testbericht 2026-11-07); Status → verified |

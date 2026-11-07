@@ -154,20 +154,20 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 132 Anforderungen · R1-Must verifiziert: 51 von 85 (60 %)
+**Stand:** 132 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 28 |
-| implemented | Umsetzung | 26 |
-| verified | Test | 78 |
+| approved | Konkretisiert (bereit) | 18 |
+| implemented | Umsetzung | 12 |
+| verified | Test | 102 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
 | [REQ-A11Y-001](req/REQ-A11Y-001.md) | Barrierefreiheit nach WCAG 2.2 AA | quality | M | basis | high | implemented | AT-A11Y-001, MAN-A11Y-001 |
 | [REQ-A11Y-002](req/REQ-A11Y-002.md) | Vollständige Tastaturbedienbarkeit der Kernabläufe | quality | M | basis | high | implemented | AT-A11Y-002, AT-A11Y-002-2, MAN-A11Y-002 |
 | [REQ-ACC-001](req/REQ-ACC-001.md) | Profil pflegen | functional | M | basis | low | verified | AT-ACC-001 |
-| [REQ-ACC-002](req/REQ-ACC-002.md) | Konto löschen mit Karenzzeit | functional | M | basis | high | approved | AT-ACC-002, AT-ACC-002-2 |
+| [REQ-ACC-002](req/REQ-ACC-002.md) | Konto löschen mit Karenzzeit | functional | M | basis | high | verified | AT-ACC-002, AT-ACC-002-2 |
 | [REQ-ACC-003](req/REQ-ACC-003.md) | Daten exportieren | functional | S | leistung | medium | verified | AT-ACC-003 |
 | [REQ-ACC-004](req/REQ-ACC-004.md) | Profilbild | functional | S | leistung | medium | approved | AT-ACC-004 |
 | [REQ-ARCH-001](req/REQ-ARCH-001.md) | Bezahlung als späteres Modul hinter einem Port | constraint | M | n/a | high | verified | CTRL-DEPCRUISE, MAN-ARCH-001 |
@@ -177,7 +177,7 @@ flowchart LR
 | [REQ-ARCH-005](req/REQ-ARCH-005.md) | Auslieferung als lokales Docker-Compose-Setup | constraint | M | n/a | high | verified | AT-ARCH-005 |
 | [REQ-ARCH-006](req/REQ-ARCH-006.md) | Vereinfachte Infrastruktur hinter Ports | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
 | [REQ-AUTH-001](req/REQ-AUTH-001.md) | Registrierung nur mit Hochschul-Domain (BR-01) | domain | M | basis | high | verified | AT-AUTH-001, AT-AUTH-001-2 |
-| [REQ-AUTH-002](req/REQ-AUTH-002.md) | Hochschuladresse per Link bestätigen | functional | M | basis | high | approved | AT-AUTH-002, AT-AUTH-002-2, AT-AUTH-002-3, AT-AUTH-002-4 |
+| [REQ-AUTH-002](req/REQ-AUTH-002.md) | Hochschuladresse per Link bestätigen | functional | M | basis | high | verified | AT-AUTH-002, AT-AUTH-002-2, AT-AUTH-002-3, AT-AUTH-002-4 |
 | [REQ-AUTH-003](req/REQ-AUTH-003.md) | Nutzertyp aus der Domain ableiten | domain | S | n/a | low | verified | AT-AUTH-003, AT-AUTH-003-2 |
 | [REQ-AUTH-004](req/REQ-AUTH-004.md) | Keine Offenlegung bestehender Konten | constraint | M | basis | high | implemented | AT-AUTH-004, AT-AUTH-004-2 |
 | [REQ-AUTH-005](req/REQ-AUTH-005.md) | Anmelden und Abmelden | functional | M | basis | medium | verified | AT-AUTH-005, AT-AUTH-005-2 |
@@ -190,11 +190,11 @@ flowchart LR
 | [REQ-AVAIL-003](req/REQ-AVAIL-003.md) | Datensicherung und getestete Wiederherstellung im Docker-Beispiel | quality | M | n/a | high | verified | AT-AVAIL-003, CTRL-DOC-BACKUP |
 | [REQ-CHAT-001](req/REQ-CHAT-001.md) | Anbieter über anzeigenbezogenen Chat kontaktieren | functional | M | basis | high | verified | AT-CHAT-001, AT-CHAT-001-2, AT-CHAT-001-3, AT-CHAT-001-4 |
 | [REQ-CHAT-002](req/REQ-CHAT-002.md) | Genau eine Konversation pro Anzeige und Interessent | functional | M | basis | medium | verified | AT-CHAT-002 |
-| [REQ-CHAT-003](req/REQ-CHAT-003.md) | Nachrichten in Echtzeit empfangen | functional | M | leistung | medium | implemented | AT-CHAT-003, AT-CHAT-003-2 |
+| [REQ-CHAT-003](req/REQ-CHAT-003.md) | Nachrichten in Echtzeit empfangen | functional | M | leistung | medium | verified | AT-CHAT-003, AT-CHAT-003-2 |
 | [REQ-CHAT-004](req/REQ-CHAT-004.md) | Nachrichten genau einmal anzeigen, keine verlieren | quality | M | basis | medium | verified | AT-CHAT-004, AT-CHAT-004-2 |
 | [REQ-CHAT-005](req/REQ-CHAT-005.md) | Ungelesene Nachrichten erkennen | functional | S | leistung | low | verified | AT-CHAT-005 |
 | [REQ-CHAT-006](req/REQ-CHAT-006.md) | Sicherheitshinweis bei Links, IBAN und Telefonnummern | constraint | S | basis | low | verified | AT-CHAT-006 |
-| [REQ-CHAT-007](req/REQ-CHAT-007.md) | Begrenzung von Nachrichtenlänge und Sendehäufigkeit | constraint | M | n/a | medium | implemented | AT-CHAT-007, AT-CHAT-007-2 |
+| [REQ-CHAT-007](req/REQ-CHAT-007.md) | Begrenzung von Nachrichtenlänge und Sendehäufigkeit | constraint | M | n/a | medium | verified | AT-CHAT-007, AT-CHAT-007-2 |
 | [REQ-CHAT-008](req/REQ-CHAT-008.md) | Bilder im Chat senden | functional | C | begeisterung | medium | approved | AT-CHAT-008 |
 | [REQ-CHAT-009](req/REQ-CHAT-009.md) | Preisvorschlag im Chat | functional | C | begeisterung | low | approved | AT-CHAT-009-2 |
 | [REQ-CHAT-010](req/REQ-CHAT-010.md) | Kontaktdaten erst nach beidseitiger Zustimmung freigeben | constraint | M | basis | high | verified | AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3, AT-CHAT-010-4 |
@@ -220,25 +220,25 @@ flowchart LR
 | [REQ-LST-004](req/REQ-LST-004.md) | Übergabeort aus Campus-Standorten | domain | M | basis | low | verified | AT-LST-004 |
 | [REQ-LST-005](req/REQ-LST-005.md) | Studienbezogene Attribute für Bücher und Skripte | domain | S | begeisterung | low | verified | AT-LST-005 |
 | [REQ-LST-006](req/REQ-LST-006.md) | Eigene Anzeige bearbeiten, pausieren, reaktivieren, löschen | functional | M | basis | low | verified | AT-LST-006, AT-LST-006-2 |
-| [REQ-LST-007](req/REQ-LST-007.md) | Anzeige als reserviert oder abgegeben markieren | functional | M | basis | low | approved | AT-LST-007, AT-LST-007-2 |
-| [REQ-LST-008](req/REQ-LST-008.md) | Ablauf, Erinnerung, Verlängerung und Löschfristen von Anzeigen | functional | S | leistung | low | approved | AT-LST-008 |
+| [REQ-LST-007](req/REQ-LST-007.md) | Anzeige als reserviert oder abgegeben markieren | functional | M | basis | low | verified | AT-LST-007, AT-LST-007-2 |
+| [REQ-LST-008](req/REQ-LST-008.md) | Ablauf, Erinnerung, Verlängerung und Löschfristen von Anzeigen | functional | S | leistung | low | verified | AT-LST-008 |
 | [REQ-LST-009](req/REQ-LST-009.md) | Teilbarer Link mit Vorschau für Nicht-Mitglieder | functional | C | begeisterung | medium | approved | AT-LST-009 |
 | [REQ-LST-010](req/REQ-LST-010.md) | Verbotene Inhalte vor Veröffentlichung in die Moderation | constraint | M | basis | medium | verified | AT-LST-010, AT-LST-010-2 |
-| [REQ-LST-011](req/REQ-LST-011.md) | Höchstens 30 aktive Anzeigen pro Mitglied | functional | S | n/a | low | implemented | AT-LST-011 |
+| [REQ-LST-011](req/REQ-LST-011.md) | Höchstens 30 aktive Anzeigen pro Mitglied | functional | S | n/a | low | verified | AT-LST-011 |
 | [REQ-LST-012](req/REQ-LST-012.md) | HEIC-Fotos annehmen | functional | C | leistung | medium | approved | AT-LST-012 |
-| [REQ-MAINT-001](req/REQ-MAINT-001.md) | Testabdeckung der Fachlogik | quality | S | n/a | medium | implemented | CTRL-COVERAGE, CTRL-MUTATION |
+| [REQ-MAINT-001](req/REQ-MAINT-001.md) | Testabdeckung der Fachlogik | quality | S | n/a | medium | verified | CTRL-COVERAGE, CTRL-MUTATION |
 | [REQ-MAINT-002](req/REQ-MAINT-002.md) | Geprüfte Modulgrenzen | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
 | [REQ-MOD-001](req/REQ-MOD-001.md) | Inhalte und Mitglieder melden | functional | M | basis | high | verified | AT-MOD-001, AT-MOD-001-2 |
 | [REQ-MOD-002](req/REQ-MOD-002.md) | Moderations-Queue bearbeiten | functional | M | basis | high | verified | AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3 |
-| [REQ-MOD-003](req/REQ-MOD-003.md) | Entscheidungen begründen und unveränderlich protokollieren | constraint | M | basis | high | implemented | AT-MOD-003, AT-MOD-003-2 |
+| [REQ-MOD-003](req/REQ-MOD-003.md) | Entscheidungen begründen und unveränderlich protokollieren | constraint | M | basis | high | verified | AT-MOD-003, AT-MOD-003-2 |
 | [REQ-MOD-004](req/REQ-MOD-004.md) | Vorläufiges Ausblenden ab drei Meldungen | functional | S | basis | medium | approved | AT-MOD-004 |
 | [REQ-MOD-005](req/REQ-MOD-005.md) | Mitglieder blockieren | functional | S | leistung | medium | verified | AT-MOD-005 |
 | [REQ-MOD-006](req/REQ-MOD-006.md) | Übergabepartner bewerten | functional | C | begeisterung | medium | approved | AT-MOD-006 |
 | [REQ-MOD-007](req/REQ-MOD-007.md) | Rollen vergeben und entziehen | functional | M | n/a | high | verified | AT-MOD-007, AT-MOD-007-2 |
 | [REQ-MOD-008](req/REQ-MOD-008.md) | Whitelist-Domains über eine Oberfläche verwalten | functional | C | n/a | medium | approved | AT-MOD-008 |
 | [REQ-NOTI-001](req/REQ-NOTI-001.md) | Transaktionale E-Mails | functional | M | basis | high | implemented | AT-NOTI-001, AT-NOTI-001-2 |
-| [REQ-NOTI-002](req/REQ-NOTI-002.md) | Gebündelte Benachrichtigung über neue Nachrichten ohne Inhalt | functional | M | leistung | medium | implemented | AT-NOTI-002 |
-| [REQ-NOTI-003](req/REQ-NOTI-003.md) | Benachrichtigungen pro Kategorie abbestellen | functional | S | leistung | low | implemented | AT-NOTI-003 |
+| [REQ-NOTI-002](req/REQ-NOTI-002.md) | Gebündelte Benachrichtigung über neue Nachrichten ohne Inhalt | functional | M | leistung | medium | verified | AT-NOTI-002 |
+| [REQ-NOTI-003](req/REQ-NOTI-003.md) | Benachrichtigungen pro Kategorie abbestellen | functional | S | leistung | low | verified | AT-NOTI-003 |
 | [REQ-NOTI-004](req/REQ-NOTI-004.md) | Authentifizierter E-Mail-Versand (SPF, DKIM, DMARC) | quality | W | basis | high | verified | MAN-NOTI-004 |
 | [REQ-NOTI-005](req/REQ-NOTI-005.md) | Zuverlässige E-Mail-Zustellung | quality | M | basis | medium | implemented | AT-NOTI-005, CTRL-DLQ |
 | [REQ-NOTI-006](req/REQ-NOTI-006.md) | Web-Push-Benachrichtigungen | functional | C | begeisterung | low | approved | AT-NOTI-006 |
@@ -247,7 +247,7 @@ flowchart LR
 | [REQ-OPS-002](req/REQ-OPS-002.md) | Beobachtbarkeit ohne personenbezogene Daten | quality | M | n/a | medium | verified | AT-OPS-002, MAN-OPS-002 |
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | verified | MAN-OPS-003 |
 | [REQ-OPS-004](req/REQ-OPS-004.md) | Reproduzierbarer, versionierter Image-Build | quality | M | n/a | medium | verified | CTRL-CI-IMAGE |
-| [REQ-OPS-005](req/REQ-OPS-005.md) | Automatische, idempotente Datenbankmigration | quality | M | n/a | medium | implemented | AT-OPS-005 |
+| [REQ-OPS-005](req/REQ-OPS-005.md) | Automatische, idempotente Datenbankmigration | quality | M | n/a | medium | verified | AT-OPS-005 |
 | [REQ-OPS-006](req/REQ-OPS-006.md) | Wartungsmodus und Ankündigungen | quality | S | n/a | medium | verified | AT-OPS-006, AT-OPS-006-2 |
 | [REQ-OPS-007](req/REQ-OPS-007.md) | Öffentliche Statusseite | quality | C | leistung | low | verified | AT-OPS-007 |
 | [REQ-OPS-008](req/REQ-OPS-008.md) | Überwachung und Alarmierung | quality | S | n/a | medium | verified | CTRL-ALERT-RULES, MAN-OPS-008 |
@@ -255,27 +255,27 @@ flowchart LR
 | [REQ-OPS-010](req/REQ-OPS-010.md) | Zustellbarkeit der E-Mails | constraint | C | n/a | low | verified | AT-OPS-010, CTRL-DOC-MAIL |
 | [REQ-OPS-011](req/REQ-OPS-011.md) | Betriebshandbuch, Störungs- und Notfallprozess | constraint | M | n/a | medium | verified | CTRL-DOC-BETRIEB, MAN-OPS-011 |
 | [REQ-OPS-012](req/REQ-OPS-012.md) | Automatisierte Aktualisierung von Abhängigkeiten | constraint | S | n/a | low | verified | CTRL-RENOVATE |
-| [REQ-PERF-001](req/REQ-PERF-001.md) | Antwortzeit der Suche | quality | M | leistung | medium | approved | AT-PERF-001 |
-| [REQ-PERF-002](req/REQ-PERF-002.md) | Zustellzeit von Chatnachrichten | quality | M | leistung | medium | approved | AT-PERF-002 |
-| [REQ-PERF-003](req/REQ-PERF-003.md) | Antwortzeit beim Erstellen einer Anzeige | quality | M | leistung | low | approved | AT-PERF-003 |
-| [REQ-PERF-004](req/REQ-PERF-004.md) | Zeit bis zum Versand der Bestätigungsmail | quality | M | basis | medium | approved | AT-PERF-004 |
-| [REQ-PERF-005](req/REQ-PERF-005.md) | Ladeverhalten der Oberfläche | quality | S | leistung | low | approved | AT-PERF-005 |
+| [REQ-PERF-001](req/REQ-PERF-001.md) | Antwortzeit der Suche | quality | M | leistung | medium | verified | AT-PERF-001 |
+| [REQ-PERF-002](req/REQ-PERF-002.md) | Zustellzeit von Chatnachrichten | quality | M | leistung | medium | verified | AT-PERF-002 |
+| [REQ-PERF-003](req/REQ-PERF-003.md) | Antwortzeit beim Erstellen einer Anzeige | quality | M | leistung | low | verified | AT-PERF-003 |
+| [REQ-PERF-004](req/REQ-PERF-004.md) | Zeit bis zum Versand der Bestätigungsmail | quality | M | basis | medium | verified | AT-PERF-004 |
+| [REQ-PERF-005](req/REQ-PERF-005.md) | Ladeverhalten der Oberfläche | quality | S | leistung | low | approved | AT-PERF-005, CTRL-BUNDLE |
 | [REQ-PORT-001](req/REQ-PORT-001.md) | Entwicklungsumgebung mit einem Befehl | quality | S | n/a | low | verified | MAN-PORT-001 |
 | [REQ-PORT-002](req/REQ-PORT-002.md) | Lauffähig auf x86- und ARM-Rechnern | quality | M | n/a | medium | verified | CTRL-CI-MULTIARCH |
 | [REQ-PRIV-001](req/REQ-PRIV-001.md) | Versionierte Einwilligungen | constraint | M | n/a | medium | approved | AT-PRIV-001, AT-PRIV-001-2 |
-| [REQ-PRIV-002](req/REQ-PRIV-002.md) | Datenminimierung und Schutz der Kontaktdaten | constraint | M | basis | high | approved | AT-PRIV-002, AT-PRIV-002-2 |
-| [REQ-PRIV-003](req/REQ-PRIV-003.md) | Löschkonzept mit Fristen je Datenkategorie | constraint | M | n/a | high | approved | AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3 |
-| [REQ-PRIV-004](req/REQ-PRIV-004.md) | Moderation sieht nur gemeldeten Chat-Kontext | constraint | M | basis | high | implemented | AT-PRIV-004 |
+| [REQ-PRIV-002](req/REQ-PRIV-002.md) | Datenminimierung und Schutz der Kontaktdaten | constraint | M | basis | high | verified | AT-PRIV-002, AT-PRIV-002-2 |
+| [REQ-PRIV-003](req/REQ-PRIV-003.md) | Löschkonzept mit Fristen je Datenkategorie | constraint | M | n/a | high | verified | AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3 |
+| [REQ-PRIV-004](req/REQ-PRIV-004.md) | Moderation sieht nur gemeldeten Chat-Kontext | constraint | M | basis | high | verified | AT-PRIV-004 |
 | [REQ-PRIV-005](req/REQ-PRIV-005.md) | Hosting und Auftragsverarbeiter in der EU | constraint | W | n/a | high | approved | MAN-PRIV-005 |
 | [REQ-PRIV-006](req/REQ-PRIV-006.md) | Kein Tracking, keine Drittanbieter-Ressourcen | constraint | M | basis | medium | verified | AT-PRIV-006, AT-PRIV-006-2 |
 | [REQ-PRIV-007](req/REQ-PRIV-007.md) | Prüfung der Datenschutz-Folgenabschätzung | constraint | S | n/a | medium | verified | CTRL-DOC-DSFA, MAN-PRIV-007 |
 | [REQ-PRIV-008](req/REQ-PRIV-008.md) | Keine Indexierung durch Suchmaschinen | constraint | S | basis | low | verified | AT-PRIV-008 |
 | [REQ-SEC-001](req/REQ-SEC-001.md) | OWASP ASVS Level 2 | quality | M | basis | high | implemented | MAN-SEC-001 |
-| [REQ-SEC-002](req/REQ-SEC-002.md) | Passwörter mit Argon2id speichern | constraint | M | n/a | high | implemented | AT-SEC-002 |
+| [REQ-SEC-002](req/REQ-SEC-002.md) | Passwörter mit Argon2id speichern | constraint | M | n/a | high | verified | AT-SEC-002 |
 | [REQ-SEC-003](req/REQ-SEC-003.md) | Passwortrichtlinie | constraint | M | basis | medium | verified | AT-SEC-003 |
 | [REQ-SEC-004](req/REQ-SEC-004.md) | Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen | constraint | M | basis | high | verified | AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3 |
-| [REQ-SEC-005](req/REQ-SEC-005.md) | Begrenzung von Anfragen (Rate-Limits) | constraint | M | n/a | high | implemented | AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3 |
-| [REQ-SEC-006](req/REQ-SEC-006.md) | Autorisierung pro Ressource, standardmäßig verweigern | constraint | M | basis | high | implemented | AT-SEC-006, AT-SEC-006-2 |
+| [REQ-SEC-005](req/REQ-SEC-005.md) | Begrenzung von Anfragen (Rate-Limits) | constraint | M | n/a | high | verified | AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3 |
+| [REQ-SEC-006](req/REQ-SEC-006.md) | Autorisierung pro Ressource, standardmäßig verweigern | constraint | M | basis | high | verified | AT-SEC-006, AT-SEC-006-2 |
 | [REQ-SEC-007](req/REQ-SEC-007.md) | Sicherer Umgang mit hochgeladenen Bildern | constraint | M | basis | medium | approved | AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4 |
 | [REQ-SEC-008](req/REQ-SEC-008.md) | Sicherheitsprüfungen in der CI-Pipeline | constraint | M | n/a | medium | verified | CTRL-CI-SCAN |
 | [REQ-SEC-009](req/REQ-SEC-009.md) | Threat Model für Registrierung, Chat und Upload | constraint | M | n/a | high | verified | MAN-SEC-009 |
@@ -284,11 +284,11 @@ flowchart LR
 | [REQ-SEC-012](req/REQ-SEC-012.md) | Meldeweg für Sicherheitslücken | constraint | S | n/a | low | verified | AT-SEC-012, CTRL-DOC-BETRIEB |
 | [REQ-SEC-013](req/REQ-SEC-013.md) | Penetrationstest vor dem Go-live | constraint | S | n/a | medium | verified | CTRL-DOC-PENTEST, MAN-SEC-013 |
 | [REQ-SRCH-001](req/REQ-SRCH-001.md) | Freitextsuche mit Wortstämmen und Tippfehlertoleranz | functional | M | leistung | medium | verified | AT-SRCH-001, AT-SRCH-001-2 |
-| [REQ-SRCH-002](req/REQ-SRCH-002.md) | Filtern und Sortieren | functional | M | leistung | low | implemented | AT-SRCH-002 |
+| [REQ-SRCH-002](req/REQ-SRCH-002.md) | Filtern und Sortieren | functional | M | leistung | low | verified | AT-SRCH-002 |
 | [REQ-SRCH-003](req/REQ-SRCH-003.md) | Aktualität der Suche | quality | S | leistung | low | verified | AT-SRCH-003, AT-SRCH-003-2 |
 | [REQ-SRCH-004](req/REQ-SRCH-004.md) | Anzeigen merken | functional | S | leistung | low | verified | AT-SRCH-004 |
 | [REQ-SRCH-005](req/REQ-SRCH-005.md) | Suchaufträge mit täglicher E-Mail | functional | C | begeisterung | low | approved | AT-SRCH-005 |
-| [REQ-SRCH-006](req/REQ-SRCH-006.md) | Keine Anzeigen blockierter oder gesperrter Nutzer in der Suche | functional | M | basis | medium | implemented | AT-SRCH-006 |
+| [REQ-SRCH-006](req/REQ-SRCH-006.md) | Keine Anzeigen blockierter oder gesperrter Nutzer in der Suche | functional | M | basis | medium | verified | AT-SRCH-006 |
 | [REQ-UX-001](req/REQ-UX-001.md) | Mobile Nutzung und Installierbarkeit | quality | M | basis | medium | implemented | AT-UX-001, AT-UX-001-2 |
 | [REQ-UX-002](req/REQ-UX-002.md) | Deutsche Oberfläche, übersetzbar vorbereitet | quality | S | basis | low | verified | MAN-UX-002 |
 | [REQ-UX-003](req/REQ-UX-003.md) | Fehlerseiten und korrekte HTTP-Statuscodes | functional | M | basis | medium | verified | AT-UX-003, AT-UX-003-2 |

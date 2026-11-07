@@ -3,7 +3,7 @@ id: REQ-SEC-006
 title: Autorisierung pro Ressource, standardmäßig verweigern
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead]
@@ -13,9 +13,9 @@ moscow_reason: [2]
 kano: basis
 epic: EPIC-00
 source: OWASP Top 10:2021 A01 (Broken Access Control), QS-2
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 review_due: 2027-04-26
 verification: [AT-SEC-006, AT-SEC-006-2]
 ---
@@ -50,7 +50,7 @@ Direkte Objektreferenzen (IDOR) sind die häufigste Ursache für Datenabflüsse;
 
 ## Nachweis
 - `AT-SEC-006`: Smoke-Test – fremde Konversation 404, Mitglied auf Moderation 403, Interessent auf Deal 403.
-- `AT-SEC-006-2`: neu zu schreiben – vollständige Autorisierungsmatrix (alle Zeilen) als Integrationstest.
+- `AT-SEC-006-2`: Integrationstest `modules/authorization.integration.test.ts` – vollständige Autorisierungsmatrix: jeder Endpunkt für Gast, Mitglied, Moderation und Admin, fremde Ressourcen liefern 404.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -59,3 +59,4 @@ Direkte Objektreferenzen (IDOR) sind die häufigste Ursache für Datenabflüsse;
 | 1.1 | 2026-10-23 | Eigene Datei, Autorisierungsmatrix |
 | 1.2 | 2026-10-23 | Review v0.2: R-03 `class: constraint` (Kontrollmatrix); R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason |
 | 1.3 | 2026-10-26 | Guideline-Review: GL-06 Ausgabe der OWASP Top 10 genannt, review_due |
+| 1.4 | 2026-11-07 | Nachweis AT-SEC-006-2 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

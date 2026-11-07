@@ -3,7 +3,7 @@ id: REQ-PERF-004
 title: Zeit bis zum Versand der Bestätigungsmail
 type: quality
 class: quality
-status: approved
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -15,9 +15,9 @@ epic: EPIC-01
 source: BG-2
 use_cases: [UC-01]
 depends_on: [REQ-NOTI-005]
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-PERF-004]
 ---
 
@@ -52,7 +52,7 @@ Die Registrierung ist die erste kritische Nutzerreise; eine verspätete Mail kos
 | Adresse existiert nicht | kein Bounce-Handling im Beispiel; unbestätigte Konten werden nach 7 Tagen gelöscht (Q-13) |
 
 ## Nachweis
-- `AT-PERF-004`: k6-Lasttest Registrierung mit Mailpit-Abgleich (neu zu schreiben; Umsetzungsstand ⬜).
+- `AT-PERF-004`: k6-Lasttest `tests/load/signup.js` mit Abgleich in Mailpit (wöchentlich in `ops-weekly.yml`, `RATE_LIMIT_FACTOR=100` nur im Demo-Modus). Messung 2026-11-07, 50 Registrierungen/min über 5 min: **p95 949 ms** von der Antwort bis zur Mail (max. 966 ms), 0 verlorene Mails bei 251 Registrierungen. Abweichung vom Messkontext: 12 statt 4 Kerne (Abstand zur Grenze Faktor > 10).
 
 
 ## Änderungshistorie
@@ -63,3 +63,4 @@ Die Registrierung ist die erste kritische Nutzerreise; eine verspätete Mail kos
 | 2.1 | 2026-10-23 | Review v0.2: R-15 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
 | 2.3 | 2026-10-26 | Guideline-Review: GL-10 Felder aus der NFR-/SLO-Vorlage ergänzt (Fehlerbudget, Lastprofil, Timeout/Retry, Wiederherstellung, Eskalation) |
+| 2.4 | 2026-11-07 | AT-PERF-004 umgesetzt (k6 + Mailpit) und gemessen: p95 949 ms, 0 verlorene Mails (Testbericht 2026-11-07); Status → verified |

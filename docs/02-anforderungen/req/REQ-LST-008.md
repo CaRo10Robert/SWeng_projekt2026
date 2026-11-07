@@ -3,7 +3,7 @@ id: REQ-LST-008
 title: Ablauf, Erinnerung, Verlängerung und Löschfristen von Anzeigen
 type: business-rule
 class: functional
-status: approved
+status: verified
 owner: team-marktplatz
 risk: low
 release: R1
@@ -13,9 +13,9 @@ epic: EPIC-02
 source: BG-2, REQ-PRIV-003
 use_cases: [UC-17]
 depends_on: [REQ-NOTI-001]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-LST-008]
 ---
 
@@ -47,9 +47,9 @@ Die Prüfung erfolgt mindestens stündlich. Im Demo-Modus kann ein Admin sie sof
 | Prüfung läuft doppelt | idempotent, keine zweite Erinnerung |
 
 ## Nachweis
-- `AT-LST-008`: Szenario-Test mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (neu).
+- `AT-LST-008`: Integrationstest (`listings.integration.test.ts`) mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (mit Aufhebung des offenen Deals, Mail und Systemnachricht).
 
-Teilweise umgesetzt: Erinnerung, Ablauf aktiver Anzeigen, Verlängerung und Löschfristen sind umgesetzt; Ablauf pausierter und Rückfall reservierter Anzeigen fehlen noch. Deshalb Status `approved`.
+Umgesetzt (2026-10-27): auch Ablauf pausierter Anzeigen und Rückfall reservierter Anzeigen nach 30 Tagen (`RESERVATION_FALLBACK_DAYS` in `listings/domain.ts`); genau 30 Tage zählen noch nicht.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -57,3 +57,4 @@ Teilweise umgesetzt: Erinnerung, Ablauf aktiver Anzeigen, Verlängerung und Lös
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Löschfrist abgegebener Anzeigen (30 Tage) aufgenommen; „Verlängern mit einem Klick“ präzisiert als Link zur Anzeige plus eine Aktion |
 | 3.0 | 2026-10-23 | Review v0.2: R-05/R-28 pausierte Anzeigen laufen nach 90 Tagen ab, Reservierungen fallen nach 30 Tagen zurück; R-07 Verlängern über Link + eine Aktion (UC-17); Verweis auf §4 |
+| 3.1 | 2026-11-07 | Ablauf pausierter und Rückfall reservierter Anzeigen umgesetzt; AT-LST-008 als Integrationstest grün (Testbericht 2026-11-07); Status → verified |

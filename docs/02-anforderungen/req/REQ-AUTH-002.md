@@ -3,7 +3,7 @@ id: REQ-AUTH-002
 title: Hochschuladresse per Link bestätigen
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-identity
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-01
 source: BG-1
 use_cases: [UC-01]
 depends_on: [REQ-AUTH-001, REQ-NOTI-001, REQ-PRIV-003]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-AUTH-002, AT-AUTH-002-2, AT-AUTH-002-3, AT-AUTH-002-4]
 ---
 
@@ -81,9 +81,8 @@ I: setzt nur REQ-AUTH-001 voraus · N: Gültigkeitsdauer und Löschfrist verhand
 ## Nachweis
 - `AT-AUTH-002`: Smoke-Test – Bestätigung mit dem Link aus der **älteren** von zwei Mails meldet an.
 - `AT-AUTH-002-2`: Smoke-Test – derselbe Link ein zweites Mal liefert `token_used`, keine Sitzung.
-- `AT-AUTH-002-3`: (neu) abgelaufener Link liefert `token_expired` (Zeit über die Datenbank vorgestellt).
-- `AT-AUTH-002-4`: (neu) unbestätigtes Konto älter als 7 Tage wird vom Löschlauf entfernt; erneute Registrierung derselben Adresse ist möglich.
-- Teilweise umgesetzt: Die Löschung nach 7 Tagen (Q-13) fehlt noch.
+- `AT-AUTH-002-3`: Integrationstest (`identity.integration.test.ts`) – abgelaufener Link liefert `token_expired` (Zeit über die Datenbank vorgestellt).
+- `AT-AUTH-002-4`: Integrationstest (`identity.integration.test.ts`) – unbestätigtes Konto älter als 7 Tage wird vom Löschlauf entfernt; erneute Registrierung derselben Adresse ist möglich.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -91,3 +90,4 @@ I: setzt nur REQ-AUTH-001 voraus · N: Gültigkeitsdauer und Löschfrist verhand
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Szenario „mehrere Links“ ergänzt (Fehlerkorrektur aus dem MVP-Test) |
 | 3.0 | 2026-10-23 | Review v0.2: R-06/R-28 – Löschung unbestätigter Konten nach 7 Tagen (Q-13), Szenario und Nachweis ergänzt; Status `approved`, weil die Löschung noch nicht umgesetzt ist; R-15 moscow_reason |
+| 3.1 | 2026-11-07 | Löschung unbestätigter Konten nach 7 Tagen durch AT-AUTH-002-4 belegt; AT-AUTH-002-3/-4 als Integrationstests grün (Testbericht 2026-11-07); Status → verified |

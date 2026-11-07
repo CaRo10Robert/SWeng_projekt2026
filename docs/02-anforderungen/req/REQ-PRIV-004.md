@@ -3,7 +3,7 @@ id: REQ-PRIV-004
 title: Moderation sieht nur gemeldeten Chat-Kontext
 type: privacy
 class: constraint
-status: implemented
+status: verified
 owner: team-produkt
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-06
 source: DSGVO Art. 5 Abs. 1 c, Vertraulichkeit privater Kommunikation
 use_cases: [UC-32]
 depends_on: [REQ-MOD-002]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 verification: [AT-PRIV-004]
 ---
 
@@ -51,7 +51,7 @@ Szenario: Nicht gemeldete Konversation
 | Fall ist entschieden | Kontext wird nicht mehr angezeigt |
 
 ## Nachweis
-- `AT-PRIV-004`: neu zu schreiben – Meldung einer Nachricht in einer langen Konversation; Moderationsfall enthält höchstens 11 Nachrichten; Audit-Log enthält den Zugriff.
+- `AT-PRIV-004`: Integrationstest (`trust.integration.test.ts`) – Meldung einer Nachricht in einer langen Konversation; der Moderationsfall enthält höchstens 11 Nachrichten, der Zugriff steht im Audit-Log.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -59,3 +59,4 @@ Szenario: Nicht gemeldete Konversation
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Szenarien |
 | 1.2 | 2026-10-23 | Review v0.2: R-04 Fehler- und Missbrauchsfälle; R-15 moscow_reason |
+| 1.3 | 2026-11-07 | Nachweis AT-PRIV-004 als Integrationstest umgesetzt und grün (Testbericht 2026-11-07); Status → verified |

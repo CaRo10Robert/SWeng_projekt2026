@@ -3,9 +3,9 @@ id: ARC-001
 type: architecture
 status: approved
 owner: team-architektur
-version: 1.5
+version: 1.6
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 review_due: 2027-01-31
 ---
 
@@ -18,6 +18,8 @@ review_due: 2027-01-31
 > **v1.2:** Recht, Auftritt und Betrieb als Übung mit Platzhaltern (EPIC-13, Q-23): Rechtstexte als versionierte Markdown-Inhalte ([ADR-0015](decisions/0015-rechtstexte-als-markdown.md)), englische Oberfläche ([ADR-0016](decisions/0016-internationalisierung.md)), optionale Compose-Profile für Reverse Proxy mit TLS/HSTS und Überwachung ([ADR-0017](decisions/0017-optionale-betriebsprofile.md)), Datensicherung mit getesteter Wiederherstellung ([ADR-0018](decisions/0018-datensicherung.md)). Neu: DSA-Begründung und Widerspruch (Vier-Augen), Wartungsmodus und Statusseite, DAC7-Auswertung, Fehlerseiten mit korrekten Statuscodes, Laufzeitsichten 6.5/6.6, Verteilungssicht 7.3, Querschnitt 8.8–8.11. Alle neuen Bausteine sind **geplant** (Spalte „Stand“ mit Backlog-ID B-43 … B-58; Sprint-Zuordnung im [Backlog](../02-anforderungen/03-backlog.md)). Prozessartefakte: [Recht](../06-recht/README.md), [Betrieb](../07-betrieb/README.md).
 >
 > **v1.5:** Guideline-Review (GL-01…GL-17): [Ausnahmeregister](ausnahmen.md) für MUST-Abweichungen (ASVS-Fassung, OpenTelemetry, befristete ASVS-Ausnahmen, SLSA Level 3); [ADR-0019](decisions/0019-wiederherstellung-und-loeschjournal.md) ersetzt die geänderten Teile von ADR-0018; [ADR-0020](decisions/0020-datenzugriff-pg-sql-template.md) begründet den Datenzugriff ohne Query Builder; ADR-0014 bis 0018 auf Accepted; Status des Dokuments `approved`.
+>
+> **v1.6:** Testpyramide und Lieferkette (2026-11-07): Paginierung und `RateLimit-*`-Header (8.1, 8.10, neu 8.12), Löschläufe in 8.4 auf den umgesetzten Stand gebracht (Rückfall reservierter Anzeigen, unbestätigte Konten, Kontolöschung mit Anonymisierung), Lieferkette in 8.1 (Scans, SBOM, Provenance-Attestation, Digest-Pins), Qualitätssicherung in 8.11 mit Integrationstests, Bundle-Budget, ZAP und k6; Details in der [Teststrategie](../05-umsetzung/teststrategie.md).
 
 > **v1.1:** Befunde aus dem [Architektur-Review v1.0](../04-review/review-v1.0-architektur.md) behoben: Soll und Ist getrennt (Spalte „Stand“ mit Backlog-ID), Datenbankzugriff und Modulabhängigkeiten in der Komponentensicht, Löschung und Anonymisierung im Datenmodell, Schlüsselkonzept für die IP-Pseudonymisierung ([ADR-0014](decisions/0014-ip-pseudonymisierung.md)), Laufzeitsichten an den Code angeglichen, Qualitätsszenarien an die Anforderungen angeglichen.
 >
@@ -988,8 +990,9 @@ flowchart LR
 - **Authentifizierung:** serverseitige Sessions (gehashtes Opaque-Token in Postgres), Cookie `HttpOnly; Secure; SameSite=Lax`. Siehe ADR-0003. Nur Konten mit Status `aktiv` erhalten eine gültige Sitzung; eine Sperre oder Löschung entzieht jeden Zugriff sofort (REQ-SEC-011).
 - **Autorisierung:** zentrale Prüfung pro Ressource in den Fachmodulen, *deny by default*; fremde Ressourcen liefern 404 (REQ-SEC-006).
 - **Eingaben:** Validierung an der Grenze gegen die TypeBox-Schemas aus `packages/contracts` (Fastify), aus denen auch die OpenAPI-Spezifikation erzeugt wird. Ausgabe-Encoding durch React. Strikte CSP (die SPA kommt vom selben Origin). CSRF-Schutz über Pflicht-Header und Origin-Prüfung (ADR-0011).
-- **Container-Härtung:** Non-root-User, Read-only-Root-FS, `no-new-privileges`, keine Secrets im Image, minimales Base-Image. Image-Scan (Trivy), Renovate, SCA, Secret-Scan und SBOM sind geplant (B-06, Sprint 4).
-- **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). Die Anmeldung zählt einen Versuch zuerst atomar und setzt den Zähler bei Erfolg zurück. (Stand: umgesetzt B-34, B-35.)
+- **Container-Härtung:** Non-root-User, Read-only-Root-FS, `no-new-privileges`, keine Secrets im Image, minimales Base-Image ohne npm und yarn zur Laufzeit.
+- **Lieferkette (REQ-SEC-008, REQ-OPS-004, EX-05):** CI scannt jeden Push (Semgrep, `pnpm audit`, gitleaks, Trivy) und erzeugt eine SBOM (CycloneDX). Für das ausgelieferte Image-Archiv entstehen bei Push eine Build-Provenance- und eine SBOM-Attestation (GitHub Attestations, SLSA Level 2). Actions sind per Commit-SHA, Basis- und Werkzeug-Images (Postgres, k6, ZAP, Trivy) per Digest gepinnt; Renovate hält die Pins aktuell. Signierte Images in einer Registry (Level 3) gibt es mangels Registry nicht (EX-05).
+- **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). Die Anmeldung zählt einen Versuch zuerst atomar und setzt den Zähler bei Erfolg zurück. Begrenzte Antworten tragen `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` und `RateLimit-Policy` (draft-ietf-httpapi-ratelimit-headers-07, Guideline Kap. 06): Ein Wrapper um den `RateLimitStore` merkt sich je Request das strengste Ergebnis, der HTTP-Server setzt daraus die Header (`platform/http/rate-limit-headers.ts`); Schlüssel gelangen nie in die Antwort. (Stand: umgesetzt B-34, B-35; Header geprüft im Smoke-Test zu AT-SEC-005.)
 - **Pseudonymisierte IP-Adressen (ADR-0014):** HMAC-SHA256 mit einem zufälligen 256-Bit-Schlüssel aus `platform.ip_pepper`. Er wird beim ersten Gebrauch erzeugt, falls keiner gültig ist, und nach 24 h beim nächsten Gebrauch gewechselt; der Vorgänger bleibt 1 h gültig (längstes Zählfenster) und wird dann gelöscht. Kein Standardwert im Code, kein Secret im Image; für mehrere Instanzen tragfähig. Gespeicherte Werte sind ohne den Schlüssel nicht zurückrechenbar und höchstens 7 Tage vorhanden (REQ-PRIV-002). (Stand: umgesetzt, Review v1.3 RV-R-02; der frühere feste Salt ist entfernt.)
 - **Vertrauensgrenze Kontaktfreigabe (REQ-CHAT-010, REQ-PRIV-002):** Die Entscheidung „darf die Adresse sehen“ ist eine reine Funktion in `messaging/domain.ts` (beide Zustimmungen erteilt, keine Blockierung, Gegenüber aktiv) und wird tabellarisch getestet. `identity` stellt dafür ein schmales API `getSharedContactAddresses(userIds)` bereit, das nur für aktive Konten die bei der Registrierung eingegebene Adresse liefert; das bestehende `getContact` bleibt dem Versand von E-Mails (`notifications`) vorbehalten. In `packages/contracts` tragen nur `Me`, `AdminUser` und `ContactShare.counterpartEmail` E-Mail-Felder; die Smoke-Prüfung AT-CHAT-001-2 stellt sicher, dass Konversationen und Nachrichten außerhalb von `contact` keine Adresse enthalten. Die Adresse ist nie Teil einer Nachricht, daher sieht die Moderation sie auch im gemeldeten Kontext nicht. Zustimmungen erscheinen im Datenexport. Missbrauchsschutz über Sperrfrist (24 h) und Höchstzahl (3). (Stand: umgesetzt B-01.)
 - **Demo-spezifisch:** Demo-Passwörter stehen nur in der Seed-Dokumentation und werden nur bei `SEED_DEMO=true` angelegt.
@@ -1020,22 +1023,22 @@ flowchart LR
 
 ### 8.4 Datenschutz: Datenklassen und verantwortliche Löschläufe
 
-> Die Fristen sind verbindlich in [REQ-PRIV-003](../02-anforderungen/req/REQ-PRIV-003.md) festgelegt. Diese Übersicht ordnet die Datenklassen den Modulen und Löschläufen zu; sie nennt bewusst keine eigenen Fristen. Welche Fristen bereits automatisch durchgesetzt werden, zeigt der [Katalog-Index](../02-anforderungen/02-anforderungen.md#6-katalog-index) (REQ-PRIV-003 ist erst teilweise umgesetzt).
+> Die Fristen sind verbindlich in [REQ-PRIV-003](../02-anforderungen/req/REQ-PRIV-003.md) festgelegt. Diese Übersicht ordnet die Datenklassen den Modulen und Löschläufen zu; sie nennt bewusst keine eigenen Fristen. Alle Fristen werden automatisch durchgesetzt (REQ-PRIV-003 `verified`, Nachweise AT-PRIV-003, -2, -3).
 
 | Datenkategorie | Klasse | Modul | Löschlauf |
 |---|---|---|---|
-| E-Mail-Adresse, Passwort-Hash, Sessions, Tokens | vertraulich | identity | Kontolöschung über `privacy-purge` (täglich 03:17); unbestätigte Konten und Tokens geplant B-12 |
-| Einwilligungen | vertraulich (Nachweis) | identity | Anonymisierung bei Kontolöschung geplant B-22 |
-| Anzeigen, Bilder | intern (nur Mitglieder) | listings | `listings-maintenance` (stündlich); Ü-12/Ü-13/Ü-19 geplant B-32 |
+| E-Mail-Adresse, Passwort-Hash, Sessions, Tokens | vertraulich | identity | Kontolöschung über `privacy-purge` (täglich 03:17); unbestätigte Konten nach 7 Tagen, benutzte bzw. abgelaufene Links nach 7 Tagen im selben Lauf |
+| Einwilligungen | vertraulich (Nachweis) | identity | bei Kontolöschung ohne Profilbezug (`user_id` NULL, `subject_ref` als HMAC), danach 3 Jahre |
+| Anzeigen, Bilder | intern (nur Mitglieder) | listings | `listings-maintenance` (stündlich): Ablauf, Ablauf pausierter Anzeigen, Rückfall reservierter Anzeigen nach 30 Tagen, Löschung abgelaufener und abgegebener Anzeigen |
 | Merkliste | intern | search | mit dem Konto |
-| Chatnachrichten, Deals, Kontaktfreigaben | **vertraulich** | messaging | Fristen für Chats geplant B-12; Kontolöschung mit Anonymisierung geplant B-22 |
-| Meldungen, Moderationsentscheidungen, Blockierungen | vertraulich | trust | Fristen geplant B-12 |
-| Audit-Log (Admin- und Moderationsaktionen) | vertraulich | platform | Frist geplant B-12 |
+| Chatnachrichten, Deals, Kontaktfreigaben | **vertraulich** | messaging | Chats 12 Monate nach der letzten Nachricht in `privacy-purge`; bei Kontolöschung nur die eigenen Texte, das Gegenüber sieht „Ehemaliges Mitglied“ |
+| Meldungen, Moderationsentscheidungen, Blockierungen | vertraulich | trust | 12 Monate nach Abschluss in `privacy-purge`; Beweissicherung und offene Widersprüche halten zurück |
+| Audit-Log (Admin- und Moderationsaktionen) | vertraulich | platform | 24 Monate in `privacy-purge` |
 | Zählerspeicher Rate-Limit (pseudonymisierte IP und Adresse) | vertraulich | platform | täglich in `privacy-purge` |
 | IP-Pseudonymisierungsschlüssel | geheim | platform | Rotation täglich, Vorgänger nach 1 h gelöscht (ADR-0014, umgesetzt) |
 | Löschjournal | intern (nur IDs) | platform, Volume `journal` | 35 Tage, außerhalb der Datenbank (ADR-0019) |
 | Anwendungs-Logs | intern, **ohne PII** | – | Container-Logs, nicht persistiert |
-| Widersprüche | vertraulich | trust | wie Moderationsentscheidungen, Fristen geplant B-12 |
+| Widersprüche | vertraulich | trust | wie Moderationsentscheidungen (12 Monate nach Abschluss) |
 | DAC7-Auswertung | vertraulich | admin (keine eigene Speicherung, nur Export) | Exporte liegen beim Betreiber; Aufbewahrung nach § 22 PStTG (Übungswert, Q-28), Konzept in [dac7-konzept.md](../06-recht/dac7-konzept.md) |
 | Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: alle der letzten 7 Tage, danach je Woche die neueste; gelöschte Konten verschwinden nach ≤ 28 Tagen auch aus Sicherungen (ADR-0018) |
 | Einstellungen, Ankündigung | intern | platform | bis zur Änderung |
@@ -1109,7 +1112,7 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | Unbekannter Pfad | – | **404** mit SPA, die die Fehlerseite zeigt (Liste der Routenpräfixe auf dem Server, abgeleitet aus dem Router) |
 | Unerwarteter Fehler | 500 Problem Details ohne interne Details, Korrelations-ID im Log und in der Antwort | Fehlerseite mit Korrelations-ID und „Erneut versuchen“ |
 | Wartungsmodus | 503 Problem Details mit `Retry-After` | Wartungsseite; Rechtsseiten und `/status` bleiben erreichbar |
-| Rate-Limit | 429 mit `Retry-After` (unverändert) | Hinweis mit Wartezeit |
+| Rate-Limit | 429 mit `Retry-After` und `RateLimit-*`-Headern (auch auf erfolgreichen begrenzten Antworten) | Hinweis mit Wartezeit |
 
 Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten sind barrierefrei: Überschrift mit Fokus und verständlicher Text ohne Fachjargon. Fehlerseiten werden nicht indexiert (siehe 8.1).
 
@@ -1124,7 +1127,13 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 - **Statusseite (REQ-OPS-007):** `/status` öffentlich, aus der Readiness-Prüfung und dem Wartungsmodus abgeleitet. Sie zeigt nur den Gesamtzustand (`operational`, `degraded`, `maintenance`), den Zustand der Bereiche `app`, `database`, `email` und `realtime` (Vertrag `SystemStatus`) und die Ankündigung; Prüfungen laufen höchstens einmal gleichzeitig, die Route ist auf 50 Anfragen je 10 s begrenzt; keine internen Details (Versionen, Hosts, Fehlermeldungen).
 - **Aktualisierung (REQ-OPS-012):** Renovate gruppiert Updates. Sicherheitsupdates kommen sofort, alle anderen wöchentlich; CI muss grün sein, und vor dem Update wird gesichert ([update-prozess.md](../07-betrieb/update-prozess.md)).
 - **Störungen und Datenpannen (REQ-OPS-011, REQ-LEGAL-013):** Schweregrade, Rollen und Kommunikation über Ankündigung bzw. Statusseite. Bei Personenbezug greift der Datenpannen-Prozess mit Meldung binnen 72 h ([incident-prozess.md](../07-betrieb/incident-prozess.md), [datenpannen-prozess.md](../06-recht/datenpannen-prozess.md)).
-- **Qualitätssicherung in CI:** Coverage mit Schwellen (Geschäftsregeln 100 %, Fachmodule 15,9 % – Lücke zu REQ-MAINT-001 offen, B-64), Mutationstests wöchentlich (`mutation.yml`, 73,8 %), Security-Scans mit SBOM (`security-scans`, REQ-SEC-008), Multi-Arch-Build (`multiarch`, REQ-PORT-002), Ops-Tests im Job `compose` (Restore, Löschfristen, Datenbankausfall, Proxy) und wöchentlich der Dead-Letter-Test (`ops-weekly.yml`). Bedrohungen und Gegenmaßnahmen: [Threat Model](threat-model.md).
+- **Qualitätssicherung in CI** (Einzelheiten in der [Teststrategie](../05-umsetzung/teststrategie.md)): Unit- und Integrationstests gegen echte PostgreSQL (Testcontainers) mit Coverage-Schwellen (Fachmodule 88,65 %, Geschäftsregeln 100 % Zeilen; REQ-MAINT-001), Komponententests der Web-App, JS-Budget der Web-App (`CTRL-BUNDLE`), Mutationstests wöchentlich (`mutation.yml`, 73,8 %), Security-Scans mit SBOM (`security-scans`, REQ-SEC-008), Multi-Arch-Build (`multiarch`, REQ-PORT-002), Ops-Tests im Job `compose` (Restore, Löschfristen, Datenbankausfall, Proxy) und wöchentlich Dead-Letter-Test, ZAP-Baseline und k6-Lasttests (`ops-weekly.yml`). Bedrohungen und Gegenmaßnahmen: [Threat Model](threat-model.md).
+
+### 8.12 Listen und Paginierung (ADR-0009)
+- **Keyset-Paginierung** für Listen, die unbegrenzt wachsen: `?cursor=&limit=` mit Antwort `{ items, nextCursor }` (`Page<T>`/`PageQuery` in `packages/contracts`, Hilfen in `platform/http/pagination.ts`). Der Cursor ist opak (base64url) und enthält nur die Sortierschlüssel des letzten Eintrags. Standard 50, höchstens 200 Einträge; ein ungültiger Cursor liefert 422, statt still von vorn zu beginnen. Umgesetzt für Audit-Log und Beweissicherungen (Smoke-Test: zwei Seiten lückenlos und ohne Doppelung).
+- **Suche** (`GET /listings`): eigener Cursor mit Offset (höchstens 10.000), weil die Relevanzsortierung keinen stabilen Schlüssel hat. Neue Anzeigen zwischen zwei Seiten können Treffer verschieben; für eine Kleinanzeigen-Suche ist das hinnehmbar.
+- **Chatnachrichten** (`GET /conversations/:id/messages`): Nachladen ab einer Nachricht (`after`, `limit` ≤ 200).
+- **Noch ohne Paginierung** (Guideline Kap. 06 „Pagination on every list endpoint“, SHOULD): eigene Anzeigen, Merkliste, Konversationen, Blockierungen, Mitteilungen, Moderationsfälle, Widersprüche und Nutzerverwaltung. Die ersten fünf sind je Mitglied durch Geschäftsregeln oder Löschfristen klein, die Moderations- und Admin-Listen im Beispiel ebenfalls. Umstellung auf `Page<T>` im Backlog (B-65, R2). Sie ändert die Antwortform (Array → Objekt); weil Web-App und Server aus demselben Repository gemeinsam ausgeliefert werden und es keine externen Konsumenten gibt, braucht sie keine neue API-Version.
 
 ## 9. Architekturentscheidungen
 

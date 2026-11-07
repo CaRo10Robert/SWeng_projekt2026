@@ -3,9 +3,9 @@ id: EVIDENCE
 type: verification
 status: in-review
 owner: qa-lead
-version: 1.0
+version: 1.1
 created: 2026-10-23
-last_updated: 2026-10-23
+last_updated: 2026-11-07
 ---
 
 # Nachweiskatalog
@@ -14,7 +14,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 
 | Präfix | Art | Ort |
 |---|---|---|
-| `AT-` | automatisierter Test (Unit, API/Smoke, E2E, Last) | `apps/server/src/**/*.test.ts`, `scripts/smoke-test.mjs`, `e2e/`, `tests/` – die ID steht im Testnamen |
+| `AT-` | automatisierter Test (Unit, Integration, Komponenten, API/Smoke, E2E, Last) | `apps/server/src/**/*.test.ts` (Unit), `apps/server/src/**/*.integration.test.ts` (Integration gegen PostgreSQL per Testcontainers), `apps/web/src/**/*.test.tsx` (Komponenten), `scripts/smoke-test.mjs`, `e2e/`, `tests/` – die ID steht im Testnamen; Einordnung in der [Teststrategie](../05-umsetzung/teststrategie.md) |
 | `MAN-` | manueller Nachweis mit Protokoll | `docs/04-review/` |
 | `CTRL-` | Kontrolle (Fitness Function, CI-Prüfung, Konfiguration) | `package.json`-Skripte, CI-Workflow |
 
@@ -40,8 +40,8 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-001-2` | automatisiert | REQ-AUTH-001 | Smoke-Test – Registrierung mit `x@hwg-lu.de.evil.com` wird mit `domain_not_allowed` abgelehnt (QS-1). |
 | `AT-AUTH-002` | automatisiert | REQ-AUTH-002 | Smoke-Test – Bestätigung mit dem Link aus der **älteren** von zwei Mails meldet an. |
 | `AT-AUTH-002-2` | automatisiert | REQ-AUTH-002 | Smoke-Test – derselbe Link ein zweites Mal liefert `token_used`, keine Sitzung. |
-| `AT-AUTH-002-3` | automatisiert | REQ-AUTH-002 | (neu) abgelaufener Link liefert `token_expired` (Zeit über die Datenbank vorgestellt). |
-| `AT-AUTH-002-4` | automatisiert | REQ-AUTH-002 | (neu) unbestätigtes Konto älter als 7 Tage wird vom Löschlauf entfernt; erneute Registrierung derselben Adresse ist möglich. |
+| `AT-AUTH-002-3` | automatisiert | REQ-AUTH-002 | Integrationstest (`identity.integration.test.ts`) – abgelaufener Link liefert `token_expired` (Zeit über die Datenbank vorgestellt). |
+| `AT-AUTH-002-4` | automatisiert | REQ-AUTH-002 | Integrationstest (`identity.integration.test.ts`) – unbestätigtes Konto älter als 7 Tage wird vom Löschlauf entfernt; erneute Registrierung derselben Adresse ist möglich. |
 | `AT-AUTH-003` | automatisiert | REQ-AUTH-003 | Unit-Test – BR-01-Tabelle prüft den abgeleiteten Typ je zugelassener Zeile. |
 | `AT-AUTH-003-2` | automatisiert | REQ-AUTH-003 | Smoke-Test – nach Bestätigung einer `@studmail.hwg-lu.de`-Adresse ist der Typ „Studierende“. |
 | `AT-AUTH-004` | automatisiert | REQ-AUTH-004 | Smoke-Test – zweite Registrierung derselben Adresse liefert identische Antwort. |
@@ -62,13 +62,13 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-CHAT-001-4` | automatisiert | REQ-CHAT-001 | API-Test – Kontakt bei Blockierung wird mit „Kontakt nicht möglich“ abgelehnt (neu). |
 | `AT-CHAT-002` | automatisiert | REQ-CHAT-002 | API-Test – zweimaliger (auch paralleler) Start liefert dieselbe Konversations-ID (neu; Grundlage: Smoke-Test „Konversation starten“). |
 | `AT-CHAT-003` | automatisiert | REQ-CHAT-003 | Smoke-Test – Anbieter erhält die Nachricht in Echtzeit; zusätzlich Browser-Durchlauf mit zwei Konten. |
-| `AT-CHAT-003-2` | automatisiert | REQ-CHAT-003 | E2E-Test – bei getrennter Verbindung erscheint die Nachricht durch Aktualisierung (neu). |
+| `AT-CHAT-003-2` | automatisiert | REQ-CHAT-003 | E2E-Test `e2e/tests/realtime.spec.ts` – bei getrennter Echtzeitverbindung erscheint eine neue Nachricht durch Aktualisierung (Polling). |
 | `AT-CHAT-004` | automatisiert | REQ-CHAT-004 | Smoke-Test – gleiche Kennung erzeugt keine zweite Nachricht. |
 | `AT-CHAT-004-2` | automatisiert | REQ-CHAT-004 | API-Test – Nachladen ab der letzten bekannten Nachricht ohne Lücke (neu). |
 | `AT-CHAT-005` | automatisiert | REQ-CHAT-005 | Smoke-Test – Ungelesen-Zähler; Lesestatus nach Öffnen (Lesestatus-Prüfung neu zu ergänzen). |
 | `AT-CHAT-006` | automatisiert | REQ-CHAT-006 | Unit-Test der Erkennung (Entscheidungstabelle). |
 | `AT-CHAT-007` | automatisiert | REQ-CHAT-007 | API-Test – Längengrenze (neu). |
-| `AT-CHAT-007-2` | automatisiert | REQ-CHAT-007 | API-Test – Rate-Limits für Konversationen und Nachrichten (neu). |
+| `AT-CHAT-007-2` | automatisiert | REQ-CHAT-007 | Integrationstest (`messaging.integration.test.ts`) – höchstens 20 neue Konversationen je Stunde und 60 Nachrichten je Minute. |
 | `AT-CHAT-008` | automatisiert | REQ-CHAT-008 | API-Test Bild senden und Zugriffsschutz (neu). Noch nicht umgesetzt (⬜). |
 | `AT-CHAT-009-2` | automatisiert | REQ-CHAT-009 | API-Test Preisvorschlag senden, annehmen, ablehnen (neu). Noch nicht umgesetzt (⬜). |
 | `AT-CHAT-010` | automatisiert | REQ-CHAT-010 | Smoke-Test – einseitige Zustimmung gibt nichts preis, beidseitige Zustimmung zeigt die Adresse, Systemnachricht ohne Adresse, Widerruf blendet sie aus (neu). |
@@ -117,14 +117,14 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-LST-006` | automatisiert | REQ-LST-006 | Unit-Test des Zustandsautomaten (erlaubte und verbotene Übergänge). |
 | `AT-LST-006-2` | automatisiert | REQ-LST-006 | API-Test – pausieren, reaktivieren, löschen, fremde Anzeige → 404 (neu). |
 | `AT-LST-007` | automatisiert | REQ-LST-007 | Unit-Test der Übergänge reservieren, aufheben, abgeben. |
-| `AT-LST-007-2` | automatisiert | REQ-LST-007 | Smoke-Test – Reservierung aus dem Chat setzt die Anzeige auf `reserviert`. |
-| `AT-LST-008` | automatisiert | REQ-LST-008 | Szenario-Test mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (neu). |
+| `AT-LST-007-2` | automatisiert | REQ-LST-007 | Smoke-Test (gemeinsam mit `AT-CHAT-011`) – Reservierung aus dem Chat setzt die Anzeige auf `reserviert`. |
+| `AT-LST-008` | automatisiert | REQ-LST-008 | Integrationstest (`listings.integration.test.ts`) mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (offener Deal aufgehoben, Mail und Systemnachricht); ein zweiter Lauf ändert nichts. |
 | `AT-LST-009` | automatisiert | REQ-LST-009 | API-/E2E-Test der Gast-Vorschau ohne Bild (neu). Noch nicht umgesetzt (⬜). |
 | `AT-LST-010` | automatisiert | REQ-LST-010 | Unit-Test des Wortfilters (Entscheidungstabelle). |
 | `AT-LST-010-2` | automatisiert | REQ-LST-010 | Smoke-Test – gefilterte Anzeige ist `in_review` und nicht suchbar. |
-| `AT-LST-011` | automatisiert | REQ-LST-011 | API-Test – 31. Anzeige wird abgelehnt, auch bei gleichzeitigen Anfragen (neu). |
+| `AT-LST-011` | automatisiert | REQ-LST-011 | Integrationstest (`listings.integration.test.ts`) – die 31. aktive Anzeige wird abgelehnt, auch bei gleichzeitigen Anfragen. |
 | `AT-LST-012` | automatisiert | REQ-LST-012 | Upload-Test mit HEIC-Beispielfoto inkl. Metadatenprüfung (neu). Noch nicht umgesetzt (⬜). |
-| `CTRL-COVERAGE` | Kontrolle | REQ-MAINT-001 | Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Messwerte (2026-10-26): Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen (Schwelle 95 % Zeilen, 85 % Zweige, 95 % Funktionen); **Fachmodule insgesamt 15,9 %** (Schwelle 13 % = Messwert minus 2 Pp). **Lücke zu Kriterium (1) ≥ 80 % offen:** Die Services hängen an der Datenbank und werden nur über Smoke- und E2E-Tests ausgeführt, die nicht in die Messung eingehen. Lösungsweg: Server unter Smoke- und E2E-Tests mit `NODE_V8_COVERAGE` messen und mit der Unit-Coverage zusammenführen (Backlog B-64). |
+| `CTRL-COVERAGE` | Kontrolle | REQ-MAINT-001 | Vitest-v8-Coverage mit Schwellen in `apps/server/vitest.config.ts`, Bericht als CI-Artefakt `coverage-server`. Unit- und Integrationstests (Testcontainers) gehen gemeinsam in die Messung ein. Messwerte (2026-11-07): **Fachmodule 88,65 % Zeilen**, 71,99 % Zweige, 89,2 % Funktionen (Schwellen 86/70/86) – Kriterium (1) ≥ 80 % erfüllt; Geschäftsregeln (`modules/*/domain.ts`) 100 % Zeilen, 99,4 % Zweige, 100 % Funktionen (Schwelle je 95 %). In CI ist Docker Pflicht; lokal ohne Docker werden die Integrationstests mit Hinweis übersprungen. |
 | `CTRL-MUTATION` | Kontrolle | REQ-MAINT-001 | StrykerJS 10.0.0 auf die Geschäftsregeln (`stryker.config.mjs`), Workflow `mutation.yml` montags und auf Anforderung. Score **73,8 %** (Schwelle 60 %) – Kriterium (2) erfüllt; Ausreißer `platform/pseudonym.ts` 45,9 % (datenbanknahe Mutanten) und `listings/domain.ts` 59,3 %. |
 | `AT-MOD-001` | automatisiert | REQ-MOD-001 | Smoke-Test – Mitglied meldet eine Anzeige über die API, der Fall erscheint in der Queue. |
 | `AT-MOD-001-2` | automatisiert | REQ-MOD-001 | Smoke-Test – zweite Meldung desselben Mitglieds ergibt 409, Meldung eigener Inhalte 422. |
@@ -141,8 +141,8 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-MOD-008` | automatisiert | REQ-MOD-008 | Smoke-Test – Domain anlegen und deaktivieren. Umsetzungsstand ⬜ (Could für R1). |
 | `AT-NOTI-001` | automatisiert | REQ-NOTI-001 | Smoke-Test – Verifikationsmail erscheint in Mailpit. |
 | `AT-NOTI-001-2` | automatisiert | REQ-NOTI-001 | Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu). |
-| `AT-NOTI-002` | automatisiert | REQ-NOTI-002 | Szenario-Test mit verkürzter Wartezeit – Bündelung, Lesen vor Versand, kein Inhalt in der Mail (neu). |
-| `AT-NOTI-003` | automatisiert | REQ-NOTI-003 | Szenario-Test – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmail trotzdem (neu). |
+| `AT-NOTI-002` | automatisiert | REQ-NOTI-002 | Integrationstest (`messaging.integration.test.ts`) mit verkürzter Wartezeit – Bündelung, keine Mail nach dem Lesen, kein Inhalt in der Mail. |
+| `AT-NOTI-003` | automatisiert | REQ-NOTI-003 | Integrationstest (`messaging.integration.test.ts`) – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmails kommen trotzdem. |
 | `MAN-NOTI-004` | manuell | REQ-NOTI-004 | Protokoll des mail-tester-Laufs und der Testzustellung – als Übung: [MAN-NOTI-004](../05-umsetzung/nachweise/MAN-NOTI-004.md). Header in Mailpit echt geprüft, DNS-Einträge syntaktisch gültig, mail-tester-Werte fiktiv (Q-28). Befunde behoben: Absender `no-reply@campusmarkt.example` (`MAIL_FROM`) passt zu den Beispiel-DNS-Einträgen, `Reply-To` ist die Kontaktstelle (`MAIL_REPLY_TO`). |
 | `AT-NOTI-005` | automatisiert | REQ-NOTI-005 | Resilienztest QS-3 mit gestopptem Mail-Catcher (neu). |
 | `CTRL-DLQ` | Kontrolle | REQ-NOTI-005 | Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen – geprüft mit `tests/ops/dlq-test.mjs` (Mailpit gestoppt, Passwort-Reset angefordert, nach 302 s steht der Job mit Vorlage `password_reset` in der Ansicht, die App bleibt erreichbar); Protokoll [CTRL-DLQ](../05-umsetzung/nachweise/CTRL-DLQ.md). Läuft wegen der Dauer wöchentlich im Workflow `ops-weekly.yml`, nicht bei jedem Push. |
@@ -155,7 +155,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder – Protokoll [MAN-OPS-002](../05-umsetzung/nachweise/MAN-OPS-002.md): Normalbetrieb ohne Personenbezug, Korrelations-ID in allen Einträgen; die Lücken P-1 (Request-ID aus dem Client) und P-2 (Rohpfad unbekannter Routen) sind behoben (Request-ID nur als UUID, unbekannte Pfade als `unmatched`). Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme. |
 | `MAN-OPS-003` | manuell | REQ-OPS-003 | Protokoll des Onboarding-Tests – [MAN-OPS-003](../05-umsetzung/nachweise/MAN-OPS-003.md) (simuliert: frischer Clone, nur README-Schritte, 1 min 16 s bis zur Anmeldung mit vorhandenem Build-Cache). |
 | `CTRL-CI-IMAGE` | Kontrolle | REQ-OPS-004 | CI-Job `compose` baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt das `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (umgesetzt 2026-10-24). |
-| `AT-OPS-005` | automatisiert | REQ-OPS-005 | Neustart-Test – zweiter Start meldet keine neue Migration und wird gesund (Grundlage: Frischstart-Zyklen; als Skript neu zu schreiben). |
+| `AT-OPS-005` | automatisiert | REQ-OPS-005 | Integrationstest (`privacy.integration.test.ts`) – ein zweiter Migrationslauf wendet nichts neu an, die Datenbank bleibt bereit; den Neustart des Stacks prüft zusätzlich der Restore-Test (AT-AVAIL-003). |
 | `AT-OPS-006` | automatisiert | REQ-OPS-006 | Smoke-Test – mit `MAINTENANCE_MODE=true` liefern Seiten und API 503 mit `Retry-After`, Health, Status und Rechtsseiten nicht. |
 | `AT-OPS-006-2` | automatisiert | REQ-OPS-006 | Smoke-Test – Administrator setzt und entfernt eine Ankündigung (Mitglied 403), die Ankündigung ist öffentlich abrufbar, Audit-Log-Eintrag. |
 | `AT-OPS-007` | automatisiert | REQ-OPS-007 | Smoke-Test – `/status` (Seite) und die zugehörige API sind ohne Anmeldung erreichbar, zeigen je Dienst „in Betrieb“ bzw. „gestört“ mit Zeitpunkt und enthalten keine Versionen, Hostnamen oder Fehlertexte. |
@@ -167,21 +167,22 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `CTRL-DOC-BETRIEB` | Kontrolle | REQ-OPS-011, REQ-SEC-012 | Kontrolle `docs/07-betrieb/` – Betriebshandbuch, Störungsprozess und Prozess für Sicherheitsmeldungen vorhanden – Protokoll [CTRL-DOC-BETRIEB](../05-umsetzung/nachweise/CTRL-DOC-BETRIEB.md). |
 | `MAN-OPS-011` | manuell | REQ-OPS-011 | Protokoll einer Störungsübung (z. B. Datenbank gestoppt) nach dem Handbuch – [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md): Störung nach 3 min 32 s behoben. Der Code-Befund B-1 (App-Absturz bei Datenbankausfall) ist behoben und durch AT-OPS-001-3 abgesichert; die Handbuch-Befunde H-1 bis H-4 sind im Betriebshandbuch und im Störungsprozess eingearbeitet (Schweregrade S1–S4 mit Reaktionszeiten, Runbook „Datenbank nicht erreichbar“, Ausweichkanal). |
 | `CTRL-RENOVATE` | Kontrolle | REQ-OPS-012 | CI-Kontrolle – `renovate-config-validator` prüft `renovate.json`. |
-| `AT-PERF-001` | automatisiert | REQ-PERF-001 | k6-Lasttest `tests/load/search.js` (geplant, siehe Umsetzungsstand). |
-| `AT-PERF-002` | automatisiert | REQ-PERF-002 | k6-Lasttest Chat (neu zu schreiben; Umsetzungsstand ⬜ – nicht gemessen). |
-| `AT-PERF-003` | automatisiert | REQ-PERF-003 | k6-Lasttest „Anzeige erstellen“ (neu zu schreiben; Umsetzungsstand ⬜). |
-| `AT-PERF-004` | automatisiert | REQ-PERF-004 | k6-Lasttest Registrierung mit Mailpit-Abgleich (neu zu schreiben; Umsetzungsstand ⬜). |
+| `AT-PERF-001` | automatisiert | REQ-PERF-001 | k6-Lasttest `tests/load/search.js` (wöchentlich, `ops-weekly.yml`) – Grenzen p95 < 500 ms, p99 < 1.500 ms, 0 % 5xx; gemessen 2026-11-07: p95 14,9 ms, p99 37,9 ms, 0 %. |
+| `AT-PERF-002` | automatisiert | REQ-PERF-002 | k6-Lasttest `tests/load/chat.js` (WebSocket, 200 Verbindungen) – Grenzen p95 < 2 s, 0 verloren, 0 doppelt; gemessen 2026-11-07: p95 24 ms, 0/0. |
+| `AT-PERF-003` | automatisiert | REQ-PERF-003 | k6-Lasttest `tests/load/create-listing.js` – Grenze p95 < 800 ms, 0 % Fehler; gemessen 2026-11-07: p95 19,1 ms, 0 %. |
+| `AT-PERF-004` | automatisiert | REQ-PERF-004 | k6-Lasttest `tests/load/signup.js` mit Mailpit-Abgleich – Grenze p95 < 10 s bis zur Mail, 0 verlorene Mails; gemessen 2026-11-07: p95 949 ms, 0. |
 | `AT-PERF-005` | automatisiert | REQ-PERF-005 | Lighthouse-CI-Lauf (neu zu schreiben; Umsetzungsstand ⬜). |
+| `CTRL-BUNDLE` | Kontrolle | REQ-PERF-005 | CI-Job `checks`: `scripts/check-bundle.mjs` misst das JS der Web-App gzip-komprimiert und bricht bei Überschreitung ab (Guideline Kap. 03 „Performance budget enforced in CI“). Budgets: initial (Entry + `modulepreload`) 177 kB, größter nachgeladener Chunk 53 kB. Messwerte (2026-11-07): 160,6 kB und 48,0 kB (Markdown). Ersetzt nicht die LCP-Messung (`AT-PERF-005`), verhindert aber, dass das Startbudget unbemerkt wächst. |
 | `MAN-PORT-001` | manuell | REQ-PORT-001 | Protokoll des Onboarding-Tests – [MAN-PORT-001](../05-umsetzung/nachweise/MAN-PORT-001.md) (simuliert, 3 min 25 s). Die Befunde (feste Ports in `compose.dev.yaml`, Dev-Proxy ohne `.env`) sind behoben: Ports nur an 127.0.0.1 und per `DEV_DB_PORT`, `DEV_SMTP_PORT`, `DEV_MAILPIT_PORT` änderbar; Vite liest `VITE_API_TARGET` bzw. den `PORT` des Servers aus `.env`. |
 | `CTRL-CI-MULTIARCH` | Kontrolle | REQ-PORT-002 | CI-Job `multiarch` (QEMU + Buildx) baut `linux/amd64` und `linux/arm64`, startet das arm64-Image unter Emulation bis „healthy“ und lädt beide Image-Archive hoch; der Smoke-Test läuft gegen amd64 im Job `compose`. Lokal geprüft: arm64 nativ „healthy“, amd64 per Emulation in 347 s gebaut. |
 | `AT-PRIV-001` | automatisiert | REQ-PRIV-001 | (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel. |
 | `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt. |
 | `AT-PRIV-002` | automatisiert | REQ-PRIV-002 | Smoke-Test, (neu) erweitert – Antworten zu Anzeige, Konversation, Suche und Moderationsfall enthalten keine fremde E-Mail-Adresse; nach beidseitiger Freigabe nur das Gegenüber. |
-| `AT-PRIV-002-2` | automatisiert | REQ-PRIV-002 | (neu) Daten zum Missbrauchsschutz älter als 7 Tage werden vom täglichen Löschjob entfernt. |
-| `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | (neu) Szenario-Test mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |
+| `AT-PRIV-002-2` | automatisiert | REQ-PRIV-002 | Integrationstest (`privacy.integration.test.ts`) – Daten zum Missbrauchsschutz älter als 7 Tage entfernt der tägliche Löschjob. |
+| `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | Integrationstest (`listings.integration.test.ts`) mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |
 | `AT-PRIV-003-2` | automatisiert | REQ-PRIV-003 | Ops-Test `tests/ops/retention-test.mjs` – Datensätze werden per psql zurückdatiert, danach löst die Administration den Löschlauf aus (`POST /admin/demo/run-due-jobs`); geprüft werden Chats (12 Monate nach der letzten Nachricht), Meldungen und Entscheidungen (12 Monate nach Abschluss), Audit-Log (24 Monate), benutzte bzw. abgelaufene Links (7 Tage) und von der Moderation entfernte Anzeigen (12 Monate); jüngere Einträge bleiben. Läuft in CI im Job `compose`. |
 | `AT-PRIV-003-3` | automatisiert | REQ-PRIV-003 | derselbe Ops-Test – Kontolöschung entfernt nur die eigenen Nachrichtentexte (Systemcode `message_deleted`), die Konversation bleibt für das Gegenüber mit „Ehemaliges Mitglied“. |
-| `AT-PRIV-004` | automatisiert | REQ-PRIV-004 | neu zu schreiben – Meldung einer Nachricht in einer langen Konversation; Moderationsfall enthält höchstens 11 Nachrichten; Audit-Log enthält den Zugriff. |
+| `AT-PRIV-004` | automatisiert | REQ-PRIV-004 | Integrationstest (`trust.integration.test.ts`) – Meldung einer Nachricht in einer langen Konversation; der Moderationsfall enthält höchstens 11 Nachrichten; der Zugriff steht im Audit-Log. |
 | `MAN-PRIV-005` | manuell | REQ-PRIV-005 | Verzeichnis der Auftragsverarbeiter mit AV-Verträgen. |
 | `AT-PRIV-006` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Browser-Test protokolliert alle Netzwerkanfragen über Anmelden, Suchen, Anzeige, Chat; keine fremde Domain, nur ein Cookie. |
 | `AT-PRIV-006-2` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Smoke-Test prüft, dass die Content-Security-Policy nur den eigenen Ursprung erlaubt. |
@@ -189,16 +190,16 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-PRIV-007` | manuell | REQ-PRIV-007 | Übungs-DSFA `docs/06-recht/dsfa.md` mit fiktiver Stellungnahme der DSB und fiktiver Entscheidung liegt vor; alle Pflichtinhalte nach Art. 35 Abs. 7 und die sieben Mindestszenarien sind bewertet (Q-28). |
 | `AT-PRIV-008` | automatisiert | REQ-PRIV-008 | Smoke-Test – `robots.txt` mit `Disallow: /`, Header `X-Robots-Tag` auf Start- und Rechtsseiten. |
 | `MAN-SEC-001` | manuell | REQ-SEC-001 | ASVS-L2-Checkliste mit Nachweis je Kontrolle und ZAP-Bericht – [MAN-SEC-001](../05-umsetzung/nachweise/MAN-SEC-001.md), ZAP-Zusammenfassungen in `zap/` (Baseline 0 FAIL / 63 PASS, angemeldeter API-Scan 0 FAIL / 114 PASS). |
-| `AT-SEC-002` | automatisiert | REQ-SEC-002 | neu zu schreiben – Test prüft Algorithmus und Parameter eines frisch erzeugten Hashes. |
+| `AT-SEC-002` | automatisiert | REQ-SEC-002 | Integrationstest (`identity.integration.test.ts`) – ein frisch erzeugter Hash nutzt Argon2id mit mindestens den OWASP-Parametern. |
 | `AT-SEC-003` | automatisiert | REQ-SEC-003 | Unit-Test der Tabelle (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „Passwortrichtlinie“). |
 | `AT-SEC-004` | automatisiert | REQ-SEC-004 | Smoke-Test – zustandsändernde Anfrage ohne Schutzmerkmal liefert 403 `csrf`. |
 | `AT-SEC-004-2` | automatisiert | REQ-SEC-004 | (neu) Freigabe der Sitzungskennung nach dem Login prüfen: für Skripte unlesbar, nur sichere Verbindungen, nur gleiche Website. |
 | `AT-SEC-004-3` | automatisiert | REQ-SEC-004 | (neu) Sitzung ist nach Abmelden und nach Passwort-Reset ungültig. |
 | `AT-SEC-005` | automatisiert | REQ-SEC-005 | (neu) 5 falsche Passwörter, die 6. Anmeldung desselben Paars liefert 429 mit `Retry-After`. |
 | `AT-SEC-005-2` | automatisiert | REQ-SEC-005 | (neu) 4. Registrierung derselben Adresse innerhalb einer Stunde liefert 429. |
-| `AT-SEC-005-3` | automatisiert | REQ-SEC-005 | (neu) Registrierungen verschiedener Adressen von derselben IP: die 30. wird angenommen, die 31. liefert 429. |
+| `AT-SEC-005-3` | automatisiert | REQ-SEC-005 | Integrationstest (`identity.integration.test.ts`) – Registrierungen verschiedener Adressen von derselben IP: die 30. wird angenommen, die 31. liefert 429. |
 | `AT-SEC-006` | automatisiert | REQ-SEC-006 | Smoke-Test – fremde Konversation 404, Mitglied auf Moderation 403, Interessent auf Deal 403. |
-| `AT-SEC-006-2` | automatisiert | REQ-SEC-006 | neu zu schreiben – vollständige Autorisierungsmatrix (alle Zeilen) als Integrationstest. |
+| `AT-SEC-006-2` | automatisiert | REQ-SEC-006 | Integrationstest `modules/authorization.integration.test.ts` – vollständige Autorisierungsmatrix: jeder Endpunkt für Gast, Mitglied, Moderation und Admin; fremde Ressourcen liefern 404. |
 | `AT-SEC-007` | automatisiert | REQ-SEC-007 | Smoke-Test – Upload ohne gültige Bildsignatur liefert 415. |
 | `AT-SEC-007-2` | automatisiert | REQ-SEC-007 | Smoke-Test – Bildabruf ohne Sitzung liefert 401. |
 | `AT-SEC-007-3` | automatisiert | REQ-SEC-007 | Unit-Test der Formaterkennung am Inhalt (Grundlage: `listings/domain.test.ts`, „Magic Bytes“). |
@@ -214,12 +215,12 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-SEC-013` | manuell | REQ-SEC-013 | Abschlussbericht des Penetrationstests – als Übungs-Pentest durchgeführt (kein externer Tester): [MAN-SEC-013](../05-umsetzung/nachweise/MAN-SEC-013.md), Rohdaten `pentest-results.json`, ZAP-Zusammenfassungen in `zap/`. 49 gezielte Prüfungen, 47 bestanden, 2 akzeptierte Demo-Befunde (PT-F-17 API-Doku im Demo-Modus, PT-F-18 `/metrics` am lokalen Port); kein kritischer oder hoher Befund. Behoben: PT-F-01, 02, 03, 13, 14, 15, 16. Offen als Backlog: PT-F-04 bis PT-F-12 (B-59 bis B-63). |
 | `AT-SRCH-001` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit Tippfehler findet die Anzeige. |
 | `AT-SRCH-001-2` | automatisiert | REQ-SRCH-001 | Smoke-Test – Suche mit abweichender Wortform findet Anzeigen. |
-| `AT-SRCH-002` | automatisiert | REQ-SRCH-002 | API-Test – Filterkombinationen und Sortierungen gegen Seed-Daten (neu). |
+| `AT-SRCH-002` | automatisiert | REQ-SRCH-002 | Integrationstest (`listings.integration.test.ts`) – Filterkombinationen und Sortierungen liefern passende Treffer in richtiger Reihenfolge. |
 | `AT-SRCH-003` | automatisiert | REQ-SRCH-003 | Smoke-Test – neu angelegte Anzeige wird unmittelbar gefunden. |
 | `AT-SRCH-003-2` | automatisiert | REQ-SRCH-003 | Smoke-Test – pausierte Anzeige wird ≤ 10 s danach nicht mehr gefunden (neu). |
 | `AT-SRCH-004` | automatisiert | REQ-SRCH-004 | API-Test – merken, Liste, entfernen, eigene Anzeige abgelehnt (neu). |
 | `AT-SRCH-005` | automatisiert | REQ-SRCH-005 | Szenario-Test des täglichen Digests (neu). Noch nicht umgesetzt (⬜). |
-| `AT-SRCH-006` | automatisiert | REQ-SRCH-006 | API-Test – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus (neu). |
+| `AT-SRCH-006` | automatisiert | REQ-SRCH-006 | Integrationstest (`listings.integration.test.ts`) – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus. |
 | `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben). |
 | `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test – Manifest und Service Worker sind vorhanden und registriert. |
 | `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte – [MAN-UX-002](../05-umsetzung/nachweise/MAN-UX-002.md). Chat-Systemnachrichten werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten werden weiter am Text erkannt. |

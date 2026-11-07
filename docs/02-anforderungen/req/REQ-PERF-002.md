@@ -3,7 +3,7 @@ id: REQ-PERF-002
 title: Zustellzeit von Chatnachrichten
 type: quality
 class: quality
-status: approved
+status: verified
 owner: team-plattform
 risk: medium
 reviewers: [qa-lead]
@@ -15,9 +15,9 @@ epic: EPIC-04
 source: BG-3
 use_cases: [UC-21]
 depends_on: [REQ-CHAT-003]
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-07
 verification: [AT-PERF-002]
 ---
 
@@ -54,7 +54,7 @@ Nachricht senden ist eine kritische Nutzerreise; Verzögerungen führen zu Abbr�
 | Datenbank nicht erreichbar | Senden scheitert sichtbar; keine scheinbar gesendete Nachricht |
 
 ## Nachweis
-- `AT-PERF-002`: k6-Lasttest Chat (neu zu schreiben; Umsetzungsstand ⬜ – nicht gemessen).
+- `AT-PERF-002`: k6-Lasttest `tests/load/chat.js` (WebSocket, wöchentlich in `ops-weekly.yml`). Messung 2026-11-07, 200 Verbindungen, 5 Nachrichten/s über 5 min: **p95 24 ms** (p99 77 ms, max. 267 ms), 0 verlorene, 0 doppelte Nachrichten, 0 WebSocket-Fehler, 300.200 Zustellungen. Abweichung vom Messkontext: 12 statt 4 Kerne (Abstand zur Grenze Faktor > 80).
 
 
 ## Änderungshistorie
@@ -65,3 +65,4 @@ Nachricht senden ist eine kritische Nutzerreise; Verzögerungen führen zu Abbr�
 | 2.1 | 2026-10-23 | Review v0.2: R-15 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
 | 2.3 | 2026-10-26 | Guideline-Review: GL-10 Felder aus der NFR-/SLO-Vorlage ergänzt (Fehlerbudget, Lastprofil, Timeout/Retry, Wiederherstellung, Eskalation) |
+| 2.4 | 2026-11-07 | AT-PERF-002 umgesetzt (k6, WebSocket) und gemessen: p95 24 ms, 0 verloren/doppelt (Testbericht 2026-11-07); Status → verified |
