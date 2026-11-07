@@ -14,4 +14,6 @@ regexes = [
   # Neue Passwörter der Testkonten, die Smoke- und E2E-Tests nur im lokalen Docker-Beispiel anlegen
   '''ganz-neues-passwort-2026''',
   '''englisch-test-passwort-1''',
+  # Zweiter Reset-Versuch mit demselben Link im Integrationstest (muss scheitern); nur in der Test-Datenbank
+  '''noch-ein-passwort-2026''',
 ]
