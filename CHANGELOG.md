@@ -4,9 +4,15 @@ Alle wesentlichen Änderungen an CampusMarkt HWG LU. Das Format folgt [Keep a Ch
 
 Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änderungen enthalten (SemVer §4). Im Docker-Beispiel betrifft das vor allem Datenbank-Migrationen und die Versionen der Rechtstexte.
 
-## [Unreleased] – 0.4.0 (geplant, Stand 2026-11-12)
+## [Unreleased]
+
+## [0.4.0] – 2026-11-12
+
+Erstes Release über die Release-Pipeline (REQ-OPS-013, ADR-0022): Image `ghcr.io/caro10robert/campusmarkt:0.4.0` mit Build-Provenance, eingespielt in die Vorführumgebung.
 
 ### Added
+- Release-Pipeline (REQ-OPS-013, ADR-0022): Ein Tag `vX.Y.Z` auf `main` durchläuft die ganze CI. Danach überträgt der Job `release` das im Job `compose` geprüfte Image unverändert nach ghcr.io (build once, promote), mit Build-Provenance in der Registry und einem GitHub-Release mit Changelog, Image-Archiv und SBOM. Das Zielsystem holt neue Versionen selbst ab, sichert vorher App und Datenbank und kehrt bei einem Fehler automatisch zurück.
+- Eine Version an einer Stelle: alle `package.json` (Prüfung `tests/ops/release-check.mjs` in jedem CI-Lauf); `/health/live` und OpenAPI nennen die Version.
 - Dunkles Farbschema (REQ-UX-008, ADR-0021): folgt der Systemeinstellung, im Seitenkopf wählbar (Wie im System, Hell, Dunkel), Wahl nur auf Wunsch im Browser gespeichert (`cm_theme`), kein Aufblitzen beim Laden; Kontrastmatrix beider Schemata als Test.
 - Fehlerseiten für alle Fehlerarten (REQ-UX-009): 403 statt stiller Weiterleitung, 401, 429 mit Wartezeit aus `Retry-After`, eigene 404 für Anzeigen und Unterhaltungen, Offline-Hinweis und Offline-Seite, Rückfallebene außerhalb des Routers; einheitlicher Aufbau mit Fehlercode, Titel und Wegen zurück.
 - Website-Hygiene (REQ-UX-010): Favicon (ICO, SVG), Apple Touch Icon, Manifest mit PNG- und Maskable-Icons, `theme-color` je Schema, `noindex` im Dokument, `<noscript>`-Hinweis, eigener Seitentitel je Seite; Skript `apps/web/scripts/generate-icons.mjs`.

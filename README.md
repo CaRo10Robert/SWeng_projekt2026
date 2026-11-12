@@ -2,7 +2,7 @@
 
 Tausch- und Verkaufsplattform für Studierende und Beschäftigte der Hochschule für Wirtschaft und Gesellschaft Ludwigshafen (HWG LU). Funktional angelehnt an Kleinanzeigen. Zugang nur mit verifizierter Hochschul-E-Mail-Adresse.
 
-> **Status:** v0.4 (2026-10-26): MVP mit Fallstudien-Constraints, Recht, Auftritt und Betrieb (EPIC-13, Übung mit fiktiven Werten), englischer Oberfläche und Nachweisrunde (Übungen, Threat Model, ASVS, Pentest, CI-Kontrollen). Stand der Anforderungen im [Katalog-Index](docs/02-anforderungen/02-anforderungen.md#6-katalog-index).
+> **Status:** v0.4.0 (2026-11-12, erstes Release über die [Release-Pipeline](docs/07-betrieb/update-prozess.md#release-und-auslieferung), Image `ghcr.io/caro10robert/campusmarkt:0.4.0`): MVP mit Fallstudien-Constraints, Recht, Auftritt und Betrieb (EPIC-13, Übung mit fiktiven Werten), englischer Oberfläche, dunklem Farbschema, Fehlerseiten und Nachweisrunde (Übungen, Threat Model, ASVS, Pentest, CI-Kontrollen). Stand der Anforderungen im [Katalog-Index](docs/02-anforderungen/02-anforderungen.md#6-katalog-index).
 > **Auslieferung:** Kein öffentliches Hosting. Das Ergebnis ist ein lokal lauffähiges Docker-Beispiel, siehe [ADR-0010](docs/03-architektur/decisions/0010-docker-demo-deployment.md).
 > **Guideline:** Es gilt die [DEV Guideline](https://github.com/CaRo10Robert/dev_guideline). Abweichungen werden als ADR oder Guideline-Exception dokumentiert ([ADR-0011](docs/03-architektur/decisions/0011-mvp-umsetzung.md)).
 
