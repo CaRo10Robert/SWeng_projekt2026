@@ -9,17 +9,21 @@ import { activate, apiSession, DEMO, gotoTop, keyboardLogin, liveConversation, t
 
 const groupName = 'Farbschema';
 
-/** Protokolliert, ob die Klasse `dark` gesetzt war, bevor React den ersten Inhalt in #root geschrieben hat. */
+/**
+ * Protokolliert, ob die Klasse `dark` gesetzt war, bevor React den ersten Inhalt in #root geschrieben hat. Beobachtet
+ * `document`, weil `<html>` beim Start des Init-Skripts noch nicht existiert; die Reihenfolge folgt den Mutationen.
+ */
 async function recordFirstPaintOrder(page: Page) {
   await page.addInitScript(() => {
     const log: string[] = [];
     (window as unknown as { __themeLog: string[] }).__themeLog = log;
-    new MutationObserver(() => {
-      if (document.documentElement.classList.contains('dark') && !log.includes('dark')) log.push('dark');
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    new MutationObserver(() => {
-      if (document.getElementById('root')?.firstChild && !log.includes('content')) log.push('content');
-    }).observe(document, { childList: true, subtree: true });
+    new MutationObserver((records) => {
+      for (const r of records) {
+        const html = document.documentElement;
+        if (r.type === 'attributes' && r.target === html && html.classList.contains('dark') && !log.includes('dark')) log.push('dark');
+        if (r.type === 'childList' && (r.target as Element).id === 'root' && r.addedNodes.length && !log.includes('content')) log.push('content');
+      }
+    }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
   });
 }
 
