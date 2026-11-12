@@ -56,7 +56,7 @@ flowchart LR
   C -->|grün| D["Job release:<br/>Release-Prüfung"]
   D --> E["geprüftes Image →<br/>ghcr.io/…/campusmarkt:X.Y.Z<br/>+ Provenance"]
   D --> F["GitHub-Release<br/>Changelog, Archiv, SBOM"]
-  E --> G["Zielsystem holt ab<br/>(alle 5 min)"]
+  E --> G["Zielsystem holt ab<br/>(nachts oder von Hand)"]
   G --> H["Stack stoppen,<br/>Daten sichern"]
   H --> I["neuer Tag, Start,<br/>Prüfungen"]
   I -->|ok| J["läuft mit X.Y.Z,<br/>Image-Kopie gesichert"]
@@ -69,9 +69,9 @@ flowchart LR
 3. Nach `main` mergen, die CI muss grün sein.
 4. Tag setzen und pushen: `git tag -a vX.Y.Z -m "CampusMarkt X.Y.Z" && git push origin vX.Y.Z`.
 5. Die CI läuft für den Tag. Der Job `release` veröffentlicht `ghcr.io/caro10robert/campusmarkt:X.Y.Z` und das GitHub-Release.
-6. Das Zielsystem spielt die Version binnen etwa 5 Minuten selbst ein. Die Version zeigt `GET /health/live` an (`{"status":"ok","version":"X.Y.Z"}`).
+6. Das Zielsystem spielt die Version beim nächsten Abholen selbst ein: nachts oder sofort, wenn der Betreiber das Abholen von Hand anstößt. Die Version zeigt `GET /health/live` an (`{"status":"ok","version":"X.Y.Z"}`).
 
-**Vertrag für das Zielsystem:** In der Compose-Datei steht das Image mit festem Tag. Der App-Dienst trägt die Labels `caroai.release: auto` und `caroai.release.health: <URL der Bereitschaftsprüfung>`. Sicherung, Prüfung und Rückweg übernimmt der Abhol-Dienst des Zielsystems. In der Vorführumgebung CaRoNexus ist das `caroai_update.py --releases` (alle 5 Minuten).
+**Vertrag für das Zielsystem:** In der Compose-Datei steht das Image mit festem Tag. Der App-Dienst trägt die Labels `caroai.release: auto` und `caroai.release.health: <URL der Bereitschaftsprüfung>`. Sicherung, Prüfung und Rückweg übernimmt der Abhol-Dienst des Zielsystems. In der Vorführumgebung CaRoNexus ist das `caroai_update.py --releases` (nachts um 01:30, von Hand über das Dashboard).
 
 ## Ausrollen
 

@@ -13,7 +13,7 @@ kano: n/a
 epic: EPIC-00
 source: Guideline Kap. 10, Vorführung des Prototyps am 2026-11-13
 depends_on: [REQ-OPS-004, REQ-OPS-001, REQ-OPS-005]
-version: 1.0
+version: 1.1
 created: 2026-11-12
 last_updated: 2026-11-12
 verification: [AT-OPS-013, AT-OPS-013-2]
@@ -35,7 +35,8 @@ Manuelle Auslieferung ist fehleranfällig und nicht nachvollziehbar. Die Guideli
 | Merkmal (ISO/IEC 25010) | Metrik | Zielwert | Messverfahren |
 |---|---|---|---|
 | Zuverlässigkeit – Wiederherstellbarkeit | Zeit von fehlgeschlagener Prüfung bis zur wieder laufenden alten Version | ≤ 10 min | Update-Historie des Zielsystems (Zeitstempel „rolled_back“) |
-| Wartbarkeit – Änderbarkeit | Zeit vom Ende der grünen CI bis zur laufenden neuen Version | ≤ 15 min | Zeitstempel des Jobs `release` und der Update-Historie |
+| Wartbarkeit – Änderbarkeit | Zeit vom Anstoß des Abholens bis zur laufenden neuen Version | ≤ 10 min | Update-Historie des Zielsystems (Anstoß und „updated“) |
+| Wartbarkeit – Änderbarkeit | Zeit vom Ende der grünen CI bis zur laufenden neuen Version ohne Anstoß | ≤ 24 h (nächster nächtlicher Lauf) | Zeitstempel des Jobs `release` und der Update-Historie |
 | Wartbarkeit – Änderbarkeit | Releases ohne Handarbeit nach dem Tag | 100 % | Update-Historie: jedes Release mit Status „updated“ oder „rolled_back“ ohne manuellen Eingriff |
 
 ## Akzeptanzkriterien
@@ -45,7 +46,7 @@ Szenario: Release ausliefern
   Wenn der Tag v0.5.0 gepusht wird und alle CI-Jobs grün sind
   Dann liegt ghcr.io/caro10robert/campusmarkt:0.5.0 mit Provenance in der Registry
   Und es gibt ein GitHub-Release v0.5.0 mit Image-Archiv und SBOM
-  Und das Zielsystem läuft binnen 15 Minuten mit 0.5.0 und /health/live meldet "0.5.0"
+  Und nach dem nächsten Abholen (nächtlich oder von Hand angestoßen) läuft das Zielsystem mit 0.5.0 und /health/live meldet "0.5.0"
 
 Szenario: Falscher Tag
   Angenommen package.json enthält 0.5.0
@@ -75,3 +76,4 @@ Szenario: Fehlerhaftes Release
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-12 | Erstfassung mit Release-Job in CI und Pull-Auslieferung (ADR-0022) |
+| 1.1 | 2026-11-12 | Abholen nachts statt alle 5 Minuten, dazu Anstoß von Hand (Betreiber-Entscheidung); Metriken angepasst |

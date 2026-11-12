@@ -26,7 +26,7 @@ Rahmenbedingungen:
 1. **Version an einer Stelle:** alle `package.json` tragen dieselbe SemVer-Version; `tests/ops/release-check.mjs` prüft das in jedem CI-Lauf. Server: `apps/server/src/platform/version.ts` → OpenAPI und `/health/live`.
 2. **Auslöser:** Tag `vX.Y.Z`. Die CI läuft für den Tag vollständig; der Job `release` hängt per `needs` von allen Jobs ab und prüft zusätzlich Tag = Version, Commit auf `main` und den Changelog-Abschnitt.
 3. **Build once, promote:** Der Job `release` lädt das im Job `compose` gebaute und mit E2E-, Smoke- und Restore-Tests geprüfte Image-Archiv und überträgt es unverändert nach `ghcr.io/caro10robert/campusmarkt:X.Y.Z`. Dazu Build-Provenance in der Registry und ein GitHub-Release mit Changelog, Image-Archiv und SBOM. Das Image trägt `org.opencontainers.image.source` und ist damit mit dem Repository verknüpft.
-4. **Auslieferung (Pull):** Das Zielsystem führt das Image mit festem Versions-Tag in seiner Compose-Datei und kennzeichnet den Dienst mit dem Label `caroai.release=auto`. Ein Abhol-Dienst fragt die Registry alle 5 Minuten. Bei einer neuen Version:
+4. **Auslieferung (Pull):** Das Zielsystem führt das Image mit festem Versions-Tag in seiner Compose-Datei und kennzeichnet den Dienst mit dem Label `caroai.release=auto`. Ein Abhol-Dienst fragt die Registry nach dem Zeitplan des Betreibers (in der Vorführumgebung nachts um 01:30, vor der nächtlichen Sicherung) und auf Anstoß von Hand. Bei einer neuen Version:
    1. Image laden.
    2. Den ganzen Stack (App und Datenbank) stoppen und alle Volumes sichern.
    3. Den Tag tauschen und starten.
