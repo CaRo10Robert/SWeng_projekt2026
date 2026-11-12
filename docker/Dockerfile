@@ -26,6 +26,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 # ---------------------------------------------------------------- Runtime
 FROM node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d AS runtime
+# Herkunft für die Registry (REQ-OPS-013): verknüpft das Paket auf ghcr.io mit dem Repository
+LABEL org.opencontainers.image.source="https://github.com/CaRo10Robert/SWeng_projekt2026" \
+      org.opencontainers.image.title="CampusMarkt HWG LU" \
+      org.opencontainers.image.description="Tausch- und Verkaufsplattform der HWG LU (Hochschulprojekt, Docker-Beispiel)"
 ENV NODE_ENV=production \
     PORT=8080 \
     UPLOADS_DIR=/data/uploads \
