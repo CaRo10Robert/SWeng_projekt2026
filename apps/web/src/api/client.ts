@@ -60,7 +60,7 @@ export async function api<T>(path: string, { method = 'GET', body, signal }: Req
   const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
   if (!res.ok) {
     const p = (data ?? {}) as Partial<Problem>;
-    const retryAfter = Number(res.headers.get('retry-after')) || undefined;
+    const retryAfter = parseRetryAfter(res.headers.get('retry-after'));
     const error = new ApiError(res.status, p.code, p.detail ?? p.title, p.errors ?? [], p.requestId, retryAfter);
     for (const listener of errorListeners) listener(error);
     throw error;
@@ -75,6 +75,23 @@ const errorListeners = new Set<ErrorListener>();
 export function onApiError(listener: ErrorListener): () => void {
   errorListeners.add(listener);
   return () => errorListeners.delete(listener);
+}
+
+/** `Retry-After` als Sekunden (RFC 9110: Sekundenzahl oder HTTP-Datum); ungültig oder vergangen → undefined. */
+export function parseRetryAfter(header: string | null, now = Date.now()): number | undefined {
+  if (!header) return undefined;
+  const value = header.trim();
+  if (/^\d+$/.test(value)) return Number(value) || undefined;
+  const at = Date.parse(value);
+  if (Number.isNaN(at)) return undefined;
+  const seconds = Math.ceil((at - now) / 1000);
+  return seconds > 0 ? seconds : undefined;
+}
+
+/** Hinweis auf die Wartezeit nach 429 bzw. 503 (REQ-UX-009): Sekunden unter zwei Minuten, sonst Minuten. */
+export function retryHint(seconds: number | undefined): string {
+  if (!seconds) return t('error.retryLater');
+  return seconds < 120 ? t('error.retryInSeconds', { seconds }) : t('error.retryInMinutes', { minutes: Math.ceil(seconds / 60) });
 }
 
 export const isMaintenance = (err: unknown): err is ApiError =>
@@ -95,7 +112,11 @@ export function qs(params: Record<string, string | number | undefined | null>): 
  */
 export function errorMessage(err: unknown, fallback?: string): string {
   if (err instanceof ApiError) {
-    if (err.status === 429) return t('apiError.rate_limited');
+    // 429 (REQ-UX-009): eigener Text des Fehlercodes, sonst der allgemeine; dazu die Wartezeit aus Retry-After
+    if (err.status === 429) {
+      const specific = err.code && err.code !== 'rate_limited' ? tMaybe(`apiError.${err.code}`) : undefined;
+      return `${specific ?? t('apiError.rate_limited')} ${retryHint(err.retryAfter)}`;
+    }
     if (err.status === 503 && err.code === 'maintenance') return t('apiError.maintenance');
     const translated = err.code ? tMaybe(`apiError.${err.code}`) : undefined;
     if (translated && currentLocale() !== 'de') return translated;

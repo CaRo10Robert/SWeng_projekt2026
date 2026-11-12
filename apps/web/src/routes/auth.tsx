@@ -13,6 +13,7 @@ import {
 } from '../api/auth';
 import { Alert, Button, Card, Checkbox, Field, FormError, Loading } from '../components/ui';
 import { currentLocale, t, tx, type MessageKey } from '../i18n';
+import { useDocumentTitle } from '../lib/title';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const DEMO_PASSWORD = 'CampusMarkt-Demo-2026';
@@ -24,6 +25,7 @@ const demoAccounts = [
 ] as const satisfies readonly { email: string; role: MessageKey }[];
 
 function AuthShell({ title, children }: { title: string; children: ReactNode }) {
+  useDocumentTitle(title);
   return (
     <div className="mx-auto max-w-md space-y-4">
       <h1 className="text-2xl font-bold">{title}</h1>

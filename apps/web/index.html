@@ -3,12 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b4f8a" />
+    <script>
+      // Farbschema vor dem ersten Rendern setzen, damit nichts aufblitzt (REQ-UX-008, ADR-0021).
+      // Kurzform von storedPreference/resolveTheme aus src/lib/theme.ts; die CSP erlaubt genau dieses Skript per Hash.
+      (function () {
+        var stored = null;
+        try {
+          stored = window.localStorage.getItem('cm_theme');
+        } catch (e) {}
+        var dark = stored === 'dark' || (stored !== 'light' && !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var root = document.documentElement;
+        if (dark) root.classList.add('dark');
+        root.style.colorScheme = dark ? 'dark' : 'light';
+      })();
+    </script>
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0b4f8a" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111a2b" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="CampusMarkt – Tausch- und Verkaufsplattform der HWG Ludwigshafen / Swap and sell marketplace of HWG Ludwigshafen" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>CampusMarkt HWG LU</title>
   </head>
   <body>
+    <noscript>CampusMarkt braucht JavaScript. Bitte aktiviere JavaScript in deinem Browser. / CampusMarkt requires JavaScript. Please enable JavaScript in your browser.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

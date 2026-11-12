@@ -141,7 +141,7 @@ export function ProfilePage() {
       <Card className="space-y-3">
         <h2 className="text-lg font-semibold">{t('profile.myData')}</h2>
         <p className="text-sm text-slate-700">{t('profile.exportText')}</p>
-        <a href={`${API_BASE}/me/export`} download className="inline-flex min-h-11 items-center rounded-lg border border-slate-400 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-100">
+        <a href={`${API_BASE}/me/export`} download className="inline-flex min-h-11 items-center rounded-lg border border-slate-500 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-100">
           {t('profile.export')}
         </a>
       </Card>

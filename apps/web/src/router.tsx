@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { Role } from '@campusmarkt/contracts';
 import { meQuery, useMe } from './api/auth';
-import { Layout, NotFound, RouteError } from './components/Layout';
+import { Layout } from './components/Layout';
+import { ErrorPage, NotFound, RouteError } from './components/ErrorPages';
 import { LoginPage, RegisterPage, VerifyPage, ForgotPasswordPage, ResetPasswordPage } from './routes/auth';
 import { SearchPage, validateSearchFilters } from './routes/search';
 import { ListingPage } from './routes/listing';
@@ -119,10 +120,15 @@ const authRoute = createRoute({
   },
 });
 
-function requireRole(roles: Role[]) {
-  return ({ context }: { context: { me: { role: Role } } }) => {
-    if (!roles.includes(context.me.role)) throw redirect({ to: '/' });
-  };
+/**
+ * Fehlende Rolle → Fehlerseite „Kein Zugriff“ (403, REQ-UX-009) statt stiller Weiterleitung auf die Startseite.
+ * Als Komponente statt als Fehler in `beforeLoad`: Die Seite (und ihre Abfragen) wird gar nicht erst geladen, und es
+ * entsteht kein Konsolenfehler (REQ-UX-010). Die API prüft die Rolle unabhängig davon selbst.
+ */
+function RoleGate({ roles, children }: { roles: Role[]; children: ReactNode }) {
+  const { data: me, isPending } = useMe();
+  if (isPending) return <Loading />;
+  return me && roles.includes(me.role) ? children : <ErrorPage kind="forbidden" />;
 }
 
 const newListingRoute = createRoute({ getParentRoute: () => authRoute, path: '/listings/new', component: ListingFormPage });
@@ -137,14 +143,20 @@ const noticesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me/n
 const moderationRoute = createRoute({
   getParentRoute: () => authRoute,
   path: '/moderation',
-  beforeLoad: requireRole(['moderator', 'admin']),
-  component: ModerationPage,
+  component: () => (
+    <RoleGate roles={['moderator', 'admin']}>
+      <ModerationPage />
+    </RoleGate>
+  ),
 });
 const adminRoute = createRoute({
   getParentRoute: () => authRoute,
   path: '/admin',
-  beforeLoad: requireRole(['admin']),
-  component: AdminPage,
+  component: () => (
+    <RoleGate roles={['admin']}>
+      <AdminPage />
+    </RoleGate>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([

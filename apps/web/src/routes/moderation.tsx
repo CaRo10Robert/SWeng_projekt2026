@@ -8,7 +8,6 @@ import { Alert, Badge, Button, Card, EmptyState, FormError, Loading, PageHeader,
 import { DecisionDetails } from './notices';
 import { appealStatusLabels, decisionLabels, MIN_REASON, ruleLabels, suspicionLabels, targetLabels } from '../lib/dsa';
 import { formatDateTime, reasonLabels } from '../lib/format';
-import { useDocumentTitle } from '../lib/title';
 import { t, tx, type MessageKey } from '../i18n';
 
 function ReasonField({ value, onChange, label, hint }: { value: string; onChange: (v: string) => void; label: string; hint: string }) {
@@ -291,7 +290,6 @@ function AppealList({ status }: { status: 'open' | 'decided' }) {
 
 export function ModerationPage() {
   const [section, setSection] = useState<Section>('open');
-  useDocumentTitle(t('nav.moderation'));
   return (
     <div className="space-y-4">
       <PageHeader title={t('nav.moderation')} />

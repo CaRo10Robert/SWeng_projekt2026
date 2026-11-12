@@ -1,4 +1,7 @@
 import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadConfig } from '../../config.js';
 import { createLogger } from '../logger.js';
@@ -6,7 +9,7 @@ import { createMetrics } from '../metrics.js';
 import { createOps } from '../ops.js';
 import type { SettingsStore } from '../settings.js';
 import { isSameOrigin } from './auth.js';
-import { buildSecurityTxt, createHttpServer, cspFor, requestIdFrom, requestLogEntry } from './server.js';
+import { buildSecurityTxt, createHttpServer, cspFor, inlineScriptHashes, isPageRequest, requestIdFrom, requestLogEntry } from './server.js';
 
 function memorySettings(): SettingsStore {
   const values = new Map<string, unknown>();
@@ -17,8 +20,8 @@ function memorySettings(): SettingsStore {
   };
 }
 
-async function server(settings = memorySettings()) {
-  process.env.WEB_DIST_DIR = '/does-not-exist';
+async function server(settings = memorySettings(), webDistDir = '/does-not-exist') {
+  process.env.WEB_DIST_DIR = webDistDir;
   const config = loadConfig();
   const ops = createOps({
     maintenanceFromEnv: false,
@@ -235,6 +238,76 @@ describe('[AT-PRIV-006-2] CSP ohne unsafe-inline, eigene Inline-Styles per Hash 
     const style = res.body.match(/<style>([\s\S]*?)<\/style>/)![1]!;
     const hash = createHash('sha256').update(style).digest('base64');
     expect(String(res.headers['content-security-policy'])).toContain(`style-src 'self' 'sha256-${hash}'`);
+    await app.close();
+  });
+});
+
+/** Kleine SPA im Temp-Verzeichnis: index.html mit Inline-Skript (Farbschema) und Modul-Skript. */
+const THEME_SCRIPT = "\n(function(){document.documentElement.classList.add('dark')})();\n";
+function fakeSpa() {
+  const dir = mkdtempSync(join(tmpdir(), 'cm-spa-'));
+  writeFileSync(
+    join(dir, 'index.html'),
+    `<!doctype html><html><head><script>${THEME_SCRIPT}</script><script type="module" crossorigin src="/assets/index.js"></script></head><body><div id="root"></div></body></html>`,
+  );
+  return dir;
+}
+
+describe('[AT-UX-008-4] CSP erlaubt das Farbschema-Skript der Startseite per Hash, ohne unsafe-inline (REQ-UX-008)', () => {
+  it('Hash genau der Inline-Skripte; Skripte mit src zählen nicht', () => {
+    const html = `<script>${THEME_SCRIPT}</script><script type="module" src="/a.js"></script><script>  </script>`;
+    expect(inlineScriptHashes(html)).toEqual([`'sha256-${createHash('sha256').update(THEME_SCRIPT).digest('base64')}'`]);
+  });
+
+  it('jede Antwort trägt den Hash aus der ausgelieferten index.html in script-src', async () => {
+    const app = await server(memorySettings(), fakeSpa());
+    const res = await app.inject({ method: 'GET', url: '/gibt-es-nicht', headers: { accept: 'text/html' } });
+    expect(res.statusCode).toBe(404);
+    const csp = String(res.headers['content-security-policy']);
+    expect(csp).toContain(`script-src 'self' 'sha256-${createHash('sha256').update(THEME_SCRIPT).digest('base64')}'`);
+    expect(csp).not.toContain('unsafe-inline');
+    await app.close();
+  });
+
+  it('die Startseite der Web-App hat genau ein Inline-Skript (das für das Farbschema)', () => {
+    const html = readFileSync(resolve(import.meta.dirname, '../../../../web/index.html'), 'utf8');
+    expect(inlineScriptHashes(html)).toHaveLength(1);
+    expect(html).toContain("localStorage.getItem('cm_theme')");
+  });
+});
+
+describe('[AT-UX-009-3] Unbekannte Pfade: Seite oder JSON je nach Anfrage (REQ-UX-003, REQ-UX-009)', () => {
+  it.each([
+    ['GET', '/gibt-es-nicht', '*/*', true],
+    ['HEAD', '/gibt-es-nicht', undefined, true],
+    ['GET', '/alte-seite.html', 'text/html,application/xhtml+xml', true],
+    ['GET', '/alte-seite.html', '*/*', false],
+    ['GET', '/bild.png', 'image/avif,image/webp,*/*', false],
+    ['GET', '/assets/alt-abc123.js', '*/*', false],
+    ['GET', '/api', 'text/html', false],
+    ['GET', '/api/v1/gibt-es-nicht', 'text/html', false],
+    ['GET', '/health/foo', 'text/html', false],
+    ['GET', '/metrics/foo', 'text/html', false],
+    ['GET', '/apixyz', 'text/html', true],
+    ['POST', '/gibt-es-nicht', 'text/html', false],
+  ])('%s %s (Accept %s) → Seite=%s', (method, url, accept, page) => {
+    expect(isPageRequest(method, url, accept)).toBe(page);
+  });
+
+  it('Seitenaufruf einer fehlenden .html-Datei → 404 mit der SPA; Bild → JSON-404; /api → JSON-404', async () => {
+    const app = await server(memorySettings(), fakeSpa());
+    const page = await app.inject({ method: 'GET', url: '/alte-seite.html', headers: { accept: 'text/html' } });
+    expect(page.statusCode).toBe(404);
+    expect(page.headers['content-type']).toContain('text/html');
+    expect(page.body).toContain('<div id="root">');
+    const image = await app.inject({ method: 'GET', url: '/bild.png', headers: { accept: 'image/*' } });
+    expect(image.statusCode).toBe(404);
+    expect(image.json().code).toBe('not_found');
+    const api = await app.inject({ method: 'GET', url: '/api', headers: { accept: 'text/html' } });
+    expect(api.statusCode).toBe(404);
+    expect(api.json().code).toBe('not_found');
+    const known = await app.inject({ method: 'GET', url: '/impressum', headers: { accept: 'text/html' } });
+    expect(known.statusCode).toBe(200);
     await app.close();
   });
 });

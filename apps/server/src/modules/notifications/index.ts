@@ -34,10 +34,11 @@ const unsubscribeForm = (token: string, label: string) => `<form method="post" a
 
 const page = (lang: Locale, title: string, body: string) => `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>${escapeHtml(title)} – CampusMarkt HWG LU</title>
-<style>body{font-family:system-ui,sans-serif;color:#1f2937;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5}
+<meta name="color-scheme" content="light dark"><title>${escapeHtml(title)} – CampusMarkt HWG LU</title>
+<style>body{font-family:system-ui,sans-serif;color:#1f2937;background:#f8fafc;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5}
 h1{color:#0b4884}button{background:#0b4884;color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:1rem}
-button:focus-visible,a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}a{color:#0b4884}</style></head>
+button:focus-visible,a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}a{color:#0b4884}
+@media (prefers-color-scheme: dark){body{color:#e9edf3;background:#0a1120}h1,a{color:#7db8ee}button{background:#7db8ee;color:#111a2b}}</style></head>
 <body><main><h1>${escapeHtml(title)}</h1>${body}</main>
 <p><a href="/">${lang === 'en' ? 'Home' : 'Zur Startseite'}</a> · <a href="/impressum">Impressum</a> · <a href="/datenschutz">${lang === 'en' ? 'Privacy' : 'Datenschutz'}</a></p></body></html>`;
 

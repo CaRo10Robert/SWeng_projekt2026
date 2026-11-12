@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
-version: 2026-10-25
-last_updated: 2026-10-26
+version: 2026-11-12
+last_updated: 2026-11-12
 sample: true
 ---
 
@@ -85,6 +85,7 @@ We only store what is strictly necessary for technical reasons (Section 25(2) no
 | Cookie `cm_session` (HttpOnly, Secure, SameSite) | keeps you logged in; contains only a random session key | until you log out, at most 30 days |
 | Service worker cache (Cache Storage) | stores the app's program files (no personal data) so that it loads quickly and can be installed | until the next version of the app or until you clear the site data |
 | `localStorage` entry `cm_locale` | remembers the language (`de` or `en`) you explicitly chose; only set when you switch the language. Strictly necessary because you explicitly requested this setting | until you choose another language or clear the site data |
+| `localStorage` entry `cm_theme` | remembers the colour scheme (`light` or `dark`) you explicitly chose; only set when you choose “Light” or “Dark” and removed again by “Same as system”. Strictly necessary because you explicitly requested this setting; the value never leaves your device | until you choose “Same as system” or clear the site data |
 
 Apart from this, no `localStorage`, no `sessionStorage` and no IndexedDB are used. Should storage that is not strictly necessary be added later, we will ask for your consent first.
 

@@ -7,10 +7,12 @@ import { useStartConversation } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage } from '../api/client';
 import { Dialog } from '../components/Dialog';
+import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, PriceTag, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
 import { Alert, Badge, Button, buttonClass, Card, FormError, Loading, TextArea } from '../components/ui';
 import { conditionLabels, formatDate, kindLabels, newId, userTypeLabels } from '../lib/format';
+import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
 const actionLabels: Record<ListingAction, MessageKey> = {
@@ -158,21 +160,16 @@ function OwnerActions({ listing }: { listing: ListingDetail }) {
 
 export function ListingPage() {
   const { id } = useParams({ strict: false }) as { id: string };
-  const { data: listing, isPending, isError, error } = useListing(id);
+  const { data: listing, isPending, isError, error, refetch } = useListing(id);
   const { data: meta } = useMeta();
+  useDocumentTitle(listing?.title);
   const favorite = useToggleFavorite(id);
   const block = useSetBlock();
   const [reportOpen, setReportOpen] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
 
   if (isPending) return <Loading />;
-  if (isError) {
-    return (
-      <Alert tone="error" title={t('listing.unavailable')}>
-        {error instanceof ApiError && error.status === 404 ? t('listing.notFound') : errorMessage(error)}
-      </Alert>
-    );
-  }
+  if (isError) return <ErrorView error={error} notFound="listingNotFound" onRetry={() => void refetch()} />;
 
   const category = meta?.categories.find((c) => c.id === listing.categoryId);
   const locations = listing.locationIds.map((lid) => meta?.locations.find((l) => l.id === lid)?.name).filter(Boolean);
