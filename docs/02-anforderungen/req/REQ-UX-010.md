@@ -3,7 +3,7 @@ id: REQ-UX-010
 title: Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-produkt
 risk: low
 reviewers: [qa-lead]
@@ -12,7 +12,7 @@ moscow: S
 kano: basis
 epic: EPIC-13
 source: Auftraggeber (2026-11-12, Q-29), REQ-UX-001, REQ-PRIV-008
-version: 1.1
+version: 1.2
 created: 2026-11-12
 last_updated: 2026-11-12
 review_due: 2027-04-23
@@ -71,3 +71,4 @@ Diese Punkte fallen Nutzenden sofort auf (fehlendes Symbol im Tab oder auf dem S
 |---|---|---|
 | 1.0 | 2026-11-12 | Erstfassung auf Wunsch des Auftraggebers (Q-29), freigegeben |
 | 1.1 | 2026-11-12 | Umgesetzt (B-68); Status → implemented |
+| 1.2 | 2026-11-12 | Verifiziert gegen das Docker-Beispiel: lokal (Edge) und im CI-Lauf 43304771207 (AT-UX-010, AT-UX-010-2 bestanden); Status → verified |

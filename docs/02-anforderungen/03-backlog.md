@@ -142,7 +142,7 @@ gantt
 
 **Stand Auftritt (2026-11-12, Q-29):**
 
-- **B-66, B-67 und B-68 neu und umgesetzt** auf Wunsch des Auftraggebers vor der Vorführung des Prototyps: dunkles Farbschema (REQ-UX-008, ADR-0021), Fehlerseiten für alle Fehlerarten (REQ-UX-009, ergänzt REQ-UX-003) und Website-Hygiene (REQ-UX-010). Eingeplant in Sprint 7 (Should, Puffer-Sprint); Reihenfolge nach WSJF: B-68, B-67, B-66. Sprint 7 steigt damit auf 24 SP über der Kapazität von ~20 SP; ausgeglichen, weil B-53 und B-51 bereits vorab als Übungsinkrement fertig waren.
+- **B-66, B-67 und B-68 neu, umgesetzt und verifiziert** (CI-Lauf 43304771207) auf Wunsch des Auftraggebers vor der Vorführung des Prototyps: dunkles Farbschema (REQ-UX-008, ADR-0021), Fehlerseiten für alle Fehlerarten (REQ-UX-009, ergänzt REQ-UX-003) und Website-Hygiene (REQ-UX-010). Eingeplant in Sprint 7 (Should, Puffer-Sprint); Reihenfolge nach WSJF: B-68, B-67, B-66. Sprint 7 steigt damit auf 24 SP über der Kapazität von ~20 SP; ausgeglichen, weil B-53 und B-51 bereits vorab als Übungsinkrement fertig waren.
 - Nebenbefunde: Rahmen von Eingabefeldern im hellen Schema unter 3:1 (SC 1.4.11) und Überlauf des Seitenkopfs für Gäste bei 360 px (REQ-UX-001) – beide mit behoben.
 
 **Stand Testpyramide und Lieferkette (2026-11-07):**
