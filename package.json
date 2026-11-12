@@ -1,7 +1,7 @@
 {
   "name": "campusmarkt",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CampusMarkt HWG LU – Tausch- und Verkaufsplattform (MVP, Docker-Beispiel)",
   "packageManager": "pnpm@10.34.7",
   "engines": {

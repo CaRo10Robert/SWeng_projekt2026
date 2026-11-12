@@ -6,8 +6,15 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 ## [Unreleased]
 
+## [0.4.1] – 2026-11-12
+
+Zweites Release über die Pipeline. In der Vorführumgebung genügt ein Anstoß: Sicherung, Wechsel und Prüfung laufen automatisch.
+
 ### Added
 - Beispielfotos für die Demo-Anzeigen (REQ-DEMO-003): 26 KI-generierte Fotos (1200 × 900, ohne Personen, Schrift und Marken) statt einfarbiger Platzhalter; fehlt ein Foto, nimmt der Seed weiter den Platzhalter. Herkunft und Bildbeschreibungen in `apps/server/assets/demo-images/`.
+
+### Changed
+- Die Vorführumgebung holt Releases nachts und auf Anstoß von Hand ab statt alle 5 Minuten (REQ-OPS-013 v1.1).
 
 ## [0.4.0] – 2026-11-12
 
