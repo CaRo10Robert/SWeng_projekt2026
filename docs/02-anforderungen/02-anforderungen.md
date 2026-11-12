@@ -158,8 +158,8 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 21 |
-| implemented | Umsetzung | 12 |
+| approved | Konkretisiert (bereit) | 18 |
+| implemented | Umsetzung | 15 |
 | verified | Test | 102 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
@@ -296,8 +296,8 @@ flowchart LR
 | [REQ-UX-005](req/REQ-UX-005.md) | Hilfe, FAQ und Sicherheitstipps | functional | S | leistung | low | verified | AT-UX-005 |
 | [REQ-UX-006](req/REQ-UX-006.md) | Rechtliche Links auf jeder Seite und in jeder E-Mail | constraint | M | basis | medium | verified | AT-UX-006, AT-UX-006-2 |
 | [REQ-UX-007](req/REQ-UX-007.md) | Englische Oberfläche | functional | S | leistung | medium | verified | AT-UX-007, AT-UX-007-2, AT-UX-007-3 |
-| [REQ-UX-008](req/REQ-UX-008.md) | Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf | functional | S | leistung | medium | approved | AT-UX-008, AT-UX-008-2, AT-UX-008-3, AT-UX-008-4 |
-| [REQ-UX-009](req/REQ-UX-009.md) | Vollständige Fehlerseiten für alle Fehlerarten | functional | S | basis | medium | approved | AT-UX-009, AT-UX-009-2, AT-UX-009-3, AT-UX-009-4 |
-| [REQ-UX-010](req/REQ-UX-010.md) | Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole | quality | S | basis | low | approved | AT-UX-010, AT-UX-010-2 |
+| [REQ-UX-008](req/REQ-UX-008.md) | Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf | functional | S | leistung | medium | implemented | AT-UX-008, AT-UX-008-2, AT-UX-008-3, AT-UX-008-4 |
+| [REQ-UX-009](req/REQ-UX-009.md) | Vollständige Fehlerseiten für alle Fehlerarten | functional | S | basis | medium | implemented | AT-UX-009, AT-UX-009-2, AT-UX-009-3, AT-UX-009-4 |
+| [REQ-UX-010](req/REQ-UX-010.md) | Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole | quality | S | basis | low | implemented | AT-UX-010, AT-UX-010-2 |
 
 <!-- req-index:end -->

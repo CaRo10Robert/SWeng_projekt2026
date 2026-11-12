@@ -3,7 +3,7 @@ id: REQ-UX-009
 title: Vollständige Fehlerseiten für alle Fehlerarten
 type: user-story
 class: functional
-status: approved
+status: implemented
 owner: team-plattform
 risk: medium
 release: R1
@@ -11,7 +11,7 @@ moscow: S
 kano: basis
 epic: EPIC-13
 source: Auftraggeber (2026-11-12, Q-29), REQ-UX-003, Guideline Kap. 03 „Resilience on the frontend“
-version: 1.0
+version: 1.1
 created: 2026-11-12
 last_updated: 2026-11-12
 review_due: 2027-04-23
@@ -90,3 +90,4 @@ I: setzt auf REQ-UX-003 auf · N: Texte und Aufbau verhandelbar · V: Orientieru
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-12 | Erstfassung auf Wunsch des Auftraggebers (Q-29), freigegeben, ergänzt REQ-UX-003 |
+| 1.1 | 2026-11-12 | Umgesetzt (B-67); Status → implemented |

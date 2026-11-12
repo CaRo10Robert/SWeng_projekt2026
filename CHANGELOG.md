@@ -4,9 +4,12 @@ Alle wesentlichen Änderungen an CampusMarkt HWG LU. Das Format folgt [Keep a Ch
 
 Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änderungen enthalten (SemVer §4). Im Docker-Beispiel betrifft das vor allem Datenbank-Migrationen und die Versionen der Rechtstexte.
 
-## [Unreleased] – 0.4.0 (geplant, Stand 2026-11-07)
+## [Unreleased] – 0.4.0 (geplant, Stand 2026-11-12)
 
 ### Added
+- Dunkles Farbschema (REQ-UX-008, ADR-0021): folgt der Systemeinstellung, im Seitenkopf wählbar (Wie im System, Hell, Dunkel), Wahl nur auf Wunsch im Browser gespeichert (`cm_theme`), kein Aufblitzen beim Laden; Kontrastmatrix beider Schemata als Test.
+- Fehlerseiten für alle Fehlerarten (REQ-UX-009): 403 statt stiller Weiterleitung, 401, 429 mit Wartezeit aus `Retry-After`, eigene 404 für Anzeigen und Unterhaltungen, Offline-Hinweis und Offline-Seite, Rückfallebene außerhalb des Routers; einheitlicher Aufbau mit Fehlercode, Titel und Wegen zurück.
+- Website-Hygiene (REQ-UX-010): Favicon (ICO, SVG), Apple Touch Icon, Manifest mit PNG- und Maskable-Icons, `theme-color` je Schema, `noindex` im Dokument, `<noscript>`-Hinweis, eigener Seitentitel je Seite; Skript `apps/web/scripts/generate-icons.mjs`.
 - Nachweise in `docs/05-umsetzung/nachweise/`:
   - Übungen: Alarm, Störung, Restore, Datenpanne als Tabletop, Mail-Zustellbarkeit, simuliertes Onboarding.
   - Reviews: Architektur, Datenbankschema, Log-Felder, Übersetzungen.
@@ -39,6 +42,8 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 - `RATE_LIMIT_FACTOR` hebt die Rate-Limits nur für Lasttests an (wirkt nur mit `DEMO_MODE=true`).
 
 ### Changed
+- Volle Navigation im Seitenkopf erst ab 1280 px, darunter Menü; unter 640 px zeigt der Kopf nur das Logo (Name für Screenreader) und für Gäste nur „Anmelden“.
+- Datenschutzerklärung Fassung 2026-11-12 (neuer Eintrag `cm_theme` unter „Cookies und lokale Speicherung“).
 - Coverage-Schwellen der Fachmodule von 13 % auf 86 % Zeilen, 70 % Zweige und 86 % Funktionen angehoben (gemessen 88,65 %); Geschäftsregeln je 95 % inklusive Zweige.
 - 24 weitere Anforderungen sind `verified` (R1-Must 84 % statt 60 %), darunter REQ-MAINT-001 (Coverage), REQ-PRIV-003 (Löschfristen) und REQ-PERF-001 bis -004 (Lasttests); Einzelheiten im [Testbericht 2026-11-07](docs/05-umsetzung/testbericht-2026-11-07.md).
 - Architektur v1.6: Lieferkette, Paginierung (neu 8.12) und Löschläufe auf dem umgesetzten Stand.
@@ -52,6 +57,9 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 - Abhängigkeiten aktualisiert (sharp, @fastify/static, @fastify/swagger-ui, nodemailer, vitest); das Runtime-Image enthält kein npm und kein yarn mehr.
 
 ### Fixed
+- Rahmen von Eingabefeldern im hellen Schema mit zu wenig Kontrast (2,6:1, WCAG SC 1.4.11) – jetzt 4,8:1.
+- Seitenkopf für Gäste lief bei 360 px Breite horizontal über (REQ-UX-001).
+- Seitenaufrufe fehlender `.html`-Dateien liefern die 404-Seite statt JSON; `/api` ohne Schrägstrich liefert JSON statt der SPA.
 - Die App stürzt bei einem Datenbankausfall nicht mehr ab.
 - Request-IDs vom Client werden nur noch als UUID übernommen.
 - Unbekannte Pfade erscheinen im Log nicht mehr im Klartext.

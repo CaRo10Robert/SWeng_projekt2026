@@ -3,7 +3,7 @@ id: REQ-UX-008
 title: Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf
 type: user-story
 class: functional
-status: approved
+status: implemented
 owner: team-produkt
 risk: medium
 release: R1
@@ -11,7 +11,7 @@ moscow: S
 kano: leistung
 epic: EPIC-13
 source: Auftraggeber (2026-11-12, Q-29), BG-2
-version: 1.0
+version: 1.1
 created: 2026-11-12
 last_updated: 2026-11-12
 review_due: 2027-04-23
@@ -82,3 +82,4 @@ I: unabhängig von Fachfunktionen · N: Bedienform des Schalters verhandelbar (A
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-12 | Erstfassung auf Wunsch des Auftraggebers (Q-29), freigegeben |
+| 1.1 | 2026-11-12 | Umgesetzt (B-66); Status → implemented |
