@@ -154,12 +154,12 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 135 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
+**Stand:** 136 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
 | approved | Konkretisiert (bereit) | 18 |
-| implemented | Umsetzung | 12 |
+| implemented | Umsetzung | 13 |
 | verified | Test | 105 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
@@ -255,6 +255,7 @@ flowchart LR
 | [REQ-OPS-010](req/REQ-OPS-010.md) | Zustellbarkeit der E-Mails | constraint | C | n/a | low | verified | AT-OPS-010, CTRL-DOC-MAIL |
 | [REQ-OPS-011](req/REQ-OPS-011.md) | Betriebshandbuch, Störungs- und Notfallprozess | constraint | M | n/a | medium | verified | CTRL-DOC-BETRIEB, MAN-OPS-011 |
 | [REQ-OPS-012](req/REQ-OPS-012.md) | Automatisierte Aktualisierung von Abhängigkeiten | constraint | S | n/a | low | verified | CTRL-RENOVATE |
+| [REQ-OPS-013](req/REQ-OPS-013.md) | Automatische Auslieferung eines Releases mit Rückweg | quality | S | n/a | medium | implemented | AT-OPS-013, AT-OPS-013-2 |
 | [REQ-PERF-001](req/REQ-PERF-001.md) | Antwortzeit der Suche | quality | M | leistung | medium | verified | AT-PERF-001 |
 | [REQ-PERF-002](req/REQ-PERF-002.md) | Zustellzeit von Chatnachrichten | quality | M | leistung | medium | verified | AT-PERF-002 |
 | [REQ-PERF-003](req/REQ-PERF-003.md) | Antwortzeit beim Erstellen einer Anzeige | quality | M | leistung | low | verified | AT-PERF-003 |

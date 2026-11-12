@@ -90,10 +90,10 @@ Die DEV-Guideline verlangt für jede Abweichung von einer MUST- bzw. SHALL-Regel
 | Feld | Inhalt |
 |---|---|
 | Regel | Guideline Kap. 07, Abschnitt „Secrets & supply chain“ (signierte, attestierbare CI-Artefakte); Standards-Register „SLSA v1.0, Ziel Level 2–3“ (normativ) |
-| Betroffen | CI-Image-Artefakt (`docker save`), REQ-OPS-004 |
-| Grund | Es gibt keine Container-Registry (Q-19, Abgabe als Quellcode bzw. Archiv). CI erzeugt eine Build-Provenance per GitHub-Attestation (Level 2). Signierte Images, deren Signatur beim Deployment geprüft wird (Level 3), brauchen eine Registry und eine Deployment-Policy. |
+| Betroffen | CI-Image-Artefakt (`docker save`), REQ-OPS-004; seit 2026-11-12 das Release-Image auf ghcr.io (REQ-OPS-013, ADR-0022) |
+| Grund | Bis 2026-11-11 gab es keine Container-Registry (Q-19, Abgabe als Quellcode bzw. Archiv). Seit ADR-0022 gehen Releases nach ghcr.io, mit Build-Provenance in der Registry (Level 2). Offen bleibt Level 3: Das Zielsystem prüft Signatur bzw. Provenance beim Abholen noch nicht (Deployment-Policy fehlt). |
 | Risiko | niedrig: Das Image wird lokal aus dem Quellcode gebaut. |
 | Kompensation | Build-Provenance-Attestation des Image-Archivs in CI, SBOM (CycloneDX), Trivy-Scan, Images per Digest gepinnt (Renovate) |
 | Genehmigt von | security-lead (fiktiv), 2026-10-26 |
 | Ablauf | 2027-04-30 |
-| Plan | Mit einer Registry im Echtbetrieb: cosign keyless signieren und die Signatur beim Deployment prüfen (EPIC-12) |
+| Plan | Das Zielsystem prüft vor dem Einspielen die Provenance (`gh attestation verify oci://ghcr.io/caro10robert/campusmarkt:X.Y.Z`) oder eine cosign-Signatur (EPIC-12) |

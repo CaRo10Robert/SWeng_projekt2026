@@ -38,12 +38,40 @@ Jeder Update-Pull-Request durchläuft die volle CI (Typprüfung, Unit-, E2E- und
 
 **Zeitziele (Beispiel):** kritische Sicherheitslücken in erreichbarem Code binnen 48 h, hohe binnen 7 Tagen, sonst mit dem nächsten wöchentlichen Update.
 
-## Versionierung und Release
+## Versionierung
 
 - **SemVer** für die Anwendung (`MAJOR.MINOR.PATCH`); der Image-Tag entspricht der Version, zusätzlich `<version>-<commit-sha>` (beide Tags setzt CI).
-- Ein Release entsteht aus `main` mit Tag `vX.Y.Z`; CI baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt es als `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (Job `compose`, CTRL-CI-IMAGE). Eine Container-Registry ist optional (Q-19).
+- Ein Release entsteht aus `main` mit Tag `vX.Y.Z`; CI baut das Image aus sauberem Checkout, taggt es mit der Version aus `package.json` (`campusmarkt:<version>`) und legt es als `docker save`-Archiv `campusmarkt-<version>.tar.gz` für 7 Tage als Artefakt ab (Job `compose`, CTRL-CI-IMAGE). Eine Container-Registry ist für die Abgabe optional (Q-19); Releases gehen seit 2026-11-12 zusätzlich nach ghcr.io (siehe unten).
 - Änderungen an Nutzungsbedingungen oder Datenschutzerklärung → `TERMS_VERSION` anheben ([Pflegeprozess](../06-recht/README.md#pflegeprozess-für-rechtstexte)).
 - Datenbankmigrationen sind **additiv** und laufen beim Start automatisch (REQ-OPS-005); zerstörende Änderungen erst ein Release später (Expand-and-Contract).
+
+## Release und Auslieferung
+
+Seit 2026-11-12 automatisch (REQ-OPS-013, [ADR-0022](../03-architektur/decisions/0022-release-pipeline-tag-registry-pull.md)):
+
+```mermaid
+flowchart LR
+  A["Version in allen package.json<br/>und Changelog-Abschnitt"] --> B["Tag vX.Y.Z<br/>auf main pushen"]
+  B --> C["CI: alle Jobs<br/>(Tests, E2E, Smoke, Restore, Scans)"]
+  C -->|grün| D["Job release:<br/>Release-Prüfung"]
+  D --> E["geprüftes Image →<br/>ghcr.io/…/campusmarkt:X.Y.Z<br/>+ Provenance"]
+  D --> F["GitHub-Release<br/>Changelog, Archiv, SBOM"]
+  E --> G["Zielsystem holt ab<br/>(alle 5 min)"]
+  G --> H["Stack stoppen,<br/>Daten sichern"]
+  H --> I["neuer Tag, Start,<br/>Prüfungen"]
+  I -->|ok| J["läuft mit X.Y.Z,<br/>Image-Kopie gesichert"]
+  I -->|Fehler| K["alter Tag +<br/>alte Daten"]
+```
+
+**So erstellt man ein Release:**
+1. Version in allen `package.json` anheben (dieselbe SemVer-Version; `node tests/ops/release-check.mjs` prüft das).
+2. Im `CHANGELOG.md` den Abschnitt `## [X.Y.Z] – JJJJ-MM-TT` anlegen.
+3. Nach `main` mergen, die CI muss grün sein.
+4. Tag setzen und pushen: `git tag -a vX.Y.Z -m "CampusMarkt X.Y.Z" && git push origin vX.Y.Z`.
+5. Die CI läuft für den Tag. Der Job `release` veröffentlicht `ghcr.io/caro10robert/campusmarkt:X.Y.Z` und das GitHub-Release.
+6. Das Zielsystem spielt die Version binnen etwa 5 Minuten selbst ein. Die Version zeigt `GET /health/live` an (`{"status":"ok","version":"X.Y.Z"}`).
+
+**Vertrag für das Zielsystem:** In der Compose-Datei steht das Image mit festem Tag. Der App-Dienst trägt die Labels `caroai.release: auto` und `caroai.release.health: <URL der Bereitschaftsprüfung>`. Sicherung, Prüfung und Rückweg übernimmt der Abhol-Dienst des Zielsystems. In der Vorführumgebung CaRoNexus ist das `caroai_update.py --releases` (alle 5 Minuten).
 
 ## Ausrollen
 

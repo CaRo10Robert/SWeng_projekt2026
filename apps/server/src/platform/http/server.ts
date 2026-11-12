@@ -20,6 +20,7 @@ import { isMaintenanceExempt, maintenancePage, retryAfterSeconds } from './maint
 import { rateLimitHeaders, runWithRateLimitState, type RateLimitState } from './rate-limit-headers.js';
 import { isKnownSpaPath } from './spa-routes.js';
 import { requiresCurrentTerms } from './terms.js';
+import { APP_VERSION } from '../version.js';
 
 export interface HttpServerOptions {
   config: Config;
@@ -105,7 +106,7 @@ export async function createHttpServer(options: HttpServerOptions) {
       openapi: '3.1.0',
       info: {
         title: 'CampusMarkt HWG LU API',
-        version: '0.1.0',
+        version: APP_VERSION,
         description: 'REST-API des CampusMarkt-MVP (ADR-0009). Fehler als RFC 9457 Problem Details.',
       },
       servers: [{ url: config.publicUrl }],
@@ -255,7 +256,8 @@ export async function createHttpServer(options: HttpServerOptions) {
   });
 
   // Health (REQ-OPS-001) und Metriken
-  app.get('/health/live', { schema: { hide: true } }, async () => ({ status: 'ok' }));
+  // Version für die Release-Prüfung nach dem Einspielen (REQ-OPS-013)
+  app.get('/health/live', { schema: { hide: true } }, async () => ({ status: 'ok', version: APP_VERSION }));
   app.get('/health/ready', { schema: { hide: true } }, async (_req, reply) => {
     const ready = await options.isReady();
     return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });

@@ -66,6 +66,15 @@ describe('[AT-UX-003-2] Unerwarteter Fehler: 500 mit Request-ID, ohne interne De
 });
 
 describe('Betriebs-Endpunkte (REQ-PRIV-008, REQ-SEC-012, REQ-OPS-006/007)', () => {
+  it('[AT-OPS-013-2] /health/live und OpenAPI nennen die Version aus package.json (REQ-OPS-013)', async () => {
+    const { version } = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf8')) as {
+      version: string;
+    };
+    const app = await server();
+    expect((await app.inject({ method: 'GET', url: '/health/live' })).json()).toEqual({ status: 'ok', version });
+    expect(app.swagger().info.version).toBe(version);
+    await app.close();
+  });
   it('robots.txt sperrt alles, X-Robots-Tag auf jeder Antwort', async () => {
     const app = await server();
     const res = await app.inject({ method: 'GET', url: '/robots.txt' });
