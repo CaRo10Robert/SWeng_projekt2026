@@ -6,6 +6,9 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 ## [Unreleased]
 
+### Added
+- Beispielfotos für die Demo-Anzeigen (REQ-DEMO-003): 26 KI-generierte Fotos (1200 × 900, ohne Personen, Schrift und Marken) statt einfarbiger Platzhalter; fehlt ein Foto, nimmt der Seed weiter den Platzhalter. Herkunft und Bildbeschreibungen in `apps/server/assets/demo-images/`.
+
 ## [0.4.0] – 2026-11-12
 
 Erstes Release über die Release-Pipeline (REQ-OPS-013, ADR-0022): Image `ghcr.io/caro10robert/campusmarkt:0.4.0` mit Build-Provenance, eingespielt in die Vorführumgebung.

@@ -79,6 +79,8 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-CHAT-011-2` | automatisiert | REQ-CHAT-011 | Smoke-Test – der Interessent darf den Deal nicht steuern. |
 | `AT-DEMO-001` | automatisiert | REQ-DEMO-001 | Smoke-Test – Login mit Demo-Konto, Suche liefert Anzeigen, Queue ≥ 2 Fälle (bestehend: „Moderations-Queue enthält Seed-Meldung und Wortfilter-Fall“). |
 | `AT-DEMO-002` | automatisiert | REQ-DEMO-002 | Smoke-Test – Auslösen liefert 202 und erzeugt die Erinnerungsmail in Mailpit (neu zu schreiben). |
+| `AT-DEMO-003` | automatisiert | REQ-DEMO-003 | Unit-Test (`demo-images.test.ts`) – für jede Demo-Anzeige mit Bildern liegen die Fotos vor, JPEG 1200 × 900, höchstens 350 KB. |
+| `AT-DEMO-003-2` | automatisiert | REQ-DEMO-003 | Unit-Test (`demo-images.test.ts`) – fehlt ein Foto oder der Ordner, liefert der Seed das Platzhalterbild. |
 | `AT-LEGAL-001` | automatisiert | REQ-LEGAL-001 | E2E-Test – Impressum ohne Anmeldung aus dem Seitenfuß erreichbar, HTTP 200 bei Direktaufruf, alle Pflichtabschnitte und der Muster-Hinweis sichtbar. |
 | `CTRL-DOC-LEGAL-TEXTE` | Kontrolle | REQ-LEGAL-001, REQ-LEGAL-002, REQ-LEGAL-003, REQ-LEGAL-004, REQ-LEGAL-005 | Kontrolle der Rechtstexte unter `apps/web/src/content/legal/` – alle Pflichtabschnitte vorhanden, jede Betreiberangabe als fiktiver Übungswert erkennbar (Muster-Hinweis, „(fiktiv)“, Domain `.example`, Q-28), Version und Datum im Front Matter, Review protokolliert – Protokoll [CTRL-DOC-LEGAL-TEXTE](../05-umsetzung/nachweise/CTRL-DOC-LEGAL-TEXTE.md). |
 | `AT-LEGAL-002` | automatisiert | REQ-LEGAL-002 | E2E-Test – Datenschutzerklärung ohne Anmeldung erreichbar, aus dem Registrierungsformular verlinkt, Abschnitte 1–12 und Version vorhanden. |

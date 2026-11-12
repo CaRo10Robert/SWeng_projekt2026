@@ -154,13 +154,13 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 136 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
+**Stand:** 137 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
 | approved | Konkretisiert (bereit) | 18 |
 | implemented | Umsetzung | 13 |
-| verified | Test | 105 |
+| verified | Test | 106 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
@@ -201,6 +201,7 @@ flowchart LR
 | [REQ-CHAT-011](req/REQ-CHAT-011.md) | Reservierung und Abgabe für eine Person (Deal-Kern) | functional | M | basis | medium | verified | AT-CHAT-011, AT-CHAT-011-2 |
 | [REQ-DEMO-001](req/REQ-DEMO-001.md) | Demo-Daten auf Knopfdruck | constraint | M | n/a | low | verified | AT-DEMO-001 |
 | [REQ-DEMO-002](req/REQ-DEMO-002.md) | Zeitgesteuerte Abläufe sofort auslösen | functional | S | n/a | low | verified | AT-DEMO-002 |
+| [REQ-DEMO-003](req/REQ-DEMO-003.md) | Beispielfotos für die Demo-Anzeigen | constraint | S | begeisterung | low | verified | AT-DEMO-003, AT-DEMO-003-2 |
 | [REQ-LEGAL-001](req/REQ-LEGAL-001.md) | Impressum | constraint | M | basis | medium | verified | AT-LEGAL-001, CTRL-DOC-LEGAL-TEXTE |
 | [REQ-LEGAL-002](req/REQ-LEGAL-002.md) | Datenschutzerklärung | constraint | M | basis | high | verified | AT-LEGAL-002, AT-LEGAL-002-2, AT-LEGAL-002-3, CTRL-DOC-LEGAL-TEXTE |
 | [REQ-LEGAL-003](req/REQ-LEGAL-003.md) | Nutzungsbedingungen und Community-Regeln | constraint | M | basis | medium | verified | AT-LEGAL-003, AT-LEGAL-003-2, CTRL-DOC-LEGAL-TEXTE |

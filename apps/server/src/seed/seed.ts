@@ -12,6 +12,7 @@ import {
   DEMO_USERS,
   HWG_INSTITUTION_ID,
 } from './demo-data.js';
+import { loadDemoImage } from './demo-images.js';
 
 /** Stammdaten (immer, idempotent): Institution, Whitelist, Campus-Standorte, Kategorien. */
 export async function seedBaseData(database: Database): Promise<void> {
@@ -97,7 +98,9 @@ export async function seedDemoData(deps: ModuleDeps): Promise<void> {
     const owner = user(l.owner);
     const imageIds: string[] = [];
     for (let i = 0; i < (l.images ?? 0); i++) {
-      const [upload] = await modules.listings.upload(owner, [{ buffer: await demoImage(category.color, category.glyph, index + i) }]);
+      // Beispielfoto (REQ-DEMO-003), sonst das schlichte Platzhalterbild
+      const buffer = await loadDemoImage(index, i + 1, () => demoImage(category.color, category.glyph, index + i));
+      const [upload] = await modules.listings.upload(owner, [{ buffer }]);
       imageIds.push(upload!.id);
     }
     const listing = await modules.listings.create(owner, {
