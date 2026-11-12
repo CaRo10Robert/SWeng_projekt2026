@@ -21,6 +21,13 @@
       "purpose": "Ausdrücklich gewählte Sprache (ADR-0016, REQ-UX-007); wird erst nach Klick auf die Sprachwahl gesetzt",
       "classification": "unbedingt erforderlich (auf ausdrücklichen Wunsch)",
       "privacyTerm": "cm_locale"
+    },
+    {
+      "type": "localStorage",
+      "pattern": "^cm_theme$",
+      "purpose": "Ausdrücklich gewähltes Farbschema hell oder dunkel (ADR-0021, REQ-UX-008); wird erst nach Klick auf „Hell“ oder „Dunkel“ gesetzt, „Wie im System“ löscht es",
+      "classification": "unbedingt erforderlich (auf ausdrücklichen Wunsch)",
+      "privacyTerm": "cm_theme"
     }
   ]
 }

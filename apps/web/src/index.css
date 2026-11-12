@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Farbschema (REQ-UX-008, ADR-0021): Die Oberfläche nutzt die Tailwind-Paletten durchgängig nach der Konvention
+ * „helle Fläche, dunkle Schrift; kräftige Farbe, weiße Schrift“. Im dunklen Schema werden deshalb nur die Farb-Tokens
+ * umgedeutet: Jede Stufe einer Palette bekommt ihren Gegenpart (hell ↔ dunkel), `white` wird zur dunklen Fläche.
+ * Alle Paarungen aus den Komponenten behalten so ihre Rolle und ihren Kontrast, ohne `dark:`-Varianten in jeder
+ * Komponente. Lesart: In `.dark` bedeutet `bg-white` „Fläche“ und `text-slate-900` „Haupttext“.
+ * Neue Farbstufen hier für beide Schemata ergänzen; die Kontrastmatrix prüft theme-contrast.test.ts (AT-UX-008-2).
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #eef5fc;
   --color-brand-100: #d6e7f7;
@@ -7,6 +18,61 @@
   --color-brand-700: #0b4f8a;
   --color-brand-800: #083d6b;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  /* Flächen und Text (slate): 50 = Seitenhintergrund, white = Karten/Kopf/Felder, 900 = Haupttext */
+  --color-white: #111a2b;
+  --color-slate-50: #0a1120;
+  --color-slate-100: #1b2537;
+  --color-slate-200: #2b374b;
+  --color-slate-300: #3d4a5f;
+  --color-slate-400: #6b7a90;
+  --color-slate-500: #8191a8;
+  --color-slate-600: #aab6c7;
+  --color-slate-700: #c3ccd8;
+  --color-slate-800: #d8dee7;
+  --color-slate-900: #e9edf3;
+  --color-slate-950: #f5f7fa;
+
+  /* Marke: 700 = Links und Primärfläche (mit dunkler Schrift), 50/100 = getönte Flächen */
+  --color-brand-50: #10233a;
+  --color-brand-100: #17324f;
+  --color-brand-600: #4f9fe6;
+  --color-brand-700: #7db8ee;
+  --color-brand-800: #a9d0f5;
+
+  /* Status: 50/100 = getönte Flächen, 700 = Text/Rahmen/Gefahrfläche, 900/950 = Text auf getönter Fläche */
+  --color-red-50: #2a1416;
+  --color-red-100: #3b1a1d;
+  --color-red-300: #7a2e33;
+  --color-red-700: #f29797;
+  --color-red-800: #f6b6b6;
+  --color-red-900: #fbd2d2;
+
+  --color-green-50: #0f2418;
+  --color-green-100: #143221;
+  --color-green-700: #4cc27a;
+  --color-green-800: #8fdcab;
+  --color-green-900: #b8ecca;
+
+  --color-amber-50: #2a1f0b;
+  --color-amber-100: #3a2b0e;
+  --color-amber-300: #7a5a17;
+  --color-amber-500: #d39a2c;
+  --color-amber-600: #e0a63c;
+  --color-amber-900: #f5d58e;
+  --color-amber-950: #fae6b5;
+
+  --color-sky-50: #0c2233;
+  --color-sky-300: #1f5f86;
+  --color-sky-950: #d4ecfb;
 }
 
 html { -webkit-text-size-adjust: 100%; }
@@ -17,7 +83,11 @@ body { @apply bg-slate-50 text-slate-900 antialiased; }
   outline-offset: 2px;
 }
 
+/* Überschriften, die per Skript den Fokus bekommen (Fehlerseiten, REQ-UX-009), sind kein Bedienelement: kein Rahmen */
+h1[tabindex="-1"]:focus { outline: none; }
+
 dialog::backdrop { background: rgb(15 23 42 / 0.5); }
+:root.dark dialog::backdrop { background: rgb(0 0 0 / 0.65); }
 
 .sr-only-focusable:not(:focus) {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;

@@ -28,7 +28,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl p-0 shadow-xl"
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl bg-white p-0 text-slate-900 shadow-xl ring-1 ring-slate-200"
     >
       <div className="space-y-4 p-5">
         <div className="flex items-start justify-between gap-4">

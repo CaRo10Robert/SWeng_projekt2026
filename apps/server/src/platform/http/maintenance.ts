@@ -31,7 +31,7 @@ export function retryAfterSeconds(until: string | null, now = new Date()): numbe
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-/** Statische Wartungsseite ohne externe Ressourcen und ohne Skripte (CSP-konform). */
+/** Statische Wartungsseite ohne externe Ressourcen und ohne Skripte (CSP-konform); hell oder dunkel nach Systemeinstellung (REQ-UX-008). */
 export function maintenancePage(until: string | null): string {
   const end = until
     ? `Voraussichtlich wieder erreichbar ab ${escapeHtml(
@@ -46,9 +46,10 @@ export function maintenancePage(until: string | null): string {
     : 'We will be back for you shortly.';
   return `<!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow"><title>Wartung – CampusMarkt HWG LU</title>
-<style>body{font-family:system-ui,sans-serif;color:#1f2937;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5}
-h1{color:#0b4884;font-size:1.75rem}a{color:#0b4884}footer{margin-top:3rem;font-size:.875rem;color:#4b5563}</style></head>
+<meta name="robots" content="noindex, nofollow"><meta name="color-scheme" content="light dark"><title>Wartung – CampusMarkt HWG LU</title>
+<style>body{font-family:system-ui,sans-serif;color:#1f2937;background:#f8fafc;max-width:40rem;margin:4rem auto;padding:0 1rem;line-height:1.5}
+h1{color:#0b4884;font-size:1.75rem}a{color:#0b4884}footer{margin-top:3rem;font-size:.875rem;color:#4b5563}
+@media (prefers-color-scheme: dark){body{color:#e9edf3;background:#0a1120}h1,a{color:#7db8ee}footer{color:#aab6c7}}</style></head>
 <body><main><h1 tabindex="-1">CampusMarkt wird gerade gewartet</h1>
 <p>Wegen Wartungsarbeiten ist CampusMarkt vorübergehend nicht verfügbar. ${end}</p>
 <p>Den aktuellen Stand findest du auf der <a href="/status">Statusseite</a>.</p>

@@ -1,12 +1,13 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { t } from '../i18n';
+import { useDocumentTitle } from '../lib/title';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 const variants: Record<Variant, string> = {
   primary: 'bg-brand-700 text-white hover:bg-brand-800 disabled:bg-slate-400 aria-disabled:bg-slate-400',
-  secondary: 'bg-white text-slate-900 border border-slate-400 hover:bg-slate-100 disabled:text-slate-500 aria-disabled:text-slate-500',
+  secondary: 'bg-white text-slate-900 border border-slate-500 hover:bg-slate-100 disabled:text-slate-500 aria-disabled:text-slate-500',
   danger: 'bg-red-700 text-white hover:bg-red-800 disabled:bg-slate-400 aria-disabled:bg-slate-400',
   ghost: 'text-brand-700 hover:bg-brand-50 disabled:text-slate-500 aria-disabled:text-slate-500',
 };
@@ -72,7 +73,7 @@ export function Loading() {
 }
 
 const inputClass =
-  'block w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-500 aria-[invalid=true]:border-red-700';
+  'block w-full rounded-lg border border-slate-500 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-500 aria-[invalid=true]:border-red-700';
 
 interface FieldWrapProps {
   label: string;
@@ -202,7 +203,9 @@ export function FormError({ error }: { error?: string | null }) {
   return <div aria-live="assertive">{error ? <Alert tone="error">{error}</Alert> : null}</div>;
 }
 
+/** Seitenüberschrift; setzt zugleich den Seitentitel (WCAG 2.4.2, REQ-UX-010). */
 export function PageHeader({ title, actions }: { title: string; actions?: ReactNode }) {
+  useDocumentTitle(title);
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <h1 className="text-2xl font-bold text-slate-900">{title}</h1>

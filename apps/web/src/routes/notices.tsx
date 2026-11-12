@@ -139,7 +139,6 @@ function NoticeCard({ notice }: { notice: ModerationNotice }) {
 export function NoticesPage() {
   const { data, isPending, isError, error } = useNotices();
   const markRead = useMarkNoticesRead();
-  useDocumentTitle(t('nav.notices'));
   const unread = data?.some((n) => !n.readAt) ?? false;
 
   // Beim Öffnen als gelesen markieren; die Kennzeichnung „neu“ bleibt bis zum nächsten Abruf sichtbar

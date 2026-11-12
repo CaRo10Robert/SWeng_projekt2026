@@ -8,9 +8,15 @@ test('[AT-UX-001] Kein horizontales Scrollen bei 360 px Breite', async ({ browse
 
   const context = await browser.newContext({ viewport: { width: 360, height: 780 }, locale: 'de-DE' });
   const page = await context.newPage();
-  await keyboardLogin(page, DEMO.lea);
   const overflow: string[] = [];
-  for (const path of ['/', `/listings/${listingId}`, '/listings/new', `/messages/${conversationId}`]) {
+  // Gastseiten mit Sprach- und Farbschema-Wahl im Seitenkopf (REQ-UX-008, REQ-UX-010)
+  for (const path of ['/', '/login', '/register', '/hilfe', '/gibt-es-nicht']) {
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) overflow.push(path);
+  }
+  await keyboardLogin(page, DEMO.lea);
+  for (const path of ['/', `/listings/${listingId}`, '/listings/new', `/messages/${conversationId}`, '/admin']) {
     await page.goto(path);
     await page.waitForLoadState('networkidle');
     if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) overflow.push(path);

@@ -29,7 +29,7 @@ function Users() {
         <label htmlFor="user-q" className="sr-only">
           {t('admin.users.search')}
         </label>
-        <input id="user-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('admin.users.placeholder')} className="flex-1 rounded-lg border border-slate-400 px-3 py-2" />
+        <input id="user-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('admin.users.placeholder')} className="flex-1 rounded-lg border border-slate-500 bg-white px-3 py-2" />
         <Button type="submit">{t('common.search')}</Button>
       </form>
       <FormError error={setRole.isError ? errorMessage(setRole.error) : null} />
@@ -68,7 +68,7 @@ function Users() {
                       value={u.role}
                       disabled={u.id === me?.id || setRole.isPending}
                       onChange={(e) => setRole.mutate({ id: u.id, role: e.target.value as Role })}
-                      className="rounded border border-slate-400 bg-white px-2 py-1"
+                      className="rounded border border-slate-500 bg-white px-2 py-1"
                     >
                       {roles.map((r) => (
                         <option key={r} value={r}>

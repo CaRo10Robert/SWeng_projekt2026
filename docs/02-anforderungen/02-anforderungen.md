@@ -60,7 +60,7 @@ Antwort auf Aufgabe II a) der Fallstudie. „Im Scope“ heißt: im Release R1 p
 | P7 Konto und Datenschutz | Profil pflegen (Anzeigename, Studiengang, Übergabeorte), Daten exportieren, Konto mit Karenz löschen, Benachrichtigungen abbestellen, Fristen und Löschungen | Profilbild (REQ-ACC-004, R2, Q-14) | REQ-ACC-001…003, REQ-PRIV-* |
 | P8 Administration | Rollen vergeben, Audit-Log, Job-Übersicht, Demo-Werkzeug | Whitelist- und Kategorienverwaltung per Oberfläche (C) | REQ-MOD-007/008, REQ-DEMO-* |
 | P9 Betrieb | Start per Docker Compose, Migrationen, Health, Logs, Metriken, Wartungsmodus, Statusseite, Datensicherung mit Restore-Test, optionale Profile für Monitoring und TLS (Q-27) | Öffentliches Hosting (EPIC-12), weitere Hochschulen (EPIC-10), native Apps (EPIC-11), gewerbliche Anbieter, Wohnungsbörse, Werbung | REQ-OPS-*, REQ-AVAIL-003, REQ-ARCH-005/006 |
-| P10 Recht und Auftritt (EPIC-13, Übung, Q-23) | Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Erklärung zur Barrierefreiheit, Kontaktstelle, Begründung und Widerspruch nach DSA, Kennzeichnung Straftatverdacht, DAC7-Auswertung, Startseite, Hilfe, Fehlerseiten, englische Oberfläche; Prozessdokumente (VVT, TOMs, AVV, Datenpannen, DSFA-Schwellwertanalyse, Betriebshandbuch) mit Platzhaltern | Echte Betreiberangaben, Meldung an BZSt und Behörden, Abschluss von AV-Verträgen, Durchführung des Penetrationstests (EPIC-12) | REQ-LEGAL-*, REQ-UX-003…007, REQ-PRIV-007/008, REQ-SEC-012/013 |
+| P10 Recht und Auftritt (EPIC-13, Übung, Q-23) | Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Erklärung zur Barrierefreiheit, Kontaktstelle, Begründung und Widerspruch nach DSA, Kennzeichnung Straftatverdacht, DAC7-Auswertung, Startseite, Hilfe, Fehlerseiten, englische Oberfläche, dunkles Farbschema, Website-Hygiene (Icons, Manifest, Seitentitel); Prozessdokumente (VVT, TOMs, AVV, Datenpannen, DSFA-Schwellwertanalyse, Betriebshandbuch) mit Platzhaltern | Echte Betreiberangaben, Meldung an BZSt und Behörden, Abschluss von AV-Verträgen, Durchführung des Penetrationstests (EPIC-12) | REQ-LEGAL-*, REQ-UX-003…010, REQ-PRIV-007/008, REQ-SEC-012/013 |
 
 ## 3. Constraints und ihre Operationalisierung
 
@@ -154,13 +154,13 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 132 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
+**Stand:** 135 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
 | approved | Konkretisiert (bereit) | 18 |
 | implemented | Umsetzung | 12 |
-| verified | Test | 102 |
+| verified | Test | 105 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
@@ -296,5 +296,8 @@ flowchart LR
 | [REQ-UX-005](req/REQ-UX-005.md) | Hilfe, FAQ und Sicherheitstipps | functional | S | leistung | low | verified | AT-UX-005 |
 | [REQ-UX-006](req/REQ-UX-006.md) | Rechtliche Links auf jeder Seite und in jeder E-Mail | constraint | M | basis | medium | verified | AT-UX-006, AT-UX-006-2 |
 | [REQ-UX-007](req/REQ-UX-007.md) | Englische Oberfläche | functional | S | leistung | medium | verified | AT-UX-007, AT-UX-007-2, AT-UX-007-3 |
+| [REQ-UX-008](req/REQ-UX-008.md) | Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf | functional | S | leistung | medium | verified | AT-UX-008, AT-UX-008-2, AT-UX-008-3, AT-UX-008-4 |
+| [REQ-UX-009](req/REQ-UX-009.md) | Vollständige Fehlerseiten für alle Fehlerarten | functional | S | basis | medium | verified | AT-UX-009, AT-UX-009-2, AT-UX-009-3, AT-UX-009-4 |
+| [REQ-UX-010](req/REQ-UX-010.md) | Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole | quality | S | basis | low | verified | AT-UX-010, AT-UX-010-2 |
 
 <!-- req-index:end -->

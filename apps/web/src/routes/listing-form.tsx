@@ -4,6 +4,7 @@ import type { Condition, CreateListingBody, ListingDetail, ListingKind, PriceTyp
 import { useMeta } from '../api/auth';
 import { uploadImages, useCreateListing, useListing, useUpdateListing } from '../api/listings';
 import { ApiError, errorMessage } from '../api/client';
+import { ErrorPage, ErrorView } from '../components/ErrorPages';
 import { Alert, Button, FormError, Field, Loading, PageHeader, Select, TextArea } from '../components/ui';
 import { centsToEuroInput, conditionLabels, kindLabels, parseEuroToCents, priceTypeLabels } from '../lib/format';
 import { t } from '../i18n';
@@ -35,10 +36,10 @@ export function ListingFormPage() {
 }
 
 function EditLoader({ id }: { id: string }) {
-  const { data, isPending, isError, error } = useListing(id);
+  const { data, isPending, isError, error, refetch } = useListing(id);
   if (isPending) return <Loading />;
-  if (isError) return <Alert tone="error">{errorMessage(error)}</Alert>;
-  if (!data.isOwner) return <Alert tone="error">{t('form.onlyOwn')}</Alert>;
+  if (isError) return <ErrorView error={error} notFound="listingNotFound" onRetry={() => void refetch()} />;
+  if (!data.isOwner) return <ErrorPage kind="forbidden" text={t('form.onlyOwn')} />;
   return <ListingForm initial={data} />;
 }
 

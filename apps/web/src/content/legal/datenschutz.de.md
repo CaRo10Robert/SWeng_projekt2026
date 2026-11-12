@@ -1,7 +1,7 @@
 ---
 title: Datenschutzerklärung
-version: 2026-10-25
-last_updated: 2026-10-26
+version: 2026-11-12
+last_updated: 2026-11-12
 sample: true
 ---
 
@@ -83,6 +83,7 @@ Wir speichern nur, was technisch unbedingt erforderlich ist (§ 25 Abs. 2 Nr. 2 
 | Cookie `cm_session` (HttpOnly, Secure, SameSite) | hält Sie angemeldet; enthält nur einen zufälligen Sitzungsschlüssel | bis zur Abmeldung, höchstens 30 Tage |
 | Zwischenspeicher des Service Workers (Cache Storage) | speichert die Programmdateien der App (keine persönlichen Daten), damit sie schnell lädt und installierbar ist | bis zur nächsten Version der App bzw. bis Sie die Websitedaten löschen |
 | `localStorage`-Eintrag `cm_locale` | merkt sich die Sprache (`de` oder `en`), die Sie ausdrücklich gewählt haben; wird erst gesetzt, wenn Sie die Sprache umschalten. Unbedingt erforderlich, weil Sie diese Einstellung ausdrücklich wünschen | bis Sie eine andere Sprache wählen oder die Websitedaten löschen |
+| `localStorage`-Eintrag `cm_theme` | merkt sich das Farbschema (`light` oder `dark`), das Sie ausdrücklich gewählt haben; wird erst gesetzt, wenn Sie „Hell“ oder „Dunkel“ wählen, und mit „Wie im System“ wieder gelöscht. Unbedingt erforderlich, weil Sie diese Einstellung ausdrücklich wünschen; der Wert verlässt Ihr Gerät nicht | bis Sie „Wie im System“ wählen oder die Websitedaten löschen |
 
 Darüber hinaus werden kein `localStorage`, kein `sessionStorage` und keine IndexedDB genutzt. Sollte später eine Speicherung hinzukommen, die nicht unbedingt erforderlich ist, fragen wir vorher Ihre Einwilligung ab.
 

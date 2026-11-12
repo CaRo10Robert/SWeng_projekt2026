@@ -3,9 +3,9 @@ id: EVIDENCE
 type: verification
 status: in-review
 owner: qa-lead
-version: 1.1
+version: 1.2
 created: 2026-10-23
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 ---
 
 # Nachweiskatalog
@@ -221,7 +221,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SRCH-004` | automatisiert | REQ-SRCH-004 | API-Test – merken, Liste, entfernen, eigene Anzeige abgelehnt (neu). |
 | `AT-SRCH-005` | automatisiert | REQ-SRCH-005 | Szenario-Test des täglichen Digests (neu). Noch nicht umgesetzt (⬜). |
 | `AT-SRCH-006` | automatisiert | REQ-SRCH-006 | Integrationstest (`listings.integration.test.ts`) – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus. |
-| `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben). |
+| `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen, für Gäste und Mitglieder (seit 2026-11-12 auch Gastseiten und „Kein Zugriff“). |
 | `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test – Manifest und Service Worker sind vorhanden und registriert. |
 | `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte – [MAN-UX-002](../05-umsetzung/nachweise/MAN-UX-002.md). Chat-Systemnachrichten werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten werden weiter am Text erkannt. |
 | `AT-UX-003` | automatisiert | REQ-UX-003 | Smoke- oder E2E-Test – unbekannte Seite ergibt 404 mit Seite „Seite nicht gefunden“ und Links; unbekannter API-Pfad ergibt JSON-404. |
@@ -233,3 +233,13 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-UX-007` | automatisiert | REQ-UX-007 | E2E-Test – Sprachwechsel auf Englisch ändert Texte und `lang`, Wahl bleibt nach Neuladen erhalten. |
 | `AT-UX-007-2` | automatisiert | REQ-UX-007 | Unit-Test – Schlüsselmengen Deutsch und Englisch sind gleich. |
 | `AT-UX-007-3` | automatisiert | REQ-UX-007 | E2E-Test – englische Rechtstexte zeigen den Hinweis auf die verbindliche deutsche Fassung. |
+| `AT-UX-008` | automatisiert | REQ-UX-008 | Komponententest (`ThemeSwitch.test.tsx`) – Entscheidungstabelle Wahl × Systemeinstellung; ohne Wahl folgt die Seite dem System (auch beim Wechsel) und speichert nichts; Schalter mit drei Optionen, aktive gedrückt; Wahl wird gespeichert und angewandt, „Wie im System“ löscht sie; gesperrter Speicher und ungültiger Wert ohne Fehler; Farbe der Browserleiste; Wahl aus einem anderen Tab. |
+| `AT-UX-008-2` | automatisiert | REQ-UX-008, REQ-A11Y-001 | Unit-Test (`theme-contrast.test.ts`) – Kontrastmatrix aller Farbpaarungen der Komponenten in hellem und dunklem Schema: Text ≥ 4,5:1, Rahmen von Eingabefeldern und Fokusrahmen ≥ 3:1; jedes benutzte Token ist im dunklen Schema umgedeutet. |
+| `AT-UX-008-3` | automatisiert | REQ-UX-008, REQ-A11Y-001 | E2E-Test (`theme.spec.ts`) – Systemeinstellung dunkel: Schema steht vor dem ersten Inhalt fest (kein Aufblitzen), keine CSP-Verletzung, nichts gespeichert; Wahl per Tastatur wird gespeichert und gilt nach Neuladen; axe-core im dunklen Schema auf allen Seitentypen ohne `serious`/`critical`. |
+| `AT-UX-008-4` | automatisiert | REQ-UX-008, REQ-PRIV-006 | Unit-Test (`server.test.ts`) – die CSP erlaubt genau das Inline-Skript der Startseite per SHA-256-Hash, ohne `unsafe-inline`; die Startseite hat genau ein Inline-Skript. |
+| `AT-UX-009` | automatisiert | REQ-UX-009 | Komponententest (`ErrorPages.test.tsx`) – Entscheidungstabelle Fehler → Fehlerseite; jede Fehlerseite mit Fehlercode, fokussierter Überschrift, Seitentitel, Weg zur Startseite und Hilfelinks; 403 ohne „Erneut versuchen“, 401 mit Anmeldelink und Rücksprung, 429 mit Wartezeit, eigene 404 für Anzeigen, Offline-Hinweis. |
+| `AT-UX-009-2` | automatisiert | REQ-UX-009 | Unit-Test (`client.test.ts`) – API-Client bei 429: `ApiError` mit Sekunden aus `Retry-After` (Zahl oder HTTP-Datum), Meldung mit Wartezeit, eigener Fehlercode behält seinen Text. |
+| `AT-UX-009-3` | automatisiert | REQ-UX-009, REQ-UX-003 | Unit-Test (`server.test.ts`) – unbekannte Pfade: Seitenaufruf (auch fehlende `.html`-Datei mit `Accept: text/html`) → 404 mit SPA; fehlende Dateien, `/api`, `/health`, `/metrics` → JSON-404; bekannte Route → 200. |
+| `AT-UX-009-4` | automatisiert | REQ-UX-009 | E2E-Test (`errors.spec.ts`) – 403 bei fehlender Rolle (Administration, Moderation), 404 für unbekannte Anzeige, Bearbeitung und Unterhaltung, 429 mit Wartezeit und „Erneut versuchen“, Offline-Hinweis und Offline-Seite, englische 404 im dunklen Schema mit Status 404; axe-core ohne `serious`/`critical`. |
+| `AT-UX-010` | automatisiert | REQ-UX-010 | E2E-Test (`hygiene.spec.ts`) – Icon-Satz und Manifest erreichbar, Metadaten und `noindex`; eigener Titel je Seite (Gast, Mitglied, Administration), `lang` folgt der Sprache, keine Konsolenfehler in beiden Schemata. |
+| `AT-UX-010-2` | automatisiert | REQ-UX-010 | Unit-Test (`index-html.test.ts`) – Pflichtangaben im Kopf von `index.html`, keine externen Ressourcen, Icon-Satz mit richtigen Pixelmaßen. |

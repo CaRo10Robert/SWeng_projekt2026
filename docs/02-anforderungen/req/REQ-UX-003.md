@@ -13,15 +13,17 @@ kano: basis
 epic: EPIC-13
 source: BG-2, Guideline Kap. 05
 depends_on: [REQ-UX-006]
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-11-12
 verification: [AT-UX-003, AT-UX-003-2]
 ---
 
 # REQ-UX-003 Fehlerseiten und korrekte HTTP-Statuscodes
 ## Anforderung
 Als Besucher möchte ich bei einer unbekannten Adresse, einem Serverfehler oder einer Wartung eine verständliche Seite mit Weg zurück sehen, damit ich nicht festhänge. Clients und Werkzeuge müssen am HTTP-Statuscode erkennen, was passiert ist.
+
+Weitere Fehlerarten (403, 401, 429, offline, unbekannte Anzeige oder Unterhaltung, Fehler außerhalb des Routers) und der gemeinsame Aufbau aller Fehlerseiten stehen in REQ-UX-009.
 
 ## Begründung
 Ein SPA-Fallback mit Status 200 für jede Adresse verschleiert Fehler (Monitoring, Suchmaschinen, Linkprüfer). Fehlerseiten sind ein Basismerkmal eines professionellen Auftritts.
@@ -62,3 +64,4 @@ I: unabhängig · N: Gestaltung verhandelbar · V: Orientierung, Betreibbarkeit 
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-A-20): Status nach Umsetzung; HEAD wird wie GET behandelt |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-UX-003, AT-UX-003-2 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-11-12 | Ergänzt durch REQ-UX-009 (weitere Fehlerarten, gemeinsamer Aufbau, Statuscodes für fehlende Dateien bei Seitenaufrufen und für `/api` ohne Schrägstrich); Kriterien dieser Anforderung unverändert |

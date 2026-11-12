@@ -6,11 +6,13 @@ import { useMe } from '../api/auth';
 import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage, NetworkError } from '../api/client';
+import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
 import { ContactShare } from '../components/ContactShare';
 import { Alert, Badge, Button, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
 import { formatChatTime, newId } from '../lib/format';
+import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
 const dealLabels: Record<DealStatus, MessageKey> = {
@@ -174,6 +176,7 @@ export function ConversationPage() {
   const { data: me } = useMe();
   const conversation = useConversation(id);
   const messages = useMessages(id);
+  useDocumentTitle(conversation.data ? t('chat.docTitle', { title: conversation.data.listing.title }) : undefined);
   const block = useSetBlock();
   const [body, setBody] = useState('');
   const [pending, setPending] = useState<PendingMessage[]>([]);
@@ -240,11 +243,7 @@ export function ConversationPage() {
 
   if (conversation.isPending || messages.isPending) return <Loading />;
   if (conversation.isError) {
-    return (
-      <Alert tone="error" title={t('chat.unavailable')}>
-        {errorMessage(conversation.error)}
-      </Alert>
-    );
+    return <ErrorView error={conversation.error} notFound="conversationNotFound" onRetry={() => void conversation.refetch()} />;
   }
   const c = conversation.data;
 
@@ -328,7 +327,7 @@ export function ConversationPage() {
                 }
               }}
               aria-describedby="chat-counter"
-              className="block flex-1 rounded-lg border border-slate-400 bg-white px-3 py-2 text-base"
+              className="block flex-1 rounded-lg border border-slate-500 bg-white px-3 py-2 text-base"
               placeholder={t('chat.placeholder')}
             />
             <Button type="submit" disabled={!body.trim()}>

@@ -13,9 +13,9 @@ moscow_reason: [1]
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-12
 verification: [AT-UX-001, AT-UX-001-2]
 ---
 
@@ -57,3 +57,4 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 | 2.0 | 2026-10-23 | Metrik und Messverfahren ergänzt (Fallstudie FS-M3) |
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15, R-16 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
+| 2.3 | 2026-11-12 | AT-UX-001 prüft zusätzlich Gastseiten und die Seite „Kein Zugriff“: Der Seitenkopf für Gäste lief bei 360 px über (432 px); behoben mit REQ-UX-010 (nur Logo und „Anmelden“ unter 640 px) |

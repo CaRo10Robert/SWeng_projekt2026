@@ -3,9 +3,9 @@ id: ARC-001
 type: architecture
 status: approved
 owner: team-architektur
-version: 1.6
+version: 1.7
 created: 2026-10-20
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 review_due: 2027-01-31
 ---
 
@@ -20,6 +20,8 @@ review_due: 2027-01-31
 > **v1.5:** Guideline-Review (GL-01…GL-17): [Ausnahmeregister](ausnahmen.md) für MUST-Abweichungen (ASVS-Fassung, OpenTelemetry, befristete ASVS-Ausnahmen, SLSA Level 3); [ADR-0019](decisions/0019-wiederherstellung-und-loeschjournal.md) ersetzt die geänderten Teile von ADR-0018; [ADR-0020](decisions/0020-datenzugriff-pg-sql-template.md) begründet den Datenzugriff ohne Query Builder; ADR-0014 bis 0018 auf Accepted; Status des Dokuments `approved`.
 >
 > **v1.6:** Testpyramide und Lieferkette (2026-11-07): Paginierung und `RateLimit-*`-Header (8.1, 8.10, neu 8.12), Löschläufe in 8.4 auf den umgesetzten Stand gebracht (Rückfall reservierter Anzeigen, unbestätigte Konten, Kontolöschung mit Anonymisierung), Lieferkette in 8.1 (Scans, SBOM, Provenance-Attestation, Digest-Pins), Qualitätssicherung in 8.11 mit Integrationstests, Bundle-Budget, ZAP und k6; Details in der [Teststrategie](../05-umsetzung/teststrategie.md).
+
+> **v1.7:** Auftritt (2026-11-12, Q-29): Farbschema hell/dunkel über umgedeutete Farb-Tokens mit Inline-Skript per CSP-Hash ([ADR-0021](decisions/0021-farbschema-hell-dunkel.md), REQ-UX-008), Fehlerseiten für alle Fehlerarten mit gemeinsamem Aufbau (REQ-UX-009, 8.10), Website-Hygiene (REQ-UX-010): Komponentensicht 5.3, Sicherheit 8.1, Datenklassen 8.4, Barrierefreiheit 8.7, Speicherung 8.8.
 
 > **v1.1:** Befunde aus dem [Architektur-Review v1.0](../04-review/review-v1.0-architektur.md) behoben: Soll und Ist getrennt (Spalte „Stand“ mit Backlog-ID), Datenbankzugriff und Modulabhängigkeiten in der Komponentensicht, Löschung und Anonymisierung im Datenmodell, Schlüsselkonzept für die IP-Pseudonymisierung ([ADR-0014](decisions/0014-ip-pseudonymisierung.md)), Laufzeitsichten an den Code angeglichen, Qualitätsszenarien an die Anforderungen angeglichen.
 >
@@ -433,7 +435,8 @@ C4Component
 | Echtzeit-Hook | `apps/web/src/lib/realtime.ts` | WebSocket, Reconnect, Nachladen per `?after=`, Polling | Nachricht senden | umgesetzt |
 | Service Worker | erzeugt durch `vite-plugin-pwa` | Installierbarkeit (PWA); cacht ausschließlich statische Dateien, damit keine personenbezogenen Antworten im Gerät verbleiben | – | umgesetzt |
 | Rechts- und Hilfeseiten | `apps/web/src/routes/legal.tsx`, Inhalte `apps/web/src/content/` | Darstellung der Markdown-Inhalte (ADR-0015), Inhaltsverzeichnis, Muster-Hinweis, Footer-Links auf jeder Seite | – (öffentlich, REQ-LEGAL-001…005, REQ-UX-005/006) | umgesetzt (B-43, B-45) |
-| Startseite, Fehler-, Status- und Wartungsseite | `apps/web/src/routes/` | Startseite für Gäste, 404 mit Suche und Hilfe, Seite für Serverfehler, `/status`, Hinweis bei 503 | – (REQ-UX-003/004, REQ-OPS-006/007) | umgesetzt (B-44, B-45, B-53) |
+| Startseite, Fehler-, Status- und Wartungsseite | `apps/web/src/routes/`, Fehlerseiten in `components/ErrorPages.tsx` | Startseite für Gäste, `/status`, Hinweis bei 503; Fehlerseiten mit gemeinsamem Aufbau für 404 (Seite, Anzeige, Unterhaltung), 403, 401, 429, 503, offline und unerwartete Fehler, Rollen-Gate für Moderation und Administration, Rückfallebene außerhalb des Routers | – (REQ-UX-003/004/009, REQ-OPS-006/007) | umgesetzt (B-44, B-45, B-53, B-67) |
+| Farbschema | `apps/web/src/lib/theme.ts`, `components/ThemeSwitch.tsx`, Tokens in `index.css`, Inline-Skript in `index.html` | Systemeinstellung als Voreinstellung, Wahl hell/dunkel im Seitenkopf, Speicherung nur auf Wunsch (`cm_theme`), Schema vor dem ersten Rendern | alle 9 (Lesbarkeit, Kontrast) | umgesetzt (B-66, ADR-0021) |
 | Internationalisierung | `apps/web/src/i18n/` | Kataloge, Sprachschalter, `<html lang>`, Übersetzung von Fehlercodes | alle 9 (Texte, Labels) | umgesetzt (B-51) |
 | Widerspruch | `apps/web/src/routes/profile.tsx` bzw. eigene Seite | Mitteilungen zu Moderationsentscheidungen, Widerspruch einlegen (UC-35); Moderationsseite mit Widerspruchs-Queue (UC-36) | Melden (Folgeablauf) | umgesetzt (B-46) |
 
@@ -989,7 +992,7 @@ flowchart LR
 ### 8.1 Sicherheit
 - **Authentifizierung:** serverseitige Sessions (gehashtes Opaque-Token in Postgres), Cookie `HttpOnly; Secure; SameSite=Lax`. Siehe ADR-0003. Nur Konten mit Status `aktiv` erhalten eine gültige Sitzung; eine Sperre oder Löschung entzieht jeden Zugriff sofort (REQ-SEC-011).
 - **Autorisierung:** zentrale Prüfung pro Ressource in den Fachmodulen, *deny by default*; fremde Ressourcen liefern 404 (REQ-SEC-006).
-- **Eingaben:** Validierung an der Grenze gegen die TypeBox-Schemas aus `packages/contracts` (Fastify), aus denen auch die OpenAPI-Spezifikation erzeugt wird. Ausgabe-Encoding durch React. Strikte CSP (die SPA kommt vom selben Origin). CSRF-Schutz über Pflicht-Header und Origin-Prüfung (ADR-0011).
+- **Eingaben:** Validierung an der Grenze gegen die TypeBox-Schemas aus `packages/contracts` (Fastify), aus denen auch die OpenAPI-Spezifikation erzeugt wird. Ausgabe-Encoding durch React. Strikte CSP (die SPA kommt vom selben Origin) ohne `unsafe-inline`; das einzige Inline-Skript (Farbschema vor dem ersten Rendern) ist per SHA-256-Hash erlaubt, den der Server beim Start aus der ausgelieferten `index.html` berechnet (ADR-0021). CSRF-Schutz über Pflicht-Header und Origin-Prüfung (ADR-0011).
 - **Container-Härtung:** Non-root-User, Read-only-Root-FS, `no-new-privileges`, keine Secrets im Image, minimales Base-Image ohne npm und yarn zur Laufzeit.
 - **Lieferkette (REQ-SEC-008, REQ-OPS-004, EX-05):** CI scannt jeden Push (Semgrep, `pnpm audit`, gitleaks, Trivy) und erzeugt eine SBOM (CycloneDX). Für das ausgelieferte Image-Archiv entstehen bei Push eine Build-Provenance- und eine SBOM-Attestation (GitHub Attestations, SLSA Level 2). Actions sind per Commit-SHA, Basis- und Werkzeug-Images (Postgres, k6, ZAP, Trivy) per Digest gepinnt; Renovate hält die Pins aktuell. Signierte Images in einer Registry (Level 3) gibt es mangels Registry nicht (EX-05).
 - **Rate-Limits (REQ-SEC-005, Q-18):** Anmeldung 5 Fehlversuche je (Adresse, IP) in 15 min, Registrierung 3 je Adresse und 30 je IP und Stunde; immer Wartezeit statt Kontosperre. Der Zählerspeicher liegt in derselben Datenbank; ist sie nicht erreichbar, wird die Anfrage abgelehnt (**fail closed**). Schlüssel enthalten keine Klartext-Adressen oder -IPs, sondern HMAC-Pseudonyme (ADR-0014). Die Anmeldung zählt einen Versuch zuerst atomar und setzt den Zähler bei Erfolg zurück. Begrenzte Antworten tragen `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` und `RateLimit-Policy` (draft-ietf-httpapi-ratelimit-headers-07, Guideline Kap. 06): Ein Wrapper um den `RateLimitStore` merkt sich je Request das strengste Ergebnis, der HTTP-Server setzt daraus die Header (`platform/http/rate-limit-headers.ts`); Schlüssel gelangen nie in die Antwort. (Stand: umgesetzt B-34, B-35; Header geprüft im Smoke-Test zu AT-SEC-005.)
@@ -1043,6 +1046,7 @@ flowchart LR
 | Sicherungen | vertraulich | Betrieb (außerhalb der Anwendung) | Rotation: alle der letzten 7 Tage, danach je Woche die neueste; gelöschte Konten verschwinden nach ≤ 28 Tagen auch aus Sicherungen (ADR-0018) |
 | Einstellungen, Ankündigung | intern | platform | bis zur Änderung |
 | Sprachwahl | intern | identity (`user.locale`) bzw. Browser (`cm_locale`, nur auf Wunsch) | mit dem Konto bzw. durch Nutzer löschbar |
+| Farbschema | intern, kein Personenbezug | nur Browser (`cm_theme`, nur auf Wunsch, ADR-0021) | „Wie im System“ oder Löschen der Websitedaten |
 
 ### 8.5 Erweiterungspunkt Bezahlung (ADR-0006)
 
@@ -1084,7 +1088,7 @@ flowchart LR
 Strukturierte JSON-Logs (pino) mit Korrelations-ID; der Request-Log ist ein eigener Eintrag mit Methode, Route ohne Query, Status, Dauer und Request-ID, **ohne IP-Adresse, Port und Query-Werte** (REQ-OPS-002, Unit-Test AT-OPS-002); `/metrics` im Prometheus-Format (Request-Latenzen, Job-Durchsatz, WS-Verbindungen), Health-Endpunkte. Im Beispiel ist `/metrics` ohne Anmeldung auf Port 8080 erreichbar; im Profil `proxy` ist es am Proxy gesperrt, im Echtbetrieb gehört es auf einen internen Port bzw. hinter eine Proxy-Regel. **Überwachung und Alarmierung** (REQ-OPS-008) liefert das Profil `monitoring` (ADR-0017): Prometheus mit Alarmregeln auf Symptome (App nicht erreichbar oder nicht bereit, Fehlerrate ab Mindestlast und nicht im Wartungsmodus, Latenz, endgültig gescheiterte Jobs `outcome="dead"`, Wartungsmodus zu lange aktiv, fehlende Sicherung; Folgealarme werden per `inhibit_rules` unterdrückt), Alertmanager sendet an Mailpit; jede Regel verweist auf ein Runbook in [monitoring-alarmierung.md](../07-betrieb/monitoring-alarmierung.md). Neu ist die Metrik `app_ready` (0/1) aus der Readiness-Prüfung (Stand: umgesetzt (B-54)). Zuschaltbares Tracing (OpenTelemetry) ist geplant (R2); Grafana bleibt Could. Eine Request-ID vom Client (`x-request-id`) wird nur übernommen, wenn sie eine UUID ist; unbekannte Pfade erscheinen im Log als `unmatched`. Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur HMAC-Pseudonyme (ADR-0014; Review [MAN-OPS-002](../05-umsetzung/nachweise/MAN-OPS-002.md)).
 
 ### 8.7 Barrierefreiheit und UX
-Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test umgesetzt B-02, `e2e/tests/keyboard.spec.ts`). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten).
+Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurücksetzen, Suche, Anzeige erstellen inkl. Bild, Anzeige verwalten, Nachricht senden, Melden, Kontaktfreigabe) sind vollständig per Tastatur bedienbar und werden automatisiert nur mit Tastatur durchlaufen; axe-core prüft die Kernseiten (Fallstudie FS-C2; Stand: automatisierter Test umgesetzt B-02, `e2e/tests/keyboard.spec.ts`). Die Auswahl im Dateidialog des Betriebssystems wird manuell geprüft (MAN-A11Y-002). Eigene zugängliche Basisbausteine (Tailwind, natives `<dialog>`, [ADR-0011](decisions/0011-mvp-umsetzung.md) Nr. 6), sichtbarer Fokus, Fokus-Management im Chat (ARIA-Live-Region für neue Nachrichten). **Farbschema hell/dunkel** (REQ-UX-008, [ADR-0021](decisions/0021-farbschema-hell-dunkel.md)): Die Farb-Tokens werden im dunklen Schema umgedeutet; eine Kontrastmatrix prüft jede Paarung der Komponenten in beiden Schemata (AT-UX-008-2), axe-core läuft zusätzlich im dunklen Schema (AT-UX-008-3). Jede Seite setzt einen eigenen Titel (`PageHeader` bzw. `useDocumentTitle`, REQ-UX-010).
 
 ### 8.8 Rechtliche Inhalte und Versionierung (ADR-0015)
 - **Eine Quelle:** Rechtstexte und Hilfe liegen als Markdown in `apps/web/src/content/`. Die Doku in `docs/06-recht/` verlinkt sie nur. Die Version der Nutzungsbedingungen erreicht den Server über `legal-manifest.json`. Eine abweichende Zustimmung erzwingt die erneute Zustimmung vor schreibenden Aktionen (REQ-LEGAL-003).
@@ -1092,7 +1096,7 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 - **Platzhalter und Übungswerte:** Betreiberangaben sind fiktive Übungswerte (Q-28); das Format `[Platzhalter: …]` wird weiter gezählt, falls es wieder vorkommt. Der Muster-Hinweis (`sample`) bleibt. `LEGAL_STRICT=true` verhindert im Echtbetrieb den Start, solange Muster oder Platzhalter enthalten sind (Risiko R-11).
 - **Neue Fassung im Demo-Modus:** Mit `SEED_DEMO=true` hebt der Start (`syncDemoLegalVersions` in `seed/seed.ts`, über das API von `identity`) alle Demo-Konten auf die aktuelle Fassung von Nutzungsbedingungen und Datenschutzerklärung und legt fehlende Demo-Konten an. Ausgenommen ist das Testkonto Tim mit fest alter Fassung. Echte Konten stimmen immer selbst zu.
 - **Sicherheit:** kein HTML im Markdown, keine `javascript:`-Links, kein `dangerouslySetInnerHTML`; die CSP bleibt unverändert.
-- **Kein Cookie-Banner (Q-24, REQ-LEGAL-010):** Es gibt nur das Sitzungscookie und – auf ausdrücklichen Wunsch – die Sprachwahl im Browser. Beides ist nach TDDDG § 25 Abs. 2 Nr. 2 einwilligungsfrei und in der Datenschutzerklärung aufgeführt. Jede weitere Speicherung auf dem Endgerät braucht vorher eine Einwilligung. Ein E2E-Test prüft, dass nach den Kernabläufen keine weiteren Cookies oder Speichereinträge entstehen (Erweiterung von AT-PRIV-006).
+- **Kein Cookie-Banner (Q-24, REQ-LEGAL-010):** Es gibt nur das Sitzungscookie und – auf ausdrücklichen Wunsch – die Sprach- und die Farbschemawahl im Browser (`cm_locale`, `cm_theme`). Beides ist nach TDDDG § 25 Abs. 2 Nr. 2 einwilligungsfrei und in der Datenschutzerklärung aufgeführt. Jede weitere Speicherung auf dem Endgerät braucht vorher eine Einwilligung. Ein E2E-Test prüft, dass nach den Kernabläufen keine weiteren Cookies oder Speichereinträge entstehen (Erweiterung von AT-PRIV-006).
 
 ### 8.9 Internationalisierung (ADR-0016)
 - `react-intl` mit ICU MessageFormat, Kataloge `de` (Quelle) und `en`, Schlüssel `bereich.seite.element`.
@@ -1112,9 +1116,13 @@ Die neun Kernabläufe aus REQ-A11Y-002 (Registrierung, Anmeldung, Passwort zurü
 | Unbekannter Pfad | – | **404** mit SPA, die die Fehlerseite zeigt (Liste der Routenpräfixe auf dem Server, abgeleitet aus dem Router) |
 | Unerwarteter Fehler | 500 Problem Details ohne interne Details, Korrelations-ID im Log und in der Antwort | Fehlerseite mit Korrelations-ID und „Erneut versuchen“ |
 | Wartungsmodus | 503 Problem Details mit `Retry-After` | Wartungsseite; Rechtsseiten und `/status` bleiben erreichbar |
-| Rate-Limit | 429 mit `Retry-After` und `RateLimit-*`-Headern (auch auf erfolgreichen begrenzten Antworten) | Hinweis mit Wartezeit |
+| Rate-Limit | 429 mit `Retry-After` und `RateLimit-*`-Headern (auch auf erfolgreichen begrenzten Antworten) | Fehlerseite „Zu viele Anfragen“ bzw. Meldung am Formular, jeweils mit Wartezeit aus `Retry-After` (REQ-UX-009) |
+| Fehlende Rolle (Moderation, Administration) | 403 Problem Details | Fehlerseite „Kein Zugriff“ (403) an derselben Adresse, keine Weiterleitung (REQ-UX-009) |
+| Sitzung abgelaufen beim Laden | 401 Problem Details | Fehlerseite mit Link zur Anmeldung und Rücksprung |
+| Fehlende Datei mit Endung | 404 Problem Details (`Accept` ohne HTML) | 404 mit SPA, wenn der Browser HTML erwartet (z. B. alter Link auf `/seite.html`) |
+| Netz weg | – | Hinweis „offline“ im Seitenkopf; Fehlerseite „Keine Verbindung“ mit „Erneut versuchen“ |
 
-Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten sind barrierefrei: Überschrift mit Fokus und verständlicher Text ohne Fachjargon. Fehlerseiten werden nicht indexiert (siehe 8.1).
+Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Alle Fehlerseiten haben denselben Aufbau (`components/ErrorPages.tsx`, REQ-UX-009): Fehlercode, Überschrift mit Fokus, verständlicher Text ohne Fachjargon, Wege zurück (Startseite, Zurück, Erneut versuchen) und Links zu Hilfe, Kontakt und Status; welche Seite erscheint, entscheidet eine reine Funktion (`errorKind`, Entscheidungstabelle im Test). `/api`, `/health` und `/metrics` antworten immer maschinenlesbar. Bekannte Routen mit unbekannter Ressource (z. B. `/listings/{unbekannte ID}`) liefern bewusst 200 mit der Fehlerseite der SPA („Soft 404“), damit die Auslieferung der SPA nicht von Fachmodulen abhängt; die API selbst antwortet 404. Fehlerseiten werden nicht indexiert (siehe 8.1).
 
 ### 8.11 Betrieb: Sicherung, Überwachung, Wartung, Aktualisierung
 - **Sicherung und Wiederherstellung (ADR-0018, ADR-0019, REQ-AVAIL-003):** Skripte außerhalb der Anwendung, Wiederherstellung in CI getestet (QS-15).
@@ -1159,6 +1167,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Fehlerseiten
 | [0018](decisions/0018-datensicherung.md) | Datensicherung mit pg_dump und Uploads-Archiv, Wiederherstellung in CI getestet (Nr. 2 und 5 ersetzt durch 0019) | Accepted |
 | [0019](decisions/0019-wiederherstellung-und-loeschjournal.md) | Wiederherstellung über temporäre Datenbank mit Rückfall, Löschjournal außerhalb der Datenbank | Accepted |
 | [0020](decisions/0020-datenzugriff-pg-sql-template.md) | Datenzugriff mit `pg` und parametrisierendem `sql`-Template statt Query Builder (ersetzt Teil von 0002 und 0011 Nr. 1) | Accepted |
+| [0021](decisions/0021-farbschema-hell-dunkel.md) | Farbschema hell/dunkel über umgedeutete Farb-Tokens und Inline-Skript mit CSP-Hash | Accepted |
 
 ## 10. Qualitätsszenarien
 

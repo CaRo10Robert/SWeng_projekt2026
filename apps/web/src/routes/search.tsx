@@ -8,6 +8,7 @@ import { ListingGrid } from '../components/ListingCard';
 import { Alert, Button, EmptyState, Field, Loading, Select } from '../components/ui';
 import { centsToEuroInput, conditionLabels, kindLabels, parseEuroToCents, priceTypeLabels } from '../lib/format';
 import { t, type MessageKey } from '../i18n';
+import { useDocumentTitle } from '../lib/title';
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
 const int = (v: unknown) => {
@@ -50,6 +51,7 @@ export function SearchPage() {
   const navigate = useNavigate();
   const { data: meta } = useMeta();
   const search = useListingSearch(clean(filters));
+  useDocumentTitle(t('search.title'));
   const [q, setQ] = useState(filters.q ?? '');
   const [minPrice, setMinPrice] = useState(centsToEuroInput(filters.minPriceCents));
   const [maxPrice, setMaxPrice] = useState(centsToEuroInput(filters.maxPriceCents));
@@ -93,7 +95,7 @@ export function SearchPage() {
               onChange={(e) => setQ(e.target.value)}
               maxLength={100}
               placeholder={t('search.placeholder')}
-              className="block w-full rounded-lg border border-slate-400 px-3 py-2 text-base"
+              className="block w-full rounded-lg border border-slate-500 bg-white px-3 py-2 text-base"
             />
           </div>
           <Button type="submit">{t('common.search')}</Button>

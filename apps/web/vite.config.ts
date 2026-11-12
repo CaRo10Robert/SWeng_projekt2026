@@ -26,17 +26,27 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'auto',
-        includeAssets: ['icon.svg'],
+        // Icon-Satz (REQ-UX-010): SVG plus Rastergrafiken aus scripts/generate-icons.mjs
+        includeAssets: ['icon.svg', 'favicon.ico', 'apple-touch-icon.png'],
         manifest: {
+          id: '/',
           name: 'CampusMarkt HWG LU',
           short_name: 'CampusMarkt',
           description: 'Tausch- und Verkaufsplattform der HWG Ludwigshafen / Swap and sell marketplace of HWG Ludwigshafen',
           lang: 'de',
+          dir: 'ltr',
           start_url: '/',
+          scope: '/',
           display: 'standalone',
+          // Das Manifest kennt nur eine Farbe; das Schema der Seite steuert <meta name="theme-color"> je Schema (ADR-0021)
           theme_color: '#0b4f8a',
-          background_color: '#ffffff',
-          icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+          background_color: '#f8fafc',
+          icons: [
+            { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          ],
         },
         workbox: {
           navigateFallback: '/index.html',

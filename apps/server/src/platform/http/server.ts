@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import Fastify, { LogController, type FastifyError } from 'fastify';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
@@ -49,20 +50,38 @@ const CSP = [
   "form-action 'self'",
 ].join('; ');
 
+const sha256Source = (text: string) => `'sha256-${createHash('sha256').update(text).digest('base64')}'`;
+
+/**
+ * CSP-Quellen für die Inline-Skripte der SPA-Startseite (`<script>` ohne `src`): das Skript, das das Farbschema vor
+ * dem ersten Rendern setzt (REQ-UX-008, ADR-0021). Statt 'unsafe-inline' wird genau dieser Inhalt per SHA-256 erlaubt;
+ * der Hash entsteht beim Start aus der ausgelieferten Datei und passt deshalb immer zum Build.
+ */
+export function inlineScriptHashes(html: string): string[] {
+  return [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]!).filter((s) => s.trim()).map(sha256Source);
+}
+
+/** Basis-CSP mit erlaubten Inline-Skripten (Hashes); ohne Hashes bleibt es bei `script-src 'self'`. */
+export function cspWithScripts(scriptHashes: string[]): string {
+  return scriptHashes.length ? CSP.replace("script-src 'self'", `script-src 'self' ${scriptHashes.join(' ')}`) : CSP;
+}
+
 /**
  * CSP je Antwort: Serverseitig erzeugte HTML-Seiten (Wartung, Abmeldung) bringen ihr CSS als festen <style>-Block mit.
  * Statt 'unsafe-inline' wird genau dieser Block per SHA-256 erlaubt (ZAP 10055, Pentest PT-HDR-01).
  */
-export function cspFor(payload: unknown, contentType: string | undefined): string {
-  if (typeof payload !== 'string' || !contentType?.startsWith('text/html')) return CSP;
-  const hashes = [...payload.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(
-    (m) => `'sha256-${createHash('sha256').update(m[1]!).digest('base64')}'`,
-  );
-  return hashes.length ? CSP.replace("style-src 'self'", `style-src 'self' ${hashes.join(' ')}`) : CSP;
+export function cspFor(payload: unknown, contentType: string | undefined, base = CSP): string {
+  if (typeof payload !== 'string' || !contentType?.startsWith('text/html')) return base;
+  const hashes = [...payload.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => sha256Source(m[1]!));
+  return hashes.length ? base.replace("style-src 'self'", `style-src 'self' ${hashes.join(' ')}`) : base;
 }
 
 export async function createHttpServer(options: HttpServerOptions) {
   const { config, logger, metrics } = options;
+  // React-SPA vorhanden? Dann die Inline-Skripte ihrer Startseite per Hash in die CSP aufnehmen (REQ-UX-008)
+  const spaIndex = join(config.webDistDir, 'index.html');
+  const spaAvailable = existsSync(spaIndex);
+  const csp = cspWithScripts(spaAvailable ? inlineScriptHashes(readFileSync(spaIndex, 'utf8')) : []);
 
   const app = Fastify({
     loggerInstance: logger,
@@ -166,7 +185,7 @@ export async function createHttpServer(options: HttpServerOptions) {
     // Keine Indexierung durch Suchmaschinen (REQ-PRIV-008)
     reply.header('x-robots-tag', 'noindex, nofollow');
     if (!req.url.startsWith('/api/docs')) {
-      reply.header('content-security-policy', cspFor(payload, reply.getHeader('content-type') as string | undefined));
+      reply.header('content-security-policy', cspFor(payload, reply.getHeader('content-type') as string | undefined, csp));
     }
     if (req.url.startsWith('/api/') && !reply.hasHeader('cache-control')) reply.header('cache-control', 'no-store');
     const limited = rateLimitStates.get(req)?.result;
@@ -275,15 +294,14 @@ export async function createHttpServer(options: HttpServerOptions) {
   );
 
   // React-SPA als statische Dateien (ADR-0002), Fallback auf index.html für Client-Routen
-  const spaAvailable = existsSync(config.webDistDir);
   if (spaAvailable) {
     await app.register(fastifyStatic, { root: config.webDistDir, wildcard: false, index: ['index.html'] });
   }
-  // Bekannte SPA-Routen → 200, sonstige Seitenaufrufe → 404 mit der SPA, die „Seite nicht gefunden“ zeigt (REQ-UX-003)
+  // Bekannte SPA-Routen → 200, sonstige Seitenaufrufe → 404 mit der SPA, die „Seite nicht gefunden“ zeigt (REQ-UX-003).
+  // Pfade mit Dateiendung (fehlende Datei) bekommen die Seite nur, wenn der Browser HTML erwartet (z. B. ein alter
+  // Link auf /seite.html); Skripte, Bilder und Werkzeuge bekommen weiter JSON (REQ-UX-009).
   app.setNotFoundHandler((req, reply) => {
-    const isApi = req.url.startsWith(API_PREFIX) || req.url.startsWith('/api/') || req.url.startsWith('/health');
-    const pageRequest = req.method === 'GET' || req.method === 'HEAD';
-    if (spaAvailable && pageRequest && !isApi && !/\.[a-z0-9]+$/i.test(req.url.split('?')[0] ?? '')) {
+    if (spaAvailable && isPageRequest(req.method, req.url, req.headers.accept)) {
       return reply
         .status(isKnownSpaPath(req.url) ? 200 : 404)
         .header('cache-control', 'no-cache')
@@ -299,6 +317,20 @@ export async function createHttpServer(options: HttpServerOptions) {
 }
 
 export type App = Awaited<ReturnType<typeof createHttpServer>>;
+
+/** API, Health und Metriken antworten immer maschinenlesbar, nie mit der SPA. */
+const MACHINE_PATH = /^\/(api|health|metrics)(\/|$|\?)/;
+
+/**
+ * Soll ein unbekannter Pfad die SPA mit „Seite nicht gefunden“ bekommen? Nur bei GET/HEAD außerhalb von API, Health
+ * und Metriken; bei Dateiendung nur, wenn `Accept` HTML verlangt (Seitenaufruf des Browsers). Tabellarisch getestet.
+ */
+export function isPageRequest(method: string, url: string, accept: string | undefined): boolean {
+  if (method !== 'GET' && method !== 'HEAD') return false;
+  if (MACHINE_PATH.test(url)) return false;
+  const path = url.split('?')[0] ?? '';
+  return !/\.[a-z0-9]+$/i.test(path) || /\btext\/html\b/.test(accept ?? '');
+}
 
 const STATUS_REQUESTS_PER_10S = 50;
 

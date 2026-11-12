@@ -3,9 +3,9 @@ id: DECISION-LOG
 type: decision-log
 status: in-review
 owner: product-owner
-version: 1.3
+version: 1.4
 created: 2026-10-23
-last_updated: 2026-10-25
+last_updated: 2026-11-12
 ---
 
 # Entscheidungslog (fachliche Fragen)
@@ -36,6 +36,7 @@ Fachliche Entscheidungen, die keine Architekturentscheidung (ADR) sind. Architek
 | Q-26 | Wie weit geht die Steuermeldepflicht (DAC7) im Beispiel? | Nur **Auswertung und CSV-Export** für Administratoren: abgeschlossene Deals mit Gegenleistung je Anbieter und Kalenderjahr; meldepflichtig ab 30 Verkäufen **oder** 2.000 € (sonst Bagatellgrenze). Kein Versand an das BZSt, keine Erhebung von Steuer-ID, Anschrift oder Geburtsdatum im Beispiel. Tausch zählt vorerst nicht (zu klären). | PStTG gilt für Plattformbetreiber; die Auswertung zeigt, dass der Deal-Kern die nötigen Daten liefert, ohne zusätzliche Daten zu erheben. | Product Owner mit der Steuerabteilung der Hochschule (fiktive Rolle) | vorläufig | REQ-LEGAL-009, REQ-CHAT-011, UC-43 |
 | Q-27 | Wie bilden wir Monitoring und TLS im Docker-Beispiel ab, ohne ADR-0010 zu verletzen? | Als **optionale Compose-Profile** `monitoring` (Prometheus, Alertmanager, Alarme an Mailpit) und `proxy` (Reverse Proxy mit lokal ausgestelltem Zertifikat und HSTS). Der Standardstart bleibt `app` + `db` + `mailpit`. | Vorführbar und offline lauffähig, ohne den Standardstart zu verkomplizieren. | architecture-lead | vorläufig | REQ-OPS-008, REQ-OPS-009, REQ-ARCH-005, ADR-0010 |
 | Q-28 | Wie gehen wir mit den offenen Fachfragen für Justiziariat, DSB und Steuerabteilung um? | Sie werden durch dokumentierte, plausible **Übungsannahmen** ersetzt (Tabelle unten). Betreiberangaben werden von Platzhaltern auf **erkennbar fiktive Übungswerte** umgestellt: Musternamen mit „(fiktiv)“, Anschriften „(fiktiv)“, Domains `.example`, Telefonnummern 555, Kennziffern „DE000000000 (fiktiv)“. Die DSFA wird als Hausaufgabe mit fiktiver Stellungnahme durchgeführt ([`docs/06-recht/dsfa.md`](../06-recht/dsfa.md)). Nichts davon wird im Echtbetrieb genutzt; Muster-Hinweis und `LEGAL_STRICT` bleiben. | Es gibt keinen Echtbetrieb; ein „Real-World“-Szenario mit passenden, aber nicht rechtsverbindlichen Werten genügt (Vorgabe des Auftraggebers, 2026-10-25). Offene Prüfpunkte ohne Adressaten würden die Übung nie abschließen. | Product Owner | **bestätigt** (Auftraggeber, 2026-10-25) | Review v1.3 (offene Prüfpunkte), REQ-LEGAL-001/002/004/006/007/008/009, REQ-PRIV-007, alle Rechtstexte und `docs/06-recht/*` |
+| Q-29 | Nimmt der Prototyp vor der Vorführung noch ein dunkles Farbschema, vollständige Fehlerseiten und die üblichen Grundlagen einer sauberen Website auf? | Ja, als **Should in R1** (Sprint 7): REQ-UX-008 (Farbschema nach Systemeinstellung, wählbar im Seitenkopf), REQ-UX-009 (Fehlerseiten für alle Fehlerarten, ergänzt REQ-UX-003), REQ-UX-010 (Icons, Manifest, Metadaten, Seitentitel, saubere Konsole). Keine Analysewerkzeuge und keine externen Ressourcen (ADR-0010); die Wahl des Farbschemas wird nur auf ausdrücklichen Wunsch im Browser gespeichert. | Wunsch des Auftraggebers für die Vorführung am 2026-11-13; geringer Aufwand, hoher sichtbarer Nutzen; Barrierefreiheit muss in beiden Schemata erhalten bleiben. | Auftraggeber | bestätigt | REQ-UX-008, REQ-UX-009, REQ-UX-010, ADR-0021, B-66…B-68 |
 
 ## Übungsannahmen zu Q-28
 

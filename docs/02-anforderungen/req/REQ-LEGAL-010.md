@@ -13,9 +13,9 @@ kano: basis
 epic: EPIC-13
 source: TDDDG § 25, Q-24
 depends_on: [REQ-PRIV-006]
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-25
+last_updated: 2026-11-12
 verification: [AT-LEGAL-010]
 ---
 
@@ -34,6 +34,7 @@ Zulässige Speicherungen (Allowlist, abgelegt als `e2e/storage-allowlist.json` u
 | Cookie `cm_session` | Anmeldung | Sitzung bzw. Ablauf der Sitzung | unbedingt erforderlich |
 | Cache des Service Workers (App-Shell) | Laden und Offline-Hinweis der PWA | bis zur nächsten Version | unbedingt erforderlich |
 | Sprachwahl (falls REQ-UX-007 umgesetzt) | vom Nutzer ausdrücklich gewählte Sprache | bis zur Änderung | unbedingt erforderlich (ausdrücklich gewünscht) |
+| Farbschema `cm_theme` (REQ-UX-008) | vom Nutzer ausdrücklich gewähltes Schema hell oder dunkel; „Wie im System“ speichert nichts | bis zur Änderung | unbedingt erforderlich (ausdrücklich gewünscht) |
 
 | Neue Speicherung | Eintrag in Allowlist und Datenschutzerklärung | Einwilligung nötig | Ergebnis |
 |---|---|---|---|
@@ -56,3 +57,4 @@ Zulässige Speicherungen (Allowlist, abgelegt als `e2e/storage-allowlist.json` u
 | 1.0 | 2026-10-24 | Erstfassung aus dem Abgleich Recht, Auftritt und Betrieb ([06-abgleich-recht-betrieb.md](../06-abgleich-recht-betrieb.md)); als Übung mit Platzhaltern freigegeben (Q-23) |
 | 1.1 | 2026-10-25 | Review v1.3 (RV-R-11, RV-C-18): Status nach Umsetzung; Test prüft, dass `cm_locale` vor der ausdrücklichen Wahl fehlt |
 | 1.2 | 2026-10-25 | Verifiziert im finalen Lauf gegen das Docker-Beispiel (AT-LEGAL-010 bestanden bzw. ausgeführt); Status → verified |
+| 1.3 | 2026-11-12 | Allowlist um `cm_theme` ergänzt (REQ-UX-008, ADR-0021), Datenschutzerklärung Fassung 2026-11-12; Regel unverändert |

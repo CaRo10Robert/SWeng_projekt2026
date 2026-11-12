@@ -3,9 +3,9 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.4
+version: 1.5
 created: 2026-10-20
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 ---
 
 # Product Backlog und Release-Planung
@@ -94,6 +94,9 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-63 | Sicherheitsalarme und Bestätigungen: erneute Passwortabfrage für Rollenwechsel und DAC7-Export, Metrik und Alarm bei gehäuften Fehlanmeldungen, `Content-Disposition` für JSON-Antworten (PT-F-10 bis PT-F-12; ASVS 3.7.1, 4.3.3, 11.1.8, 14.4.2) | Enabler | REQ-SEC-001, REQ-OPS-008 | basis | hoch | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
 | B-64 | Coverage der Fachmodule auch unter Smoke- und E2E-Tests messen (`NODE_V8_COVERAGE`, zusammengeführt mit der Unit-Coverage), Ziel ≥ 80 % (REQ-MAINT-001 Kriterium 1) | Enabler | REQ-MAINT-001 | n/a | mittel | – | 3 | 1 | 1 | 3 | 5 | 1,7 | R2 |
 | B-65 | Paginierung (`Page<T>`, Keyset) für die übrigen Listen-Endpunkte: eigene Anzeigen, Merkliste, Konversationen, Blockierungen, Mitteilungen, Moderationsfälle, Widersprüche, Nutzerverwaltung (Guideline Kap. 06, [Architektur 8.12](../03-architektur/architektur.md#812-listen-und-paginierung-adr-0009)) | Enabler | – (Guideline Kap. 06) | n/a | niedrig | – | 3 | 1 | 1 | 2 | 4 | 1,3 | R2 |
+| B-66 | Dunkles Farbschema: Systemeinstellung als Voreinstellung, Wahl im Seitenkopf (System/Hell/Dunkel), kein Aufblitzen, Kontrast in beiden Schemata ([ADR-0021](../03-architektur/decisions/0021-farbschema-hell-dunkel.md)) | Feature | REQ-UX-008 | leistung | mittel | – | 5 | 5 | 2 | 1 | 8 | 1,6 | 7 |
+| B-67 | Fehlerseiten für alle Fehlerarten (403, 401, 429, offline, unbekannte Anzeige und Unterhaltung, Rückfallebene) mit einheitlichem Aufbau; Statuscodes für fehlende Dateien | Feature | REQ-UX-009, REQ-UX-003 | basis | mittel | B-44 | 3 | 8 | 2 | 3 | 13 | 4,3 | 7 |
+| B-68 | Website-Hygiene: Icon-Satz, Manifest, Metadaten, `noindex` im Dokument, Seitentitel je Seite, saubere Konsole, Kopfzeile ohne Überlauf bei 360 px | Feature | REQ-UX-010 | basis | niedrig | – | 2 | 8 | 2 | 2 | 12 | 6,0 | 7 |
 
 **Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
 
@@ -133,9 +136,14 @@ gantt
 | 4 | Nach Feature Freeze: nur Messung, Nachweise, Fehlerbehebung | B-23, B-27, B-10, B-06, B-08 | 20 |
 | 5 | Der Auftritt erfüllt die Rechtspflichten (Rechtsseiten, Links, Fehlerseiten, DSA-Begründung und Widerspruch), und Daten lassen sich nachweislich wiederherstellen | B-49, B-52, B-44, B-56, B-43, B-46 | 20 |
 | 6 | Prozesse und Betrieb sind dokumentiert und eingeübt; DAC7, Straftatverdacht, TLS und Abhängigkeitspflege laufen | B-47, B-58, B-55, B-45, B-48, B-57, B-50 | 19 |
-| 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung | B-54, B-53, B-51 | 14 |
+| 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung; Auftritt (Nachtrag Q-29: Farbschema, Fehlerseiten, Hygiene) | B-54, B-53, B-51, B-68, B-67, B-66 | 24 |
 
 **Einordnung EPIC-13 (2026-10-24, Q-23):** Der Auftraggeber hat die Rechts- und Betreiberpflichten als Übung in R1 aufgenommen. Sie passen nicht in die Sprints 1–4, deren Umfang feststeht; der Feature Freeze nach Sprint 3 gilt weiter für den bisherigen R1-Umfang. EPIC-13 erweitert R1 um drei Sprints (53 SP bei ~20 SP Kapazität). **Reihenfolge:** alle Must-Einträge (B-43, B-44, B-46, B-49, B-50, B-56, B-57) in Sprint 5 und 6; Sprint 5 zuerst die Einträge mit hohem WSJF und die Rechtspflichten, die ein Besucher sofort sieht; Sprint 7 enthält nur Should/Could und ist der Puffer: Reicht die Kapazität nicht, rücken B-51, B-53 und B-54 nach R2. Die Einträge entstehen im Docker-Beispiel teilweise schon vorab als Übungsinkrement; der Sprint-Plan bleibt der Maßstab für Nachweise und Abnahme.
+
+**Stand Auftritt (2026-11-12, Q-29):**
+
+- **B-66, B-67 und B-68 neu, umgesetzt und verifiziert** (CI-Lauf 43304771207) auf Wunsch des Auftraggebers vor der Vorführung des Prototyps: dunkles Farbschema (REQ-UX-008, ADR-0021), Fehlerseiten für alle Fehlerarten (REQ-UX-009, ergänzt REQ-UX-003) und Website-Hygiene (REQ-UX-010). Eingeplant in Sprint 7 (Should, Puffer-Sprint); Reihenfolge nach WSJF: B-68, B-67, B-66. Sprint 7 steigt damit auf 24 SP über der Kapazität von ~20 SP; ausgeglichen, weil B-53 und B-51 bereits vorab als Übungsinkrement fertig waren.
+- Nebenbefunde: Rahmen von Eingabefeldern im hellen Schema unter 3:1 (SC 1.4.11) und Überlauf des Seitenkopfs für Gäste bei 360 px (REQ-UX-001) – beide mit behoben.
 
 **Stand Testpyramide und Lieferkette (2026-11-07):**
 

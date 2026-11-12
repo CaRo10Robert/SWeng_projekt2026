@@ -3,7 +3,6 @@ import { useSystemStatus } from '../api/ops';
 import { errorMessage } from '../api/client';
 import { Alert, Badge, Button, Loading, PageHeader } from '../components/ui';
 import { formatDateTime } from '../lib/format';
-import { useDocumentTitle } from '../lib/title';
 import { t, tx, type MessageKey } from '../i18n';
 
 const serviceLabels: Record<SystemStatus['services'][number]['id'], MessageKey> = {
@@ -22,7 +21,6 @@ const overallLabels: Record<SystemStatus['status'], { text: MessageKey; tone: 's
 /** Öffentliche Statusseite (REQ-OPS-007): nur Zustände und Zeitpunkt, keine technischen Details. */
 export function StatusPage() {
   const { data, isPending, isError, error, refetch, isFetching } = useSystemStatus();
-  useDocumentTitle(t('error.systemStatus'));
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <PageHeader title={t('error.systemStatus')} />
