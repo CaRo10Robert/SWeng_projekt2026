@@ -13,7 +13,7 @@ import { buttonClass, cx } from './ui';
 import { t } from '../i18n';
 
 const navLinkClass =
-  'block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-slate-800 hover:bg-brand-50 [&.active]:bg-brand-100 [&.active]:text-brand-800';
+  'block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-slate-800 hover:bg-brand-50 xl:px-2 [&.active]:bg-brand-100 [&.active]:text-brand-800';
 
 function UnreadBadge() {
   const { data } = useUnread();
@@ -82,7 +82,8 @@ function Header() {
       <a href="#main" className="sr-only-focusable absolute left-2 top-2 z-30 rounded bg-white px-3 py-2 text-brand-700">
         {t('nav.skipToContent')}
       </a>
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2">
+      {/* Ab 1280 px etwas breiter als der Inhalt, damit die volle Navigation (auch für Admins) in eine Zeile passt */}
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 xl:max-w-7xl">
         <Link to="/" className="flex shrink-0 items-center gap-2 text-lg font-bold text-brand-700">
           <img src="/icon.svg" alt="" className="h-8 w-8" />
           {/* Schmale Bildschirme: nur das Logo, der Name bleibt als Linktext für Screenreader */}
