@@ -12,7 +12,9 @@
  *  2. Hohes Risiko ⇒ benannte Reviewer
  *  3. depends_on / supersedes zeigen auf existierende Anforderungen
  *  4. Jede Nachweis-ID ist im Nachweiskatalog (nachweise.md) definiert
- *  5. Status „verified“ ⇒ Nachweise vorhanden; automatisierte Nachweise (AT-…) kommen in Testquellen vor
+ *  5. Status „verified“ ⇒ Nachweise vorhanden; automatisierte Nachweise (AT-…) kommen in Testquellen vor.
+ *     Ab „approved“ (bereit zur Umsetzung): mindestens ein Nachweis und Abnahmekriterien; „implemented“ mit
+ *     AT-Nachweis, der in keinem Test vorkommt ⇒ Warnung
  *  6. Jede in Tests markierte AT-ID ist im Katalog; jede in Doku/Code erwähnte REQ-ID existiert
  *  7. Must hat moscow_reason; Klasse passt zum Typ; interne Markdown-Links und Anker sind gültig
  *  8. Kano/Risiko im Backlog stimmen mit dem Front Matter überein; offene R1-Must stehen im Backlog
@@ -179,8 +181,24 @@ for (const f of testFiles) {
 }
 
 const allVerification = new Set([...reqs.values()].flatMap((r) => r.verification ?? []));
+// Readiness (DoR, Entscheidung 2026-11-13): Umgesetzt wird nur, was Nachweis und Abnahmekriterien hat
+const CRITERIA = /^## (Akzeptanzkriterien|Qualitätsmerkmal, Metrik, Messverfahren|Konformitätsprüfung)\b/m;
+const READY_OR_LATER = ['approved', 'implemented', 'verified', 'operational'];
+for (const r of reqs.values()) {
+  if (!READY_OR_LATER.includes(r.status)) continue;
+  if (!(r.verification ?? []).length) err(r.file, `Status ${r.status} ohne Nachweis (verification) – nicht bereit zur Umsetzung`);
+  if (!CRITERIA.test(readFileSync(join(REQ_DIR, r.file), 'utf8'))) {
+    err(r.file, `Status ${r.status} ohne Abnahmekriterien (Akzeptanzkriterien, Merkmal/Metrik/Messverfahren oder Konformitätsprüfung)`);
+  }
+}
 for (const r of reqs.values()) {
   for (const v of r.verification ?? []) if (!catalogIds.has(v)) err(r.file, `Nachweis ${v} fehlt im Nachweiskatalog`);
+  // Umgesetzt, aber der automatisierte Nachweis ist noch nicht geschrieben: früh sichtbar machen, nicht erst bei „verified“
+  if (r.status === 'implemented') {
+    for (const v of r.verification ?? []) {
+      if (v.startsWith('AT-') && !taggedInTests.has(v)) warnings.push(`${r.file}: umgesetzt, aber ${v} kommt in keinem Test vor`);
+    }
+  }
   if (['verified', 'operational'].includes(r.status)) {
     if (!(r.verification ?? []).length) err(r.file, `Status ${r.status} ohne Nachweise`);
     for (const v of r.verification ?? []) {

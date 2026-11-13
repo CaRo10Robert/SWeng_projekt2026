@@ -59,4 +59,10 @@ describe('[AT-AUTH-009] Anmeldeverfahren austauschbar (REQ-AUTH-009, ADR-0013)',
   ])('lehnt ab: %s', async (_name, ticket, code) => {
     expect(await resolveLogin(sso, { ticket }, deps)).toEqual({ ok: false, code });
   });
+
+  it('bestehendes Konto einer deaktivierten Domain meldet sich weiter an (REQ-ARCH-003, REQ-MOD-008)', async () => {
+    const inactive = { ...deps, rules: rules.map((r) => ({ ...r, active: false })) };
+    expect(await resolveLogin(sso, { ticket: 'ok' }, inactive)).toMatchObject({ ok: true, userType: 'student' });
+    expect(await resolveLogin(sso, { ticket: 'unbekannt' }, inactive)).toEqual({ ok: false, code: 'invalid_credentials' });
+  });
 });

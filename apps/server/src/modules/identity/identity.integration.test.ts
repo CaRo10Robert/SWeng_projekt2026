@@ -36,6 +36,69 @@ describe.skipIf(!integrationAvailable)('Integration identity (PostgreSQL)', () =
     expect(rows[0].n).toBe(1);
   });
 
+  it('[AT-ARCH-003] zur Laufzeit ergänzte Domain wird ohne Neustart akzeptiert, deaktivierte abgelehnt, bestehende Konten bleiben', async () => {
+    expect((await register(h, 'neu@hs-beispiel.de')).data.code).toBe('domain_not_allowed');
+    // Domain nur als Datensatz ergänzen: kein neuer Code, kein Neustart (gleiche App-Instanz)
+    await h.sql(`INSERT INTO identity.allowed_domain (domain, institution_id, user_type)
+                 SELECT 'hs-beispiel.de', institution_id, 'staff' FROM identity.allowed_domain LIMIT 1`);
+    const member = await h.member('neu@hs-beispiel.de');
+    expect((await member.call('GET', '/me')).data).toMatchObject({ email: 'neu@hs-beispiel.de', userType: 'staff' });
+
+    await h.sql(`UPDATE identity.allowed_domain SET active = false WHERE domain = 'hs-beispiel.de'`);
+    expect((await register(h, 'zweite@hs-beispiel.de')).data.code).toBe('domain_not_allowed');
+    expect((await h.client().call('POST', '/auth/login', { email: 'neu@hs-beispiel.de', password: PASSWORD })).status).toBe(200);
+  });
+
+  it('[AT-AUTH-004-2] Registrierung, Anmeldung und Passwort-Reset verraten weder über Inhalt noch über Antwortzeit, ob ein Konto existiert', async () => {
+    await h.member('vorhanden@studmail.hwg-lu.de');
+    const ROUNDS = 30;
+    const TOLERANCE_MS = 50;
+    const median = (values: number[]) => {
+      const sorted = [...values].sort((a, b) => a - b);
+      return (sorted[(sorted.length - 1) >> 1]! + sorted[sorted.length >> 1]!) / 2;
+    };
+    const cases: { name: string; send: (existing: boolean, i: number) => Promise<{ status: number; data: unknown }> }[] = [
+      {
+        name: 'Registrierung',
+        send: (existing, i) => register(h, existing ? 'vorhanden@studmail.hwg-lu.de' : `neu${i}@studmail.hwg-lu.de`),
+      },
+      {
+        name: 'Anmeldung mit falschem Passwort',
+        send: (existing) =>
+          h.client().call('POST', '/auth/login', {
+            email: existing ? 'vorhanden@studmail.hwg-lu.de' : 'unbekannt@studmail.hwg-lu.de',
+            password: 'falsches-passwort-123',
+          }),
+      },
+      {
+        name: 'Passwort-Reset anfordern',
+        send: (existing) =>
+          h.client().call('POST', '/auth/password-reset/request', {
+            email: existing ? 'vorhanden@studmail.hwg-lu.de' : 'unbekannt@studmail.hwg-lu.de',
+          }),
+      },
+    ];
+    for (const c of cases) {
+      const times = { true: [] as number[], false: [] as number[] };
+      const bodies = { true: new Set<string>(), false: new Set<string>() };
+      // Abwechselnd senden, Rate-Limits vor jeder Anfrage zurücksetzen (Messverfahren REQ-AUTH-004)
+      for (let i = 0; i < ROUNDS * 2; i++) {
+        const existing = i % 2 === 0;
+        await h.sql('DELETE FROM platform.rate_limit');
+        const t0 = performance.now();
+        const res = await c.send(existing, i);
+        times[`${existing}`].push(performance.now() - t0);
+        // requestId ist je Anfrage eindeutig und verrät nichts über das Konto
+        const { requestId: _ignored, ...data } = (res.data ?? {}) as Record<string, unknown>;
+        bodies[`${existing}`].add(`${res.status} ${JSON.stringify(data)}`);
+      }
+      expect([...bodies.true], `${c.name}: Antwort bei bestehendem Konto`).toEqual([...bodies.false]);
+      expect(bodies.true.size, `${c.name}: Antwort einheitlich`).toBe(1);
+      const diff = Math.abs(median(times.true) - median(times.false));
+      expect(diff, `${c.name}: Unterschied der Mediane ${diff.toFixed(1)} ms`).toBeLessThanOrEqual(TOLERANCE_MS);
+    }
+  }, 120_000);
+
   it('[AT-SEC-002] Passwort-Hash mit Argon2id und mindestens den OWASP-Parametern', async () => {
     await h.member('hash@studmail.hwg-lu.de');
     const [row] = await h.sql<{ password_hash: string }>(
@@ -104,7 +167,7 @@ describe.skipIf(!integrationAvailable)('Integration identity (PostgreSQL)', () =
     expect((await c.call('POST', '/auth/password-reset/confirm', { token, password: 'noch-ein-passwort-2026' })).status).toBeGreaterThanOrEqual(400);
   });
 
-  it('veraltete Zustimmung: geschützte Aktionen verlangen terms_required, Schutzrechte bleiben, erneute Zustimmung hebt die Sperre auf', async () => {
+  it('[AT-PRIV-001-2] veraltete Zustimmung: geschützte Aktionen verlangen terms_required, Schutzrechte bleiben, erneute Zustimmung hebt die Sperre auf', async () => {
     const lea = await h.member('terms@studmail.hwg-lu.de');
     await h.sql(`UPDATE identity.consent SET version = '2026-01'`);
     expect((await lea.call('GET', '/me')).data.termsRequired).toBe(true);

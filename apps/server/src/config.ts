@@ -76,6 +76,11 @@ export function loadConfig() {
     logLevel: env('LOG_LEVEL', 'info'),
     passwordBlocklistFile: env('PASSWORD_BLOCKLIST_FILE', resolve(APP_ROOT, 'assets/password-blocklist.txt')),
     shutdownTimeoutMs: int('SHUTDOWN_TIMEOUT_MS', 25_000),
+    /**
+     * Erster Wiederholungsabstand für E-Mails (ADR-0005, REQ-NOTI-005): 120 s mit exponentiellem Backoff überbrückt
+     * einen Mailserver-Ausfall von mindestens 30 min. Nur für Tests verkürzen; das Verhältnis Ausfall zu Plan bleibt gleich.
+     */
+    mailRetryDelaySeconds: Math.max(1, int('MAIL_RETRY_DELAY_SECONDS', 120)),
     /** Harter Wartungsmodus, z. B. während einer Wiederherstellung (REQ-OPS-006, ADR-0018). */
     maintenanceMode: bool('MAINTENANCE_MODE', false),
     maintenanceUntil: process.env.MAINTENANCE_UNTIL || null,

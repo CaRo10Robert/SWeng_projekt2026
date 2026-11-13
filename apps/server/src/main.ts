@@ -176,11 +176,18 @@ async function main() {
       process.exit(1);
     }, config.shutdownTimeoutMs);
     timer.unref();
+    const started = Date.now();
+    // Dauer je Schritt im Log, damit ein hängender Schritt im Betrieb sofort sichtbar ist (REQ-OPS-001)
+    const step = async (name: string, fn: () => Promise<unknown> | undefined) => {
+      const t0 = Date.now();
+      await fn();
+      logger.info({ step: name, ms: Date.now() - t0 }, 'Herunterfahren: Schritt abgeschlossen');
+    };
     try {
-      await app?.close();
-      await jobs?.stop();
-      await pool.end();
-      logger.info('Beendet');
+      await step('http', () => app?.close());
+      await step('jobs', () => jobs?.stop());
+      await step('db', () => pool.end());
+      logger.info({ ms: Date.now() - started }, 'Beendet');
       process.exit(0);
     } catch (error) {
       logger.error({ err: error }, 'Fehler beim Herunterfahren');

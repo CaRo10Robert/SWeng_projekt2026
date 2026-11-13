@@ -42,7 +42,9 @@ export async function resolveLogin<A extends LoginAccount>(
 ): Promise<LoginOutcome<A>> {
   const identity = await provider.complete(input);
   if (!identity) return { ok: false, code: 'invalid_credentials' };
-  const check = checkRegistrationEmail(identity.email, deps.rules);
+  // Eine deaktivierte Domain sperrt nur neue Registrierungen; bestehende Konten bleiben aktiv (REQ-ARCH-003, REQ-MOD-008).
+  // Domains, die gar nicht auf der Whitelist stehen, bleiben abgelehnt.
+  const check = checkRegistrationEmail(identity.email, deps.rules.map((r) => ({ ...r, active: true })));
   if (!check.ok) return { ok: false, code: 'domain_not_allowed' };
   const account = await deps.findByCanonical(check.email.canonical);
   // Erstanmeldung per SSO legt erst nach Einwilligung ein Konto an (ADR-0013 Nr. 6); bis dahin abgelehnt

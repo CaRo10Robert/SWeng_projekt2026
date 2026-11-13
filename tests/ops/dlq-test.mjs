@@ -4,7 +4,9 @@
  *   node tests/ops/dlq-test.mjs [http://localhost:8080] [--project <compose-projekt>]
  *
  * Ablauf: Mailpit stoppen → Passwort-Reset für Lea anfordern (erzeugt einen Mail-Job) → warten, bis der Job nach
- * 5 Versuchen (10/20/40/80 s Backoff) in der Dead-Letter-Queue liegt → GET /admin/jobs prüft den Eintrag →
+ * 5 Versuchen in der Dead-Letter-Queue liegt → GET /admin/jobs prüft den Eintrag →
+ * Voraussetzung: Stack mit `MAIL_RETRY_DELAY_SECONDS=10` (Backoff 10–20/20–40/40–80/80–160 s); mit dem Standard
+ * 120 s (ADR-0005) dauert es 30–60 min.
  * Mailpit wieder starten. Dauer etwa 3–4 min. Verändert Daten (Reset-Token für Lea).
  */
 import { execFileSync } from 'node:child_process';

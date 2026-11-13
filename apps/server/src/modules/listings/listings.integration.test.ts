@@ -77,6 +77,37 @@ describe.skipIf(!integrationAvailable)('Integration listings und search (Postgre
     expect(await h.client().call('GET', `/media/${detail.data.images[0].id}/md`).then((r) => r.status)).toBe(401);
   });
 
+  it('[AT-LST-003-3] [AT-SEC-007-4] JPEG mit GPS-EXIF: ausgelieferte Bilder in allen Größen ohne Metadaten', async () => {
+    const jpeg = await sharp({ create: { width: 800, height: 600, channels: 3, background: '#cc6633' } })
+      .jpeg()
+      .withExif({
+        IFD0: { Make: 'Testkamera', Copyright: 'Lea Muster' },
+        IFD3: { GPSLatitudeRef: 'N', GPSLatitude: '49/1 28/1 3000/100', GPSLongitudeRef: 'E', GPSLongitude: '8/1 26/1 1500/100' },
+      })
+      .toBuffer();
+    // Vorbedingung: das Testbild trägt wirklich Standort und Kamera
+    const input = await sharp(jpeg).metadata();
+    expect(input.exif?.toString('latin1')).toContain('Testkamera');
+    expect(input.exif?.length).toBeGreaterThan(50);
+
+    const up = await upload(lea, jpeg, 'image/jpeg');
+    expect(up.status).toBe(201);
+    const created = await lea.call('POST', '/listings', body({ imageIds: up.data.uploads.map((u: { id: string }) => u.id) }));
+    await h.jobs.drain();
+    const imageId = (await ben.call('GET', `/listings/${created.data.id}`)).data.images[0].id as string;
+
+    for (const size of ['sm', 'md', 'lg']) {
+      const res = await h.app.inject({ method: 'GET', url: `/api/v1/media/${imageId}/${size}`, headers: { cookie: ben.cookie } });
+      expect(res.statusCode, `Größe ${size}`).toBe(200);
+      const meta = await sharp(res.rawPayload).metadata();
+      expect(meta.exif, `Größe ${size}: EXIF`).toBeUndefined();
+      expect(meta.xmp, `Größe ${size}: XMP`).toBeUndefined();
+      expect(meta.iptc, `Größe ${size}: IPTC`).toBeUndefined();
+      expect(res.rawPayload.toString('latin1')).not.toContain('Testkamera');
+      expect(res.rawPayload.toString('latin1')).not.toContain('Lea Muster');
+    }
+  });
+
   it('Upload ohne gültige Bildsignatur wird abgelehnt (415)', async () => {
     expect((await upload(lea, Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'), 'image/png')).status).toBe(415);
   });

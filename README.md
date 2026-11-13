@@ -88,7 +88,9 @@ Vite leitet API-Aufrufe an `VITE_API_TARGET` weiter; ohne diese Variable an den 
 | `node tests/ops/retention-test.mjs [app-url] [mailpit-url] [--project <name>]` | Löschfristen mit vorgestellter Zeit (AT-PRIV-003-2/-3) |
 | `node tests/ops/db-outage-test.mjs [app-url] [--project <name>]` | Datenbankausfall: App bleibt erreichbar, Bereitschaft 503 (AT-OPS-001-3) |
 | `node tests/ops/proxy-test.mjs [--project <name>]` | Profil `proxy`: TLS, HSTS, Weiterleitung (AT-OPS-009) |
-| `node tests/ops/dlq-test.mjs [app-url] [--project <name>]` | Dead-Letter-Ansicht bei Mailausfall (CTRL-DLQ, dauert etwa 5 min) |
+| `node tests/ops/shutdown-test.mjs [app-url] [--project <name>]` | Geordnetes Herunterfahren unter Last: ≤ 30 s, keine abgebrochenen Anfragen; startet die App danach neu (AT-OPS-001-2) |
+| `node tests/ops/dlq-test.mjs [app-url] [--project <name>]` | Dead-Letter-Ansicht bei Mailausfall (CTRL-DLQ, etwa 5 min); Stack mit `MAIL_RETRY_DELAY_SECONDS=10` starten |
+| `node tests/ops/mail-outage-test.mjs [app-url] [mailpit-url] [--project <name>]` | Mailserver-Ausfall von 30 min (skaliert) ohne Verlust und ohne Duplikate (AT-NOTI-005, etwa 5 min); Stack mit `MAIL_RETRY_DELAY_SECONDS=10` starten |
 | `node scripts/check-i18n.mjs` | Übersetzungskataloge de/en vollständig und gültig |
 | `node scripts/check-bundle.mjs` | JS-Budget der Web-App nach `pnpm --filter @campusmarkt/web build` (CTRL-BUNDLE) |
 | `node tests/load/run.mjs <search\|chat\|create-listing\|signup\|all>` | k6-Lasttests (AT-PERF-001 bis -004) gegen einen Stack mit `RATE_LIMIT_FACTOR=100`, je Szenario 6 min |

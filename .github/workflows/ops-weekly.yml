@@ -1,5 +1,6 @@
 # Langlaufende Betriebs- und Qualitätsprüfungen: wöchentlich und auf Anforderung, nicht bei jedem Push.
-# - CTRL-DLQ (REQ-NOTI-005): etwa 5 min Warten auf die endgültig gescheiterte Zustellung
+# - AT-NOTI-005 und CTRL-DLQ (REQ-NOTI-005): skalierter Mailserver-Ausfall von 30 min und Warten auf die endgültig
+#   gescheiterte Zustellung, mit verkürztem Wiederholungsplan (MAIL_RETRY_DELAY_SECONDS=10 statt 120, Verhältnis gleich)
 # - DAST mit ZAP-Baseline (Guideline Kap. 07 „Verification cadence“, GL-13, MAN-SEC-001)
 # - Lasttests mit k6 (REQ-PERF-001…004, Guideline Kap. 09, GL-11): je Szenario 5 min Dauerlast
 name: Ops wöchentlich
@@ -17,16 +18,20 @@ env:
 
 jobs:
   dlq:
-    name: Dead-Letter-Ansicht bei Mailausfall (CTRL-DLQ)
+    name: Mailserver-Ausfall und Dead-Letter-Ansicht (AT-NOTI-005, CTRL-DLQ)
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      - name: Compose-Setup starten
+      - name: Compose-Setup mit verkürztem Wiederholungsplan starten (Skala 1:12)
         run: docker compose up --build -d --wait
+        env:
+          MAIL_RETRY_DELAY_SECONDS: '10'
+      - name: Mailpit für skalierte 30 min stoppen, Mail kommt danach genau einmal an (AT-NOTI-005)
+        run: node tests/ops/mail-outage-test.mjs http://localhost:8080 http://localhost:8025
       - name: Mailpit stoppen, Zustellung bis „dead“ laufen lassen, Admin-Ansicht prüfen
         run: node tests/ops/dlq-test.mjs http://localhost:8080
       - name: Logs bei Fehler

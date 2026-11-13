@@ -32,6 +32,8 @@ services:
       SMTP_PORT: 1025
       MAIL_FROM: CampusMarkt HWG LU <no-reply@campusmarkt.example>
       MAIL_REPLY_TO: CampusMarkt Support <campusmarkt-support@hwg-lu.example>
+      # Wiederholungsplan für E-Mails (ADR-0005, REQ-NOTI-005); nur für Ops-Tests verkürzen
+      MAIL_RETRY_DELAY_SECONDS: ${MAIL_RETRY_DELAY_SECONDS:-120}
       SEED_DEMO: ${SEED_DEMO:-true}
       DEMO_MODE: ${DEMO_MODE:-true}
       # Nur für Lasttests (tests/load), wirkt nur mit DEMO_MODE=true

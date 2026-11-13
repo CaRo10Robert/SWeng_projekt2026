@@ -149,6 +149,8 @@ jobs:
         run: node tests/ops/retention-test.mjs http://localhost:8080 http://localhost:8025
       - name: Datenbankausfall – App bleibt erreichbar, Bereitschaft 503 (AT-OPS-001-3)
         run: node tests/ops/db-outage-test.mjs http://localhost:8080
+      - name: Herunterfahren unter Last – ≤ 30 s, keine abgebrochenen Anfragen (AT-OPS-001-2)
+        run: node tests/ops/shutdown-test.mjs http://localhost:8080
       - name: Profil proxy starten und prüfen (AT-OPS-009)
         run: |
           docker compose --env-file .env.proxy.example --profile proxy up -d --wait

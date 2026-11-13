@@ -143,10 +143,11 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
     api,
     routes,
     async registerJobs(withWorkers) {
-      // REQ-NOTI-005: max. 5 Versuche, exponentieller Backoff, danach Dead-Letter-Queue
+      // REQ-NOTI-005, ADR-0005: max. 5 Versuche, exponentieller Backoff ab 120 s (2 + 4 + 8 + 16 min ≥ 30 min,
+      // mit Zufallsanteil bis 60 min), danach Dead-Letter-Queue
       await deps.jobs.defineQueue(SEND_EMAIL, {
         retryLimit: 4,
-        retryDelaySeconds: 10,
+        retryDelaySeconds: deps.config.mailRetryDelaySeconds,
         retryBackoff: true,
         expireInSeconds: 60,
         deadLetter: true,
