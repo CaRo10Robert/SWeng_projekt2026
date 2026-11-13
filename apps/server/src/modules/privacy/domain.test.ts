@@ -13,6 +13,7 @@ describe('Löschfristen aus dem Löschkonzept (REQ-PRIV-003)', () => {
     expect(c.moderationBefore.toISOString()).toBe('2025-10-26T03:17:00.000Z');
     expect(c.removedListingsBefore.toISOString()).toBe('2025-10-26T03:17:00.000Z');
     expect(c.noticesBefore.toISOString()).toBe('2025-10-26T03:17:00.000Z');
+    expect(c.notificationsBefore.toISOString()).toBe('2026-07-28T03:17:00.000Z');
     expect(c.auditBefore.toISOString()).toBe('2024-10-26T03:17:00.000Z');
     expect(c.consentProofsBefore.toISOString()).toBe('2023-10-26T03:17:00.000Z');
   });

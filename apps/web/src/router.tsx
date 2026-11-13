@@ -13,6 +13,7 @@ import { MyListingsPage, FavoritesPage } from './routes/my-listings';
 import { ConversationsPage, ConversationPage } from './routes/messages';
 import { ProfilePage } from './routes/profile';
 import { MemberProfilePage } from './routes/member';
+import { NotificationsPage } from './routes/notifications';
 import { ModerationPage } from './routes/moderation';
 import { AdminPage } from './routes/admin';
 import { HomePage } from './routes/home';
@@ -141,6 +142,7 @@ const conversationsRoute = createRoute({ getParentRoute: () => authRoute, path: 
 const conversationRoute = createRoute({ getParentRoute: () => authRoute, path: '/messages/$id', component: ConversationPage });
 const profileRoute = createRoute({ getParentRoute: () => authRoute, path: '/profile', component: ProfilePage });
 const memberRoute = createRoute({ getParentRoute: () => authRoute, path: '/users/$id', component: MemberProfilePage });
+const notificationsRoute = createRoute({ getParentRoute: () => authRoute, path: '/me/notifications', component: NotificationsPage });
 const noticesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me/notices', component: NoticesPage });
 const moderationRoute = createRoute({
   getParentRoute: () => authRoute,
@@ -187,6 +189,7 @@ const routeTree = rootRoute.addChildren([
     conversationRoute,
     profileRoute,
     memberRoute,
+    notificationsRoute,
     noticesRoute,
     moderationRoute,
     adminRoute,

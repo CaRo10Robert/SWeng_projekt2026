@@ -36,7 +36,7 @@ import { TEMPLATE_DB, withDatabase } from './global-setup.js';
 export const integrationAvailable = Boolean(inject('integrationAdminUrl'));
 
 export const PASSWORD = 'ein-sicheres-testpasswort';
-const APP_SCHEMAS = ['identity', 'listings', 'search', 'messaging', 'trust', 'platform'];
+const APP_SCHEMAS = ['identity', 'listings', 'search', 'messaging', 'trust', 'notifications', 'platform'];
 
 // ------------------------------------------------------------------ Fakes für Ports ohne Datenbank
 

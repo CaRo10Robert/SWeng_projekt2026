@@ -57,6 +57,12 @@ export const ROUTES = {
   deal: 'POST /conversations/:id/deal DealActionBody → Deal (nur Anbieter)',
   contact: 'POST /conversations/:id/contact ContactActionBody → ContactShare | 403 contact_not_possible | 429 contact_request_limit | 409 invalid_contact_action (REQ-CHAT-010)',
   unread: 'GET /me/unread → UnreadCount',
+
+  // notifications (REQ-NOTI-008)
+  notifications: 'GET /me/notifications?cursor&limit → Page<AppNotification> (neueste zuerst)',
+  notificationsUnread: 'GET /me/notifications/unread → UnreadCount',
+  markNotification: 'PUT /me/notifications/:id/read MarkNotificationBody → 204 | 404 (fremde oder unbekannte)',
+  markAllNotifications: 'POST /me/notifications/read-all → 204',
   websocket: 'GET /ws (WebSocket) – siehe ServerEvent / ClientEvent',
 
   // trust

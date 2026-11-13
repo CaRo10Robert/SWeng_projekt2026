@@ -158,8 +158,8 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 19 |
-| implemented | Umsetzung | 4 |
+| approved | Konkretisiert (bereit) | 18 |
+| implemented | Umsetzung | 5 |
 | verified | Test | 118 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
@@ -246,7 +246,7 @@ flowchart LR
 | [REQ-NOTI-005](req/REQ-NOTI-005.md) | Zuverlässige E-Mail-Zustellung | quality | M | basis | medium | verified | AT-NOTI-005, CTRL-DLQ |
 | [REQ-NOTI-006](req/REQ-NOTI-006.md) | Web-Push-Benachrichtigungen | functional | C | begeisterung | low | approved | AT-NOTI-006 |
 | [REQ-NOTI-007](req/REQ-NOTI-007.md) | Mailserver per Konfiguration austauschbar | constraint | M | n/a | low | verified | AT-NOTI-007 |
-| [REQ-NOTI-008](req/REQ-NOTI-008.md) | Benachrichtigungen in der App mit gelesen und ungelesen | functional | S | leistung | medium | approved | AT-NOTI-008, AT-NOTI-008-2, AT-NOTI-008-3 |
+| [REQ-NOTI-008](req/REQ-NOTI-008.md) | Benachrichtigungen in der App mit gelesen und ungelesen | functional | S | leistung | medium | implemented | AT-NOTI-008, AT-NOTI-008-2, AT-NOTI-008-3 |
 | [REQ-OPS-001](req/REQ-OPS-001.md) | Gesundheitsprüfung und geordnetes Herunterfahren | quality | M | n/a | medium | verified | AT-OPS-001, AT-OPS-001-2, AT-OPS-001-3 |
 | [REQ-OPS-002](req/REQ-OPS-002.md) | Beobachtbarkeit ohne personenbezogene Daten | quality | M | n/a | medium | verified | AT-OPS-002, MAN-OPS-002 |
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | verified | MAN-OPS-003 |

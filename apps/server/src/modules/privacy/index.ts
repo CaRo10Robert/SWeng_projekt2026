@@ -31,6 +31,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       messagesSent: await modules.messaging.exportForUser(userId),
       contactConsents: await modules.messaging.exportContactConsents(userId),
       trust: await modules.trust.exportForUser(userId),
+      notifications: await modules.notifications.exportForUser(userId),
     };
   }
 
@@ -43,6 +44,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
       await modules.listings.deleteAllForOwner(tx, user.id);
       await modules.messaging.deleteForUser(tx, user.id);
       await modules.trust.deleteForUser(tx, user.id);
+      await modules.notifications.deleteForUser(tx, user.id);
       await modules.notifications.email(tx, { address: user.email, locale: user.locale }, 'deletion_completed', { name: user.displayName });
       await modules.identity.deleteUser(tx, user.id);
     });
@@ -68,6 +70,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
         ...(await modules.identity.purgeExpired(c)),
         ...(await modules.trust.purgeExpired(c)),
         conversations: await modules.messaging.purgeInactiveConversations(c.conversationsBefore, protectedMessages),
+        notifications: await modules.notifications.purgeExpired(c.notificationsBefore),
         auditLog: await purgeAuditLog(database.db, c.auditBefore),
       };
     },

@@ -543,6 +543,7 @@ export function createListingsService(deps: ModuleDeps) {
           dateIso: new Date(r.expires_at).toISOString(),
           link: `${deps.config.publicUrl}/listings/${r.id}`,
         });
+        await modules.notifications.notify(undefined, r.owner_id, 'listing_expiry', { listingId: r.id, listingTitle: r.title });
       }
       stats.reminders = reminders.length;
       stats.expired = await db.exec(sql`
@@ -570,6 +571,7 @@ export function createListingsService(deps: ModuleDeps) {
             listingTitle: row.title,
             link: `${deps.config.publicUrl}/listings/${id}`,
           });
+          await modules.notifications.notify(tx, row.owner_id, 'reservation_expired', { listingId: id, listingTitle: row.title });
           return messages;
         });
         if (!outcome) continue;

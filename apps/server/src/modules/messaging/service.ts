@@ -412,6 +412,11 @@ export function createMessagingService(deps: ModuleDeps) {
         }
 
         const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(), SYSTEM_TEXT[systemCode], 'system', systemCode);
+        // Grundregel REQ-NOTI-008: der Käufer hat die Änderung nicht selbst ausgelöst
+        await modules.notifications.notify(tx, conv.buyer_id, systemCode as 'deal_reserved' | 'deal_completed' | 'deal_cancelled', {
+          listingId: conv.listing_id, listingTitle: listing.title, conversationId: conv.id,
+          ...(deal.agreed_price_cents != null ? { amountCents: deal.agreed_price_cents, currency: deal.currency.trim() } : {}),
+        });
         const eventType = ({ agreed: 'DealAgreed', completed: 'DealCompleted', cancelled: 'DealCancelled' } as const)[deal.status];
         await tx.enqueue(DEAL_EVENTS, dealEvent(eventType, deal, () => crypto.randomUUID()));
         return { deal, message };
@@ -435,6 +440,10 @@ export function createMessagingService(deps: ModuleDeps) {
         WHERE listing_id = ${listingId} AND status = 'agreed' RETURNING *`);
       for (const deal of deals) {
         await tx.enqueue(DEAL_EVENTS, dealEvent(target === 'completed' ? 'DealCompleted' : 'DealCancelled', deal, () => crypto.randomUUID()));
+        // Anbieter hat an der Anzeige geändert: der Käufer erfährt es (REQ-NOTI-008)
+        await modules.notifications.notify(tx, deal.buyer_id, target === 'completed' ? 'deal_completed' : 'deal_cancelled', {
+          listingId, conversationId: deal.conversation_id,
+        });
       }
     },
 
@@ -450,6 +459,7 @@ export function createMessagingService(deps: ModuleDeps) {
       const result: { message: Message; participants: string[] }[] = [];
       for (const deal of deals) {
         await tx.enqueue(DEAL_EVENTS, dealEvent('DealCancelled', deal, () => crypto.randomUUID()));
+        await modules.notifications.notify(tx, deal.buyer_id, 'deal_cancelled', { listingId, conversationId: deal.conversation_id });
         const conv = await tx.db.one<ConversationRow>(sql`SELECT * FROM messaging.conversation WHERE id = ${deal.conversation_id}`);
         if (!conv) continue;
         const { message } = await insertMessage(tx, conv, conv.seller_id, crypto.randomUUID(),

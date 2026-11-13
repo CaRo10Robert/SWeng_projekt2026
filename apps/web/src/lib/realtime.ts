@@ -64,6 +64,12 @@ function handleEvent(qc: QueryClient, event: ServerEvent) {
       void qc.invalidateQueries({ queryKey: ['unread'] });
       break;
     }
+    case 'notifications': {
+      // Zähler sofort setzen, Liste beim nächsten Anzeigen neu laden (REQ-NOTI-008: ohne Neuladen ≤ 5 s)
+      qc.setQueryData(['notifications', 'unread'], { count: event.unread });
+      void qc.invalidateQueries({ queryKey: ['notifications', 'list'] });
+      break;
+    }
     default:
       break;
   }
@@ -76,6 +82,7 @@ function catchUp(qc: QueryClient) {
   }
   void qc.invalidateQueries({ queryKey: ['conversations'] });
   void qc.invalidateQueries({ queryKey: ['unread'] });
+  void qc.invalidateQueries({ queryKey: ['notifications'] });
 }
 
 /** Hält eine WebSocket-Verbindung für angemeldete Nutzer, mit exponentiellem Backoff (max. 30 s). */

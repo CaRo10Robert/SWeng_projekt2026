@@ -1,4 +1,4 @@
-Integrationstest (`identity.integration.test.ts`) – Gäste 401 ohne Profildaten (die Web-App leitet zur Anmeldung); unbekannte, gesperrte, gelöschte, in beide Richtungen blockierte und ausgeblendete Profile liefern für Profil und Anzeigen dieselbe 404 `profile_not_found`. |
+Integrationstest (`notifications.integration.test.ts`) – Grundregel: Reservieren, Aufheben, Abgeben und Löschen durch die Anbieterin benachrichtigen nur den Käufer; Rückfall der Reservierung (System) benachrichtigt beide; eigene Aktionen erzeugen nichts. |
 id: EVIDENCE
 type: verification
 status: in-review

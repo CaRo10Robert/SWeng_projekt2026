@@ -1,8 +1,22 @@
 import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
-import type { Locale } from '@campusmarkt/contracts';
+import {
+  IdParams,
+  MarkNotificationBody,
+  NotificationPage,
+  PageQuery,
+  UnreadCount,
+  type AppNotification,
+  type Locale,
+  type NotificationData,
+  type NotificationKind,
+} from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
+import { notFound, unprocessable } from '../../platform/errors.js';
+import { requireAuth } from '../../platform/http/auth.js';
+import { decodeCursor, pageLimit, toPage } from '../../platform/http/pagination.js';
 import type { MailPort } from '../../platform/ports/index.js';
+import { empty, sql } from '../../platform/sql.js';
 import type { Module, ModuleDeps } from '../shared.js';
 import { unsubscribeToken, verifyUnsubscribeToken } from './domain.js';
 import { renderEmail, templateCategory, UNSUBSCRIBABLE, type EmailTemplate } from './templates.js';
@@ -20,7 +34,34 @@ interface SendEmailJob {
 export interface NotificationsApi {
   /** Reiht eine E-Mail transaktional ein (Outbox, ADR-0005). Ohne `tx` sofort. */
   email(tx: Tx | undefined, recipient: Recipient, template: EmailTemplate, params: Record<string, string>): Promise<void>;
+  /**
+   * Benachrichtigung in der App (REQ-NOTI-008), in derselben Transaktion wie die auslösende Änderung. Der neue Zähler
+   * geht erst nach dem COMMIT über den Echtzeit-Kanal hinaus. Ohne `tx` sofort.
+   */
+  notify(tx: Tx | undefined, userId: string, kind: NotificationKind, data?: NotificationData): Promise<void>;
+  /** Löschlauf: Benachrichtigungen älter als `before` (90 Tage, REQ-PRIV-003). */
+  purgeExpired(before: Date): Promise<number>;
+  /** Kontolöschung (REQ-ACC-002). */
+  deleteForUser(tx: Tx, userId: string): Promise<void>;
+  /** Datenexport (REQ-ACC-003). */
+  exportForUser(userId: string): Promise<AppNotification[]>;
 }
+
+interface NotificationRow {
+  id: string;
+  kind: NotificationKind;
+  data: NotificationData;
+  created_at: string;
+  read_at: string | null;
+}
+
+const toNotification = (r: NotificationRow): AppNotification => ({
+  id: r.id,
+  kind: r.kind,
+  data: r.data,
+  createdAt: new Date(r.created_at).toISOString(),
+  readAt: r.read_at ? new Date(r.read_at).toISOString() : null,
+});
 
 const SEND_EMAIL = 'send-email';
 
@@ -68,11 +109,51 @@ const UNSUBSCRIBE_TEXTS = {
 /** Modul notifications: Templates, Präferenzen, Versand über den MailPort. */
 export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Module<NotificationsApi> {
   const { config } = deps;
+  const db = deps.database.db;
+
+  async function unreadCount(userId: string): Promise<number> {
+    const row = await db.one<{ n: number }>(sql`
+      SELECT count(*)::int AS n FROM notifications.notification WHERE user_id = ${userId} AND read_at IS NULL`);
+    return row?.n ?? 0;
+  }
+
+  /** Aktuellen Zähler an alle offenen Verbindungen des Mitglieds senden (Zähler aktualisiert sich ohne Neuladen). */
+  async function pushUnread(userId: string) {
+    await deps.realtime.publish(userId, { type: 'notifications', unread: await unreadCount(userId) });
+  }
+
   const api: NotificationsApi = {
     async email(tx, recipient, template, params) {
       const job: SendEmailJob = { recipient, template, params };
       if (tx) await tx.enqueue(SEND_EMAIL, job);
       else await deps.jobs.enqueue(SEND_EMAIL, job);
+    },
+
+    async notify(tx, userId, kind, data = {}) {
+      const insert = sql`
+        INSERT INTO notifications.notification (user_id, kind, data) VALUES (${userId}, ${kind}, ${JSON.stringify(data)}::jsonb)`;
+      if (tx) {
+        await tx.db.exec(insert);
+        tx.afterCommit(() => pushUnread(userId));
+      } else {
+        await db.exec(insert);
+        await pushUnread(userId).catch((err) => deps.logger.warn({ err }, 'Zähler nicht gesendet'));
+      }
+    },
+
+    async purgeExpired(before) {
+      return db.exec(sql`DELETE FROM notifications.notification WHERE created_at < ${before}`);
+    },
+
+    async deleteForUser(tx, userId) {
+      await tx.db.exec(sql`DELETE FROM notifications.notification WHERE user_id = ${userId}`);
+    },
+
+    async exportForUser(userId) {
+      const rows = await db.query<NotificationRow>(sql`
+        SELECT id, kind, data, created_at, read_at FROM notifications.notification
+        WHERE user_id = ${userId} ORDER BY created_at DESC, id DESC`);
+      return rows.map(toNotification);
     },
   };
 
@@ -112,6 +193,51 @@ export function createNotificationsModule(deps: ModuleDeps, mail: MailPort): Mod
 
   const routes: FastifyPluginAsyncTypebox = async (app) => {
     const tags = ['notifications'];
+
+    // ------------------------------------------------------------ Benachrichtigungen in der App (REQ-NOTI-008)
+    app.get(
+      '/me/notifications',
+      { schema: { tags, querystring: PageQuery, response: { 200: NotificationPage } } },
+      async (req) => {
+        const { userId } = requireAuth(req);
+        const limit = pageLimit(req.query.limit);
+        const after = decodeCursor(req.query.cursor, 2);
+        if (after === null) throw unprocessable('invalid_cursor', 'Ungültiger Cursor.');
+        const rows = await db.query<NotificationRow>(sql`
+          SELECT id, kind, data, created_at, read_at FROM notifications.notification
+          WHERE user_id = ${userId}
+            ${after ? sql`AND (date_trunc('milliseconds', created_at), id) < (${after[0]}::timestamptz, ${after[1]}::uuid)` : empty}
+          ORDER BY date_trunc('milliseconds', created_at) DESC, id DESC LIMIT ${limit + 1}`);
+        return toPage(rows, limit, toNotification, (r) => [new Date(r.created_at).toISOString(), r.id]);
+      },
+    );
+
+    app.get('/me/notifications/unread', { schema: { tags, response: { 200: UnreadCount } } }, async (req) => ({
+      count: await unreadCount(requireAuth(req).userId),
+    }));
+
+    app.put(
+      '/me/notifications/:id/read',
+      { schema: { tags, params: IdParams, body: MarkNotificationBody } },
+      async (req, reply) => {
+        const { userId } = requireAuth(req);
+        // Nur eigene Einträge; fremde und unbekannte sind nicht unterscheidbar (REQ-SEC-006)
+        const changed = await db.exec(sql`
+          UPDATE notifications.notification
+          SET read_at = ${req.body.read ? sql`COALESCE(read_at, now())` : sql`NULL`}
+          WHERE id = ${req.params.id} AND user_id = ${userId}`);
+        if (!changed) throw notFound();
+        await pushUnread(userId);
+        return reply.status(204).send();
+      },
+    );
+
+    app.post('/me/notifications/read-all', { schema: { tags } }, async (req, reply) => {
+      const { userId } = requireAuth(req);
+      await db.exec(sql`UPDATE notifications.notification SET read_at = now() WHERE user_id = ${userId} AND read_at IS NULL`);
+      await pushUnread(userId);
+      return reply.status(204).send();
+    });
     const query = Type.Object({ token: Type.String({ minLength: 10, maxLength: 300 }) });
 
     // GET ändert nichts (Link-Scanner in Mail-Programmen), sondern zeigt eine Bestätigung mit Formular

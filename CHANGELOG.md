@@ -12,6 +12,7 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 - `scripts/trace.mjs` prüft die Readiness: ab `approved` Nachweis-ID und Abnahmekriterien Pflicht; Warnung, wenn eine umgesetzte Anforderung einen automatisierten Nachweis ohne Test hat.
 - Herunterfahren protokolliert die Dauer je Schritt (HTTP, Jobs, Datenbank).
 - Profil anderer Mitglieder (REQ-ACC-005, B-69): Seite `/users/:id`, erreichbar über den Anbieter in der Anzeige und das Gegenüber im Chat; zeigt Anzeigename, Nutzertyp, „Mitglied seit“, Studiengang, Übergabeorte und aktive Anzeigen (paginiert), nie Kontaktdaten; Melden und Blockieren. Unbekannte, gesperrte, gelöschte, blockierte und ausgeblendete Profile liefern einheitlich „Profil nicht verfügbar“ (404). API: `GET /users/:id/profile`, `GET /users/:id/listings`.
+- Benachrichtigungen in der App (REQ-NOTI-008, B-74): Seite „Benachrichtigungen“ mit Zähler ungelesener Einträge in der Navigation (Echtzeit), gelesen/ungelesen einzeln und alle, neueste zuerst; Auslöser: Ablauf, Rückfall der Reservierung, Moderation, Widerspruch und jede nicht selbst ausgelöste Deal-Änderung (reserviert, aufgehoben, abgegeben). Löschung nach 90 Tagen und bei Kontolöschung, im Datenexport enthalten. Migration `0006_benachrichtigungen.sql` (neues Schema `notifications`).
 - UML-Sichten der Architektur (B-72, ADR-0023): Paket-, Komponenten-, Klassen-, Zustands- und Verteilungsdiagramme in `docs/03-architektur/uml-sichten.md`, abgeglichen mit Code und dependency-cruiser.
 
 ### Fixed

@@ -276,6 +276,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             deadlineIso,
             ...(appealLink ? { appealLink } : {}),
           });
+          await modules.notifications.notify(tx, kase.subject_user_id, 'moderation_notice', kase.target_type === 'listing' ? { listingId: kase.target_id, ...(title ? { listingTitle: title } : {}) } : {});
         }
 
         // Meldende (DSA Art. 16 Abs. 5): Ergebnis, bei „keine Maßnahme“ mit Widerspruchsmöglichkeit; nie die Identität
@@ -290,6 +291,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             deadlineIso,
             ...(body.decision === 'no_action' ? { appealLink: noticesLink } : {}),
           });
+          await modules.notifications.notify(tx, reporterId, 'moderation_notice');
         }
 
         // DSA Art. 18 (REQ-LEGAL-008): Kennzeichnung, Beweissicherung, Eskalation an die Administration
@@ -331,6 +333,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
         ...(title ? { title } : {}),
         link: noticesLink,
       });
+      await modules.notifications.notify(tx, kase.subject_user_id, 'moderation_notice', kase.target_type === 'listing' ? { listingId: kase.target_id, ...(title ? { listingTitle: title } : {}) } : {});
     },
 
     /** „Meine Mitteilungen“ (REQ-LEGAL-006): ohne Identität der Meldenden und ohne Art.-18-Kennzeichnung. */
@@ -599,6 +602,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             reason: body.reason.trim(),
             link: noticesLink,
           });
+          await modules.notifications.notify(tx, r.userId, 'appeal_result');
         }
       });
     },

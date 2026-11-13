@@ -23,7 +23,7 @@ const PATTERNS: RegExp[] = [
   /^\/(impressum|datenschutz|nutzungsbedingungen|community-regeln|barrierefreiheit|kontakt|hilfe|status|widerspruch)$/,
   /^\/listings\/new$/,
   /^\/listings\/[A-Za-z0-9-]+(\/edit)?$/,
-  /^\/me\/(listings|favorites|notices)$/,
+  /^\/me\/(listings|favorites|notices|notifications)$/,
   /^\/messages(\/[A-Za-z0-9-]+)?$/,
   /^\/users\/[A-Za-z0-9-]+$/,
   /^\/(profile|moderation|admin)$/,

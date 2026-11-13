@@ -135,6 +135,8 @@ export type ServerEvent =
   | { type: 'message'; message: Message }
   | { type: 'read'; conversationId: string; readerId: string; readAt: string }
   | { type: 'conversation'; conversationId: string }
+  /** Neue oder geänderte Benachrichtigung; `unread` ist der aktuelle Zähler (REQ-NOTI-008). */
+  | { type: 'notifications'; unread: number }
   | { type: 'ack'; clientMsgId: string; message: Message }
   | { type: 'error'; clientMsgId?: string; code: string; detail: string };
 

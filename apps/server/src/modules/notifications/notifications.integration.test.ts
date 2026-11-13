@@ -117,6 +117,122 @@ describe.skipIf(!integrationAvailable)('Integration notifications (PostgreSQL)',
     expect(h.jobs.failed).toEqual([]);
   });
 
+  it('[AT-NOTI-008] Benachrichtigungen in der App: Auslöser, Zähler mit Echtzeit, gelesen/ungelesen, nur eigene, Paginierung, Löschfristen', async () => {
+    const events: { type: string; unread?: number }[] = [];
+    h.deps.realtime.subscribe(lea.userId, (e) => events.push(e as { type: string; unread?: number }));
+    const unread = async (c: Member) => (await c.call('GET', '/me/notifications/unread')).data.count as number;
+    const list = async (c: Member, query = '') => (await c.call('GET', `/me/notifications${query}`)).data as {
+      items: { id: string; kind: string; data: Record<string, unknown>; readAt: string | null }[];
+      nextCursor: string | null;
+    };
+
+    // Chatnachrichten erzeugen keine Benachrichtigung (eigener Zähler)
+    const lamp = await listing(lea, 'Schreibtischlampe');
+    await ben.call('POST', '/conversations', { listingId: lamp, body: 'Vertraulicher Chatinhalt 4711', clientMsgId: randomUUID() });
+    await h.jobs.drain();
+    expect(await unread(lea)).toBe(0);
+
+    // Ablauf-Erinnerung
+    await h.sql(`UPDATE listings.listing SET expires_at = now() + interval '3 days' WHERE id = $1`, [lamp]);
+    await h.modules.listings.maintenance();
+    // Moderationsentscheidung: Betroffene und Meldende
+    const mod = await h.staff('mod@hwg-lu.de', 'moderator');
+    const book = await listing(lea, 'Lehrbuch mit Lösungen');
+    await ben.call('POST', '/reports', { targetType: 'listing', targetId: book, reason: 'other', details: 'Enthält Klausurlösungen' });
+    const cases = (await mod.call('GET', '/moderation/cases?status=open')).data as { id: string; targetId: string }[];
+    await mod.call('POST', `/moderation/cases/${cases.find((c) => c.targetId === book)!.id}/decision`, {
+      decision: 'remove', reason: 'Die Anzeige verstößt nach Prüfung gegen die Community-Regeln.', ruleRef: 'community_prohibited_items',
+    });
+    await h.jobs.drain();
+
+    expect(await unread(lea)).toBe(2);
+    expect(await unread(ben)).toBe(1);
+    expect(events.filter((e) => e.type === 'notifications').at(-1)?.unread).toBe(2);
+    const all = await list(lea);
+    expect(all.items.map((n) => n.kind)).toEqual(['moderation_notice', 'listing_expiry']);
+    expect(all.items[0]!.data).toMatchObject({ listingId: book, listingTitle: 'Lehrbuch mit Lösungen' });
+    expect(all.items[1]!.data).toMatchObject({ listingId: lamp, listingTitle: 'Schreibtischlampe' });
+    expect(JSON.stringify(all)).not.toContain('4711');
+
+    // Paginierung, neueste zuerst
+    const first = await list(lea, '?limit=1');
+    expect(first.items.map((n) => n.id)).toEqual([all.items[0]!.id]);
+    const second = await list(lea, `?limit=1&cursor=${first.nextCursor}`);
+    expect(second.items.map((n) => n.id)).toEqual([all.items[1]!.id]);
+    expect(second.nextCursor).toBeNull();
+
+    // Gelesen, ungelesen, nur eigene
+    const id = all.items[0]!.id;
+    expect((await lea.call('PUT', `/me/notifications/${id}/read`, { read: true })).status).toBe(204);
+    expect(await unread(lea)).toBe(1);
+    expect(events.at(-1)).toEqual({ type: 'notifications', unread: 1 });
+    expect((await lea.call('PUT', `/me/notifications/${id}/read`, { read: false })).status).toBe(204);
+    expect(await unread(lea)).toBe(2);
+    expect((await ben.call('PUT', `/me/notifications/${id}/read`, { read: true })).status).toBe(404);
+    expect((await lea.call('PUT', `/me/notifications/${randomUUID()}/read`, { read: true })).status).toBe(404);
+    expect((await h.client().call('GET', '/me/notifications')).status).toBe(401);
+    expect(await unread(lea)).toBe(2);
+
+    // Alle als gelesen
+    expect((await lea.call('POST', '/me/notifications/read-all')).status).toBe(204);
+    expect(await unread(lea)).toBe(0);
+    expect((await list(lea)).items.every((n) => n.readAt)).toBe(true);
+    expect(await unread(ben)).toBe(1);
+
+    // Löschfrist 90 Tage
+    await h.sql(`UPDATE notifications.notification SET created_at = now() - interval '91 days' WHERE id = $1`, [id]);
+    await h.privacy.purgeExpired();
+    expect((await list(lea)).items.map((n) => n.id)).not.toContain(id);
+
+    // Kontolöschung entfernt alle eigenen Benachrichtigungen
+    await ben.call('POST', '/me/delete', { password: PASSWORD });
+    await h.sql(`UPDATE identity."user" SET deletion_requested_at = now() - interval '15 days' WHERE id = $1`, [ben.userId]);
+    await h.privacy.purgeDueAccounts();
+    expect(await h.sql(`SELECT 1 FROM notifications.notification WHERE user_id = $1`, [ben.userId])).toHaveLength(0);
+  });
+
+  it('[AT-NOTI-008-3] Grundregel: nicht selbst ausgelöste Zustandsänderungen an Deal und Anzeige erzeugen eine Benachrichtigung, eigene nicht', async () => {
+    const kinds = async (c: Member) =>
+      ((await c.call('GET', '/me/notifications')).data.items as { kind: string; data: Record<string, unknown> }[]);
+    const start = async (title: string) => {
+      const id = await listing(lea, title);
+      const conv = (await ben.call('POST', '/conversations', { listingId: id, body: 'Noch da?', clientMsgId: randomUUID() })).data
+        .conversationId as string;
+      return { id, conv };
+    };
+    const deal = (conv: string, action: string) => lea.call('POST', `/conversations/${conv}/deal`, { action });
+
+    // Anbieterin Lea reserviert, hebt auf, reserviert erneut und gibt ab: nur Ben wird benachrichtigt
+    const a = await start('Fahrradhelm');
+    expect((await deal(a.conv, 'reserve')).status).toBe(200);
+    expect((await deal(a.conv, 'cancel')).status).toBe(200);
+    expect((await deal(a.conv, 'reserve')).status).toBe(200);
+    expect((await deal(a.conv, 'complete')).status).toBe(200);
+    await h.jobs.drain();
+    expect((await kinds(ben)).map((n) => n.kind)).toEqual(['deal_completed', 'deal_reserved', 'deal_cancelled', 'deal_reserved']);
+    expect((await kinds(ben))[0]!.data).toMatchObject({ listingId: a.id, listingTitle: 'Fahrradhelm', conversationId: a.conv });
+    expect(await kinds(lea)).toEqual([]);
+
+    // Anbieterin löscht eine reservierte Anzeige direkt: Ben erfährt die Stornierung
+    const b = await start('Kaffeemaschine');
+    await deal(b.conv, 'reserve');
+    await h.sql(`DELETE FROM notifications.notification`);
+    expect((await lea.call('DELETE', `/listings/${b.id}`)).status).toBeLessThan(300);
+    await h.jobs.drain();
+    expect((await kinds(ben)).map((n) => n.kind)).toEqual(['deal_cancelled']);
+    expect(await kinds(lea)).toEqual([]);
+
+    // System: Reservierung fällt nach 30 Tagen zurück – beide wurden nicht gefragt
+    const c = await start('Stehlampe');
+    await deal(c.conv, 'reserve');
+    await h.sql(`DELETE FROM notifications.notification`);
+    await h.sql(`UPDATE listings.listing SET status_changed_at = now() - interval '31 days' WHERE id = $1`, [c.id]);
+    await h.modules.listings.maintenance();
+    await h.jobs.drain();
+    expect((await kinds(lea)).map((n) => n.kind)).toEqual(['reservation_expired']);
+    expect((await kinds(ben)).map((n) => n.kind)).toEqual(['deal_cancelled']);
+  });
+
   it('[AT-NOTI-001-2] Mails gehen in der Sprache des Kontos hinaus', async () => {
     expect((await lea.call('PATCH', '/me', { locale: 'en' })).status).toBe(200);
     const mark = h.mail.sent.length;

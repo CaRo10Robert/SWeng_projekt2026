@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-route
 import { useAccountLocale, useLogout, useMe } from '../api/auth';
 import { useUnread } from '../api/messaging';
 import { useNotices } from '../api/trust';
+import { useUnreadNotifications } from '../api/notifications';
 import { useRealtime, useRealtimeDegraded } from '../lib/realtime';
 import { OfflineBanner } from './ErrorPages';
 import { Footer } from './Footer';
@@ -35,6 +36,19 @@ function NoticesBadge() {
     <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-700 px-1.5 text-xs font-bold text-white">
       {count}
       <span className="sr-only"> {t('nav.unreadNotices', { count })}</span>
+    </span>
+  );
+}
+
+/** Zähler ungelesener Benachrichtigungen (REQ-NOTI-008); Echtzeit setzt ihn direkt, ab 100 „99+“. */
+function NotificationsBadge() {
+  const { data } = useUnreadNotifications();
+  const count = data?.count ?? 0;
+  if (!count) return null;
+  return (
+    <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-700 px-1.5 text-xs font-bold text-white">
+      {count > 99 ? '99+' : count}
+      <span className="sr-only"> {t('nav.unreadNotifications', { count })}</span>
     </span>
   );
 }
@@ -139,6 +153,12 @@ function Header() {
               <li>
                 <Link to="/me/favorites" className={navLinkClass}>
                   {t('nav.favorites')}
+                </Link>
+              </li>
+              <li>
+                <Link to="/me/notifications" className={navLinkClass}>
+                  {t('nav.notifications')}
+                  <NotificationsBadge />
                 </Link>
               </li>
               <li>
