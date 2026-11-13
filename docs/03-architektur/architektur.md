@@ -3,9 +3,9 @@ id: ARC-001
 type: architecture
 status: approved
 owner: team-architektur
-version: 1.7
+version: 1.8
 created: 2026-10-20
-last_updated: 2026-11-12
+last_updated: 2026-11-13
 review_due: 2027-01-31
 ---
 
@@ -22,6 +22,8 @@ review_due: 2027-01-31
 > **v1.6:** Testpyramide und Lieferkette (2026-11-07): Paginierung und `RateLimit-*`-Header (8.1, 8.10, neu 8.12), Löschläufe in 8.4 auf den umgesetzten Stand gebracht (Rückfall reservierter Anzeigen, unbestätigte Konten, Kontolöschung mit Anonymisierung), Lieferkette in 8.1 (Scans, SBOM, Provenance-Attestation, Digest-Pins), Qualitätssicherung in 8.11 mit Integrationstests, Bundle-Budget, ZAP und k6; Details in der [Teststrategie](../05-umsetzung/teststrategie.md).
 
 > **v1.7:** Auftritt (2026-11-12, Q-29): Farbschema hell/dunkel über umgedeutete Farb-Tokens mit Inline-Skript per CSP-Hash ([ADR-0021](decisions/0021-farbschema-hell-dunkel.md), REQ-UX-008), Fehlerseiten für alle Fehlerarten mit gemeinsamem Aufbau (REQ-UX-009, 8.10), Website-Hygiene (REQ-UX-010): Komponentensicht 5.3, Sicherheit 8.1, Datenklassen 8.4, Barrierefreiheit 8.7, Speicherung 8.8.
+
+> **v1.8:** UML-Sichten (2026-11-13, B-72): dieselbe Architektur zusätzlich in UML in [uml-sichten.md](uml-sichten.md) (Paket-, Komponenten-, Klassen-, Zustands- und Verteilungsdiagramm, Abgleich mit dependency-cruiser); C4 bleibt führend ([ADR-0023](decisions/0023-uml-sichten-ergaenzend-zu-c4.md) ergänzt ADR-0012). Liste in Kap. 9 um ADR-0022 und ADR-0023 ergänzt.
 
 > **v1.1:** Befunde aus dem [Architektur-Review v1.0](../04-review/review-v1.0-architektur.md) behoben: Soll und Ist getrennt (Spalte „Stand“ mit Backlog-ID), Datenbankzugriff und Modulabhängigkeiten in der Komponentensicht, Löschung und Anonymisierung im Datenmodell, Schlüsselkonzept für die IP-Pseudonymisierung ([ADR-0014](decisions/0014-ip-pseudonymisierung.md)), Laufzeitsichten an den Code angeglichen, Qualitätsszenarien an die Anforderungen angeglichen.
 >
@@ -155,6 +157,8 @@ C4Context
 ## 5. Bausteinsicht (C4 Ebene 2 und 3)
 
 **Notation:** C4-Modell nach Simon Brown, als Mermaid-C4-Diagramme im Markdown ([ADR-0012](decisions/0012-c4-notation.md)). Jedes Diagramm zeigt genau **eine** Ebene und nennt sie im Titel (Guideline Kap. 02). Die Ebenen verfeinern sich: Das Softwaresystem aus 3.1 wird in 5.1 in Container zerlegt, die Container „Anwendung“ und „Web-App“ in 5.2 und 5.3 in Komponenten. Die vierte C4-Ebene (Code) wird bewusst nicht gezeichnet; sie ergibt sich aus dem Quellcode. Beziehungen zwischen Komponenten im selben Prozess sind Funktionsaufrufe (TypeScript, in-process), sofern nicht anders beschriftet.
+
+**UML-Sichten:** Dieselbe Architektur steht zusätzlich in UML in [uml-sichten.md](uml-sichten.md): Paketdiagramm mit den Abhängigkeiten laut dependency-cruiser und der Nutzung zwischen den Modulen, Komponentendiagramm mit bereitgestellten und benötigten Schnittstellen (Ports und Adapter, `PaymentPort`), Klassendiagramm des Fachmodells, Zustandsdiagramme Anzeige und Deal, Verteilungsdiagramm des Docker-Beispiels ([ADR-0023](decisions/0023-uml-sichten-ergaenzend-zu-c4.md)). Die C4-Sichten in diesem Dokument bleiben führend.
 
 | C4-Begriff | Bedeutung im Projekt |
 |---|---|
@@ -1158,7 +1162,7 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Alle Fehlers
 | [0009](decisions/0009-api-rest-openapi.md) | REST + OpenAPI 3.1 (Umsetzung Schema-first, präzisiert durch 0011) | Accepted |
 | [0010](decisions/0010-docker-demo-deployment.md) | Auslieferung als lokales Docker-Beispiel | Accepted |
 | [0011](decisions/0011-mvp-umsetzung.md) | Umsetzungsentscheidungen im MVP (SQL ohne ORM, Schema-first-Vertrag, CSRF, HEIC) | Accepted |
-| [0012](decisions/0012-c4-notation.md) | C4-Modell als Notation, Mermaid-C4-Diagramme | Accepted |
+| [0012](decisions/0012-c4-notation.md) | C4-Modell als Notation, Mermaid-C4-Diagramme (ergänzt durch 0023) | Accepted |
 | [0013](decisions/0013-anmeldung-identity-provider-port.md) | Anmeldung hinter einem IdentityProviderPort (Hochschulkennung, Q-12) | Proposed (Abstimmung mit Dozent/in) |
 | [0014](decisions/0014-ip-pseudonymisierung.md) | Pseudonymisierung von IP-Adressen mit rotierendem Schlüssel | Accepted |
 | [0015](decisions/0015-rechtstexte-als-markdown.md) | Rechtstexte als versionierte Markdown-Inhalte im Repository | Accepted |
@@ -1168,6 +1172,8 @@ Die 404-Seite bietet Suche (für Mitglieder), Startseite und Hilfe. Alle Fehlers
 | [0019](decisions/0019-wiederherstellung-und-loeschjournal.md) | Wiederherstellung über temporäre Datenbank mit Rückfall, Löschjournal außerhalb der Datenbank | Accepted |
 | [0020](decisions/0020-datenzugriff-pg-sql-template.md) | Datenzugriff mit `pg` und parametrisierendem `sql`-Template statt Query Builder (ersetzt Teil von 0002 und 0011 Nr. 1) | Accepted |
 | [0021](decisions/0021-farbschema-hell-dunkel.md) | Farbschema hell/dunkel über umgedeutete Farb-Tokens und Inline-Skript mit CSP-Hash | Accepted |
+| [0022](decisions/0022-release-pipeline-tag-registry-pull.md) | Release-Pipeline: Git-Tag, geprüftes Image in der Registry, Zielsystem holt ab | Accepted |
+| [0023](decisions/0023-uml-sichten-ergaenzend-zu-c4.md) | UML-Sichten ergänzend zu C4, als Mermaid-Diagramme aus dem Code (ergänzt 0012) | Accepted |
 
 ## 10. Qualitätsszenarien
 
