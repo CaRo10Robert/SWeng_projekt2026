@@ -12,6 +12,7 @@ import { ListingFormPage } from './routes/listing-form';
 import { MyListingsPage, FavoritesPage } from './routes/my-listings';
 import { ConversationsPage, ConversationPage } from './routes/messages';
 import { ProfilePage } from './routes/profile';
+import { MemberProfilePage } from './routes/member';
 import { ModerationPage } from './routes/moderation';
 import { AdminPage } from './routes/admin';
 import { HomePage } from './routes/home';
@@ -139,6 +140,7 @@ const favoritesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me
 const conversationsRoute = createRoute({ getParentRoute: () => authRoute, path: '/messages', component: ConversationsPage });
 const conversationRoute = createRoute({ getParentRoute: () => authRoute, path: '/messages/$id', component: ConversationPage });
 const profileRoute = createRoute({ getParentRoute: () => authRoute, path: '/profile', component: ProfilePage });
+const memberRoute = createRoute({ getParentRoute: () => authRoute, path: '/users/$id', component: MemberProfilePage });
 const noticesRoute = createRoute({ getParentRoute: () => authRoute, path: '/me/notices', component: NoticesPage });
 const moderationRoute = createRoute({
   getParentRoute: () => authRoute,
@@ -184,6 +186,7 @@ const routeTree = rootRoute.addChildren([
     conversationsRoute,
     conversationRoute,
     profileRoute,
+    memberRoute,
     noticesRoute,
     moderationRoute,
     adminRoute,

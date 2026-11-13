@@ -8,5 +8,5 @@ export type { Contact } from './service.js';
 /** Modul identity: Registrierung, Login, Sessions, Whitelist, Rollen (ADR-0003). */
 export function createIdentityModule(deps: ModuleDeps): Module<IdentityApi> {
   const service = createIdentityService(deps);
-  return { api: service, routes: identityRoutes(service, deps.config) };
+  return { api: service, routes: identityRoutes(service, deps.config, deps.modules) };
 }

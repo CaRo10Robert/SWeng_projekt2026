@@ -633,5 +633,16 @@
   "user.role.member": "Mitglied",
   "user.role.moderator": "Moderation",
   "user.type.staff": "Beschäftigte/r",
-  "user.type.student": "Studierende/r"
+  "user.type.student": "Studierende/r",
+  "errorPage.profileNotFound.text": "Dieses Profil ist nicht verfügbar. Vielleicht gibt es das Konto nicht mehr, oder der Link ist unvollständig.",
+  "errorPage.profileNotFound.title": "Profil nicht verfügbar",
+  "member.about": "Über das Mitglied",
+  "member.block": "Blockieren",
+  "member.editOwn": "Profil bearbeiten",
+  "member.listings": "Aktive Anzeigen",
+  "member.noListings": "Gerade keine aktiven Anzeigen.",
+  "member.report": "Profil melden",
+  "member.since": "Mitglied seit",
+  "member.studyProgram": "Studiengang",
+  "member.userType": "Mitgliedschaft"
 }

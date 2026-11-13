@@ -15,6 +15,7 @@ export type ErrorKind =
   | 'notFound'
   | 'listingNotFound'
   | 'conversationNotFound'
+  | 'profileNotFound'
   | 'forbidden'
   | 'unauthenticated'
   | 'rateLimited'
@@ -26,6 +27,7 @@ const STATUS: Record<ErrorKind, number | undefined> = {
   notFound: 404,
   listingNotFound: 404,
   conversationNotFound: 404,
+  profileNotFound: 404,
   forbidden: 403,
   unauthenticated: 401,
   rateLimited: 429,

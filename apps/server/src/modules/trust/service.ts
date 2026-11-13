@@ -153,6 +153,13 @@ export function createTrustService(deps: ModuleDeps) {
         WHERE (blocker_id = ${a} AND blocked_id = ${b}) OR (blocker_id = ${b} AND blocked_id = ${a})`));
     },
 
+    /** Profil ab drei Meldungen vorläufig ausgeblendet, solange der Fall offen ist (REQ-MOD-004, REQ-ACC-005). */
+    async isProfileHidden(userId: string): Promise<boolean> {
+      return !!(await db.one(sql`
+        SELECT 1 FROM trust.moderation_case
+        WHERE target_type = 'user' AND target_id = ${userId} AND status = 'open' AND hidden`));
+    },
+
     /** Alle Mitglieder, die ich blockiert habe oder die mich blockiert haben. */
     async blockRelations(userId: string): Promise<string[]> {
       const rows = await db.query<{ id: string }>(sql`

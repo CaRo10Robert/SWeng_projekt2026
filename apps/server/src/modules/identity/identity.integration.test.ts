@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { integrationAvailable, PASSWORD, startHarness, type Harness } from '../../../test/integration/harness.js';
 
@@ -98,6 +99,88 @@ describe.skipIf(!integrationAvailable)('Integration identity (PostgreSQL)', () =
       expect(diff, `${c.name}: Unterschied der Mediane ${diff.toFixed(1)} ms`).toBeLessThanOrEqual(TOLERANCE_MS);
     }
   }, 120_000);
+
+  describe('Profil anderer Mitglieder (REQ-ACC-005)', () => {
+    const offer = async (c: Awaited<ReturnType<Harness['member']>>, title: string) => {
+      const meta = (await c.call('GET', '/meta')).data;
+      const res = await c.call('POST', '/listings', {
+        kind: 'offer', title, description: 'Gut erhalten, Abholung auf dem Campus.', categoryId: meta.categories[0].id,
+        priceType: 'fixed', priceCents: 1_000, condition: 'good', locationIds: [meta.locations[0].id],
+      });
+      return res.data.id as string;
+    };
+
+    it('[AT-ACC-005-2] Profil enthält nur die freigegebenen Felder und keine E-Mail-Adresse; Anzeigen nur aktiv und reserviert, paginiert', async () => {
+      const lea = await h.member('lea@studmail.hwg-lu.de');
+      const ben = await h.member('ben@studmail.hwg-lu.de');
+      const meta = (await ben.call('GET', '/meta')).data;
+      await ben.call('PATCH', '/me', { studyProgram: 'Wirtschaftsinformatik', preferredLocationIds: [meta.locations[0].id] });
+
+      const res = await lea.call('GET', `/users/${ben.userId}/profile`);
+      expect(res.status).toBe(200);
+      expect(Object.keys(res.data).sort()).toEqual(['displayName', 'id', 'isSelf', 'memberSince', 'preferredLocationIds', 'studyProgram', 'userType']);
+      expect(res.data).toMatchObject({ id: ben.userId, userType: 'student', studyProgram: 'Wirtschaftsinformatik', preferredLocationIds: [meta.locations[0].id], isSelf: false });
+      expect(JSON.stringify(res.data)).not.toContain('@');
+      expect((await ben.call('GET', `/users/${ben.userId}/profile`)).data.isSelf).toBe(true);
+
+      // Aktive und reservierte Anzeigen, neueste zuerst; pausierte und gelöschte nie
+      const ids: string[] = [];
+      for (let i = 1; i <= 5; i++) ids.push(await offer(ben, `Anzeige Nummer ${i}`));
+      await ben.call('POST', `/listings/${ids[0]}/status`, { action: 'pause' });
+      await ben.call('DELETE', `/listings/${ids[1]}`);
+      const first = await lea.call('GET', `/users/${ben.userId}/listings?limit=2`);
+      expect(first.status).toBe(200);
+      expect(first.data.items.map((c: { id: string }) => c.id)).toEqual([ids[4], ids[3]]);
+      expect(first.data.nextCursor).toBeTruthy();
+      const second = await lea.call('GET', `/users/${ben.userId}/listings?limit=2&cursor=${first.data.nextCursor}`);
+      expect(second.data.items.map((c: { id: string }) => c.id)).toEqual([ids[2]]);
+      expect(second.data.nextCursor).toBeNull();
+      expect(JSON.stringify([first.data, second.data])).not.toContain('@');
+      expect((await lea.call('GET', `/users/${ben.userId}/listings?cursor=kaputt`)).status).toBe(422);
+    });
+
+    it('[AT-ACC-005-3] Gäste ohne Daten; unbekannte, gesperrte, gelöschte, blockierte und ausgeblendete Profile mit gleicher 404', async () => {
+      const lea = await h.member('lea@studmail.hwg-lu.de');
+      const others = {
+        gesperrt: await h.member('gesperrt@studmail.hwg-lu.de'),
+        geloescht: await h.member('geloescht@studmail.hwg-lu.de'),
+        blockiertVonLea: await h.member('blockiert@studmail.hwg-lu.de'),
+        blockiertLea: await h.member('blockiertlea@studmail.hwg-lu.de'),
+        ausgeblendet: await h.member('ausgeblendet@studmail.hwg-lu.de'),
+      };
+      await h.sql(`UPDATE identity."user" SET status = 'suspended' WHERE id = $1`, [others.gesperrt.userId]);
+      expect((await others.geloescht.call('POST', '/me/delete', { password: PASSWORD })).status).toBeLessThan(300);
+      expect((await lea.call('PUT', `/users/${others.blockiertVonLea.userId}/block`)).status).toBe(204);
+      expect((await others.blockiertLea.call('PUT', `/users/${lea.userId}/block`)).status).toBe(204);
+      await h.sql(
+        `INSERT INTO trust.moderation_case (target_type, target_id, subject_user_id, hidden)
+         VALUES ('user', $1, $1, true)`,
+        [others.ausgeblendet.userId],
+      );
+
+      // Gast: 401 ohne Profildaten (die Web-App leitet zur Anmeldung)
+      const guest = await h.client().call('GET', `/users/${others.ausgeblendet.userId}/profile`);
+      expect(guest.status).toBe(401);
+      expect(JSON.stringify(guest.data)).not.toContain('ausgeblendet');
+
+      const normalize = (r: { status: number; data: Record<string, unknown> }) => {
+        const { requestId: _ignored, ...rest } = r.data;
+        return `${r.status} ${JSON.stringify(rest)}`;
+      };
+      const targets = [randomUUID(), ...Object.values(others).map((o) => o.userId)];
+      const answers = new Set<string>();
+      for (const id of targets) {
+        answers.add(normalize(await lea.call('GET', `/users/${id}/profile`)));
+        answers.add(normalize(await lea.call('GET', `/users/${id}/listings`)));
+      }
+      expect([...answers]).toHaveLength(1);
+      expect([...answers][0]).toMatch(/^404 .*profile_not_found/);
+
+      // Gegenprobe: ohne Ausschlussgrund sichtbar
+      const sichtbar = await h.member('sichtbar@studmail.hwg-lu.de');
+      expect((await lea.call('GET', `/users/${sichtbar.userId}/profile`)).status).toBe(200);
+    });
+  });
 
   it('[AT-SEC-002] Passwort-Hash mit Argon2id und mindestens den OWASP-Parametern', async () => {
     await h.member('hash@studmail.hwg-lu.de');

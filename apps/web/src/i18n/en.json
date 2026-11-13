@@ -633,5 +633,16 @@
   "user.role.member": "Member",
   "user.role.moderator": "Moderator",
   "user.type.staff": "Staff",
-  "user.type.student": "Student"
+  "user.type.student": "Student",
+  "errorPage.profileNotFound.text": "This profile is not available. The account may no longer exist, or the link is incomplete.",
+  "errorPage.profileNotFound.title": "Profile not available",
+  "member.about": "About this member",
+  "member.block": "Block",
+  "member.editOwn": "Edit profile",
+  "member.listings": "Active listings",
+  "member.noListings": "No active listings at the moment.",
+  "member.report": "Report profile",
+  "member.since": "Member since",
+  "member.studyProgram": "Degree programme",
+  "member.userType": "Membership"
 }

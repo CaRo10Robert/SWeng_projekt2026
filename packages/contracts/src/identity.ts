@@ -50,6 +50,25 @@ export const PublicUser = Type.Object({
 });
 export type PublicUser = Static<typeof PublicUser>;
 
+/**
+ * Profil eines anderen Mitglieds (REQ-ACC-005): nur, was das Mitglied ohnehin für andere pflegt.
+ * Nie E-Mail-Adresse, Rolle, letzte Aktivität oder nicht aktive Anzeigen (REQ-PRIV-002, Datenminimierung).
+ * Übergabeorte als IDs; die Namen kommen wie bei Anzeigen aus `GET /meta`.
+ */
+export const MemberProfile = Type.Object(
+  {
+    id: Uuid,
+    displayName: Type.String(),
+    userType: UserType,
+    memberSince: Timestamp,
+    studyProgram: Type.Union([Type.String(), Type.Null()]),
+    preferredLocationIds: Type.Array(Uuid),
+    isSelf: Type.Boolean(),
+  },
+  { additionalProperties: false },
+);
+export type MemberProfile = Static<typeof MemberProfile>;
+
 export const Password = Type.String({ minLength: 12, maxLength: 256 });
 export const Email = Type.String({ minLength: 3, maxLength: 254 });
 

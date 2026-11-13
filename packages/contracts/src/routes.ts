@@ -30,6 +30,8 @@ export const ROUTES = {
   acceptTerms: 'POST /me/terms AcceptTermsBody → Me | 409 terms_outdated (Version ist nicht die aktuelle)',
   acknowledgePrivacy: 'POST /me/privacy-ack PrivacyAckBody → Me | 409 privacy_outdated (Kenntnisnahme, keine Einwilligung)',
   unsubscribe: 'GET|POST /notifications/unsubscribe?token= → Abmeldung einer Kategorie (One-Click, RFC 8058, ohne CSRF-Header)',
+  memberProfile: 'GET /users/:id/profile → MemberProfile | 404 profile_not_found (unbekannt, gesperrt, gelöscht, blockiert, ausgeblendet; REQ-ACC-005)',
+  memberListings: 'GET /users/:id/listings?cursor&limit → Page<ListingCard> (aktiv und reserviert, neueste zuerst) | 404 profile_not_found',
 
   // listings
   search: 'GET /listings SearchQuery → SearchResult',

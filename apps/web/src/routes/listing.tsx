@@ -237,7 +237,11 @@ export function ListingPage() {
 
         <Card className="space-y-1">
           <h2 className="font-semibold">{t('listing.seller')}</h2>
-          <p>{listing.owner.displayName}</p>
+          <p>
+            <Link to="/users/$id" params={{ id: listing.owner.id }} className="text-brand-700 underline">
+              {listing.owner.displayName}
+            </Link>
+          </p>
           <p className="text-sm text-slate-600">
             {userTypeLabels[listing.owner.userType]} · {t('profile.memberSince', { date: formatDate(listing.owner.memberSince) })}
           </p>

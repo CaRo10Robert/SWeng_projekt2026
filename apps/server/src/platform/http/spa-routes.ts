@@ -25,6 +25,7 @@ const PATTERNS: RegExp[] = [
   /^\/listings\/[A-Za-z0-9-]+(\/edit)?$/,
   /^\/me\/(listings|favorites|notices)$/,
   /^\/messages(\/[A-Za-z0-9-]+)?$/,
+  /^\/users\/[A-Za-z0-9-]+$/,
   /^\/(profile|moderation|admin)$/,
 ];
 

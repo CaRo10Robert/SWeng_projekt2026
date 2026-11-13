@@ -257,7 +257,11 @@ export function ConversationPage() {
           {c.listing.thumbnailUrl ? <img src={c.listing.thumbnailUrl} alt="" className="h-full w-full object-cover" /> : <ImagePlaceholder label="" />}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-bold">{c.counterpart.displayName}</h1>
+          <h1 className="truncate font-bold">
+            <Link to="/users/$id" params={{ id: c.counterpart.id }} className="underline decoration-slate-400 underline-offset-2 hover:decoration-current">
+              {c.counterpart.displayName}
+            </Link>
+          </h1>
           <Link to="/listings/$id" params={{ id: c.listing.id }} className="block truncate text-sm text-brand-700 underline">
             {c.listing.title}
           </Link>

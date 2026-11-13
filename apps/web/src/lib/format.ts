@@ -40,7 +40,11 @@ const dateFmt = () => cached('date', (l) => new Intl.DateTimeFormat(l, { dateSty
 const dateTimeFmt = () => cached('datetime', (l) => new Intl.DateTimeFormat(l, { dateStyle: 'short', timeStyle: 'short' }));
 const timeFmt = () => cached('time', (l) => new Intl.DateTimeFormat(l, { timeStyle: 'short' }));
 
+const monthYearFmt = () => cached('monthYear', (l) => new Intl.DateTimeFormat(l, { month: 'long', year: 'numeric' }));
+
 export const formatDate = (iso: string) => dateFmt().format(new Date(iso));
+/** „November 2026“ – z. B. „Mitglied seit“ im Profil anderer Mitglieder (REQ-ACC-005: Monat und Jahr). */
+export const formatMonthYear = (iso: string) => monthYearFmt().format(new Date(iso));
 export const formatDateTime = (iso: string) => dateTimeFmt().format(new Date(iso));
 
 export function formatChatTime(iso: string): string {

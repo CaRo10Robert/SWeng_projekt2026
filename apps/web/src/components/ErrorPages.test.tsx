@@ -63,6 +63,7 @@ describe('[AT-UX-009] Fehlerseiten für alle Fehlerarten, einheitlich aufgebaut 
     ['notFound', 404],
     ['listingNotFound', 404],
     ['conversationNotFound', 404],
+    ['profileNotFound', 404],
     ['forbidden', 403],
     ['unauthenticated', 401],
     ['rateLimited', 429],

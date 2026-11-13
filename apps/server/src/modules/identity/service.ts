@@ -415,6 +415,25 @@ export function createIdentityService(deps: ModuleDeps) {
       );
     },
 
+    /**
+     * Öffentliche Profilangaben eines aktiven Kontos (REQ-ACC-005); null für unbekannte, unbestätigte, gesperrte und
+     * zur Löschung vorgemerkte Konten, damit der Aufrufer sie nicht unterscheiden kann.
+     */
+    async publicProfile(userId: string) {
+      const row = await db.one<Pick<UserRow, 'id' | 'display_name' | 'user_type' | 'created_at' | 'study_program' | 'preferred_location_ids'>>(sql`
+        SELECT id, display_name, user_type, created_at, study_program, preferred_location_ids
+        FROM identity."user" WHERE id = ${userId} AND status = 'active'`);
+      if (!row) return null;
+      return {
+        id: row.id,
+        displayName: row.display_name,
+        userType: row.user_type,
+        memberSince: row.created_at,
+        studyProgram: row.study_program ?? null,
+        preferredLocationIds: row.preferred_location_ids ?? [],
+      };
+    },
+
     async getContact(userId: string): Promise<Contact | null> {
       const row = await db.one<UserRow>(sql`SELECT * FROM identity."user" WHERE id = ${userId}`);
       if (!row) return null;

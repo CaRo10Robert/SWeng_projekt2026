@@ -15,6 +15,7 @@ import type {
 import type { Tx } from '../../platform/db.js';
 import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
+import { decodeCursor, pageLimit, toPage } from '../../platform/http/pagination.js';
 import { empty, sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import {
@@ -340,6 +341,22 @@ export function createListingsService(deps: ModuleDeps) {
           AND NOT l.hidden AND NOT l.owner_suspended`);
       const byId = new Map(rows.map((r) => [r.id, toCard(r)]));
       return ids.map((id) => byId.get(id)).filter((c): c is ListingCard => !!c);
+    },
+
+    /**
+     * Aktive und reservierte Anzeigen eines Mitglieds für sein Profil (REQ-ACC-005), neueste zuerst, Keyset-paginiert
+     * (ADR-0009). Abgegebene, pausierte, ausgeblendete und gesperrte Anzeigen erscheinen nie.
+     */
+    async activeByOwner(ownerId: string, query: { cursor?: string; limit?: number }) {
+      const limit = pageLimit(query.limit);
+      const after = decodeCursor(query.cursor, 2);
+      if (after === null) throw unprocessable('invalid_cursor', 'Ungültiger Cursor.');
+      const rows = await db.query<ListingRow>(sql`
+        SELECT l.*, ${THUMB} FROM listings.listing l
+        WHERE l.owner_id = ${ownerId} AND l.status IN ('active', 'reserved') AND NOT l.hidden AND NOT l.owner_suspended
+          ${after ? sql`AND (date_trunc('milliseconds', l.created_at), l.id) < (${after[0]}::timestamptz, ${after[1]}::uuid)` : empty}
+        ORDER BY date_trunc('milliseconds', l.created_at) DESC, l.id DESC LIMIT ${limit + 1}`);
+      return toPage(rows, limit, toCard, (r) => [new Date(r.created_at).toISOString(), r.id]);
     },
 
     /** Für Chat und Moderation: Anzeige unabhängig von der Sichtbarkeit. */

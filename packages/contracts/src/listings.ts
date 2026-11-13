@@ -1,5 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { Timestamp, Uuid } from './common.js';
+import { Page, Timestamp, Uuid } from './common.js';
 import { PublicUser } from './identity.js';
 
 export const ListingKind = Type.Union([Type.Literal('offer'), Type.Literal('wanted')]);
@@ -68,6 +68,10 @@ export const ListingCard = Type.Object({
   expiresAt: Type.Union([Timestamp, Type.Null()]),
 });
 export type ListingCard = Static<typeof ListingCard>;
+
+/** Seite von Anzeigenkarten, z. B. die aktiven Anzeigen im Profil eines Mitglieds (REQ-ACC-005, ADR-0009). */
+export const ListingCardPage = Page(ListingCard);
+export type ListingCardPage = Static<typeof ListingCardPage>;
 
 export const ListingDetail = Type.Composite([
   ListingCard,

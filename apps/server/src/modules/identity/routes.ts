@@ -7,8 +7,11 @@ import {
   AdminUser,
   EmailBody,
   IdParams,
+  ListingCardPage,
   LoginBody,
   Me,
+  MemberProfile,
+  PageQuery,
   PrivacyAckBody,
   RegisterBody,
   ResetConfirmBody,
@@ -17,12 +20,14 @@ import {
   UpdateMeBody,
 } from '@campusmarkt/contracts';
 import type { Config } from '../../config.js';
+import { AppError } from '../../platform/errors.js';
 import { requireAuth, requireRole, SESSION_COOKIE } from '../../platform/http/auth.js';
+import type { Modules } from '../shared.js';
 import type { IdentityService } from './service.js';
 
 const NEUTRAL = 'Falls die Angaben stimmen, haben wir dir eine E-Mail geschickt. Bitte prüfe dein Postfach.';
 
-export function identityRoutes(service: IdentityService, config: Config): FastifyPluginAsyncTypebox {
+export function identityRoutes(service: IdentityService, config: Config, modules: Modules): FastifyPluginAsyncTypebox {
   const setSession = (reply: FastifyReply, token: string) =>
     reply.setCookie(SESSION_COOKIE, token, {
       httpOnly: true,
@@ -117,6 +122,39 @@ export function identityRoutes(service: IdentityService, config: Config): Fastif
         const actor = requireRole(req, 'admin');
         await service.setRole(actor, req.params.id, req.body.role);
         return reply.status(204).send();
+      },
+    );
+
+    // ------------------------------------------------------------ Profil anderer Mitglieder (REQ-ACC-005)
+    /**
+     * Gemeinsame Sichtbarkeitsregel für Profil und Profil-Anzeigen. Unbekannte, gesperrte, gelöschte, blockierte
+     * (beide Richtungen) und vorläufig ausgeblendete Profile liefern dieselbe 404, damit niemand auf Sperren oder
+     * Blockierungen schließen kann. Das eigene Profil ist immer sichtbar.
+     */
+    const visibleProfile = async (viewerId: string, targetId: string) => {
+      const profile = await service.publicProfile(targetId);
+      const isSelf = viewerId === targetId;
+      if (
+        !profile ||
+        (!isSelf && ((await modules.trust.isBlockedEither(viewerId, targetId)) || (await modules.trust.isProfileHidden(targetId))))
+      ) {
+        throw new AppError(404, 'profile_not_found', 'Profil nicht verfügbar.');
+      }
+      return { ...profile, isSelf };
+    };
+
+    app.get(
+      '/users/:id/profile',
+      { schema: { tags, params: IdParams, response: { 200: MemberProfile } } },
+      async (req) => visibleProfile(requireAuth(req).userId, req.params.id),
+    );
+
+    app.get(
+      '/users/:id/listings',
+      { schema: { tags, params: IdParams, querystring: PageQuery, response: { 200: ListingCardPage } } },
+      async (req) => {
+        await visibleProfile(requireAuth(req).userId, req.params.id);
+        return modules.listings.activeByOwner(req.params.id, req.query);
       },
     );
   };
