@@ -3,7 +3,7 @@ id: REQ-NOTI-007
 title: Mailserver per Konfiguration austauschbar
 type: architecture
 class: constraint
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: low
 release: R1
@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-05
 source: ADR-0005, ADR-0010, Twelve-Factor
 use_cases: [UC-23]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-13
 verification: [AT-NOTI-007]
 ---
 
@@ -37,7 +37,7 @@ Ein späterer Echtbetrieb tauscht nur die Konfiguration, nicht den Code (BG-5).
 | Zugangsdaten | stehen nicht im Image und nicht im Repository |
 
 ## Nachweis
-- `AT-NOTI-007`: Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu).
+- `AT-NOTI-007`: Konfigurationstest – Konfiguration allein aus Umgebungsvariablen laden und über einen alternativen SMTP-Server versenden: Absender, Empfänger und Zugangsdaten kommen dort an; ohne Angaben zeigt die Konfiguration auf den lokalen Mail-Catcher (`smtp-mail.test.ts`). Dass Zugangsdaten nicht in Image und Repository stehen, prüfen `.dockerignore` (`.env`, `.env.*`) und der Secret-Scan (gitleaks) in CI.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -45,3 +45,4 @@ Ein späterer Echtbetrieb tauscht nur die Konfiguration, nicht den Code (BG-5).
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Entscheidungstabelle |
 | 1.2 | 2026-10-23 | Review v0.2: Must-Begründung (moscow_reason) |
+| 1.3 | 2026-11-13 | Nachweis AT-NOTI-007 umgesetzt; Status → verified |

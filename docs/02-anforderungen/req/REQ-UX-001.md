@@ -3,7 +3,7 @@ id: REQ-UX-001
 title: Mobile Nutzung und Installierbarkeit
 type: quality
 class: quality
-status: implemented
+status: verified
 owner: team-produkt
 risk: medium
 reviewers: [qa-lead]
@@ -13,9 +13,9 @@ moscow_reason: [1]
 kano: basis
 epic: EPIC-00
 source: BG-2
-version: 2.3
+version: 2.4
 created: 2026-10-20
-last_updated: 2026-11-12
+last_updated: 2026-11-13
 verification: [AT-UX-001, AT-UX-001-2]
 ---
 
@@ -47,7 +47,7 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 
 ## Nachweis
 - `AT-UX-001`: E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen (Grundlage: bisheriger Browser-Durchlauf, als Test im Repo neu zu schreiben).
-- `AT-UX-001-2`: E2E-Test – Manifest und Service Worker sind vorhanden und registriert.
+- `AT-UX-001-2`: E2E-Test (`mobile-privacy.spec.ts`) – Manifest verlinkt (Name, Start-URL, `standalone`, Icons 192 und 512 px abrufbar), Service Worker registriert und aktiv mit Scope `/`, App-Shell lädt offline.
 
 
 ## Änderungshistorie
@@ -58,3 +58,4 @@ Studierende nutzen den Marktplatz überwiegend unterwegs auf dem Campus (BG-2).
 | 2.1 | 2026-10-23 | Review v0.2: R-22 (Technik in Messverfahren), R-15, R-16 |
 | 2.2 | 2026-10-26 | Guideline-Review: GL-05 Fehler- und Missbrauchsfälle ergänzt |
 | 2.3 | 2026-11-12 | AT-UX-001 prüft zusätzlich Gastseiten und die Seite „Kein Zugriff“: Der Seitenkopf für Gäste lief bei 360 px über (432 px); behoben mit REQ-UX-010 (nur Logo und „Anmelden“ unter 640 px) |
+| 2.4 | 2026-11-13 | Nachweis AT-UX-001-2 umgesetzt (inklusive Offline-Fall der App-Shell); Status → verified |

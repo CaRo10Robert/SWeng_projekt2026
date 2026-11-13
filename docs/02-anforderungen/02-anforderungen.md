@@ -55,9 +55,9 @@ Antwort auf Aufgabe II a) der Fallstudie. „Im Scope“ heißt: im Release R1 p
 | P2 Anbieten | Angebot/Gesuch direkt veröffentlichen inkl. Bilder (JPEG, PNG, WebP), automatische Inhaltsprüfung, bearbeiten, pausieren, reaktivieren, verlängern, löschen, Ablauf | Entwürfe und Vorschau vor dem Veröffentlichen (Won't R1), HEIC-Fotos (REQ-LST-012, R2), Malware-Scan (Won't, Q-16), teilbarer Vorschau-Link (REQ-LST-009, C) | REQ-LST-001…008, 010, 011, REQ-SEC-007, REQ-SEC-011 |
 | P3 Finden | Freitextsuche, Filter, Sortierung, Merkliste | Suchaufträge mit E-Mail-Digest (C) | REQ-SRCH-* |
 | P4 Kontakt und Absprache | Anbieter kontaktieren, Nachrichten in Echtzeit, Lesestatus, **Kontaktdaten nach beidseitiger Zustimmung freigeben**, für eine Person reservieren, an sie abgeben | Bilder im Chat (C), strukturierter Preisvorschlag (REQ-CHAT-009, C), Web-Push (C) | REQ-CHAT-001…007, 010, 011, REQ-NOTI-001…003, 005, 007 |
-| P5 Übergabe und Abschluss | Abschluss im System markieren (Deal-Kern mit Ereignissen für die spätere Bezahlung) | Die Übergabe selbst (offline auf dem Campus), Bezahlung (EPIC-09), Versand, Bewertungen (C) | REQ-CHAT-011, REQ-LST-007, REQ-ARCH-001/002 |
-| P6 Vertrauen und Moderation | Melden mit Eingangsbestätigung in der Oberfläche, automatisch ausblenden, Moderations-Queue, Entscheidung mit Begründung, Blockieren, dauerhaft sperren | Befristete Sperren (Q-15), Bewertungen (C). Widerspruch, Begründung nach DSA Art. 17 und Kennzeichnung von Straftatverdacht sind seit Q-22 im Scope (P10) | REQ-MOD-001…005, 007 |
-| P7 Konto und Datenschutz | Profil pflegen (Anzeigename, Studiengang, Übergabeorte), Daten exportieren, Konto mit Karenz löschen, Benachrichtigungen abbestellen, Fristen und Löschungen | Profilbild (REQ-ACC-004, R2, Q-14) | REQ-ACC-001…003, REQ-PRIV-* |
+| P5 Übergabe und Abschluss | Abschluss im System markieren (Deal-Kern mit Ereignissen für die spätere Bezahlung) | Die Übergabe selbst (offline auf dem Campus), Bezahlung (EPIC-09), Versand, Bewertungen als Käufer und Verkäufer (REQ-MOD-006, R2, Q-30) | REQ-CHAT-011, REQ-LST-007, REQ-ARCH-001/002 |
+| P6 Vertrauen und Moderation | Melden mit Eingangsbestätigung in der Oberfläche, automatisch ausblenden, Moderations-Queue, Entscheidung mit Begründung, Blockieren, dauerhaft sperren | Befristete Sperren (Q-15), Bewertungen (REQ-MOD-006, R2). Widerspruch, Begründung nach DSA Art. 17 und Kennzeichnung von Straftatverdacht sind seit Q-22 im Scope (P10) | REQ-MOD-001…005, 007 |
+| P7 Konto und Datenschutz | Profil pflegen (Anzeigename, Studiengang, Übergabeorte), Daten exportieren, Konto mit Karenz löschen, Benachrichtigungen abbestellen, Fristen und Löschungen | Profilbild (REQ-ACC-004, R2, Q-14), Profil anderer Mitglieder ansehen (REQ-ACC-005, R2, Q-30) | REQ-ACC-001…003, REQ-PRIV-* |
 | P8 Administration | Rollen vergeben, Audit-Log, Job-Übersicht, Demo-Werkzeug | Whitelist- und Kategorienverwaltung per Oberfläche (C) | REQ-MOD-007/008, REQ-DEMO-* |
 | P9 Betrieb | Start per Docker Compose, Migrationen, Health, Logs, Metriken, Wartungsmodus, Statusseite, Datensicherung mit Restore-Test, optionale Profile für Monitoring und TLS (Q-27) | Öffentliches Hosting (EPIC-12), weitere Hochschulen (EPIC-10), native Apps (EPIC-11), gewerbliche Anbieter, Wohnungsbörse, Werbung | REQ-OPS-*, REQ-AVAIL-003, REQ-ARCH-005/006 |
 | P10 Recht und Auftritt (EPIC-13, Übung, Q-23) | Impressum, Datenschutzerklärung, Nutzungsbedingungen und Community-Regeln, Erklärung zur Barrierefreiheit, Kontaktstelle, Begründung und Widerspruch nach DSA, Kennzeichnung Straftatverdacht, DAC7-Auswertung, Startseite, Hilfe, Fehlerseiten, englische Oberfläche, dunkles Farbschema, Website-Hygiene (Icons, Manifest, Seitentitel); Prozessdokumente (VVT, TOMs, AVV, Datenpannen, DSFA-Schwellwertanalyse, Betriebshandbuch) mit Platzhaltern | Echte Betreiberangaben, Meldung an BZSt und Behörden, Abschluss von AV-Verträgen, Durchführung des Penetrationstests (EPIC-12) | REQ-LEGAL-*, REQ-UX-003…010, REQ-PRIV-007/008, REQ-SEC-012/013 |
@@ -154,13 +154,13 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 137 Anforderungen · R1-Must verifiziert: 71 von 85 (84 %)
+**Stand:** 140 Anforderungen · R1-Must verifiziert: 82 von 85 (96 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
 | approved | Konkretisiert (bereit) | 18 |
-| implemented | Umsetzung | 13 |
-| verified | Test | 106 |
+| implemented | Umsetzung | 4 |
+| verified | Test | 118 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
@@ -170,16 +170,17 @@ flowchart LR
 | [REQ-ACC-002](req/REQ-ACC-002.md) | Konto löschen mit Karenzzeit | functional | M | basis | high | verified | AT-ACC-002, AT-ACC-002-2 |
 | [REQ-ACC-003](req/REQ-ACC-003.md) | Daten exportieren | functional | S | leistung | medium | verified | AT-ACC-003 |
 | [REQ-ACC-004](req/REQ-ACC-004.md) | Profilbild | functional | S | leistung | medium | approved | AT-ACC-004 |
+| [REQ-ACC-005](req/REQ-ACC-005.md) | Profil anderer Mitglieder ansehen | functional | S | leistung | medium | verified | AT-ACC-005, AT-ACC-005-2, AT-ACC-005-3 |
 | [REQ-ARCH-001](req/REQ-ARCH-001.md) | Bezahlung als späteres Modul hinter einem Port | constraint | M | n/a | high | verified | CTRL-DEPCRUISE, MAN-ARCH-001 |
 | [REQ-ARCH-002](req/REQ-ARCH-002.md) | Keine Verwahrung von Kundengeldern | constraint | M | n/a | high | approved | MAN-ARCH-002 |
-| [REQ-ARCH-003](req/REQ-ARCH-003.md) | Whitelist als Daten statt Code | constraint | M | n/a | medium | implemented | AT-ARCH-003 |
+| [REQ-ARCH-003](req/REQ-ARCH-003.md) | Whitelist als Daten statt Code | constraint | M | n/a | medium | verified | AT-ARCH-003 |
 | [REQ-ARCH-004](req/REQ-ARCH-004.md) | Mandantenfähigkeit vorbereitet | constraint | S | n/a | low | verified | MAN-ARCH-004 |
 | [REQ-ARCH-005](req/REQ-ARCH-005.md) | Auslieferung als lokales Docker-Compose-Setup | constraint | M | n/a | high | verified | AT-ARCH-005 |
 | [REQ-ARCH-006](req/REQ-ARCH-006.md) | Vereinfachte Infrastruktur hinter Ports | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
 | [REQ-AUTH-001](req/REQ-AUTH-001.md) | Registrierung nur mit Hochschul-Domain (BR-01) | domain | M | basis | high | verified | AT-AUTH-001, AT-AUTH-001-2 |
 | [REQ-AUTH-002](req/REQ-AUTH-002.md) | Hochschuladresse per Link bestätigen | functional | M | basis | high | verified | AT-AUTH-002, AT-AUTH-002-2, AT-AUTH-002-3, AT-AUTH-002-4 |
 | [REQ-AUTH-003](req/REQ-AUTH-003.md) | Nutzertyp aus der Domain ableiten | domain | S | n/a | low | verified | AT-AUTH-003, AT-AUTH-003-2 |
-| [REQ-AUTH-004](req/REQ-AUTH-004.md) | Keine Offenlegung bestehender Konten | constraint | M | basis | high | implemented | AT-AUTH-004, AT-AUTH-004-2 |
+| [REQ-AUTH-004](req/REQ-AUTH-004.md) | Keine Offenlegung bestehender Konten | constraint | M | basis | high | verified | AT-AUTH-004, AT-AUTH-004-2 |
 | [REQ-AUTH-005](req/REQ-AUTH-005.md) | Anmelden und Abmelden | functional | M | basis | medium | verified | AT-AUTH-005, AT-AUTH-005-2 |
 | [REQ-AUTH-006](req/REQ-AUTH-006.md) | Passwort per E-Mail-Link zurücksetzen | functional | M | basis | medium | verified | AT-AUTH-006 |
 | [REQ-AUTH-007](req/REQ-AUTH-007.md) | Mitgliedschaft jährlich re-verifizieren | domain | S | n/a | medium | approved | AT-AUTH-007 |
@@ -196,7 +197,7 @@ flowchart LR
 | [REQ-CHAT-006](req/REQ-CHAT-006.md) | Sicherheitshinweis bei Links, IBAN und Telefonnummern | constraint | S | basis | low | verified | AT-CHAT-006 |
 | [REQ-CHAT-007](req/REQ-CHAT-007.md) | Begrenzung von Nachrichtenlänge und Sendehäufigkeit | constraint | M | n/a | medium | verified | AT-CHAT-007, AT-CHAT-007-2 |
 | [REQ-CHAT-008](req/REQ-CHAT-008.md) | Bilder im Chat senden | functional | C | begeisterung | medium | approved | AT-CHAT-008 |
-| [REQ-CHAT-009](req/REQ-CHAT-009.md) | Preisvorschlag im Chat | functional | C | begeisterung | low | approved | AT-CHAT-009-2 |
+| [REQ-CHAT-009](req/REQ-CHAT-009.md) | Kaufangebot und Gegenangebot („Nehm ich“, Preisangebot bei VB) | functional | S | leistung | medium | approved | AT-CHAT-009, AT-CHAT-009-2, AT-CHAT-009-3 |
 | [REQ-CHAT-010](req/REQ-CHAT-010.md) | Kontaktdaten erst nach beidseitiger Zustimmung freigeben | constraint | M | basis | high | verified | AT-CHAT-010, AT-CHAT-010-2, AT-CHAT-010-3, AT-CHAT-010-4 |
 | [REQ-CHAT-011](req/REQ-CHAT-011.md) | Reservierung und Abgabe für eine Person (Deal-Kern) | functional | M | basis | medium | verified | AT-CHAT-011, AT-CHAT-011-2 |
 | [REQ-DEMO-001](req/REQ-DEMO-001.md) | Demo-Daten auf Knopfdruck | constraint | M | n/a | low | verified | AT-DEMO-001 |
@@ -217,7 +218,7 @@ flowchart LR
 | [REQ-LEGAL-013](req/REQ-LEGAL-013.md) | Prozess für Datenschutzverletzungen | constraint | M | n/a | high | verified | CTRL-DOC-DATENPANNE, MAN-LEGAL-013 |
 | [REQ-LST-001](req/REQ-LST-001.md) | Angebot oder Gesuch schnell erstellen | functional | M | basis | medium | implemented | AT-LST-001, MAN-LST-001 |
 | [REQ-LST-002](req/REQ-LST-002.md) | Preistypen und Preisgrenzen | domain | M | basis | low | verified | AT-LST-002, AT-LST-002-2 |
-| [REQ-LST-003](req/REQ-LST-003.md) | Bilder hochladen, Metadaten entfernen, Vorschaubilder | functional | M | leistung | medium | implemented | AT-LST-003, AT-LST-003-2, AT-LST-003-3 |
+| [REQ-LST-003](req/REQ-LST-003.md) | Bilder hochladen, Metadaten entfernen, Vorschaubilder | functional | M | leistung | medium | verified | AT-LST-003, AT-LST-003-2, AT-LST-003-3 |
 | [REQ-LST-004](req/REQ-LST-004.md) | Übergabeort aus Campus-Standorten | domain | M | basis | low | verified | AT-LST-004 |
 | [REQ-LST-005](req/REQ-LST-005.md) | Studienbezogene Attribute für Bücher und Skripte | domain | S | begeisterung | low | verified | AT-LST-005 |
 | [REQ-LST-006](req/REQ-LST-006.md) | Eigene Anzeige bearbeiten, pausieren, reaktivieren, löschen | functional | M | basis | low | verified | AT-LST-006, AT-LST-006-2 |
@@ -234,17 +235,18 @@ flowchart LR
 | [REQ-MOD-003](req/REQ-MOD-003.md) | Entscheidungen begründen und unveränderlich protokollieren | constraint | M | basis | high | verified | AT-MOD-003, AT-MOD-003-2 |
 | [REQ-MOD-004](req/REQ-MOD-004.md) | Vorläufiges Ausblenden ab drei Meldungen | functional | S | basis | medium | approved | AT-MOD-004 |
 | [REQ-MOD-005](req/REQ-MOD-005.md) | Mitglieder blockieren | functional | S | leistung | medium | verified | AT-MOD-005 |
-| [REQ-MOD-006](req/REQ-MOD-006.md) | Übergabepartner bewerten | functional | C | begeisterung | medium | approved | AT-MOD-006 |
+| [REQ-MOD-006](req/REQ-MOD-006.md) | Bewertungen als Käufer und Verkäufer | functional | S | leistung | medium | approved | AT-MOD-006, AT-MOD-006-2, AT-MOD-006-3 |
 | [REQ-MOD-007](req/REQ-MOD-007.md) | Rollen vergeben und entziehen | functional | M | n/a | high | verified | AT-MOD-007, AT-MOD-007-2 |
 | [REQ-MOD-008](req/REQ-MOD-008.md) | Whitelist-Domains über eine Oberfläche verwalten | functional | C | n/a | medium | approved | AT-MOD-008 |
-| [REQ-NOTI-001](req/REQ-NOTI-001.md) | Transaktionale E-Mails | functional | M | basis | high | implemented | AT-NOTI-001, AT-NOTI-001-2 |
+| [REQ-NOTI-001](req/REQ-NOTI-001.md) | Transaktionale E-Mails | functional | M | basis | high | verified | AT-NOTI-001, AT-NOTI-001-2 |
 | [REQ-NOTI-002](req/REQ-NOTI-002.md) | Gebündelte Benachrichtigung über neue Nachrichten ohne Inhalt | functional | M | leistung | medium | verified | AT-NOTI-002 |
 | [REQ-NOTI-003](req/REQ-NOTI-003.md) | Benachrichtigungen pro Kategorie abbestellen | functional | S | leistung | low | verified | AT-NOTI-003 |
 | [REQ-NOTI-004](req/REQ-NOTI-004.md) | Authentifizierter E-Mail-Versand (SPF, DKIM, DMARC) | quality | W | basis | high | verified | MAN-NOTI-004 |
-| [REQ-NOTI-005](req/REQ-NOTI-005.md) | Zuverlässige E-Mail-Zustellung | quality | M | basis | medium | implemented | AT-NOTI-005, CTRL-DLQ |
+| [REQ-NOTI-005](req/REQ-NOTI-005.md) | Zuverlässige E-Mail-Zustellung | quality | M | basis | medium | verified | AT-NOTI-005, CTRL-DLQ |
 | [REQ-NOTI-006](req/REQ-NOTI-006.md) | Web-Push-Benachrichtigungen | functional | C | begeisterung | low | approved | AT-NOTI-006 |
-| [REQ-NOTI-007](req/REQ-NOTI-007.md) | Mailserver per Konfiguration austauschbar | constraint | M | n/a | low | implemented | AT-NOTI-007 |
-| [REQ-OPS-001](req/REQ-OPS-001.md) | Gesundheitsprüfung und geordnetes Herunterfahren | quality | M | n/a | medium | implemented | AT-OPS-001, AT-OPS-001-2, AT-OPS-001-3 |
+| [REQ-NOTI-007](req/REQ-NOTI-007.md) | Mailserver per Konfiguration austauschbar | constraint | M | n/a | low | verified | AT-NOTI-007 |
+| [REQ-NOTI-008](req/REQ-NOTI-008.md) | Benachrichtigungen in der App mit gelesen und ungelesen | functional | S | leistung | medium | approved | AT-NOTI-008, AT-NOTI-008-2 |
+| [REQ-OPS-001](req/REQ-OPS-001.md) | Gesundheitsprüfung und geordnetes Herunterfahren | quality | M | n/a | medium | verified | AT-OPS-001, AT-OPS-001-2, AT-OPS-001-3 |
 | [REQ-OPS-002](req/REQ-OPS-002.md) | Beobachtbarkeit ohne personenbezogene Daten | quality | M | n/a | medium | verified | AT-OPS-002, MAN-OPS-002 |
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | verified | MAN-OPS-003 |
 | [REQ-OPS-004](req/REQ-OPS-004.md) | Reproduzierbarer, versionierter Image-Build | quality | M | n/a | medium | verified | CTRL-CI-IMAGE |
@@ -264,7 +266,7 @@ flowchart LR
 | [REQ-PERF-005](req/REQ-PERF-005.md) | Ladeverhalten der Oberfläche | quality | S | leistung | low | approved | AT-PERF-005, CTRL-BUNDLE |
 | [REQ-PORT-001](req/REQ-PORT-001.md) | Entwicklungsumgebung mit einem Befehl | quality | S | n/a | low | verified | MAN-PORT-001 |
 | [REQ-PORT-002](req/REQ-PORT-002.md) | Lauffähig auf x86- und ARM-Rechnern | quality | M | n/a | medium | verified | CTRL-CI-MULTIARCH |
-| [REQ-PRIV-001](req/REQ-PRIV-001.md) | Versionierte Einwilligungen | constraint | M | n/a | medium | approved | AT-PRIV-001, AT-PRIV-001-2 |
+| [REQ-PRIV-001](req/REQ-PRIV-001.md) | Versionierte Einwilligungen | constraint | M | n/a | medium | verified | AT-PRIV-001, AT-PRIV-001-2 |
 | [REQ-PRIV-002](req/REQ-PRIV-002.md) | Datenminimierung und Schutz der Kontaktdaten | constraint | M | basis | high | verified | AT-PRIV-002, AT-PRIV-002-2 |
 | [REQ-PRIV-003](req/REQ-PRIV-003.md) | Löschkonzept mit Fristen je Datenkategorie | constraint | M | n/a | high | verified | AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3 |
 | [REQ-PRIV-004](req/REQ-PRIV-004.md) | Moderation sieht nur gemeldeten Chat-Kontext | constraint | M | basis | high | verified | AT-PRIV-004 |
@@ -272,13 +274,13 @@ flowchart LR
 | [REQ-PRIV-006](req/REQ-PRIV-006.md) | Kein Tracking, keine Drittanbieter-Ressourcen | constraint | M | basis | medium | verified | AT-PRIV-006, AT-PRIV-006-2 |
 | [REQ-PRIV-007](req/REQ-PRIV-007.md) | Prüfung der Datenschutz-Folgenabschätzung | constraint | S | n/a | medium | verified | CTRL-DOC-DSFA, MAN-PRIV-007 |
 | [REQ-PRIV-008](req/REQ-PRIV-008.md) | Keine Indexierung durch Suchmaschinen | constraint | S | basis | low | verified | AT-PRIV-008 |
-| [REQ-SEC-001](req/REQ-SEC-001.md) | OWASP ASVS Level 2 | quality | M | basis | high | implemented | MAN-SEC-001 |
+| [REQ-SEC-001](req/REQ-SEC-001.md) | OWASP ASVS Level 2 | quality | M | basis | high | verified | MAN-SEC-001 |
 | [REQ-SEC-002](req/REQ-SEC-002.md) | Passwörter mit Argon2id speichern | constraint | M | n/a | high | verified | AT-SEC-002 |
 | [REQ-SEC-003](req/REQ-SEC-003.md) | Passwortrichtlinie | constraint | M | basis | medium | verified | AT-SEC-003 |
 | [REQ-SEC-004](req/REQ-SEC-004.md) | Sichere Sitzungen und Schutz vor fremdgesteuerten Anfragen | constraint | M | basis | high | verified | AT-SEC-004, AT-SEC-004-2, AT-SEC-004-3 |
 | [REQ-SEC-005](req/REQ-SEC-005.md) | Begrenzung von Anfragen (Rate-Limits) | constraint | M | n/a | high | verified | AT-SEC-005, AT-SEC-005-2, AT-SEC-005-3 |
 | [REQ-SEC-006](req/REQ-SEC-006.md) | Autorisierung pro Ressource, standardmäßig verweigern | constraint | M | basis | high | verified | AT-SEC-006, AT-SEC-006-2 |
-| [REQ-SEC-007](req/REQ-SEC-007.md) | Sicherer Umgang mit hochgeladenen Bildern | constraint | M | basis | medium | approved | AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4 |
+| [REQ-SEC-007](req/REQ-SEC-007.md) | Sicherer Umgang mit hochgeladenen Bildern | constraint | M | basis | medium | verified | AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4 |
 | [REQ-SEC-008](req/REQ-SEC-008.md) | Sicherheitsprüfungen in der CI-Pipeline | constraint | M | n/a | medium | verified | CTRL-CI-SCAN |
 | [REQ-SEC-009](req/REQ-SEC-009.md) | Threat Model für Registrierung, Chat und Upload | constraint | M | n/a | high | verified | MAN-SEC-009 |
 | [REQ-SEC-010](req/REQ-SEC-010.md) | Gehärtetes Anwendungs-Image | constraint | M | n/a | medium | verified | CTRL-IMAGE-INSPECT |
@@ -291,7 +293,7 @@ flowchart LR
 | [REQ-SRCH-004](req/REQ-SRCH-004.md) | Anzeigen merken | functional | S | leistung | low | verified | AT-SRCH-004 |
 | [REQ-SRCH-005](req/REQ-SRCH-005.md) | Suchaufträge mit täglicher E-Mail | functional | C | begeisterung | low | approved | AT-SRCH-005 |
 | [REQ-SRCH-006](req/REQ-SRCH-006.md) | Keine Anzeigen blockierter oder gesperrter Nutzer in der Suche | functional | M | basis | medium | verified | AT-SRCH-006 |
-| [REQ-UX-001](req/REQ-UX-001.md) | Mobile Nutzung und Installierbarkeit | quality | M | basis | medium | implemented | AT-UX-001, AT-UX-001-2 |
+| [REQ-UX-001](req/REQ-UX-001.md) | Mobile Nutzung und Installierbarkeit | quality | M | basis | medium | verified | AT-UX-001, AT-UX-001-2 |
 | [REQ-UX-002](req/REQ-UX-002.md) | Deutsche Oberfläche, übersetzbar vorbereitet | quality | S | basis | low | verified | MAN-UX-002 |
 | [REQ-UX-003](req/REQ-UX-003.md) | Fehlerseiten und korrekte HTTP-Statuscodes | functional | M | basis | medium | verified | AT-UX-003, AT-UX-003-2 |
 | [REQ-UX-004](req/REQ-UX-004.md) | Startseite für Gäste | functional | S | leistung | low | verified | AT-UX-004 |
@@ -301,5 +303,6 @@ flowchart LR
 | [REQ-UX-008](req/REQ-UX-008.md) | Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf | functional | S | leistung | medium | verified | AT-UX-008, AT-UX-008-2, AT-UX-008-3, AT-UX-008-4 |
 | [REQ-UX-009](req/REQ-UX-009.md) | Vollständige Fehlerseiten für alle Fehlerarten | functional | S | basis | medium | verified | AT-UX-009, AT-UX-009-2, AT-UX-009-3, AT-UX-009-4 |
 | [REQ-UX-010](req/REQ-UX-010.md) | Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole | quality | S | basis | low | verified | AT-UX-010, AT-UX-010-2 |
+| [REQ-UX-011](req/REQ-UX-011.md) | Erste Schritte für neue Mitglieder | functional | S | begeisterung | low | approved | AT-UX-011, AT-UX-011-2 |
 
 <!-- req-index:end -->

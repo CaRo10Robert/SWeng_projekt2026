@@ -3,9 +3,9 @@ id: CTRL-DLQ
 type: evidence
 status: done
 owner: qa-lead
-version: 1.0
+version: 1.1
 created: 2026-10-26
-last_updated: 2026-10-26
+last_updated: 2026-11-13
 ---
 
 # Nachweis CTRL-DLQ: Endgültig fehlgeschlagene Mail-Zustellungen in der Admin-Ansicht
@@ -41,4 +41,8 @@ last_updated: 2026-10-26
 
 ## Wiederholung
 
-Das Skript ist wiederholbar. Es verändert nur einen Reset-Token für Lea. Für CI ist es wegen der Laufzeit von etwa 5 Minuten nicht im Standardlauf, sondern ein manueller Kontrolllauf vor einem Release.
+Das Skript ist wiederholbar. Es verändert nur einen Reset-Token für Lea. Für CI ist es wegen der Laufzeit von etwa 5 Minuten nicht im Standardlauf, sondern läuft wöchentlich im Workflow `ops-weekly.yml`.
+
+## Korrektur 2026-11-13
+
+Der oben protokollierte Lauf nutzte den damals im Code festen Startabstand von 10 s. ADR-0005 verlangt 120 s, damit ein Mailserver-Ausfall von mindestens 30 min überbrückt wird (REQ-NOTI-005); mit 10 s waren es nur etwa 2,5 min. Seit 2026-11-13 ist der Startabstand über `MAIL_RETRY_DELAY_SECONDS` einstellbar (Standard 120 s). Der Kontrolllauf startet den Stack mit `MAIL_RETRY_DELAY_SECONDS=10` (Skala 1:12, wie im Messverfahren von REQ-NOTI-005 erlaubt); das Ergebnis oben bleibt damit gültig. Den Ausfall von 30 min ohne Verlust belegt der neue Test `AT-NOTI-005` (`tests/ops/mail-outage-test.mjs`).

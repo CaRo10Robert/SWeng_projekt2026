@@ -3,7 +3,7 @@ id: REQ-ARCH-003
 title: Whitelist als Daten statt Code
 type: architecture
 class: constraint
-status: implemented
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-10
 source: BG-5, EPIC-10
 depends_on: [REQ-AUTH-001]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-13
 verification: [AT-ARCH-003]
 ---
 
@@ -41,7 +41,7 @@ Vorbereitung weiterer Hochschulen (EPIC-10, QS-6).
 | Domain wird deaktiviert | neue Registrierungen abgelehnt, bestehende Konten bleiben aktiv |
 
 ## Nachweis
-- `AT-ARCH-003`: Integrationstest – Domain in der Datenbank ergänzen, Registrierung mit dieser Domain gelingt (neu zu schreiben).
+- `AT-ARCH-003`: Integrationstest – Domain zur Laufzeit in der Datenbank ergänzen, die Registrierung gelingt ohne Neustart; nach dem Deaktivieren werden neue Registrierungen abgelehnt, bestehende Konten melden sich weiter an (`identity.integration.test.ts`).
 
 
 ## Änderungshistorie
@@ -50,3 +50,4 @@ Vorbereitung weiterer Hochschulen (EPIC-10, QS-6).
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei mit Front Matter, Kano und Nachweis-IDs |
 | 1.2 | 2026-10-23 | Review v0.2: R-04, R-15, R-17 (class constraint) |
+| 1.3 | 2026-11-13 | Nachweis AT-ARCH-003 umgesetzt, Status → verified. Dabei behoben: Die Anmeldung lehnte Konten einer deaktivierten Domain ab, entgegen dem Fehlerfall „Domain wird deaktiviert“ (auch REQ-MOD-008); Unit-Test in `identity-provider.test.ts` |

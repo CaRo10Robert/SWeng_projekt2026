@@ -3,7 +3,7 @@ id: REQ-LST-003
 title: Bilder hochladen, Metadaten entfernen, Vorschaubilder
 type: data
 class: functional
-status: implemented
+status: verified
 owner: team-marktplatz
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-02
 source: BG-1, DSGVO Art. 25
 use_cases: [UC-10]
 depends_on: [REQ-SEC-007]
-version: 3.0
+version: 3.1
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-13
 verification: [AT-LST-003, AT-LST-003-2, AT-LST-003-3]
 ---
 
@@ -66,7 +66,7 @@ Szenario: Keine Bilddatei
 ## Nachweis
 - `AT-LST-003`: Smoke-Test – Upload, Verarbeitung, Auslieferung als Bild in allen Ansichten.
 - `AT-LST-003-2`: Unit- und Smoke-Test – Formaterkennung am Inhalt, Ablehnung mit 415.
-- `AT-LST-003-3`: Test mit GPS-EXIF-Foto, ausgelieferte Bilder ohne Metadaten (neu).
+- `AT-LST-003-3`: Integrationstest – JPEG mit GPS- und Kamera-EXIF hochladen; die ausgelieferten Größen `sm`, `md` und `lg` enthalten weder EXIF noch XMP oder IPTC (`listings.integration.test.ts`).
 
 HEIC-Fotos werden mit einer verständlichen Meldung abgelehnt (ADR-0011 #5); ihre Annahme regelt REQ-LST-012. Technische Umsetzung (Neukodierung) siehe ADR-0007.
 
@@ -76,3 +76,4 @@ HEIC-Fotos werden mit einer verständlichen Meldung abgelehnt (ADR-0011 #5); ihr
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 2.0 | 2026-10-23 | Lösungsneutral formuliert, Ansichtsgrößen festgelegt, Akzeptanzkriterien |
 | 3.0 | 2026-10-23 | Review v0.2: R-09/R-21 HEIC nach REQ-LST-012 abgespalten (Q-14), damit vollständig umgesetzt; R-17 Typ `data`; Must-Begründung |
+| 3.1 | 2026-11-13 | Nachweis AT-LST-003-3 umgesetzt; Status → verified |

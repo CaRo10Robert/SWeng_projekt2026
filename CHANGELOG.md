@@ -6,6 +6,21 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 ## [Unreleased]
 
+### Added
+- Nachweise für die offenen R1-Musts (Testbericht 2026-11-13): Whitelist als Daten (AT-ARCH-003), keine Offenlegung bestehender Konten über Inhalt und Antwortzeit (AT-AUTH-004-2), Bilder ohne EXIF-Metadaten (AT-LST-003-3, AT-SEC-007-4), alle Mailarten im Mail-Catcher (AT-NOTI-001-2), Mailserver per Konfiguration (AT-NOTI-007), Installierbarkeit (AT-UX-001-2). Verifizierungsquote der R1-Musts 96 % statt 84 %.
+- Ops-Tests: Mailserver-Ausfall von 30 min ohne Verlust und ohne Duplikate (`tests/ops/mail-outage-test.mjs`, AT-NOTI-005, wöchentlich) und Herunterfahren unter Last (`tests/ops/shutdown-test.mjs`, AT-OPS-001-2, bei jedem Push).
+- `scripts/trace.mjs` prüft die Readiness: ab `approved` Nachweis-ID und Abnahmekriterien Pflicht; Warnung, wenn eine umgesetzte Anforderung einen automatisierten Nachweis ohne Test hat.
+- Herunterfahren protokolliert die Dauer je Schritt (HTTP, Jobs, Datenbank).
+- Profil anderer Mitglieder (REQ-ACC-005, B-69): Seite `/users/:id`, erreichbar über den Anbieter in der Anzeige und das Gegenüber im Chat; zeigt Anzeigename, Nutzertyp, „Mitglied seit“, Studiengang, Übergabeorte und aktive Anzeigen (paginiert), nie Kontaktdaten; Melden und Blockieren. Unbekannte, gesperrte, gelöschte, blockierte und ausgeblendete Profile liefern einheitlich „Profil nicht verfügbar“ (404). API: `GET /users/:id/profile`, `GET /users/:id/listings`.
+- UML-Sichten der Architektur (B-72, ADR-0023): Paket-, Komponenten-, Klassen-, Zustands- und Verteilungsdiagramme in `docs/03-architektur/uml-sichten.md`, abgeglichen mit Code und dependency-cruiser.
+
+### Fixed
+- E-Mail-Zustellung überbrückt wieder einen Mailserver-Ausfall von 30 min (REQ-NOTI-005, ADR-0005): erster Wiederholungsabstand 120 s statt fest 10 s, einstellbar über `MAIL_RETRY_DELAY_SECONDS`.
+- Bestehende Konten einer deaktivierten Domain können sich wieder anmelden; die Deaktivierung sperrt nur neue Registrierungen (REQ-ARCH-003, REQ-MOD-008).
+
+### Changed
+- REQ-OPS-001 v2.4: Messverfahren für das Herunterfahren unter Last präzisiert (Last aus dem Docker-Netz; abgebrochen = von der App angenommene Anfrage ohne Antwort).
+
 ## [0.4.1] – 2026-11-12
 
 Zweites Release über die Pipeline. In der Vorführumgebung genügt ein Anstoß: Sicherung, Wechsel und Prüfung laufen automatisch.

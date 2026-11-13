@@ -3,7 +3,7 @@ id: REQ-NOTI-001
 title: Transaktionale E-Mails
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: high
 reviewers: [product-owner, security-lead]
@@ -15,9 +15,9 @@ epic: EPIC-05
 source: BG-1, DSA Art. 17, DSGVO Art. 17
 use_cases: [UC-23]
 depends_on: [REQ-AUTH-002, REQ-AUTH-004, REQ-AUTH-006, REQ-NOTI-002, REQ-LST-008, REQ-MOD-003, REQ-ACC-002, REQ-NOTI-005]
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-11-13
 verification: [AT-NOTI-001, AT-NOTI-001-2]
 ---
 
@@ -70,7 +70,7 @@ I: Versandzuverlässigkeit separat (REQ-NOTI-005) · N: Texte verhandelbar · V:
 
 ## Nachweis
 - `AT-NOTI-001`: Smoke-Test – Verifikationsmail erscheint in Mailpit.
-- `AT-NOTI-001-2`: Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu).
+- `AT-NOTI-001-2`: Integrationstest – je Mailart aus der Tabelle den Auslöser über die API ausführen und den Eingang im Mail-Catcher prüfen (Empfänger, Betreff, Link zur Plattform, Fußzeile mit Impressum, Datenschutz und Kontakt, keine Chatinhalte); dazu Versand in der Kontosprache (`notifications.integration.test.ts`).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -80,3 +80,4 @@ I: Versandzuverlässigkeit separat (REQ-NOTI-005) · N: Texte verhandelbar · V:
 | 2.0 | 2026-10-23 | Review v0.2: R-15/R-21 Re-Verifikationsmail nach REQ-AUTH-007 (R2) verschoben, damit vollständig umgesetzt; `depends_on` gefüllt; Must-Begründung |
 | 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Fußzeile mit Absender, Impressum und Datenschutz in jeder Mail (REQ-UX-006); Moderationsmitteilung mit Pflichtangaben nach REQ-LEGAL-006; Zustellbarkeit REQ-OPS-010 |
 | 2.2 | 2026-10-25 | Review v1.3 (RV-R-10): E-Mails in der Kontosprache statt nur Deutsch (REQ-UX-007), Fußzeile (REQ-UX-006) |
+| 2.3 | 2026-11-13 | Nachweis AT-NOTI-001-2 umgesetzt; Status → verified |

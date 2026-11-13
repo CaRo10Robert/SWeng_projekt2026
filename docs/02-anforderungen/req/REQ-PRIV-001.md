@@ -3,7 +3,7 @@ id: REQ-PRIV-001
 title: Versionierte Einwilligungen
 type: privacy
 class: constraint
-status: approved
+status: verified
 owner: team-produkt
 risk: medium
 release: R1
@@ -13,9 +13,9 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 7
 use_cases: [UC-01, UC-02]
-version: 2.2
+version: 2.3
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-11-13
 verification: [AT-PRIV-001, AT-PRIV-001-2]
 ---
 
@@ -47,7 +47,7 @@ Nachweis der Zustimmung zu den Nutzungsbedingungen und der Kenntnisnahme des Dat
 
 ## Nachweis
 - `AT-PRIV-001`: (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel.
-- `AT-PRIV-001-2`: nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt.
+- `AT-PRIV-001-2`: nach Wechsel der aktuellen Version verlangt die Nutzung durch ein bestehendes Mitglied die erneute Zustimmung – Integrationstest „veraltete Zustimmung“ (`identity.integration.test.ts`, mit dieser ID markiert); zusätzlich belegt durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog (REQ-LEGAL-003).
 - Umgesetzt: Punkte 1 bis 3. Eine neue Fassung der Datenschutzerklärung löst einen Hinweis zur Kenntnisnahme aus (keine Zustimmung, REQ-LEGAL-002).
 
 ## Änderungshistorie
@@ -58,3 +58,4 @@ Nachweis der Zustimmung zu den Nutzungsbedingungen und der Kenntnisnahme des Dat
 | 2.0 | 2026-10-23 | Review v0.2: R-14 Status `approved` statt `implemented`; optionale Einwilligungen „ab REQ-SRCH-005“; neue Version → Zustimmung bei nächster Anmeldung; R-04 Fehler- und Missbrauchsfälle |
 | 2.1 | 2026-10-24 | Abgleich Recht und Betrieb: Texte der Nutzungsbedingungen und der Datenschutzerklärung, Ablauf der erneuten Zustimmung und Fehlercode `terms_required` in REQ-LEGAL-003 bzw. REQ-LEGAL-002 |
 | 2.2 | 2026-10-25 | Review v1.3 (RV-R-08, RV-R-10): Zustimmung zu Nutzungsbedingungen ist keine DSGVO-Einwilligung; Punkt 3 umgesetzt (REQ-LEGAL-003); AT-PRIV-001-2 durch AT-LEGAL-003-2 belegt |
+| 2.3 | 2026-11-13 | AT-PRIV-001-2 am vorhandenen Integrationstest markiert (bisher als „entfällt“ geführt und deshalb nie als belegt gezählt); Status → verified |

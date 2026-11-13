@@ -3,7 +3,7 @@ id: REQ-SEC-007
 title: Sicherer Umgang mit hochgeladenen Bildern
 type: security
 class: constraint
-status: approved
+status: verified
 owner: team-plattform
 risk: medium
 release: R1
@@ -14,9 +14,9 @@ epic: EPIC-02
 source: OWASP ASVS 4.0.3 (EX-01)
 use_cases: [UC-10]
 depends_on: [REQ-LST-003]
-version: 3.1
+version: 3.2
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-13
 review_due: 2027-04-26
 verification: [AT-SEC-007, AT-SEC-007-2, AT-SEC-007-3, AT-SEC-007-4]
 ---
@@ -54,7 +54,7 @@ Uploads sind ein typischer Angriffsweg; Fotos verraten über GPS-Daten oft den W
 - `AT-SEC-007`: Smoke-Test – Upload ohne gültige Bildsignatur liefert 415.
 - `AT-SEC-007-2`: Smoke-Test – Bildabruf ohne Sitzung liefert 401.
 - `AT-SEC-007-3`: Unit-Test der Formaterkennung am Inhalt (Grundlage: `listings/domain.test.ts`, „Magic Bytes“).
-- `AT-SEC-007-4`: (neu) JPEG mit GPS-EXIF hochladen, ausgeliefertes Bild enthält keine EXIF-Daten.
+- `AT-SEC-007-4`: Integrationstest – JPEG mit GPS-EXIF hochladen, die ausgelieferten Bilder aller Größen enthalten keine EXIF-, XMP- oder IPTC-Daten (gemeinsamer Test mit AT-LST-003-3, `listings.integration.test.ts`).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -63,3 +63,4 @@ Uploads sind ein typischer Angriffsweg; Fotos verraten über GPS-Daten oft den W
 | 2.0 | 2026-10-23 | „Signierte URLs“ als Lösung entfernt (Fallstudie FS-M5); Ziel „nur angemeldete Mitglieder“ formuliert |
 | 3.0 | 2026-10-23 | Review v0.2: R-29 keine Gast-Ausnahme (Q-1); Malware-Prüfung Won't (Q-16); R-03 `class: constraint`; HEIC-Hinweis entfällt (HEIC jetzt REQ-LST-012, R2) |
 | 3.1 | 2026-10-26 | Guideline-Review: GL-02/GL-06 ASVS-Fassung 4.0.3 (EX-01), review_due |
+| 3.2 | 2026-11-13 | Nachweis AT-SEC-007-4 umgesetzt; Status → verified. Der Status stand seit Review v0.2 auf `approved`, obwohl die Umsetzung (Signaturprüfung, Neukodierung, Abruf nur mit Sitzung) längst vorlag und von AT-SEC-007 bis -3 geprüft wird |

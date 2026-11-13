@@ -3,9 +3,9 @@ id: UC-MODEL
 type: requirements
 status: in-review
 owner: team-produkt
-version: 1.3
+version: 1.4
 created: 2026-10-20
-last_updated: 2026-10-25
+last_updated: 2026-11-13
 ---
 
 # Use-Case-Modell
@@ -125,12 +125,13 @@ rectangle "CampusMarkt – Marktplatz" {
     usecase "UC-14\nAnzeige ansehen" as UC14
     usecase "UC-15\nAnzeige merken" as UC15
     usecase "UC-16\nSuchauftrag speichern" as UC16
+    usecase "UC-18\nProfil eines\nMitglieds ansehen" as UC18
   }
   package "Kommunikation" {
     usecase "UC-20\nAnbieter kontaktieren" as UC20
     usecase "UC-21\nNachrichten austauschen" as UC21
     usecase "UC-25\nKontaktdaten freigeben" as UC25
-    usecase "UC-22\nNutzer bewerten" as UC22
+    usecase "UC-22\nNutzer als Käufer bzw.\nVerkäufer bewerten" as UC22
     usecase "UC-23\nBenachrichtigungen\nerhalten" as UC23
     usecase "UC-24\nBenachrichtigungs-\neinstellungen ändern" as UC24
   }
@@ -144,6 +145,7 @@ M --> UC13
 M --> UC14
 M --> UC15
 M --> UC16
+M --> UC18
 M --> UC20
 M --> UC21
 M --> UC22
@@ -156,6 +158,8 @@ UC10 ..> UCB : <<include>>
 UC15 .> UC14 : <<extend>>\n[Interesse]
 UC20 .> UC14 : <<extend>>\n[Kontakt gewünscht]
 UC16 .> UC13 : <<extend>>\n[Suche speichern]
+UC18 .> UC14 : <<extend>>\n[Anbieter anklicken]
+UC18 .> UC21 : <<extend>>\n[Gegenüber anklicken]
 UC20 ..> UC21 : <<include>>
 UC21 ..> UC23 : <<include>>
 UC17 ..> UC23 : <<include>>
@@ -287,9 +291,10 @@ UCN --> Mail
 | UC-15 | Anzeige merken | Mitglied | Should | casual |
 | UC-16 | Suchauftrag speichern | Mitglied | Could | casual |
 | UC-17 | Anzeige ablaufen lassen | Zeitgeber | Should | casual |
+| UC-18 | Profil eines Mitglieds ansehen | Mitglied | Should (R2, Q-30) | casual |
 | UC-20 | Anbieter kontaktieren | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
 | UC-21 | Nachrichten austauschen | Mitglied | Must | [§4.4](#44-uc-20--uc-21-anbieter-kontaktieren-und-nachrichten-austauschen) |
-| UC-22 | Nutzer bewerten | Mitglied | Could | casual |
+| UC-22 | Nutzer als Käufer bzw. Verkäufer bewerten | Mitglied | Should (R2, Q-30) | casual |
 | UC-23 | Benachrichtigungen erhalten | Mitglied (sekundär: E-Mail-System) | Must | casual |
 | UC-24 | Benachrichtigungseinstellungen ändern | Mitglied | Should | casual |
 | UC-25 | Kontaktdaten freigeben | Mitglied | Must (Fallstudie FS-C1) | [§4.8](#48-uc-25-kontaktdaten-freigeben) |
@@ -644,11 +649,12 @@ sequenceDiagram
 | UC-06 | Export aller personenbezogenen Daten als JSON-Datei zum sofortigen Download (Profil, Einwilligungen, Anzeigen, eigene Nachrichten, Merkliste, Meldungen, Blockierungen, Kontaktfreigaben) (REQ-ACC-003) |
 | UC-11 | Bearbeiten (Änderungshistorie für die Moderation), pausieren, reaktivieren, verlängern, löschen |
 | UC-12 | Status `reserviert` (direkt oder im Chat für eine bestimmte Person, REQ-CHAT-011) und `abgegeben`. Abgegebene Anzeigen verschwinden sofort aus der Suche und werden nach 30 Tagen gelöscht; Reservierungen fallen nach 30 Tagen auf `aktiv` zurück (Zustandsmodell Ü-10, Ü-13, Ü-17) |
-| UC-14 | Detailansicht mit Bildern, Beschreibung, Preis, Zustand, Übergabeorten, Profil-Kurzinfo (Anzeigename, Studierende/Beschäftigte, Mitglied seit) sowie den Aktionen Merken, Nachricht, Melden, Blockieren (REQ-LST-001, REQ-SRCH-004, REQ-CHAT-001, REQ-MOD-001). Bewertungen und Teilen-Link folgen später (Could) |
+| UC-14 | Detailansicht mit Bildern, Beschreibung, Preis, Zustand, Übergabeorten, Profil-Kurzinfo (Anzeigename, Studierende/Beschäftigte, Mitglied seit) sowie den Aktionen Merken, Nachricht, Melden, Blockieren (REQ-LST-001, REQ-SRCH-004, REQ-CHAT-001, REQ-MOD-001). Der Anzeigename führt ab R2 zum Profil (UC-18). Teilen-Link folgt später (Could) |
 | UC-15 | Anzeige zur Merkliste hinzufügen oder entfernen. Optional Hinweis bei Preisänderung |
 | UC-16 | Suche mit Filtern speichern. Täglicher E-Mail-Digest mit neuen Treffern (max. 10 Suchaufträge pro Mitglied) |
 | UC-17 | 7 Tage vor Ablauf eine Erinnerungs-E-Mail mit Link zur Anzeige; dort genügt eine Aktion zum Verlängern. Nach 60 Tagen (pausiert: 90 Tage) Status `abgelaufen`. Nach 90 Tagen im Status `abgelaufen` wird die Anzeige gelöscht (REQ-LST-008) |
-| UC-22 | Nach Status `abgegeben` können beide Konversationsteilnehmer einander einmal bewerten (👍/👎 + max. 280 Zeichen) |
+| UC-18 | Mitglied klickt in einer Anzeige auf den Anbieter, im Kopf einer Konversation auf das Gegenüber oder in einer Bewertung auf den Autor und sieht dessen Profil: Anzeigename, Profilbild (ab REQ-ACC-004), Studierende/Beschäftigte, Mitglied seit, Studiengang und Übergabeorte (falls gepflegt), aktive Anzeigen und Bewertungen getrennt nach Rolle; Aktionen Melden und Blockieren. Nie Kontaktdaten. Blockierte, gesperrte, gelöschte und ausgeblendete Profile: 404 (REQ-ACC-005) |
+| UC-22 | Nach einem abgeschlossenen Deal bewerten beide Beteiligten einander einmal innerhalb von 14 Tagen: positiv, neutral oder negativ, Text bis 280 Zeichen (Pflicht bei negativ). Die Rolle folgt aus der Anzeige (Angebot: Anbieter = Verkäufer; Gesuch: Anbieter = Käufer). Sichtbar erst, wenn beide bewertet haben oder die Frist abgelaufen ist; Übersicht im Profil je Rolle (REQ-MOD-006, Q-30) |
 | UC-23 | Transaktionale E-Mails: Verifikation, „Konto existiert“, Passwort, neue Nachricht (ohne Inhalt), Ablauf-Erinnerung, Moderationsentscheidung, Löschbestätigung (REQ-NOTI-001); Suchauftrag und Re-Verifikation folgen mit UC-16 bzw. UC-07 |
 | UC-24 | Opt-out pro Kategorie (Nachrichten, Erinnerungen; Suchaufträge ab UC-16). Sicherheitsrelevante Mails sind nicht abwählbar |
 | UC-31 | Nach dem Blockieren können beide einander keine Nachrichten mehr senden und sehen die Anzeigen des anderen nicht mehr in der Suche (gegenseitig, REQ-MOD-005, REQ-SRCH-006) |

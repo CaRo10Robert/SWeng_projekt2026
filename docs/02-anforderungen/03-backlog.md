@@ -3,9 +3,9 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.5
+version: 1.8
 created: 2026-10-20
-last_updated: 2026-11-12
+last_updated: 2026-11-13
 ---
 
 # Product Backlog und Release-Planung
@@ -97,10 +97,17 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-66 | Dunkles Farbschema: Systemeinstellung als Voreinstellung, Wahl im Seitenkopf (System/Hell/Dunkel), kein Aufblitzen, Kontrast in beiden Schemata ([ADR-0021](../03-architektur/decisions/0021-farbschema-hell-dunkel.md)) | Feature | REQ-UX-008 | leistung | mittel | – | 5 | 5 | 2 | 1 | 8 | 1,6 | 7 |
 | B-67 | Fehlerseiten für alle Fehlerarten (403, 401, 429, offline, unbekannte Anzeige und Unterhaltung, Rückfallebene) mit einheitlichem Aufbau; Statuscodes für fehlende Dateien | Feature | REQ-UX-009, REQ-UX-003 | basis | mittel | B-44 | 3 | 8 | 2 | 3 | 13 | 4,3 | 7 |
 | B-68 | Website-Hygiene: Icon-Satz, Manifest, Metadaten, `noindex` im Dokument, Seitentitel je Seite, saubere Konsole, Kopfzeile ohne Überlauf bei 360 px | Feature | REQ-UX-010 | basis | niedrig | – | 2 | 8 | 2 | 2 | 12 | 6,0 | 7 |
+| B-69 | Profil anderer Mitglieder: erreichbar über Anbieter in der Anzeige, Gegenüber im Chat und Bewertungsautor; zeigt öffentliche Angaben, aktive Anzeigen (paginiert) und Platz für Bewertungen, nie Kontaktdaten; 404 für blockierte, gesperrte, gelöschte und ausgeblendete Profile; Melden und Blockieren im Profil ([UC-18](01-use-cases.md#5-casual-use-cases-kurzform), Q-30) | Feature | REQ-ACC-005, REQ-PRIV-002 | leistung | mittel | – | 5 | 5 | 2 | 3 | 10 | 2,0 | R2 |
+| B-70 | Bewertungen als Käufer und Verkäufer nach abgeschlossenem Deal: positiv/neutral/negativ mit Text, Frist 14 Tage, verdeckt bis beide bewertet haben, Übersicht je Rolle im Profil, Erinnerung per Mitteilung und E-Mail; Domain Event `DealCompleted` öffnet die Bewertung im Modul `trust` (Q-30) | Feature | REQ-MOD-006, REQ-CHAT-011 | leistung | mittel | B-69 | 5 | 5 | 2 | 2 | 9 | 1,8 | R2 |
+| B-71 | Bewertungen in Datenschutz und Moderation nachziehen: Export (Art. 15/20) mit abgegebenen und erhaltenen Bewertungen, Löschung bzw. Anonymisierung bei Kontolöschung, Frist in REQ-PRIV-003, VVT und DSFA-Schwellwertanalyse prüfen (Reputationsdaten), Bewertungen melden und entfernen mit Begründung nach DSA | Feature | REQ-PRIV-003, REQ-ACC-003, REQ-MOD-001 | n/a | hoch | B-70 | 3 | 1 | 2 | 8 | 11 | 3,7 | R2 |
+| B-72 | Neue Architekturdatei `docs/03-architektur/uml-sichten.md`: dieselbe Architektur zusätzlich in UML – Paketdiagramm der Module mit erlaubten Abhängigkeiten, Komponentendiagramm mit bereitgestellten und benötigten Schnittstellen (Ports und Adapter, u. a. Zahlungs-Port ADR-0006), Klassendiagramm des Fachmodells, Zustandsdiagramme Anzeige und Deal, Verteilungsdiagramm des Docker-Beispiels; Sequenzdiagramme verweisen auf [Architektur §6](../03-architektur/architektur.md#6-laufzeitsicht). Mermaid (`classDiagram` mit Stereotypen, `stateDiagram-v2`), geprüft mit `check-diagrams.mjs`; Abgleich mit dependency-cruiser. ADR-0023 ergänzt ADR-0012 (C4 bleibt führend, UML ergänzt) | Enabler | – (Guideline Kap. 02, ADR-0012) | n/a | niedrig | – | 3 | 1 | 3 | 2 | 6 | 2,0 | 7 |
+| B-73 | Kaufangebot und Gegenangebot: „Nehm ich“ (Festpreis, Verschenken), Preisangebot bei VB, strukturierte Angebotsnachricht im Chat mit Akzeptieren, Ablehnen, Gegenangebot; Akzeptieren reserviert für den Käufer (Deal vereinbart) und beendet andere offene Angebote (Q-31) | Feature | REQ-CHAT-009, REQ-CHAT-011 | leistung | mittel | B-74 | 8 | 5 | 2 | 2 | 9 | 1,1 | R2 |
+| B-74 | Benachrichtigungen in der App: Glocke mit Zähler ungelesener Einträge im Seitenkopf, Seite „Benachrichtigungen“ (neueste zuerst, paginiert), gelesen/ungelesen einzeln und alle, Echtzeit-Aktualisierung, Löschung nach 90 Tagen; Arten aus Kaufangebot, Ablauf und Moderation (Q-31) | Feature | REQ-NOTI-008, REQ-PRIV-003 | leistung | mittel | – | 5 | 5 | 2 | 2 | 9 | 1,8 | R2 |
+| B-75 | Erste Schritte für neue Mitglieder: Bereich auf der Startseite mit Profil ergänzen, erster Anzeige und Sicherheitstipps, Zustand im Konto (kein Browser-Speicher), ausblendbar und über die Hilfe wieder aufrufbar (Q-31) | Feature | REQ-UX-011 | begeisterung | niedrig | – | 3 | 3 | 1 | 1 | 5 | 1,7 | R2 |
 
-**Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt).
+**Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt), **B-69 Profil anderer Mitglieder, B-70 Bewertungen als Käufer und Verkäufer, B-71 Bewertungen in Datenschutz und Moderation** (Q-30, zusammen 13 SP; Reihenfolge nach Abhängigkeit).
 
-**Platzhalter (Could, R2-Kandidaten):** REQ-CHAT-009 Preisvorschlag (5 SP), REQ-MOD-006 Bewertungen (5 SP), REQ-LST-009 Vorschau-Link (3 SP), REQ-MOD-008 Whitelist-Oberfläche (3 SP), REQ-CHAT-008 Bilder im Chat (5 SP), REQ-SRCH-005 Suchaufträge (8 SP), REQ-NOTI-006 Web-Push (8 SP). Werden erst konkretisiert, wenn sie in den Release-Umfang rücken.
+**Platzhalter (Could, R2-Kandidaten):** REQ-LST-009 Vorschau-Link (3 SP), REQ-MOD-008 Whitelist-Oberfläche (3 SP), REQ-CHAT-008 Bilder im Chat (5 SP), REQ-SRCH-005 Suchaufträge (8 SP), REQ-NOTI-006 Web-Push (8 SP). Werden erst konkretisiert, wenn sie in den Release-Umfang rücken.
 
 **Erledigt (Inkrement 0, Prototyp vom 2026-10-23):** alle Anforderungen mit Status `implemented` bzw. `verified` im [Katalog-Index](02-anforderungen.md#6-katalog-index).
 
@@ -136,9 +143,23 @@ gantt
 | 4 | Nach Feature Freeze: nur Messung, Nachweise, Fehlerbehebung | B-23, B-27, B-10, B-06, B-08 | 20 |
 | 5 | Der Auftritt erfüllt die Rechtspflichten (Rechtsseiten, Links, Fehlerseiten, DSA-Begründung und Widerspruch), und Daten lassen sich nachweislich wiederherstellen | B-49, B-52, B-44, B-56, B-43, B-46 | 20 |
 | 6 | Prozesse und Betrieb sind dokumentiert und eingeübt; DAC7, Straftatverdacht, TLS und Abhängigkeitspflege laufen | B-47, B-58, B-55, B-45, B-48, B-57, B-50 | 19 |
-| 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung; Auftritt (Nachtrag Q-29: Farbschema, Fehlerseiten, Hygiene) | B-54, B-53, B-51, B-68, B-67, B-66 | 24 |
+| 7 | Komfort und Beobachtbarkeit: englische Oberfläche, Wartungsmodus und Statusseite, Alarmierung; Auftritt (Nachtrag Q-29: Farbschema, Fehlerseiten, Hygiene) | B-54, B-53, B-51, B-68, B-67, B-66, B-72 | 27 |
 
 **Einordnung EPIC-13 (2026-10-24, Q-23):** Der Auftraggeber hat die Rechts- und Betreiberpflichten als Übung in R1 aufgenommen. Sie passen nicht in die Sprints 1–4, deren Umfang feststeht; der Feature Freeze nach Sprint 3 gilt weiter für den bisherigen R1-Umfang. EPIC-13 erweitert R1 um drei Sprints (53 SP bei ~20 SP Kapazität). **Reihenfolge:** alle Must-Einträge (B-43, B-44, B-46, B-49, B-50, B-56, B-57) in Sprint 5 und 6; Sprint 5 zuerst die Einträge mit hohem WSJF und die Rechtspflichten, die ein Besucher sofort sieht; Sprint 7 enthält nur Should/Could und ist der Puffer: Reicht die Kapazität nicht, rücken B-51, B-53 und B-54 nach R2. Die Einträge entstehen im Docker-Beispiel teilweise schon vorab als Übungsinkrement; der Sprint-Plan bleibt der Maßstab für Nachweise und Abnahme.
+
+**Neue Einträge (2026-11-13, Q-30):**
+
+- **B-69 bis B-71 (R2):** Der Auftraggeber wünscht Bewertungen als Käufer und Verkäufer wie bei Kleinanzeigen und eine Profilansicht anderer Mitglieder. REQ-MOD-006 ist per Change Request überarbeitet (v2.0: Rollen, Skala positiv/neutral/negativ, Could → Should, R1 → R2, Abhängigkeit auf den Deal-Kern korrigiert); REQ-ACC-005 und UC-18 sind neu. Beide stehen auf `in-review` und brauchen vor dem Sprint ein Requirements-Review (DoR, Risiko mittel). Nicht in R1, weil R1 hinter dem Feature Freeze liegt und Sprint 7 ausgelastet ist. B-71 hat Risiko hoch: Reviewer `security-lead` und die Klärung mit der DSB (Q-30) vor dem Sprint.
+- **B-72 (Sprint 7):** Zusätzliche UML-Sichten der Architektur als eigene Datei. Reine Dokumentation, deshalb vom Feature Freeze nicht betroffen. Sprint 7 steigt auf 27 SP; reicht die Kapazität nicht, rückt zuerst B-54 nach R2.
+- **Stand 2026-11-13:** REQ-ACC-005 und REQ-MOD-006 nach Requirements-Review durch den Product Owner freigegeben (`approved`); B-71 mit DSB und `security-lead` geklärt. **B-69 umgesetzt und verifiziert** (REQ-ACC-005: Profil-API mit einheitlicher 404, Profilseite, AT-ACC-005 bis -3). **B-72 umgesetzt:** [UML-Sichten](../03-architektur/uml-sichten.md) und ADR-0023; der Abgleich mit dem Code fand 17 Abweichungen in architektur.md (dort §8.2, A-1 bis A-17), darunter eine mögliche Lücke im Code (A-17: Entfernt die Moderation eine reservierte Anzeige, bleibt der Deal auf `agreed`). B-70 und B-71 folgen.
+- **B-73 bis B-75 (R2, Q-31):** Kaufangebot mit „Nehm ich“ und Gegenangebot (REQ-CHAT-009 v4.0, ersetzt den bisherigen Platzhalter „Preisvorschlag“), Benachrichtigungen in der App mit gelesen/ungelesen (REQ-NOTI-008) und Erste Schritte für neue Mitglieder (REQ-UX-011). Alle mit Nachweisen und Akzeptanzkriterien spezifiziert und vom Product Owner freigegeben. Reihenfolge: B-74 vor B-73 (das Kaufangebot braucht den Eingang), B-75 unabhängig.
+
+**Stand Nachweise R1-Must (2026-11-13):**
+
+- **Verifizierungsquote 82 von 85 R1-Musts (96 %, vorher 84 %).** Die im [Testbericht 2026-11-07](../05-umsetzung/testbericht-2026-11-07.md) offenen automatisierten Nachweise sind geschrieben; elf Anforderungen stehen jetzt auf `verified`. Details im [Testbericht 2026-11-13](../05-umsetzung/testbericht-2026-11-13.md).
+- **Drei Fehler beim Schreiben der Nachweise gefunden und behoben:** (1) Konten einer deaktivierten Domain konnten sich nicht mehr anmelden (REQ-ARCH-003, REQ-MOD-008). (2) **B-36 war nur in der Doku erledigt:** Der Code nutzte 10 s statt 120 s als ersten Wiederholungsabstand für E-Mails und überbrückte damit nur etwa 2,5 min statt 30 min (REQ-NOTI-005, ADR-0005); jetzt `MAIL_RETRY_DELAY_SECONDS`, Standard 120 s. (3) Messverfahren für das Herunterfahren unter Last präzisiert (REQ-OPS-001 v2.4, Entscheidung Product Owner).
+- **Weiterhin offen (R1-Must):** REQ-A11Y-001/002 (Screenreader) und REQ-LST-001 (Usability-Test) brauchen Tests mit echten Personen; Leitfäden liegen vor.
+- **Neue Regel (Definition of Ready):** Umgesetzt wird nur eine Anforderung mit Nachweis-ID und Abnahmekriterien. `scripts/trace.mjs` lehnt ab `approved` beides fehlend ab und warnt, wenn eine umgesetzte Anforderung einen automatisierten Nachweis ohne Test hat.
 
 **Stand Auftritt (2026-11-12, Q-29):**
 
@@ -214,3 +235,5 @@ gantt
 - Englische Oberfläche (REQ-UX-002)
 - Nachhaltigkeits-Statistik („X kg Re-Use“)
 - Übergabe-Bestätigung per QR-Code auf dem Campus
+- Abzeichen aus Bewertungen („freundlich“, „zuverlässig“) wie bei Kleinanzeigen (nach B-70)
+- Öffentliche Antwort des bewerteten Mitglieds auf eine Bewertung (nach B-70)

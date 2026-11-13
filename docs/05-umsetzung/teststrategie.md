@@ -3,9 +3,9 @@ id: TEST-STRATEGY
 type: test-strategy
 status: approved
 owner: qa-lead
-version: 1.0
+version: 1.1
 created: 2026-11-07
-last_updated: 2026-11-07
+last_updated: 2026-11-13
 ---
 
 # Teststrategie
@@ -17,7 +17,7 @@ Diese Strategie setzt [Guideline Kap. 09](https://github.com/CaRo10Robert/dev_gu
 ```mermaid
 flowchart TD
     E2E["E2E im Browser (Playwright)<br/>32 Tests: Tastatur, axe-core, Rechtsseiten, Sprache, Echtzeit"]
-    SMOKE["API-/Smoke- und Ops-Tests gegen das Docker-Beispiel<br/>104 Prüfungen + Restore, Löschfristen, DB-Ausfall, Proxy, Dead Letters"]
+    SMOKE["API-/Smoke- und Ops-Tests gegen das Docker-Beispiel<br/>104 Prüfungen + Restore, Löschfristen, DB-Ausfall, Herunterfahren unter Last, Proxy, Mailausfall, Dead Letters"]
     INT["Integrationstests (Vitest + Testcontainers)<br/>59 Tests gegen echte PostgreSQL"]
     COMP["Komponententests Web (Vitest + Testing Library, jsdom)<br/>20 Tests"]
     UNIT["Unit-Tests (Vitest)<br/>281 Tests: Geschäftsregeln als Entscheidungstabellen"]
@@ -31,7 +31,7 @@ flowchart TD
 | Integration | Nahtstellen mit echter Datenbank: SQL, Transaktionen, Jobs, Löschläufe, Autorisierungsmatrix, Rate-Limits; vorgestellte Zeit per SQL | Vitest, Testcontainers (`postgres:17-alpine`, dieselbe Version wie im Docker-Beispiel, dort zusätzlich per Digest gepinnt) | `apps/server/src/**/*.integration.test.ts`, Harness in `apps/server/test/integration/` | jeder Push (Job `checks`) |
 | Komponenten | React-Komponenten ohne Browser: Kontaktfreigabe, Fehlerseiten, Sprachwahl, Markdown, Hinweise, Basisbausteine | Vitest, React Testing Library, jsdom; `fetch` per `mockApi` ersetzt | `apps/web/src/**/*.test.tsx`, Hilfen in `apps/web/src/test/` | jeder Push (Job `checks`) |
 | API/Smoke | Abläufe über HTTP gegen das laufende Docker-Beispiel inklusive Mailpit | Node-Skript | `scripts/smoke-test.mjs` | jeder Push (Job `compose`) |
-| Ops | Betrieb: Restore mit Löschjournal, Löschfristen, Datenbankausfall, Proxy mit TLS/HSTS, Dead Letters | Node-Skripte | `tests/ops/` | Job `compose`; Dead Letters wöchentlich |
+| Ops | Betrieb: Restore mit Löschjournal, Löschfristen, Datenbankausfall, Herunterfahren unter Last (Last aus dem Docker-Netz), Proxy mit TLS/HSTS, Mailserver-Ausfall, Dead Letters | Node-Skripte | `tests/ops/` | Job `compose`; Mailausfall und Dead Letters wöchentlich mit verkürztem Wiederholungsplan (`MAIL_RETRY_DELAY_SECONDS=10`, Skala 1:12) |
 | E2E | kritische Nutzerwege im Browser, Tastaturbedienung, Barrierefreiheit (axe-core), Speicherungen und fremde Hosts | Playwright (Chromium), `retries: 0` | `e2e/tests/` | jeder Push (Job `compose`) |
 
 **Abgrenzung Unit ↔ Integration:** Integrationstests prüfen nicht erneut die Regeln, die Unit-Tests schon als Tabelle abdecken. Sie prüfen, dass Module, SQL und Jobs zusammenpassen, zum Beispiel dass der Rückfall reservierter Anzeigen den offenen Deal aufhebt und eine Mail auslöst.
@@ -115,3 +115,4 @@ Ein roter Test wird nicht „ausnahmsweise“ übergangen. **Flaky Tests** gelte
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-07 | Erstfassung: Testpyramide mit Integrations- und Komponententests, Coverage nach B-64, nichtfunktionale Tests, CI-Testgate, Abweichungen (Review v0.1 D-4) |
+| 1.1 | 2026-11-13 | Ops-Tests ergänzt: Herunterfahren unter Last (AT-OPS-001-2, Job `compose`) und Mailserver-Ausfall (AT-NOTI-005, wöchentlich) |

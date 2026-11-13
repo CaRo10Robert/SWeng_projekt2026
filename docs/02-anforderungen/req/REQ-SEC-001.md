@@ -3,7 +3,7 @@ id: REQ-SEC-001
 title: OWASP ASVS Level 2
 type: security
 class: quality
-status: implemented
+status: verified
 owner: team-plattform
 risk: high
 reviewers: [product-owner, security-lead, qa-lead]
@@ -14,9 +14,9 @@ moscow_reason: [2]
 kano: basis
 epic: EPIC-00
 source: OWASP ASVS 4.0.3 (Ausnahme EX-01 gegenüber 5.0)
-version: 1.4
+version: 1.5
 created: 2026-10-20
-last_updated: 2026-10-26
+last_updated: 2026-11-13
 verification: [MAN-SEC-001]
 ---
 
@@ -59,3 +59,4 @@ Die Plattform verarbeitet personenbezogene Daten und private Kommunikation; Leve
 | 1.2 | 2026-10-23 | Review v0.2: R-15 Umfang auf anwendbare Kapitel begrenzt, Ausnahmen mit Ablaufdatum; R-16 qa-lead, review_due; Status `approved` |
 | 1.3 | 2026-10-26 | ASVS 4.0.3 als geprüfte Fassung festgelegt; Checkliste MAN-SEC-001 mit Quote 84 %; offene Kontrollen als B-59…B-63; Status → implemented |
 | 1.4 | 2026-10-26 | Guideline-Review: GL-02 Fassung 4.0.3 über Ausnahme EX-01; Kriterium mit EX-03/EX-04 erfüllt; GL-05 Fehler- und Missbrauchsfälle |
+| 1.5 | 2026-11-13 | Status → verified: Laut Bewertung in v1.4 ist das Akzeptanzkriterium erfüllt (jede anwendbare Kontrolle erfüllt oder durch eine genehmigte, befristete Ausnahme abgedeckt; 0 offene Befunde „hoch“); der Status war nicht nachgezogen. EX-03 und EX-04 bleiben befristet bis 2027-04-30, B-59 bis B-63 (R2) schließen die offenen Kontrollen |

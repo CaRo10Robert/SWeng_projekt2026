@@ -1,11 +1,11 @@
----
+Integrationstest (`identity.integration.test.ts`) – Gäste 401 ohne Profildaten (die Web-App leitet zur Anmeldung); unbekannte, gesperrte, gelöschte, in beide Richtungen blockierte und ausgeblendete Profile liefern für Profil und Anzeigen dieselbe 404 `profile_not_found`. |
 id: EVIDENCE
 type: verification
 status: in-review
 owner: qa-lead
-version: 1.2
+version: 1.3
 created: 2026-10-23
-last_updated: 2026-11-12
+last_updated: 2026-11-13
 ---
 
 # Nachweiskatalog
@@ -30,10 +30,13 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-ACC-002-2` | automatisiert | REQ-ACC-002 | Integrationstest – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen. |
 | `AT-ACC-003` | automatisiert | REQ-ACC-003 | Smoke-Test „Datenexport (Art. 15/20)“ (bestehend). |
 | `AT-ACC-004` | automatisiert | REQ-ACC-004 | Smoke-Test – Profilbild hochladen, Metadaten entfernt, Bild für andere Mitglieder sichtbar, Entfernen setzt Platzhalter (neu). |
+| `AT-ACC-005` | automatisiert | REQ-ACC-005 | E2E-Test – Profil aus Anzeige und Konversation öffnen (Maus und Tastatur), Angaben und aktive Anzeigen sichtbar; axe-core ohne `serious`/`critical` (neu, R2). |
+| `AT-ACC-005-2` | automatisiert | REQ-ACC-005 | API-Test – Profilantwort enthält nur die freigegebenen Felder, keine E-Mail-Adresse (neu, R2). |
+| `AT-ACC-005-3` | automatisiert | REQ-ACC-005 | Integrationstest – 404 für Gäste, unbekannte, gesperrte, gelöschte, blockierte und ausgeblendete Profile, ohne unterscheidbare Antwort (neu, R2). |
 | `CTRL-DEPCRUISE` | Kontrolle | REQ-ARCH-001, REQ-ARCH-006, REQ-AUTH-009, REQ-MAINT-002 | Modulgrenzen ohne Verstöße. |
 | `MAN-ARCH-001` | manuell | REQ-ARCH-001 | Architektur-Review-Protokoll (QS-5) – [MAN-ARCH-001](../05-umsetzung/nachweise/MAN-ARCH-001.md). Die dependency-cruiser-Regel `no-payment-sdk-in-modules` verhindert Importe von Zahlungsdienstleister-SDKs in Fachmodulen; Deal-Ereignisse tragen `eventId`, `occurredAt` und `dealId`. |
 | `MAN-ARCH-002` | manuell | REQ-ARCH-002 | Review-Protokoll im Spike PAY-02 (rechtliche Prüfung). Gilt ab EPIC-09; im MVP wird kein Geld verarbeitet. |
-| `AT-ARCH-003` | automatisiert | REQ-ARCH-003 | Integrationstest – Domain in der Datenbank ergänzen, Registrierung mit dieser Domain gelingt (neu zu schreiben). |
+| `AT-ARCH-003` | automatisiert | REQ-ARCH-003 | Integrationstest (`identity.integration.test.ts`) – Domain zur Laufzeit in der Datenbank ergänzen, Registrierung gelingt ohne Neustart; nach dem Deaktivieren werden neue Registrierungen abgelehnt, bestehende Konten melden sich weiter an. |
 | `MAN-ARCH-004` | manuell | REQ-ARCH-004 | Schema-Review der Migrationen – [MAN-ARCH-004](../05-umsetzung/nachweise/MAN-ARCH-004.md). Die Index-Befunde S-1 bis S-6 und S-4 (Zustimmungsnachweise ohne Profilbezug) sind mit Migration `0005_nachweise_korrekturen.sql` behoben; S-9 (Institutionsprüfung bei `GET /listings/:id`) ist vor EPIC-10 einzuplanen. |
 | `AT-ARCH-005` | automatisiert | REQ-ARCH-005, REQ-AUTH-009 | `scripts/smoke-test.mjs` gegen ein frisch gestartetes Setup (bestehend). |
 | `AT-AUTH-001` | automatisiert | REQ-AUTH-001 | Unit-Test der Entscheidungstabelle, jede Zeile ein Testfall (Grundlage: `apps/server/src/modules/identity/domain.test.ts`, „BR-01 Domain-Prüfung“). |
@@ -45,7 +48,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-AUTH-003` | automatisiert | REQ-AUTH-003 | Unit-Test – BR-01-Tabelle prüft den abgeleiteten Typ je zugelassener Zeile. |
 | `AT-AUTH-003-2` | automatisiert | REQ-AUTH-003 | Smoke-Test – nach Bestätigung einer `@studmail.hwg-lu.de`-Adresse ist der Typ „Studierende“. |
 | `AT-AUTH-004` | automatisiert | REQ-AUTH-004 | Smoke-Test – zweite Registrierung derselben Adresse liefert identische Antwort. |
-| `AT-AUTH-004-2` | automatisiert | REQ-AUTH-004 | (neu) Antwortinhalt und Median der Antwortzeit (je 30 Anfragen) für Registrierung, Anmeldung und Passwort-Reset mit existierender und nicht existierender Adresse vergleichen. |
+| `AT-AUTH-004-2` | automatisiert | REQ-AUTH-004 | Integrationstest (`identity.integration.test.ts`) – Antwortinhalt (ohne `requestId`) und Median der Antwortzeit (je 30 Anfragen, abwechselnd, Rate-Limits vor jeder Anfrage zurückgesetzt) für Registrierung, Anmeldung und Passwort-Reset mit existierender und nicht existierender Adresse vergleichen; Unterschied der Mediane ≤ 50 ms. |
 | `AT-AUTH-005` | automatisiert | REQ-AUTH-005 | Smoke-Test – Anmeldung der Demo-Konten liefert das Profil und eine Sitzung. |
 | `AT-AUTH-005-2` | automatisiert | REQ-AUTH-005 | neu zu schreiben – nach Abmelden liefert `/me` mit der alten Sitzung 401. |
 | `AT-AUTH-006` | automatisiert | REQ-AUTH-006 | neu zu schreiben – Reset-Mail aus Mailpit, neues Passwort setzen, Anmeldung mit neuem Passwort, alte Sitzung liefert 401, zweite Nutzung liefert `token_used`. |
@@ -70,7 +73,9 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-CHAT-007` | automatisiert | REQ-CHAT-007 | API-Test – Längengrenze (neu). |
 | `AT-CHAT-007-2` | automatisiert | REQ-CHAT-007 | Integrationstest (`messaging.integration.test.ts`) – höchstens 20 neue Konversationen je Stunde und 60 Nachrichten je Minute. |
 | `AT-CHAT-008` | automatisiert | REQ-CHAT-008 | API-Test Bild senden und Zugriffsschutz (neu). Noch nicht umgesetzt (⬜). |
-| `AT-CHAT-009-2` | automatisiert | REQ-CHAT-009 | API-Test Preisvorschlag senden, annehmen, ablehnen (neu). Noch nicht umgesetzt (⬜). |
+| `AT-CHAT-009` | automatisiert | REQ-CHAT-009 | Integrationstest – Zustandsmodell des Kaufangebots: Nehm ich (Festpreis, verschenken), Preisangebot (VB), Akzeptieren reserviert mit Betrag und beendet andere offene Angebote, Gegenangebot in beide Richtungen, Ablehnen, Ersetzen, Rechte der Seiten, Anzeige nicht aktiv, Idempotenz (neu, R2). |
+| `AT-CHAT-009-2` | automatisiert | REQ-CHAT-009 | API-Test der Fehlerfälle des Kaufangebots: eigene Anzeige, Gesuch, Tausch, Betragsgrenzen, Festpreis abweichend, Blockierung, Fremde 404, falsche Seite 403, gleichzeitiges Akzeptieren ergibt genau einen Deal (neu, R2). |
+| `AT-CHAT-009-3` | automatisiert | REQ-CHAT-009 | E2E-Test – „Nehm ich“ und „Angebot senden“ in der Anzeige, Kaufangebot beim Anbieter in der Konversation, Akzeptieren und Gegenangebot per Tastatur; axe-core ohne `serious`/`critical` (neu, R2). |
 | `AT-CHAT-010` | automatisiert | REQ-CHAT-010 | Smoke-Test – einseitige Zustimmung gibt nichts preis, beidseitige Zustimmung zeigt die Adresse, Systemnachricht ohne Adresse, Widerruf blendet sie aus (neu). |
 | `AT-CHAT-010-2` | automatisiert | REQ-CHAT-010 | Smoke-Test – fremder Nutzer erhält „nicht gefunden“ (neu). |
 | `AT-CHAT-010-3` | automatisiert | REQ-CHAT-010 | Smoke-Test – Ablehnen, Sperrfrist für erneute Anfragen und Höchstzahl je Konversation (neu). |
@@ -113,7 +118,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-LST-002-2` | automatisiert | REQ-LST-002 | Smoke-Test – Preis über 10.000 € wird mit 422 abgelehnt. |
 | `AT-LST-003` | automatisiert | REQ-LST-003 | Smoke-Test – Upload, Verarbeitung, Auslieferung als Bild in allen Ansichten. |
 | `AT-LST-003-2` | automatisiert | REQ-LST-003 | Unit- und Smoke-Test – Formaterkennung am Inhalt, Ablehnung mit 415. |
-| `AT-LST-003-3` | automatisiert | REQ-LST-003 | Test mit GPS-EXIF-Foto, ausgelieferte Bilder ohne Metadaten (neu). |
+| `AT-LST-003-3` | automatisiert | REQ-LST-003 | Integrationstest (`listings.integration.test.ts`) – JPEG mit GPS- und Kamera-EXIF hochladen; die Größen `sm`, `md` und `lg` werden ohne EXIF, XMP und IPTC ausgeliefert. |
 | `AT-LST-004` | automatisiert | REQ-LST-004 | API-Test – Anlage ohne bzw. mit unbekanntem Übergabeort wird abgelehnt (neu). |
 | `AT-LST-005` | automatisiert | REQ-LST-005 | API-Test – Attribute werden gespeichert und ausgeliefert, ungültige ISBN → 422 (neu). |
 | `AT-LST-006` | automatisiert | REQ-LST-006 | Unit-Test des Zustandsautomaten (erlaubte und verbotene Übergänge). |
@@ -137,21 +142,25 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-MOD-003-2` | automatisiert | REQ-MOD-003 | Integrationstest – Änderung eines Eintrags in Entscheidungs- und Audit-Protokoll schlägt fehl. |
 | `AT-MOD-004` | automatisiert | REQ-MOD-004 | Smoke-Test – drei Mitglieder melden eine Anzeige, sie verschwindet aus der Suche; die Betroffene erhält eine Mitteilung und eine E-Mail „vorläufig ausgeblendet, Prüfung läuft“ mit Hinweis auf die automatische Auslösung, ohne Namen der Meldenden. |
 | `AT-MOD-005` | automatisiert | REQ-MOD-005 | Smoke-Test – nach Blockierung liefert das Senden 403 `contact_not_possible` und die Suche blendet die Anzeigen aus. |
-| `AT-MOD-006` | automatisiert | REQ-MOD-006 | Smoke-Test – Bewertung nach abgeschlossenem Deal. Umsetzungsstand ⬜ (Could für R1). |
+| `AT-MOD-006` | automatisiert | REQ-MOD-006 | Integrationstest – beide Seiten bewerten nach abgeschlossenem Deal; Rolle Käufer/Verkäufer richtig zugeordnet (Angebot und Gesuch); Übersicht im Profil zählt richtig. Umsetzungsstand ⬜ (Should, R2). |
+| `AT-MOD-006-2` | automatisiert | REQ-MOD-006 | Integrationstest – Bewertung verdeckt bis zur zweiten Bewertung bzw. bis Fristende (14 Tage); danach keine Abgabe mehr (neu, R2). |
+| `AT-MOD-006-3` | automatisiert | REQ-MOD-006 | API-Test – Abuse Cases: ohne Deal, fremder Deal, doppelt, negativ ohne Text, nur neueste Bewertung je Paar und Rolle zählt (neu, R2). |
 | `AT-MOD-007` | automatisiert | REQ-MOD-007 | Smoke-Test – Admin vergibt eine Rolle, das Audit-Log enthält `role.changed`. |
 | `AT-MOD-007-2` | automatisiert | REQ-MOD-007 | Smoke-Test – Mitglied erhält 403 auf die Nutzerverwaltung. |
 | `AT-MOD-008` | automatisiert | REQ-MOD-008 | Smoke-Test – Domain anlegen und deaktivieren. Umsetzungsstand ⬜ (Could für R1). |
 | `AT-NOTI-001` | automatisiert | REQ-NOTI-001 | Smoke-Test – Verifikationsmail erscheint in Mailpit. |
-| `AT-NOTI-001-2` | automatisiert | REQ-NOTI-001 | Integrationstest – je Mailart Auslöser ausführen und Eingang im Mail-Catcher prüfen (neu). |
+| `AT-NOTI-001-2` | automatisiert | REQ-NOTI-001 | Integrationstest (`notifications.integration.test.ts`) – je Mailart aus REQ-NOTI-001 den Auslöser über die API ausführen und den Eingang im Mail-Catcher prüfen (Empfänger, Betreff, Link, Fußzeile, keine Chatinhalte); Versand in der Kontosprache. |
 | `AT-NOTI-002` | automatisiert | REQ-NOTI-002 | Integrationstest (`messaging.integration.test.ts`) mit verkürzter Wartezeit – Bündelung, keine Mail nach dem Lesen, kein Inhalt in der Mail. |
 | `AT-NOTI-003` | automatisiert | REQ-NOTI-003 | Integrationstest (`messaging.integration.test.ts`) – abbestellte Kategorie erzeugt keine Mail, Sicherheitsmails kommen trotzdem. |
 | `MAN-NOTI-004` | manuell | REQ-NOTI-004 | Protokoll des mail-tester-Laufs und der Testzustellung – als Übung: [MAN-NOTI-004](../05-umsetzung/nachweise/MAN-NOTI-004.md). Header in Mailpit echt geprüft, DNS-Einträge syntaktisch gültig, mail-tester-Werte fiktiv (Q-28). Befunde behoben: Absender `no-reply@campusmarkt.example` (`MAIL_FROM`) passt zu den Beispiel-DNS-Einträgen, `Reply-To` ist die Kontaktstelle (`MAIL_REPLY_TO`). |
-| `AT-NOTI-005` | automatisiert | REQ-NOTI-005 | Resilienztest QS-3 mit gestopptem Mail-Catcher (neu). |
+| `AT-NOTI-005` | automatisiert | REQ-NOTI-005 | Ops-Test (`tests/ops/mail-outage-test.mjs`) – Resilienztest QS-3: Mailpit für skalierte 30 min stoppen, Registrierung antwortet < 800 ms, nach dem Start kommt die Bestätigungsmail genau einmal an. Läuft mit `MAIL_RETRY_DELAY_SECONDS=10` (Skala 1:12) wöchentlich im Workflow `ops-weekly.yml`. |
 | `CTRL-DLQ` | Kontrolle | REQ-NOTI-005 | Admin-Ansicht „Jobs/Dead Letters“ zeigt endgültig fehlgeschlagene Zustellungen – geprüft mit `tests/ops/dlq-test.mjs` (Mailpit gestoppt, Passwort-Reset angefordert, nach 302 s steht der Job mit Vorlage `password_reset` in der Ansicht, die App bleibt erreichbar); Protokoll [CTRL-DLQ](../05-umsetzung/nachweise/CTRL-DLQ.md). Läuft wegen der Dauer wöchentlich im Workflow `ops-weekly.yml`, nicht bei jedem Push. |
 | `AT-NOTI-006` | automatisiert | REQ-NOTI-006 | E2E-Test mit simuliertem Push-Dienst (neu). Noch nicht umgesetzt (⬜); offline nur eingeschränkt vorführbar. |
-| `AT-NOTI-007` | automatisiert | REQ-NOTI-007 | Konfigurationstest – App mit alternativem SMTP-Ziel starten, Mail kommt dort an (neu). |
+| `AT-NOTI-007` | automatisiert | REQ-NOTI-007 | Konfigurationstest (`smtp-mail.test.ts`) – Konfiguration allein aus Umgebungsvariablen, Versand über einen alternativen SMTP-Server mit Absender und Zugangsdaten; ohne Angaben Mail-Catcher auf Port 1025. |
+| `AT-NOTI-008` | automatisiert | REQ-NOTI-008 | Integrationstest – Ereignisse erzeugen Benachrichtigungen für den richtigen Empfänger (keine für Chatnachrichten), ungelesen-Zähler, einzeln gelesen/ungelesen, alle gelesen, nur eigene (fremde 404), neueste zuerst paginiert, Löschung nach 90 Tagen und bei Kontolöschung, keine Chatinhalte (neu, R2). |
+| `AT-NOTI-008-2` | automatisiert | REQ-NOTI-008 | E2E-Test – Zähler im Seitenkopf mit Screenreader-Text, Eintrag „Neu“, Öffnen führt zum Ziel und senkt den Zähler, „Alle als gelesen markieren“, per Tastatur; axe-core ohne `serious`/`critical` (neu, R2). |
 | `AT-OPS-001` | automatisiert | REQ-OPS-001 | Smoke-Test „Readiness /health/ready“ (bestehend). |
-| `AT-OPS-001-2` | automatisiert | REQ-OPS-001 | Resilienztest – Stopp unter Last ohne abgebrochene Anfragen (neu zu schreiben). |
+| `AT-OPS-001-2` | automatisiert | REQ-OPS-001 | Ops-Test (`tests/ops/shutdown-test.mjs`) – `docker compose stop app` unter Last von 16 parallelen Clients aus dem Docker-Netz: Prozessende ≤ 30 s, Exit-Code 0 und „Beendet“ im Log, keine begonnene Antwort abgerissen, keine 5xx außer 503 beim Schließen; danach wieder bereit. Abgrenzung „abgebrochen“/„abgewiesen“ siehe REQ-OPS-001 Metrik (3). Läuft in CI im Job `compose`. |
 | `AT-OPS-001-3` | automatisiert | REQ-OPS-001 | Ops-Test `tests/ops/db-outage-test.mjs` – Datenbank-Container gestoppt: Bereitschaft meldet „nicht bereit“ (503), Lebendigkeit bleibt „ok“, der App-Prozess läuft ohne Neustart weiter, Status-API meldet die Datenbank als gestört, Rechts- und Statusseite laden; nach dem Datenbankstart innerhalb von 60 s wieder bereit. Läuft in CI im Job `compose`. Hintergrund: Befund B-1 aus der Störungsübung [MAN-OPS-011](../05-umsetzung/nachweise/MAN-OPS-011.md); behoben durch Error-Handler an allen Pools, Ping-Timeout 2 s und Rückgriff auf den zuletzt bekannten Wartungszustand bei Lesefehlern. |
 | `AT-OPS-002` | automatisiert | REQ-OPS-002 | Smoke-Test `/metrics` (bestehend) plus Unit-Test des Request-Logs (`apps/server/src/platform/http/server.test.ts`): Eintrag enthält Methode, Route ohne Query, Status, Dauer und Request-ID, aber keine IP-Adresse, keinen Port und keine Query-Werte wie `token=`. |
 | `MAN-OPS-002` | manuell | REQ-OPS-002 | Review der Protokollfelder – Protokoll [MAN-OPS-002](../05-umsetzung/nachweise/MAN-OPS-002.md): Normalbetrieb ohne Personenbezug, Korrelations-ID in allen Einträgen; die Lücken P-1 (Request-ID aus dem Client) und P-2 (Rohpfad unbekannter Routen) sind behoben (Request-ID nur als UUID, unbekannte Pfade als `unmatched`). Sicherheitsereignisse (`auth.login`, `auth.login_failed`, `auth.login_throttled`, `access_denied`) tragen nur Pseudonyme. |
@@ -180,7 +189,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `MAN-PORT-001` | manuell | REQ-PORT-001 | Protokoll des Onboarding-Tests – [MAN-PORT-001](../05-umsetzung/nachweise/MAN-PORT-001.md) (simuliert, 3 min 25 s). Die Befunde (feste Ports in `compose.dev.yaml`, Dev-Proxy ohne `.env`) sind behoben: Ports nur an 127.0.0.1 und per `DEV_DB_PORT`, `DEV_SMTP_PORT`, `DEV_MAILPIT_PORT` änderbar; Vite liest `VITE_API_TARGET` bzw. den `PORT` des Servers aus `.env`. |
 | `CTRL-CI-MULTIARCH` | Kontrolle | REQ-PORT-002 | CI-Job `multiarch` (QEMU + Buildx) baut `linux/amd64` und `linux/arm64`, startet das arm64-Image unter Emulation bis „healthy“ und lädt beide Image-Archive hoch; der Smoke-Test läuft gegen amd64 im Job `compose`. Lokal geprüft: arm64 nativ „healthy“, amd64 per Emulation in 347 s gebaut. |
 | `AT-PRIV-001` | automatisiert | REQ-PRIV-001 | (neu) Registrierung mit veralteter Version liefert 422 `terms_outdated`; Export enthält die Einwilligung mit Version und Zeitstempel. |
-| `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | nach Wechsel der aktuellen Version verlangt die Anmeldung eines bestehenden Mitglieds die erneute Zustimmung – wird durch den Smoke-Test zu `AT-LEGAL-003-2` und den E2E-Test zum Zustimmungsdialog belegt (REQ-LEGAL-003); ein eigener Test mit dieser ID entfällt. |
+| `AT-PRIV-001-2` | automatisiert | REQ-PRIV-001 | Integrationstest „veraltete Zustimmung“ (`identity.integration.test.ts`) – nach Wechsel der aktuellen Version verlangen geschützte Aktionen eines bestehenden Mitglieds `terms_required`, bis es erneut zustimmt; zusätzlich belegt durch AT-LEGAL-003-2 (Smoke- und E2E-Test, REQ-LEGAL-003). |
 | `AT-PRIV-002` | automatisiert | REQ-PRIV-002 | Smoke-Test, (neu) erweitert – Antworten zu Anzeige, Konversation, Suche und Moderationsfall enthalten keine fremde E-Mail-Adresse; nach beidseitiger Freigabe nur das Gegenüber. |
 | `AT-PRIV-002-2` | automatisiert | REQ-PRIV-002 | Integrationstest (`privacy.integration.test.ts`) – Daten zum Missbrauchsschutz älter als 7 Tage entfernt der tägliche Löschjob. |
 | `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | Integrationstest (`listings.integration.test.ts`) mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |
@@ -207,7 +216,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SEC-007` | automatisiert | REQ-SEC-007 | Smoke-Test – Upload ohne gültige Bildsignatur liefert 415. |
 | `AT-SEC-007-2` | automatisiert | REQ-SEC-007 | Smoke-Test – Bildabruf ohne Sitzung liefert 401. |
 | `AT-SEC-007-3` | automatisiert | REQ-SEC-007 | Unit-Test der Formaterkennung am Inhalt (Grundlage: `listings/domain.test.ts`, „Magic Bytes“). |
-| `AT-SEC-007-4` | automatisiert | REQ-SEC-007 | (neu) JPEG mit GPS-EXIF hochladen, ausgeliefertes Bild enthält keine EXIF-Daten. |
+| `AT-SEC-007-4` | automatisiert | REQ-SEC-007 | Integrationstest (`listings.integration.test.ts`, gemeinsam mit AT-LST-003-3) – JPEG mit GPS-EXIF hochladen, ausgelieferte Bilder aller Größen ohne EXIF-, XMP- und IPTC-Daten. |
 | `CTRL-CI-SCAN` | Kontrolle | REQ-SEC-008 | Pipeline-Lauf mit den vier Prüfungen und SBOM-Artefakt – CI-Job `security-scans`: SAST mit Semgrep (Regelsätze JavaScript, TypeScript, OWASP Top Ten, SARIF-Bericht), SCA mit `pnpm audit --audit-level high`, Secret-Scan mit gitleaks über die gesamte Historie, Image-Scan mit Trivy (HIGH/CRITICAL brechen den Lauf ab), SBOM im CycloneDX-Format als Artefakt `security-reports`. |
 | `MAN-SEC-009` | manuell | REQ-SEC-009 | Threat-Model-Dokument mit Review-Vermerk – [Threat Model](../03-architektur/threat-model.md): STRIDE über 7 Abläufe mit Datenflussdiagramm und Vertrauensgrenzen; 39 Bedrohungen, davon 32 umgesetzt und getestet, 7 begründet akzeptiert, 0 offen; Review-Vermerk (fiktiv: security-lead, architecture-lead). |
 | `CTRL-IMAGE-INSPECT` | Kontrolle | REQ-SEC-010 | Prüfung von Benutzer und Umgebung des Images sowie Start mit `read_only: true` (Compose) bis zum Status „healthy“. |
@@ -226,7 +235,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-SRCH-005` | automatisiert | REQ-SRCH-005 | Szenario-Test des täglichen Digests (neu). Noch nicht umgesetzt (⬜). |
 | `AT-SRCH-006` | automatisiert | REQ-SRCH-006 | Integrationstest (`listings.integration.test.ts`) – Blockierung in beide Richtungen und Sperre blenden Anzeigen aus. |
 | `AT-UX-001` | automatisiert | REQ-UX-001 | E2E-Test – kein horizontales Scrollen bei 360 px auf allen Routen, für Gäste und Mitglieder (seit 2026-11-12 auch Gastseiten und „Kein Zugriff“). |
-| `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test – Manifest und Service Worker sind vorhanden und registriert. |
+| `AT-UX-001-2` | automatisiert | REQ-UX-001 | E2E-Test (`mobile-privacy.spec.ts`) – Installierbarkeit: Manifest verlinkt (Name, Start-URL, `standalone`, Icons 192 und 512 px abrufbar), Service Worker registriert und aktiv mit Scope `/`, App-Shell lädt offline. |
 | `MAN-UX-002` | manuell | REQ-UX-002 | Code-Review-Protokoll zur Auslagerung der Texte – [MAN-UX-002](../05-umsetzung/nachweise/MAN-UX-002.md). Chat-Systemnachrichten werden als Code mit Parametern gespeichert (`system_code`, `system_params`) und im Client übersetzt; Altdaten werden weiter am Text erkannt. |
 | `AT-UX-003` | automatisiert | REQ-UX-003 | Smoke- oder E2E-Test – unbekannte Seite ergibt 404 mit Seite „Seite nicht gefunden“ und Links; unbekannter API-Pfad ergibt JSON-404. |
 | `AT-UX-003-2` | automatisiert | REQ-UX-003 | Unit-Test – Fehlerbehandler liefert bei unerwartetem Fehler 500 mit Request-ID ohne Stacktrace. |
@@ -247,3 +256,5 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-UX-009-4` | automatisiert | REQ-UX-009 | E2E-Test (`errors.spec.ts`) – 403 bei fehlender Rolle (Administration, Moderation), 404 für unbekannte Anzeige, Bearbeitung und Unterhaltung, 429 mit Wartezeit und „Erneut versuchen“, Offline-Hinweis und Offline-Seite, englische 404 im dunklen Schema mit Status 404; axe-core ohne `serious`/`critical`. |
 | `AT-UX-010` | automatisiert | REQ-UX-010 | E2E-Test (`hygiene.spec.ts`) – Icon-Satz und Manifest erreichbar, Metadaten und `noindex`; eigener Titel je Seite (Gast, Mitglied, Administration), `lang` folgt der Sprache, keine Konsolenfehler in beiden Schemata. |
 | `AT-UX-010-2` | automatisiert | REQ-UX-010 | Unit-Test (`index-html.test.ts`) – Pflichtangaben im Kopf von `index.html`, keine externen Ressourcen, Icon-Satz mit richtigen Pixelmaßen. |
+| `AT-UX-011` | automatisiert | REQ-UX-011 | E2E-Test – neues Mitglied sieht „Erste Schritte“, erledigt die drei Schritte per Tastatur, Bereich verschwindet; Ausblenden wirkt in zweiter Sitzung; Wiederaufruf über die Hilfe; axe-core; keine Einträge im Browser-Speicher (neu, R2). |
+| `AT-UX-011-2` | automatisiert | REQ-UX-011 | Integrationstest – Zustand der Schritte aus Profil, Anzeigen und gespeichertem Zustand; Ausblenden und Wiedereinblenden; nur das eigene Konto (neu, R2). |

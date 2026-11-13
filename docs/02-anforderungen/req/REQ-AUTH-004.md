@@ -3,7 +3,7 @@ id: REQ-AUTH-004
 title: Keine Offenlegung bestehender Konten
 type: security
 class: constraint
-status: implemented
+status: verified
 owner: team-identity
 risk: high
 reviewers: [product-owner, security-lead]
@@ -14,9 +14,9 @@ kano: basis
 epic: EPIC-01
 source: BG-1
 use_cases: [UC-01, UC-02, UC-03]
-version: 1.2
+version: 1.3
 created: 2026-10-20
-last_updated: 2026-10-23
+last_updated: 2026-11-13
 verification: [AT-AUTH-004, AT-AUTH-004-2]
 ---
 
@@ -35,7 +35,7 @@ Kontenaufzählung ermöglicht gezieltes Phishing gegen Hochschulangehörige und 
 | Passwort-Reset anfordern | neutrale Meldung, Reset-Mail | neutrale Meldung, keine Mail | nein |
 | Anmeldung mit falschem Passwort | „E-Mail-Adresse oder Passwort ist falsch“ | gleiche Meldung | nein |
 
-**Zeitverhalten:** Für jeden der drei Vorgänge unterscheidet sich der Median der Antwortzeit zwischen „Konto existiert“ und „Konto existiert nicht“ um höchstens **50 ms**. Messung: je Vorgang und Fall **30 Anfragen**, abwechselnd gesendet, lokal gegen das Docker-Beispiel, Rate-Limits zwischen den Läufen zurückgesetzt. Begründung der Werte: Das Passwort-Hashing dauert rund 50–100 ms; ein Unterschied unter 50 ms ist bei 30 Messungen im lokalen Netz nicht verlässlich vom Rauschen zu trennen, ein fehlendes Hashing (Unterschied ≥ 50 ms) dagegen schon.
+**Zeitverhalten:** Für jeden der drei Vorgänge unterscheidet sich der Median der Antwortzeit zwischen „Konto existiert“ und „Konto existiert nicht“ um höchstens **50 ms**. Messung: je Vorgang und Fall **30 Anfragen**, abwechselnd gesendet, über die HTTP-Schicht der App gegen eine echte PostgreSQL-Datenbank (Integrationstest, ohne Rauschen durch das Netz), Rate-Limits vor jeder Anfrage zurückgesetzt. Begründung der Werte: Das Passwort-Hashing dauert rund 50–100 ms; ein Unterschied unter 50 ms ist bei 30 Messungen im lokalen Netz nicht verlässlich vom Rauschen zu trennen, ein fehlendes Hashing (Unterschied ≥ 50 ms) dagegen schon.
 
 Ausnahme: Erst nach **korrektem** Passwort darf die Anmeldung „bitte E-Mail bestätigen“ bzw. „Konto gesperrt“ melden.
 
@@ -48,7 +48,7 @@ Ausnahme: Erst nach **korrektem** Passwort darf die Anmeldung „bitte E-Mail be
 
 ## Nachweis
 - `AT-AUTH-004`: Smoke-Test – zweite Registrierung derselben Adresse liefert identische Antwort.
-- `AT-AUTH-004-2`: (neu) Antwortinhalt und Median der Antwortzeit (je 30 Anfragen) für Registrierung, Anmeldung und Passwort-Reset mit existierender und nicht existierender Adresse vergleichen.
+- `AT-AUTH-004-2`: Integrationstest – Antwortinhalt (ohne die je Anfrage eindeutige `requestId`) und Median der Antwortzeit (je 30 Anfragen, abwechselnd) für Registrierung, Anmeldung und Passwort-Reset mit existierender und nicht existierender Adresse vergleichen; Toleranz 50 ms (`identity.integration.test.ts`).
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
@@ -56,3 +56,4 @@ Ausnahme: Erst nach **korrektem** Passwort darf die Anmeldung „bitte E-Mail be
 | 1.0 | 2026-10-20 | Erstfassung im Katalog |
 | 1.1 | 2026-10-23 | Eigene Datei, Messgröße für das Zeitverhalten ergänzt |
 | 1.2 | 2026-10-23 | Review v0.2: R-03 `class: constraint` (Kontrolle); R-24 Registrierung in die Zeitmessung, Stichprobe 30 und Toleranz begründet; R-15 moscow_reason |
+| 1.3 | 2026-11-13 | Nachweis AT-AUTH-004-2 als Integrationstest umgesetzt; Messkontext entsprechend präzisiert (HTTP-Schicht der App gegen echte PostgreSQL statt über das Netz des Docker-Beispiels); Status → verified |
