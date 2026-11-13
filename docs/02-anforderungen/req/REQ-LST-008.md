@@ -13,9 +13,9 @@ epic: EPIC-02
 source: BG-2, REQ-PRIV-003
 use_cases: [UC-17]
 depends_on: [REQ-NOTI-001]
-version: 3.1
+version: 3.2
 created: 2026-10-20
-last_updated: 2026-11-07
+last_updated: 2026-11-13
 verification: [AT-LST-008]
 ---
 
@@ -58,3 +58,4 @@ Umgesetzt (2026-10-27): auch Ablauf pausierter Anzeigen und Rückfall reserviert
 | 2.0 | 2026-10-23 | Löschfrist abgegebener Anzeigen (30 Tage) aufgenommen; „Verlängern mit einem Klick“ präzisiert als Link zur Anzeige plus eine Aktion |
 | 3.0 | 2026-10-23 | Review v0.2: R-05/R-28 pausierte Anzeigen laufen nach 90 Tagen ab, Reservierungen fallen nach 30 Tagen zurück; R-07 Verlängern über Link + eine Aktion (UC-17); Verweis auf §4 |
 | 3.1 | 2026-11-07 | Ablauf pausierter und Rückfall reservierter Anzeigen umgesetzt; AT-LST-008 als Integrationstest grün (Testbericht 2026-11-07); Status → verified |
+| 3.2 | 2026-11-13 | Hinweis Q-32: Ab R2 regelt REQ-LST-013 die Laufzeit aktiver Anzeigen (Erneuerung alle 14 Tage, Ausgelaufen = pausiert, Löschung nach 2 Tagen); die 60-Tage-Laufzeit mit Erinnerung gilt bis dahin. Pause, Reservierung und Abgabe bleiben hier geregelt |

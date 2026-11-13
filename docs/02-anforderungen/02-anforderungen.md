@@ -154,11 +154,11 @@ flowchart LR
 
 <!-- req-index:start (generiert mit `node scripts/trace.mjs --write`, nicht von Hand bearbeiten) -->
 
-**Stand:** 140 Anforderungen · R1-Must verifiziert: 82 von 85 (96 %)
+**Stand:** 141 Anforderungen · R1-Must verifiziert: 82 von 85 (96 %)
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 18 |
+| approved | Konkretisiert (bereit) | 19 |
 | implemented | Umsetzung | 4 |
 | verified | Test | 118 |
 
@@ -228,6 +228,7 @@ flowchart LR
 | [REQ-LST-010](req/REQ-LST-010.md) | Verbotene Inhalte vor Veröffentlichung in die Moderation | constraint | M | basis | medium | verified | AT-LST-010, AT-LST-010-2 |
 | [REQ-LST-011](req/REQ-LST-011.md) | Höchstens 30 aktive Anzeigen pro Mitglied | functional | S | n/a | low | verified | AT-LST-011 |
 | [REQ-LST-012](req/REQ-LST-012.md) | HEIC-Fotos annehmen | functional | C | leistung | medium | approved | AT-LST-012 |
+| [REQ-LST-013](req/REQ-LST-013.md) | Anzeigen alle 14 Tage erneuern, sonst pausieren und löschen | domain | S | leistung | medium | approved | AT-LST-013, AT-LST-013-2, AT-LST-013-3 |
 | [REQ-MAINT-001](req/REQ-MAINT-001.md) | Testabdeckung der Fachlogik | quality | S | n/a | medium | verified | CTRL-COVERAGE, CTRL-MUTATION |
 | [REQ-MAINT-002](req/REQ-MAINT-002.md) | Geprüfte Modulgrenzen | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
 | [REQ-MOD-001](req/REQ-MOD-001.md) | Inhalte und Mitglieder melden | functional | M | basis | high | verified | AT-MOD-001, AT-MOD-001-2 |
@@ -245,7 +246,7 @@ flowchart LR
 | [REQ-NOTI-005](req/REQ-NOTI-005.md) | Zuverlässige E-Mail-Zustellung | quality | M | basis | medium | verified | AT-NOTI-005, CTRL-DLQ |
 | [REQ-NOTI-006](req/REQ-NOTI-006.md) | Web-Push-Benachrichtigungen | functional | C | begeisterung | low | approved | AT-NOTI-006 |
 | [REQ-NOTI-007](req/REQ-NOTI-007.md) | Mailserver per Konfiguration austauschbar | constraint | M | n/a | low | verified | AT-NOTI-007 |
-| [REQ-NOTI-008](req/REQ-NOTI-008.md) | Benachrichtigungen in der App mit gelesen und ungelesen | functional | S | leistung | medium | approved | AT-NOTI-008, AT-NOTI-008-2 |
+| [REQ-NOTI-008](req/REQ-NOTI-008.md) | Benachrichtigungen in der App mit gelesen und ungelesen | functional | S | leistung | medium | approved | AT-NOTI-008, AT-NOTI-008-2, AT-NOTI-008-3 |
 | [REQ-OPS-001](req/REQ-OPS-001.md) | Gesundheitsprüfung und geordnetes Herunterfahren | quality | M | n/a | medium | verified | AT-OPS-001, AT-OPS-001-2, AT-OPS-001-3 |
 | [REQ-OPS-002](req/REQ-OPS-002.md) | Beobachtbarkeit ohne personenbezogene Daten | quality | M | n/a | medium | verified | AT-OPS-002, MAN-OPS-002 |
 | [REQ-OPS-003](req/REQ-OPS-003.md) | Schnellstart und Fehlerbehebung dokumentiert | quality | M | n/a | low | verified | MAN-OPS-003 |

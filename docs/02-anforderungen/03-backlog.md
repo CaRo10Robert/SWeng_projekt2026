@@ -3,7 +3,7 @@ id: BACKLOG
 type: planning
 status: in-review
 owner: product-owner
-version: 1.8
+version: 1.9
 created: 2026-10-20
 last_updated: 2026-11-13
 ---
@@ -104,6 +104,7 @@ Das Product Backlog sammelt alle offenen Arbeiten, geordnet nach Abhängigkeiten
 | B-73 | Kaufangebot und Gegenangebot: „Nehm ich“ (Festpreis, Verschenken), Preisangebot bei VB, strukturierte Angebotsnachricht im Chat mit Akzeptieren, Ablehnen, Gegenangebot; Akzeptieren reserviert für den Käufer (Deal vereinbart) und beendet andere offene Angebote (Q-31) | Feature | REQ-CHAT-009, REQ-CHAT-011 | leistung | mittel | B-74 | 8 | 5 | 2 | 2 | 9 | 1,1 | R2 |
 | B-74 | Benachrichtigungen in der App: Glocke mit Zähler ungelesener Einträge im Seitenkopf, Seite „Benachrichtigungen“ (neueste zuerst, paginiert), gelesen/ungelesen einzeln und alle, Echtzeit-Aktualisierung, Löschung nach 90 Tagen; Arten aus Kaufangebot, Ablauf und Moderation (Q-31) | Feature | REQ-NOTI-008, REQ-PRIV-003 | leistung | mittel | – | 5 | 5 | 2 | 2 | 9 | 1,8 | R2 |
 | B-75 | Erste Schritte für neue Mitglieder: Bereich auf der Startseite mit Profil ergänzen, erster Anzeige und Sicherheitstipps, Zustand im Konto (kein Browser-Speicher), ausblendbar und über die Hilfe wieder aufrufbar (Q-31) | Feature | REQ-UX-011 | begeisterung | niedrig | – | 3 | 3 | 1 | 1 | 5 | 1,7 | R2 |
+| B-76 | Anzeigen alle 14 Tage erneuern: Hinweis an Tag 14, nach 1 Tag automatisch pausiert (nur für den Anbieter sichtbar), nach 2 weiteren Tagen gelöscht; Erneuern und Reaktivieren mit einem Klick; Übernahme der Bestandsanzeigen; Benachrichtigung bei jedem Schritt (Q-32) | Feature | REQ-LST-013, REQ-NOTI-008 | leistung | mittel | B-74 | 5 | 5 | 2 | 3 | 10 | 2,0 | R2 |
 
 **Release R2 (nicht in R1, Q-14 bzw. Architektur-Review):** B-15 Ausblenden für Nachrichten und Profile (REQ-MOD-004, Should), B-39, B-42, B-11 Re-Verifikation (REQ-AUTH-007, 5 SP), B-13 Profilbild (REQ-ACC-004, 3 SP), S-02 Spike HEIC und B-14 HEIC-Fotos (REQ-LST-012, 1 + 8 SP), B-17 Texte in i18n-Ressourcen (REQ-UX-002; aufgegangen in B-51, Sprint 7), B-24 Lighthouse-Messung (REQ-PERF-005, 1 SP), B-26 zuschaltbares Tracing (REQ-OPS-002, 2 SP), B-18 Abdeckung/Mutation (falls R1-Kapazität fehlt), **B-69 Profil anderer Mitglieder, B-70 Bewertungen als Käufer und Verkäufer, B-71 Bewertungen in Datenschutz und Moderation** (Q-30, zusammen 13 SP; Reihenfolge nach Abhängigkeit).
 
@@ -153,6 +154,7 @@ gantt
 - **B-72 (Sprint 7):** Zusätzliche UML-Sichten der Architektur als eigene Datei. Reine Dokumentation, deshalb vom Feature Freeze nicht betroffen. Sprint 7 steigt auf 27 SP; reicht die Kapazität nicht, rückt zuerst B-54 nach R2.
 - **Stand 2026-11-13:** REQ-ACC-005 und REQ-MOD-006 nach Requirements-Review durch den Product Owner freigegeben (`approved`); B-71 mit DSB und `security-lead` geklärt. **B-69 umgesetzt und verifiziert** (REQ-ACC-005: Profil-API mit einheitlicher 404, Profilseite, AT-ACC-005 bis -3). **B-72 umgesetzt:** [UML-Sichten](../03-architektur/uml-sichten.md) und ADR-0023; der Abgleich mit dem Code fand 17 Abweichungen in architektur.md (dort §8.2, A-1 bis A-17), darunter eine mögliche Lücke im Code (A-17: Entfernt die Moderation eine reservierte Anzeige, bleibt der Deal auf `agreed`). B-70 und B-71 folgen.
 - **B-73 bis B-75 (R2, Q-31):** Kaufangebot mit „Nehm ich“ und Gegenangebot (REQ-CHAT-009 v4.0, ersetzt den bisherigen Platzhalter „Preisvorschlag“), Benachrichtigungen in der App mit gelesen/ungelesen (REQ-NOTI-008) und Erste Schritte für neue Mitglieder (REQ-UX-011). Alle mit Nachweisen und Akzeptanzkriterien spezifiziert und vom Product Owner freigegeben. Reihenfolge: B-74 vor B-73 (das Kaufangebot braucht den Eingang), B-75 unabhängig.
+- **B-76 (R2, Q-32):** Erneuerung aktiver Anzeigen alle 14 Tage, Ausgelaufen = pausiert, Löschung nach 2 Tagen (REQ-LST-013). B-74 übernimmt dazu die Grundregel aus REQ-NOTI-008 v1.1: Jede nicht selbst ausgelöste Zustandsänderung an Anzeige oder Deal erzeugt eine Benachrichtigung für die betroffene Person. Reihenfolge: B-74, B-76, B-73.
 
 **Stand Nachweise R1-Must (2026-11-13):**
 

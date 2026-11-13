@@ -12,12 +12,12 @@ kano: leistung
 epic: EPIC-05
 source: Auftraggeber (2026-11-13, Q-31)
 use_cases: [UC-23]
-depends_on: [REQ-NOTI-001, REQ-LEGAL-006, REQ-PRIV-003]
-version: 1.0
+depends_on: [REQ-NOTI-001, REQ-LEGAL-006, REQ-PRIV-003, REQ-CHAT-011, REQ-LST-013]
+version: 1.1
 created: 2026-11-13
 last_updated: 2026-11-13
 review_due: 2027-04-23
-verification: [AT-NOTI-008, AT-NOTI-008-2]
+verification: [AT-NOTI-008, AT-NOTI-008-2, AT-NOTI-008-3]
 ---
 
 # REQ-NOTI-008 Benachrichtigungen in der App mit gelesen und ungelesen
@@ -51,13 +51,25 @@ Szenario: Als ungelesen markieren
   Dann ist er wieder ungelesen und zählt mit
 ```
 
+**Grundregel (Q-32):** Jede Zustandsänderung an einer Anzeige oder einem Deal, die eine betroffene Person **nicht selbst ausgelöst** hat, erzeugt für sie eine Benachrichtigung. Betroffen sind der Anbieter und, solange ein Deal oder ein Kaufangebot besteht, der Käufer bzw. Interessent. Wer selbst geklickt hat, erhält keine Benachrichtigung über die eigene Aktion.
+
+| Änderung | ausgelöst von | benachrichtigt |
+|---|---|---|
+| Für den Käufer reserviert, Reservierung aufgehoben, abgegeben (REQ-CHAT-011) | Anbieter | Käufer |
+| Kaufangebot akzeptiert, abgelehnt, Gegenangebot (REQ-CHAT-009) | jeweilige Gegenseite | Absender des Angebots |
+| Erneuerung fällig, automatisch pausiert, gelöscht (REQ-LST-013) | System | Anbieter |
+| Reservierung nach 30 Tagen zurückgefallen (REQ-LST-008) | System | Anbieter und Käufer |
+| Anzeige gelöscht, pausiert oder abgegeben, während ein Kaufangebot offen ist | Anbieter | Interessent („nicht mehr verfügbar“) |
+| Ausgeblendet, entfernt, wiederhergestellt (REQ-MOD-002/004) | Moderation | Anbieter |
+
 **Arten von Benachrichtigungen**
 
 | Art | Auslöser | Ziel beim Öffnen |
 |---|---|---|
 | Neues Kaufangebot, Gegenangebot | REQ-CHAT-009 | Konversation |
 | Angebot angenommen, abgelehnt, nicht mehr verfügbar | REQ-CHAT-009 | Konversation |
-| Anzeige läuft bald ab, Reservierung abgelaufen | REQ-LST-008 | Anzeige |
+| Anzeige läuft bald ab (R1), Erneuerung fällig, automatisch pausiert, gelöscht | REQ-LST-008, REQ-LST-013 | Anzeige bzw. „Meine Anzeigen“ |
+| Reservierung abgelaufen, für dich reserviert, Reservierung aufgehoben, abgegeben | REQ-LST-008, REQ-CHAT-011 | Konversation |
 | Moderationsentscheidung, Ergebnis eines Widerspruchs | REQ-LEGAL-006/007 | „Meine Mitteilungen“ |
 | Bewertung möglich (ab REQ-MOD-006) | REQ-MOD-006 | Konversation bzw. Bewertung |
 
@@ -87,9 +99,11 @@ I: eigene Ansicht, Ereignisse aus vorhandenen Abläufen · N: Arten erweiterbar 
 
 ## Nachweis
 - `AT-NOTI-008`: Integrationstest – Ereignisse erzeugen Benachrichtigungen für den richtigen Empfänger (keine für Chatnachrichten), ungelesen-Zähler, einzeln gelesen und ungelesen, alle gelesen, nur eigene (fremde 404), neueste zuerst paginiert, Löschung nach 90 Tagen und bei Kontolöschung, keine Chatinhalte.
+- `AT-NOTI-008-3`: Integrationstest – Grundregel: je Zustandsänderung an Anzeige und Deal erhält die betroffene Gegenseite genau eine Benachrichtigung, die auslösende Person keine (Entscheidungstabelle aus der Anforderung).
 - `AT-NOTI-008-2`: E2E-Test – Zähler im Seitenkopf mit Screenreader-Text, Eintrag „Neu“, Öffnen führt zum Ziel und senkt den Zähler, „Alle als gelesen markieren“, per Tastatur; axe-core ohne `serious`/`critical`.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-31); Freigabe Product Owner |
+| 1.1 | 2026-11-13 | Grundregel „jede nicht selbst ausgelöste Zustandsänderung an Anzeige und Deal“ mit Entscheidungstabelle (Q-32); Arten für Erneuerung, automatische Pause, Löschung und Deal-Schritte; Nachweis AT-NOTI-008-3 |

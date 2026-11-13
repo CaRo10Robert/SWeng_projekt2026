@@ -14,9 +14,9 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 5, 17
 use_cases: [UC-01, UC-05]
-version: 2.4
+version: 2.5
 created: 2026-10-20
-last_updated: 2026-11-07
+last_updated: 2026-11-13
 verification: [AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3]
 ---
 
@@ -92,3 +92,4 @@ Speicherbegrenzung (DSGVO Art. 5) und Recht auf Löschung (Art. 17); Privacy by 
 | 2.2 | 2026-10-26 | Löschläufe umgesetzt, Nachweise AT-PRIV-003-2/-3 als Ops-Test, Zustimmungsnachweise pseudonymisiert; offen: reservierte Anzeigen |
 | 2.3 | 2026-10-26 | Guideline-Review: GL-09 Löschjournal auf ADR-0019 verwiesen |
 | 2.4 | 2026-11-07 | Rückfall reservierter Anzeigen umgesetzt; AT-PRIV-003 als Integrationstest grün (Testbericht 2026-11-07); Status → verified |
+| 2.5 | 2026-11-13 | Hinweis Q-32: Ab R2 werden automatisch pausierte Anzeigen 2 Tage nach der Pause gelöscht (REQ-LST-013) statt 90 Tage nach Ablauf |
