@@ -66,6 +66,10 @@ export const ListingCard = Type.Object({
   thumbnailUrl: Type.Union([Type.String(), Type.Null()]),
   createdAt: Timestamp,
   expiresAt: Type.Union([Timestamp, Type.Null()]),
+  /** Erneuerung fällig: bis dahin erneuern, sonst automatisch pausiert (REQ-LST-013) */
+  renewBy: Type.Optional(Type.Union([Timestamp, Type.Null()])),
+  /** Automatisch pausiert: wird zu diesem Zeitpunkt gelöscht (REQ-LST-013) */
+  autoDeleteAt: Type.Optional(Type.Union([Timestamp, Type.Null()])),
 });
 export type ListingCard = Static<typeof ListingCard>;
 

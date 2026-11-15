@@ -568,9 +568,9 @@ check('[AT-LEGAL-009-2] DAC7-Auswertung als JSON und CSV nur für Admins, Mitgli
   [dac7.status, dac7Csv.status, dac7Member.status, dac7Future.status, saleDone.status, dac7.data?.sellers?.length]);
 await user.call('PATCH', '/me', { displayName: 'Testi' });
 
-// Demo-Werkzeug (REQ-DEMO-002): Erinnerung für die bald ablaufende Seed-Anzeige von Lea
+// Demo-Werkzeug (REQ-DEMO-002): Hinweis „Erneuerung fällig“ für die Seed-Anzeige von Lea (REQ-LST-013)
 const due = await admin.call('POST', '/admin/demo/run-due-jobs');
-const reminder = await waitForMails('lea@studmail.hwg-lu.de', 'läuft bald ab', 1, 40);
+const reminder = await waitForMails('lea@studmail.hwg-lu.de', 'Bitte erneuere', 1, 40);
 check('[AT-DEMO-002] Fällige Jobs auslösen → 202, Erinnerungsmail in Mailpit', due.status === 202 && reminder.length >= 1);
 const reminderHeaders = await headersOf(reminder.at(-1));
 const [verifyMail] = await waitForMails(email, 'bestätige');

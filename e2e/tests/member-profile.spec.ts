@@ -22,9 +22,9 @@ test('[AT-ACC-005] Profil aus Anzeige (Maus und Tastatur) und Konversation öffn
 
   // 1. Maus: Anbietername in der Anzeige
   await page.goto(`/listings/${listing.id}`);
-  await page.getByRole('link', { name: owner.displayName }).click();
+  await page.getByRole('link', { name: owner.displayName, exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/users/${owner.id}$`));
-  await expect(page.getByRole('heading', { level: 1, name: owner.displayName })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: owner.displayName, exact: true })).toBeVisible();
   const main = page.getByRole('main');
   await expect(main).toContainText('Mitglied seit');
   await expect(main).toContainText(/Studierende|Beschäftigte/);
@@ -42,7 +42,7 @@ test('[AT-ACC-005] Profil aus Anzeige (Maus und Tastatur) und Konversation öffn
 
   // 2. Tastatur: Link per Tab erreichen und mit Enter öffnen
   await gotoTop(page, `/listings/${listing.id}`);
-  await activate(page, page.getByRole('link', { name: owner.displayName }));
+  await activate(page, page.getByRole('link', { name: owner.displayName, exact: true }));
   await expect(page).toHaveURL(new RegExp(`/users/${owner.id}$`));
 
   // 3. Konversation: Name im Kopf führt zum Profil des Gegenübers
@@ -51,5 +51,5 @@ test('[AT-ACC-005] Profil aus Anzeige (Maus und Tastatur) und Konversation öffn
   const counterpart = (await header.textContent())!.trim();
   await header.click();
   await expect(page).toHaveURL(/\/users\/[0-9a-f-]+$/);
-  await expect(page.getByRole('heading', { level: 1, name: counterpart })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: counterpart, exact: true })).toBeVisible();
 });

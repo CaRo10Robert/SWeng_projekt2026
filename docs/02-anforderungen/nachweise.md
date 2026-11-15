@@ -1,4 +1,4 @@
-Integrationstest (`notifications.integration.test.ts`) – Grundregel: Reservieren, Aufheben, Abgeben und Löschen durch die Anbieterin benachrichtigen nur den Käufer; Rückfall der Reservierung (System) benachrichtigt beide; eigene Aktionen erzeugen nichts. |
+Integrationstest (`listings.integration.test.ts`) mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (offener Deal aufgehoben, Mail und Systemnachricht); ein zweiter Lauf ändert nichts. Seit R2 (REQ-LST-013) prüft der Test nur noch Rückfall der Reservierung und Löschfristen; die Laufzeit aktiver Anzeigen prüft AT-LST-013. |
 id: EVIDENCE
 type: verification
 status: in-review

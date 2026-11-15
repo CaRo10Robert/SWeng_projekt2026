@@ -156,6 +156,7 @@ gantt
 - **B-73 bis B-75 (R2, Q-31):** Kaufangebot mit „Nehm ich“ und Gegenangebot (REQ-CHAT-009 v4.0, ersetzt den bisherigen Platzhalter „Preisvorschlag“), Benachrichtigungen in der App mit gelesen/ungelesen (REQ-NOTI-008) und Erste Schritte für neue Mitglieder (REQ-UX-011). Alle mit Nachweisen und Akzeptanzkriterien spezifiziert und vom Product Owner freigegeben. Reihenfolge: B-74 vor B-73 (das Kaufangebot braucht den Eingang), B-75 unabhängig.
 - **B-76 (R2, Q-32):** Erneuerung aktiver Anzeigen alle 14 Tage, Ausgelaufen = pausiert, Löschung nach 2 Tagen (REQ-LST-013). B-74 übernimmt dazu die Grundregel aus REQ-NOTI-008 v1.1: Jede nicht selbst ausgelöste Zustandsänderung an Anzeige oder Deal erzeugt eine Benachrichtigung für die betroffene Person. Reihenfolge: B-74, B-76, B-73.
 - **B-74 umgesetzt (2026-11-13):** Benachrichtigungen in der App mit Zähler, gelesen/ungelesen und Grundregel für Deal-Änderungen; AT-NOTI-008 bis -3 grün. REQ-NOTI-008 steht auf `implemented`, bis B-73 und B-76 ihre Arten auslösen.
+- **B-76 umgesetzt (2026-11-13):** Erneuerung alle 14 Tage mit automatischer Pause und Löschung; AT-LST-013 bis -3 grün, Smoke-, Retention- und alle E2E-Tests angepasst. REQ-LST-013 steht auf `implemented` bis B-73.
 
 **Stand Nachweise R1-Must (2026-11-13):**
 

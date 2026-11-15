@@ -11,7 +11,7 @@ import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, PriceTag, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
 import { Alert, Badge, Button, buttonClass, Card, FormError, Loading, TextArea } from '../components/ui';
-import { conditionLabels, formatDate, kindLabels, newId, userTypeLabels } from '../lib/format';
+import { conditionLabels, formatDate, formatDateTime, kindLabels, newId, userTypeLabels } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
@@ -25,7 +25,7 @@ const actionLabels: Record<ListingAction, MessageKey> = {
 };
 
 const actionsByStatus: Partial<Record<ListingStatus, ListingAction[]>> = {
-  active: ['reserve', 'complete', 'pause'],
+  active: ['extend', 'reserve', 'complete', 'pause'],
   paused: ['resume'],
   reserved: ['complete', 'unreserve'],
   expired: ['extend'],
@@ -123,7 +123,12 @@ function OwnerActions({ listing }: { listing: ListingDetail }) {
       <h2 className="font-semibold">{t('listing.owner.manage')}</h2>
       {listing.status === 'in_review' && <Alert tone="warning">{t('listing.owner.inReview')}</Alert>}
       {listing.status === 'removed' && <Alert tone="error">{t('listing.owner.removed')}</Alert>}
-      {listing.expiresAt && listing.status === 'active' && <p className="text-sm text-slate-600">{t('listing.owner.expiresOn', { date: formatDate(listing.expiresAt) })}</p>}
+      {/* Erneuerung alle 14 Tage (REQ-LST-013) */}
+      {listing.renewBy && <Alert tone="warning">{t('listing.owner.renewBy', { date: formatDateTime(listing.renewBy) })}</Alert>}
+      {!listing.renewBy && listing.expiresAt && listing.status === 'active' && (
+        <p className="text-sm text-slate-600">{t('listing.owner.expiresOn', { date: formatDate(listing.expiresAt) })}</p>
+      )}
+      {listing.autoDeleteAt && <Alert tone="warning">{t('listing.owner.autoDeleteAt', { date: formatDateTime(listing.autoDeleteAt) })}</Alert>}
       <div className="flex flex-col gap-2">
         {editable.includes(listing.status) && (
           <Link to="/listings/$id/edit" params={{ id: listing.id }} className={buttonClass('secondary')}>

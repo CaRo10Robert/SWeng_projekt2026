@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import type { ListingCard as Card, ListingStatus } from '@campusmarkt/contracts';
-import { formatDate, formatPrice, kindLabels, statusLabels } from '../lib/format';
+import { formatDate, formatDateTime, formatPrice, kindLabels, statusLabels } from '../lib/format';
 import { Badge, type Tone } from './ui';
 import { t } from '../i18n';
 
@@ -56,6 +56,9 @@ export function ListingCard({ listing, showStatus }: { listing: Card; showStatus
             <PriceTag listing={listing} />
           </p>
           <p className="text-xs text-slate-600">{formatDate(listing.createdAt)}</p>
+          {/* Nur für den Anbieter gesetzt (REQ-LST-013) */}
+          {listing.renewBy && <p className="text-xs font-semibold text-amber-800">{t('listing.card.renewBy', { date: formatDateTime(listing.renewBy) })}</p>}
+          {listing.autoDeleteAt && <p className="text-xs font-semibold text-amber-800">{t('listing.card.autoDeleteAt', { date: formatDateTime(listing.autoDeleteAt) })}</p>}
         </div>
       </Link>
     </li>

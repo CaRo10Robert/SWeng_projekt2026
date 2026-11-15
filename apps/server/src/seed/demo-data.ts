@@ -53,6 +53,8 @@ export interface DemoListing {
   locations: number[];
   attributes?: { studyProgram?: string; module?: string; isbn?: string };
   daysAgo: number;
+  /** Erneuerung sofort fällig (REQ-LST-013), damit die Demo den Hinweis zeigt */
+  renewalDue?: boolean;
   images?: number;
 }
 
@@ -82,7 +84,7 @@ export const DEMO_LISTINGS: DemoListing[] = [
   { owner: 'jonas', kind: 'offer', title: 'Japanisch-Lehrbuch Minna no Nihongo', description: 'Lehrbuch und Übungsbuch, ideal für den Einstieg am Ostasieninstitut. Wenige Notizen.', category: 'buecher-skripte', priceType: 'fixed', price: 20, condition: 'good', locations: [1], attributes: { studyProgram: 'International Business Ostasien', module: 'Japanisch I' }, daysAgo: 18, images: 1 },
   { owner: 'sara', kind: 'offer', title: 'Gummistiefel Größe 39', description: 'Robuste Gummistiefel, perfekt für die Arbeit im Weinberg. Einmal getragen.', category: 'kleidung', priceType: 'fixed', price: 10, condition: 'like_new', locations: [2], daysAgo: 19, images: 1 },
   { owner: 'ben', kind: 'offer', title: 'Mehrfachsteckdose mit Schalter', description: 'Sechsfach-Steckdose mit Überspannungsschutz. Zu verschenken.', category: 'elektronik', priceType: 'free', condition: 'good', locations: [0], daysAgo: 20 },
-  { owner: 'lea', kind: 'offer', title: 'Kleiner Couchtisch', description: 'Weißer Couchtisch, 60 x 60 cm, leichte Gebrauchsspuren.', category: 'moebel-wohnen', priceType: 'negotiable', price: 15, condition: 'acceptable', locations: [0], daysAgo: 53, images: 1 },
+  { owner: 'lea', kind: 'offer', title: 'Kleiner Couchtisch', description: 'Weißer Couchtisch, 60 x 60 cm, leichte Gebrauchsspuren.', category: 'moebel-wohnen', priceType: 'negotiable', price: 15, condition: 'acceptable', locations: [0], daysAgo: 53, renewalDue: true, images: 1 },
   { owner: 'mia', kind: 'offer', title: 'Brettspiel Siedler von Catan', description: 'Vollständig, alle Teile vorhanden. Für gemütliche Spieleabende im Wohnheim.', category: 'sport-freizeit', priceType: 'fixed', price: 18, condition: 'good', locations: [0, 1], daysAgo: 21, images: 1 },
   { owner: 'jonas', kind: 'wanted', title: 'Suche gebrauchte Laborkittel', description: 'Für einen Workshop suchen wir gebrauchte Laborkittel in verschiedenen Größen. Gerne als Spende.', category: 'sonstiges', priceType: 'free', locations: [2], daysAgo: 6 },
   { owner: 'sara', kind: 'offer', title: 'Kochbuch vegetarisch für Studis', description: 'Schnelle und günstige vegetarische Rezepte. Tausche gegen ein anderes Kochbuch.', category: 'buecher-skripte', priceType: 'swap', condition: 'good', locations: [2], daysAgo: 22, images: 1 },

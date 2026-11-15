@@ -2,12 +2,16 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { activate, apiSession, DEMO, gotoTop, keyboardLogin } from './helpers';
 
-type Conversation = { id: string; listing: { title: string; status: string }; deal?: { status: string } | null };
+type Conversation = { id: string; role: 'buyer' | 'seller'; counterpart: { displayName: string }; listing: { title: string; status: string } };
 
 test('[AT-NOTI-008-2] Zähler im Seitenkopf, „Neu“, Öffnen führt zum Ziel und senkt den Zähler, alle als gelesen – per Tastatur, ohne axe-Verstöße', async ({ page, request, baseURL }) => {
   // Ben (Anbieter) hebt die Reservierung für Lea auf und reserviert erneut: Lea hat beides nicht selbst ausgelöst
   const ben = await apiSession(request, baseURL!, DEMO.ben);
-  const conv = (await ben.call<Conversation[]>('GET', '/conversations')).find((c) => c.listing.status === 'reserved')!;
+  // Bens reservierte Anzeige mit Lea als Käuferin (Seed: Statistik-Buch)
+  const conv = (await ben.call<Conversation[]>('GET', '/conversations')).find(
+    (c) => c.role === 'seller' && c.listing.status === 'reserved' && c.counterpart.displayName.startsWith('Lea'),
+  )!;
+  expect(conv, 'reservierte Konversation Ben → Lea im Seed').toBeDefined();
   await ben.call('POST', `/conversations/${conv.id}/deal`, { action: 'cancel' });
   await ben.call('POST', `/conversations/${conv.id}/deal`, { action: 'reserve' });
   const lea = await apiSession(request, baseURL!, DEMO.lea);

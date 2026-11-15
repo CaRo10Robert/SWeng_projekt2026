@@ -208,43 +208,116 @@ describe.skipIf(!integrationAvailable)('Integration listings und search (Postgre
     expect((await ben.call('GET', '/me/favorites')).data).toHaveLength(0);
   });
 
-  it('Laufzeit: Erinnerung, Ablauf, Verlängerung; pausierte laufen nach 90 Tagen ab; Löschfristen', async () => {
-    const reminder = (await lea.call('POST', '/listings', body({ title: 'Läuft bald ab' }))).data.id;
-    const expired = (await lea.call('POST', '/listings', body({ title: 'Schon abgelaufen' }))).data.id;
-    const paused = (await lea.call('POST', '/listings', body({ title: 'Lange pausiert' }))).data.id;
-    const old = (await lea.call('POST', '/listings', body({ title: 'Lange abgelaufen' }))).data.id;
-    await lea.call('POST', `/listings/${paused}/status`, { action: 'pause' });
-    await h.sql(`UPDATE listings.listing SET expires_at = now() + interval '2 days' WHERE id = $1`, [reminder]);
-    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 hour' WHERE id = $1`, [expired]);
-    await h.sql(`UPDATE listings.listing SET status_changed_at = now() - interval '91 days' WHERE id = $1`, [paused]);
-    await h.sql(`UPDATE listings.listing SET status = 'expired', status_changed_at = now() - interval '91 days' WHERE id = $1`, [old]);
+  it('[AT-LST-013] Erneuerung alle 14 Tage: Hinweis, automatische Pause, Löschung; Erneuern und Reaktivieren; Abgrenzungen; idempotent', async () => {
+    const id = async (title: string) => (await lea.call('POST', '/listings', body({ title }))).data.id as string;
+    const row = async (listingId: string) =>
+      (await h.sql(`SELECT status, paused_reason, reminder_sent_at, expires_at FROM listings.listing WHERE id = $1`, [listingId]))[0];
+    const due = await id('Tag 14 erreicht');
+    const grace = await id('Hinweis vor 25 Stunden');
+    const autoOld = await id('Seit 49 Stunden automatisch pausiert');
+    const autoFresh = await id('Seit 47 Stunden automatisch pausiert');
+    const ownLong = await id('Seit 91 Tagen selbst pausiert');
+    const ownShort = await id('Seit 89 Tagen selbst pausiert');
+    const reserved = await id('Reserviert über die Frist');
+    const hidden = await id('Ausgeblendet über die Frist');
+    const legacy = await id('Abgelaufene Bestandsanzeige');
+
+    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 minute' WHERE id = ANY($1::uuid[])`, [[due, grace, reserved, hidden]]);
+    await h.sql(`UPDATE listings.listing SET reminder_sent_at = now() - interval '25 hours' WHERE id = $1`, [grace]);
+    await h.sql(`UPDATE listings.listing SET status = 'paused', paused_reason = 'auto', status_changed_at = now() - interval '49 hours' WHERE id = $1`, [autoOld]);
+    await h.sql(`UPDATE listings.listing SET status = 'paused', paused_reason = 'auto', status_changed_at = now() - interval '47 hours' WHERE id = $1`, [autoFresh]);
+    for (const [listingId, days] of [[ownLong, 91], [ownShort, 89]] as const) {
+      await lea.call('POST', `/listings/${listingId}/status`, { action: 'pause' });
+      await h.sql(`UPDATE listings.listing SET status_changed_at = now() - make_interval(days => $2) WHERE id = $1`, [listingId, days]);
+    }
+    await h.sql(`UPDATE listings.listing SET status = 'reserved' WHERE id = $1`, [reserved]);
+    await h.sql(`UPDATE listings.listing SET hidden = true WHERE id = $1`, [hidden]);
+    await h.sql(`UPDATE listings.listing SET status = 'expired' WHERE id = $1`, [legacy]);
 
     const stats = await h.modules.listings.maintenance();
     await h.jobs.drain();
-    // Die schon abgelaufene Anzeige bekommt vor dem Ablauf ebenfalls noch eine Erinnerung
-    expect(stats).toMatchObject({ reminders: 2, expired: 1, pausedExpired: 1, purged: 1 });
-    expect(h.mail.to('lea@studmail.hwg-lu.de').some((m) => m.text.includes('Läuft bald ab'))).toBe(true);
-    const status = async (id: string) => (await h.sql(`SELECT status FROM listings.listing WHERE id = $1`, [id]))[0]?.status;
-    expect(await status(expired)).toBe('expired');
-    expect(await status(paused)).toBe('expired');
-    expect(await status(old)).toBe('deleted');
-    expect((await lea.call('POST', `/listings/${expired}/status`, { action: 'extend' })).data.status).toBe('active');
+    expect(stats).toMatchObject({ reminders: 1, expired: 3, autoDeleted: 1 });
+
+    // Tag 14: weiterhin aktiv und für andere sichtbar, Hinweis gesetzt
+    expect(await row(due)).toMatchObject({ status: 'active', paused_reason: null });
+    expect((await row(due)).reminder_sent_at).not.toBeNull();
+    expect((await ben.call('GET', `/listings/${due}`)).status).toBe(200);
+    // Tag 15: automatisch pausiert, für andere 404, beim Anbieter mit Löschdatum
+    expect(await row(grace)).toMatchObject({ status: 'paused', paused_reason: 'auto' });
+    expect((await ben.call('GET', `/listings/${grace}`)).status).toBe(404);
+    const mine = (await lea.call('GET', '/me/listings')).data as { id: string; autoDeleteAt: string | null; renewBy: string | null }[];
+    const deleteAt = new Date(mine.find((c) => c.id === grace)!.autoDeleteAt!).getTime();
+    expect(Math.abs(deleteAt - (Date.now() + 2 * 86_400_000))).toBeLessThan(60_000);
+    expect(new Date(mine.find((c) => c.id === due)!.renewBy!).getTime()).toBeGreaterThan(Date.now() + 23 * 3_600_000);
+    // Tag 17: gelöscht; nach 47 Stunden noch nicht
+    expect((await row(autoOld)).status).toBe('deleted');
+    expect(await row(autoFresh)).toMatchObject({ status: 'paused', paused_reason: 'auto' });
+    // Eigene Pause: nach 90 Tagen wie automatisch pausiert, vorher unverändert
+    expect(await row(ownLong)).toMatchObject({ status: 'paused', paused_reason: 'auto' });
+    expect(await row(ownShort)).toMatchObject({ status: 'paused', paused_reason: 'owner' });
+    // Reserviert und ausgeblendet: Frist ruht; abgelaufene Bestandsanzeige wird automatisch pausiert
+    expect((await row(reserved)).status).toBe('reserved');
+    expect((await row(reserved)).reminder_sent_at).toBeNull();
+    expect((await row(hidden)).reminder_sent_at).toBeNull();
+    expect(await row(legacy)).toMatchObject({ status: 'paused', paused_reason: 'auto' });
+
+    // Idempotent: zweiter Lauf ändert nichts
+    expect(await h.modules.listings.maintenance()).toMatchObject({ reminders: 0, expired: 0, autoDeleted: 0 });
+
+    // Erneuern (aktiv) und Reaktivieren (automatisch pausiert): neue 14-Tage-Frist; nur der Anbieter
+    expect((await ben.call('POST', `/listings/${due}/status`, { action: 'extend' })).status).toBe(404);
+    expect((await lea.call('POST', `/listings/${due}/status`, { action: 'extend' })).data.status).toBe('active');
+    expect((await lea.call('POST', `/listings/${grace}/status`, { action: 'resume' })).data.status).toBe('active');
+    for (const listingId of [due, grace]) {
+      const r = await row(listingId);
+      expect(r).toMatchObject({ status: 'active', paused_reason: null, reminder_sent_at: null });
+      expect(new Date(r.expires_at).getTime()).toBeGreaterThan(Date.now() + 13.9 * 86_400_000);
+    }
+    expect((await ben.call('GET', `/listings/${grace}`)).status).toBe(200);
   });
 
-  it('[AT-LST-008] [AT-PRIV-003] Szenario mit vorgestellter Zeit: Erinnerung, Ablauf, Verlängerung, Pause, Rückfall der Reservierung, Löschfristen für Anzeigen und Konten', async () => {
+  it('[AT-LST-013-2] je Übergang genau eine Benachrichtigung an den Anbieter, E-Mail nur ohne Abbestellung, keine bei eigener Aktion', async () => {
+    const kinds = async () => ((await lea.call('GET', '/me/notifications')).data.items as { kind: string }[]).map((n) => n.kind);
+    const listingId = (await lea.call('POST', '/listings', body({ title: 'Benachrichtigte Anzeige' }))).data.id as string;
+    const mails = () => h.mail.to(lea.email).filter((m) => m.text.includes('Benachrichtigte Anzeige'));
+
+    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 minute' WHERE id = $1`, [listingId]);
+    await h.modules.listings.maintenance();
+    await h.jobs.drain();
+    expect(await kinds()).toEqual(['listing_renewal_due']);
+    expect(mails()).toHaveLength(1);
+
+    // E-Mails abbestellt: die Benachrichtigung in der App kommt trotzdem
+    await lea.call('PATCH', '/me', { notificationPrefs: { newMessage: true, listingExpiry: false } });
+    await h.sql(`UPDATE listings.listing SET reminder_sent_at = now() - interval '25 hours' WHERE id = $1`, [listingId]);
+    await h.modules.listings.maintenance();
+    await h.jobs.drain();
+    expect(await kinds()).toEqual(['listing_auto_paused', 'listing_renewal_due']);
+    expect(mails()).toHaveLength(1);
+
+    // Eigene Aktion (Reaktivieren, Pausieren): keine Benachrichtigung
+    await lea.call('POST', `/listings/${listingId}/status`, { action: 'resume' });
+    await lea.call('POST', `/listings/${listingId}/status`, { action: 'pause' });
+    await h.jobs.drain();
+    expect(await kinds()).toHaveLength(2);
+
+    // Löschung nach automatischer Pause
+    await h.sql(`UPDATE listings.listing SET paused_reason = 'auto', status_changed_at = now() - interval '49 hours' WHERE id = $1`, [listingId]);
+    await h.modules.listings.maintenance();
+    await h.jobs.drain();
+    expect((await kinds())[0]).toBe('listing_deleted');
+    expect(await kinds()).toHaveLength(3);
+  });
+
+  it('[AT-LST-008] [AT-PRIV-003] Szenario mit vorgestellter Zeit: Rückfall der Reservierung, Löschfristen für Anzeigen und Konten (Laufzeit aktiver Anzeigen seit R2: AT-LST-013)', async () => {
     const id = async (title: string) => (await lea.call('POST', '/listings', body({ title }))).data.id as string;
     const status = async (listingId: string) =>
       (await h.sql(`SELECT status FROM listings.listing WHERE id = $1`, [listingId]))[0]?.status as string | undefined;
-    const reminder = await id('Erinnerung fällig');
-    const expiring = await id('Ablaufdatum erreicht');
-    const paused = await id('Neunzig Tage pausiert');
     const reserved = await id('Seit 31 Tagen reserviert');
     const reservedFresh = await id('Seit 29 Tagen reserviert');
-    const expiredOld = await id('Seit 91 Tagen abgelaufen');
     const completedOld = await id('Seit 31 Tagen abgegeben');
     const completedFresh = await id('Seit 29 Tagen abgegeben');
 
-    await lea.call('POST', `/listings/${paused}/status`, { action: 'pause' });
     // Reservierung über den Deal-Kern (REQ-CHAT-011), damit der Rückfall den offenen Deal aufheben muss
     const reserve = async (listingId: string) => {
       const conv = (await ben.call('POST', '/conversations', { listingId, body: 'Reservierst du mir das?', clientMsgId: randomUUID() })).data.conversationId as string;
@@ -254,12 +327,8 @@ describe.skipIf(!integrationAvailable)('Integration listings und search (Postgre
     const conv = await reserve(reserved);
     await reserve(reservedFresh);
 
-    await h.sql(`UPDATE listings.listing SET expires_at = now() + interval '2 days' WHERE id = $1`, [reminder]);
-    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 hour', reminder_sent_at = now() WHERE id = $1`, [expiring]);
-    await h.sql(`UPDATE listings.listing SET status_changed_at = now() - interval '91 days' WHERE id = $1`, [paused]);
     await h.sql(`UPDATE listings.listing SET status_changed_at = now() - interval '31 days' WHERE id = $1`, [reserved]);
     await h.sql(`UPDATE listings.listing SET status_changed_at = now() - interval '29 days' WHERE id = $1`, [reservedFresh]);
-    await h.sql(`UPDATE listings.listing SET status = 'expired', status_changed_at = now() - interval '91 days' WHERE id = $1`, [expiredOld]);
     await h.sql(`UPDATE listings.listing SET status = 'completed', status_changed_at = now() - interval '31 days' WHERE id = $1`, [completedOld]);
     await h.sql(`UPDATE listings.listing SET status = 'completed', status_changed_at = now() - interval '29 days' WHERE id = $1`, [completedFresh]);
     h.jobs.queued = [];
@@ -267,16 +336,7 @@ describe.skipIf(!integrationAvailable)('Integration listings und search (Postgre
     const stats = await h.modules.listings.maintenance();
     const dealEvents = h.jobs.queued.filter((j) => j.name === 'deal-events').map((j) => j.data as { type: string; eventId: string });
     await h.jobs.drain();
-    expect(stats).toMatchObject({ reminders: 1, expired: 1, pausedExpired: 1, reservationFallback: 1, purged: 2 });
-
-    // Erinnerung genau einmal
-    expect(h.mail.to(lea.email).filter((m) => m.subject.includes('Erinnerung fällig'))).toHaveLength(1);
-    // Ablauf aktiver und pausierter Anzeigen; Verlängerung über eine Aktion
-    expect(await status(expiring)).toBe('expired');
-    expect(await status(paused)).toBe('expired');
-    const extended = await lea.call('POST', `/listings/${expiring}/status`, { action: 'extend' });
-    expect(extended.data.status).toBe('active');
-    expect(new Date(extended.data.expiresAt).getTime()).toBeGreaterThan(Date.now() + 59 * 86_400_000);
+    expect(stats).toMatchObject({ reservationFallback: 1, purged: 1 });
 
     // Rückfall: aktiv, wieder in der Suche, offener Deal aufgehoben, Hinweis an den Anbieter, Systemnachricht im Chat
     expect(await status(reserved)).toBe('active');
@@ -292,14 +352,17 @@ describe.skipIf(!integrationAvailable)('Integration listings und search (Postgre
     const search = (await ben.call('GET', `/listings?q=${encodeURIComponent('Seit 31 Tagen reserviert')}`)).data.items as { id: string }[];
     expect(search.map((i) => i.id)).toContain(reserved);
 
-    // Löschfristen Anzeigen: abgelaufen > 90 Tage und abgegeben > 30 Tage gelöscht, jüngere bleiben
-    expect(await status(expiredOld)).toBe('deleted');
+    // Rückfall startet eine neue 14-Tage-Frist (REQ-LST-013)
+    const fallback = (await h.sql(`SELECT expires_at FROM listings.listing WHERE id = $1`, [reserved]))[0];
+    expect(new Date(fallback.expires_at).getTime()).toBeGreaterThan(Date.now() + 13.9 * 86_400_000);
+
+    // Löschfristen Anzeigen: abgegeben > 30 Tage gelöscht, jüngere bleiben
     expect(await status(completedOld)).toBe('deleted');
     expect(await status(completedFresh)).toBe('completed');
 
     // Zweiter Lauf ändert nichts mehr
     const again = await h.modules.listings.maintenance();
-    expect(again).toMatchObject({ reminders: 0, reservationFallback: 0 });
+    expect(again).toMatchObject({ reminders: 0, expired: 0, reservationFallback: 0 });
 
     // Konten: unbestätigt > 7 Tage gelöscht, Löschantrag nach 14 Tagen Karenz vollzogen
     const meta = (await h.client().call('GET', '/meta')).data as { termsVersion: string };

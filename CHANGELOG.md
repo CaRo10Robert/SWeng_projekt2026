@@ -15,6 +15,9 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 - Benachrichtigungen in der App (REQ-NOTI-008, B-74): Seite „Benachrichtigungen“ mit Zähler ungelesener Einträge in der Navigation (Echtzeit), gelesen/ungelesen einzeln und alle, neueste zuerst; Auslöser: Ablauf, Rückfall der Reservierung, Moderation, Widerspruch und jede nicht selbst ausgelöste Deal-Änderung (reserviert, aufgehoben, abgegeben). Löschung nach 90 Tagen und bei Kontolöschung, im Datenexport enthalten. Migration `0006_benachrichtigungen.sql` (neues Schema `notifications`).
 - UML-Sichten der Architektur (B-72, ADR-0023): Paket-, Komponenten-, Klassen-, Zustands- und Verteilungsdiagramme in `docs/03-architektur/uml-sichten.md`, abgeglichen mit Code und dependency-cruiser.
 
+### Changed (R2)
+- **Anzeigen alle 14 Tage erneuern** (REQ-LST-013, B-76, Q-32): nach 14 Tagen Hinweis (App, E-Mail abbestellbar), 24 h später automatisch pausiert und nur für den Anbieter sichtbar, nach 2 weiteren Tagen gelöscht; Erneuern bzw. Reaktivieren mit einem Klick. Ersetzt die Laufzeit von 60 Tagen. Eine eigene Pause hält bis zu 90 Tage. Migration `0007_erneuerung.sql`: aktive Bestandsanzeigen älter als 14 Tage erhalten sofort den Hinweis, abgelaufene werden automatisch pausiert. **Hinweis für bestehende Installationen:** Nicht erneuerte Anzeigen verschwinden nach 3 Tagen.
+
 ### Fixed
 - E-Mail-Zustellung überbrückt wieder einen Mailserver-Ausfall von 30 min (REQ-NOTI-005, ADR-0005): erster Wiederholungsabstand 120 s statt fest 10 s, einstellbar über `MAIL_RETRY_DELAY_SECONDS`.
 - Bestehende Konten einer deaktivierten Domain können sich wieder anmelden; die Deaktivierung sperrt nur neue Registrierungen (REQ-ARCH-003, REQ-MOD-008).

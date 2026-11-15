@@ -158,8 +158,8 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 18 |
-| implemented | Umsetzung | 5 |
+| approved | Konkretisiert (bereit) | 17 |
+| implemented | Umsetzung | 6 |
 | verified | Test | 118 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
@@ -228,7 +228,7 @@ flowchart LR
 | [REQ-LST-010](req/REQ-LST-010.md) | Verbotene Inhalte vor Veröffentlichung in die Moderation | constraint | M | basis | medium | verified | AT-LST-010, AT-LST-010-2 |
 | [REQ-LST-011](req/REQ-LST-011.md) | Höchstens 30 aktive Anzeigen pro Mitglied | functional | S | n/a | low | verified | AT-LST-011 |
 | [REQ-LST-012](req/REQ-LST-012.md) | HEIC-Fotos annehmen | functional | C | leistung | medium | approved | AT-LST-012 |
-| [REQ-LST-013](req/REQ-LST-013.md) | Anzeigen alle 14 Tage erneuern, sonst pausieren und löschen | domain | S | leistung | medium | approved | AT-LST-013, AT-LST-013-2, AT-LST-013-3 |
+| [REQ-LST-013](req/REQ-LST-013.md) | Anzeigen alle 14 Tage erneuern, sonst pausieren und löschen | domain | S | leistung | medium | implemented | AT-LST-013, AT-LST-013-2, AT-LST-013-3 |
 | [REQ-MAINT-001](req/REQ-MAINT-001.md) | Testabdeckung der Fachlogik | quality | S | n/a | medium | verified | CTRL-COVERAGE, CTRL-MUTATION |
 | [REQ-MAINT-002](req/REQ-MAINT-002.md) | Geprüfte Modulgrenzen | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
 | [REQ-MOD-001](req/REQ-MOD-001.md) | Inhalte und Mitglieder melden | functional | M | basis | high | verified | AT-MOD-001, AT-MOD-001-2 |

@@ -14,6 +14,8 @@ export type EmailTemplate =
   | 'password_reset'
   | 'new_message'
   | 'listing_expiry'
+  | 'listing_auto_paused'
+  | 'listing_deleted'
   | 'reservation_expired'
   | 'moderation_decision'
   | 'moderation_report_result'
@@ -39,6 +41,8 @@ export const templateCategory: Record<EmailTemplate, EmailCategory> = {
   password_reset: 'security',
   new_message: 'newMessage',
   listing_expiry: 'listingExpiry',
+  listing_auto_paused: 'listingExpiry',
+  listing_deleted: 'listingExpiry',
   reservation_expired: 'service',
   moderation_decision: 'service',
   moderation_report_result: 'service',
@@ -195,13 +199,30 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
     ],
     action: { label: 'Nachrichten lesen', url: p.link! },
   }),
+  // Erneuerung fällig (REQ-LST-013): 24 h Frist, danach pausiert und 2 Tage später gelöscht
   listing_expiry: (p) => ({
-    subject: `Deine Anzeige „${p.listingTitle}“ läuft bald ab`,
+    subject: `Bitte erneuere deine Anzeige „${p.listingTitle}“`,
     paragraphs: [
       `Hallo ${p.name},`,
-      `deine Anzeige „${p.listingTitle}“ läuft am ${p.date} ab. Mit einem Klick kannst du sie um 60 Tage verlängern.`,
+      `deine Anzeige „${p.listingTitle}“ ist seit 14 Tagen online. Bitte erneuere sie bis ${p.date} mit einem Klick, damit sie weitere 14 Tage sichtbar bleibt. Sonst wird sie pausiert und 2 Tage später gelöscht.`,
     ],
-    action: { label: 'Anzeige verlängern', url: p.link! },
+    action: { label: 'Anzeige erneuern', url: p.link! },
+  }),
+  listing_auto_paused: (p) => ({
+    subject: `Deine Anzeige „${p.listingTitle}“ wurde pausiert`,
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `deine Anzeige „${p.listingTitle}“ wurde nicht erneuert und ist jetzt pausiert. Andere sehen sie nicht mehr. Wenn du sie bis ${p.date} reaktivierst, ist sie wieder 14 Tage online; sonst wird sie gelöscht.`,
+    ],
+    action: { label: 'Meine Anzeigen', url: p.link! },
+  }),
+  listing_deleted: (p) => ({
+    subject: `Deine Anzeige „${p.listingTitle}“ wurde gelöscht`,
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `deine Anzeige „${p.listingTitle}“ war 2 Tage pausiert und wurde jetzt mit ihren Bildern gelöscht. Unterhaltungen dazu bleiben erhalten. Du kannst sie jederzeit neu einstellen.`,
+    ],
+    action: { label: 'Meine Anzeigen', url: p.link! },
   }),
   // Rückfall einer Reservierung nach 30 Tagen (REQ-LST-008)
   reservation_expired: (p) => ({
@@ -330,12 +351,28 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
     action: { label: 'Read messages', url: p.link! },
   }),
   listing_expiry: (p) => ({
-    subject: `Your listing “${p.listingTitle}” expires soon`,
+    subject: `Please renew your listing “${p.listingTitle}”`,
     paragraphs: [
       `Hi ${p.name},`,
-      `your listing “${p.listingTitle}” expires on ${p.date}. You can extend it by 60 days with one click.`,
+      `your listing “${p.listingTitle}” has been online for 14 days. Please renew it by ${p.date} with one click to keep it visible for another 14 days. Otherwise it will be paused and deleted 2 days later.`,
     ],
-    action: { label: 'Extend listing', url: p.link! },
+    action: { label: 'Renew listing', url: p.link! },
+  }),
+  listing_auto_paused: (p) => ({
+    subject: `Your listing “${p.listingTitle}” has been paused`,
+    paragraphs: [
+      `Hi ${p.name},`,
+      `your listing “${p.listingTitle}” was not renewed and is now paused. Others can no longer see it. If you reactivate it by ${p.date}, it will be online for another 14 days; otherwise it will be deleted.`,
+    ],
+    action: { label: 'My listings', url: p.link! },
+  }),
+  listing_deleted: (p) => ({
+    subject: `Your listing “${p.listingTitle}” has been deleted`,
+    paragraphs: [
+      `Hi ${p.name},`,
+      `your listing “${p.listingTitle}” was paused for 2 days and has now been deleted together with its images. Conversations about it are kept. You can post it again at any time.`,
+    ],
+    action: { label: 'My listings', url: p.link! },
   }),
   reservation_expired: (p) => ({
     subject: `Reservation for “${p.listingTitle}” has expired`,

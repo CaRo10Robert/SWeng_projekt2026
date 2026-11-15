@@ -13,6 +13,7 @@ import {
   HWG_INSTITUTION_ID,
 } from './demo-data.js';
 import { loadDemoImage } from './demo-images.js';
+import { LISTING_LIFETIME_DAYS } from '../modules/listings/domain.js';
 
 /** Stammdaten (immer, idempotent): Institution, Whitelist, Campus-Standorte, Kategorien. */
 export async function seedBaseData(database: Database): Promise<void> {
@@ -116,11 +117,13 @@ export async function seedDemoData(deps: ModuleDeps): Promise<void> {
       imageIds,
     });
     listingIds.set(l.title, listing.id);
-    // Realistische Zeitstempel; Ablauf 60 Tage nach Einstellen (eine Anzeige läuft bald ab)
+    // Realistische Zeitstempel. Erneuerung alle 14 Tage (REQ-LST-013): Demo-Anzeigen gelten als regelmäßig erneuert,
+    // die nächste Frist liegt im 14-Tage-Takt; eine Anzeige ist sofort zur Erneuerung fällig.
+    const daysToRenewal = l.renewalDue ? 0 : LISTING_LIFETIME_DAYS - (l.daysAgo % LISTING_LIFETIME_DAYS);
     await db.exec(sql`
       UPDATE listings.listing SET created_at = now() - make_interval(days => ${l.daysAgo}),
         updated_at = now() - make_interval(days => ${l.daysAgo}),
-        expires_at = CASE WHEN status = 'active' THEN now() + make_interval(days => ${60 - l.daysAgo}) ELSE expires_at END
+        expires_at = CASE WHEN status = 'active' THEN now() + make_interval(days => ${daysToRenewal}) - interval '1 minute' * ${l.renewalDue ? 1 : 0} ELSE expires_at END
       WHERE id = ${listing.id}`);
   }
 

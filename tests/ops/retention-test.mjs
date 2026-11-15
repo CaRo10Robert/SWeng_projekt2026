@@ -139,8 +139,10 @@ for (let i = 0; i < 60 && !done; i++) {
   done = gone(`SELECT count(*) FROM identity."user" WHERE id = '${leaverId}'`) && gone(`SELECT count(*) FROM platform.audit_log WHERE id = '${auditId}'`);
 }
 
-const pausedStatus = psql(`SELECT status FROM listings.listing WHERE id = '${paused.id}'`);
-check('Anzeigen: pausiert seit 90 Tagen → abgelaufen (REQ-PRIV-003)', pausedStatus === 'expired', pausedStatus);
+// Seit REQ-LST-013 (Q-32): Ausgelaufen = pausiert; eine eigene Pause von 90 Tagen wird zur automatischen Pause
+// und 2 Tage später gelöscht
+const pausedStatus = psql(`SELECT status || '/' || COALESCE(paused_reason, '') FROM listings.listing WHERE id = '${paused.id}'`);
+check('Anzeigen: selbst pausiert seit 90 Tagen → automatisch pausiert, Löschung nach 2 Tagen (REQ-LST-013, REQ-PRIV-003)', pausedStatus === 'paused/auto', pausedStatus);
 const unverifiedCount = psql(`SELECT count(*) FROM identity."user" WHERE email = '${unverified}'`);
 check('Konten: unbestätigt seit 7 Tagen → gelöscht', unverifiedCount === '0', unverifiedCount);
 

@@ -4,8 +4,28 @@ import type { ListingAction, ListingStatus, PriceType } from '@campusmarkt/contr
 export type StoredStatus = ListingStatus | 'deleted';
 
 export const MAX_ACTIVE_LISTINGS = 30;
-export const LISTING_LIFETIME_DAYS = 60;
-export const EXPIRY_REMINDER_DAYS = 7;
+/**
+ * Erneuerung aktiver Anzeigen (REQ-LST-013, Q-32): nach 14 Tagen Hinweis, 24 h später automatisch pausiert,
+ * 2 Tage danach gelöscht. Jede Rückkehr nach „aktiv“ startet eine neue Frist.
+ */
+export const LISTING_LIFETIME_DAYS = 14;
+export const RENEWAL_GRACE_HOURS = 24;
+export const AUTO_PAUSE_DELETE_DAYS = 2;
+/** Eine selbst gewählte Pause hält bis zu 90 Tage und folgt danach der automatischen Pause. */
+export const OWNER_PAUSE_MAX_DAYS = 90;
+
+/** Fristen für die Anzeige beim Anbieter: „bis … erneuern“ bzw. „wird am … gelöscht“. */
+export function lifecycleDates(r: {
+  status: StoredStatus;
+  reminderSentAt: Date | null;
+  pausedReason: 'owner' | 'auto' | null;
+  statusChangedAt: Date;
+}): { renewBy: Date | null; autoDeleteAt: Date | null } {
+  const renewBy = r.status === 'active' && r.reminderSentAt ? new Date(r.reminderSentAt.getTime() + RENEWAL_GRACE_HOURS * 3_600_000) : null;
+  const autoDeleteAt =
+    r.status === 'paused' && r.pausedReason === 'auto' ? new Date(r.statusChangedAt.getTime() + AUTO_PAUSE_DELETE_DAYS * 86_400_000) : null;
+  return { renewBy, autoDeleteAt };
+}
 /** Reservierungen fallen nach 30 Tagen ohne Abgabe auf „aktiv“ zurück (REQ-LST-008, REQ-PRIV-003). */
 export const RESERVATION_FALLBACK_DAYS = 30;
 

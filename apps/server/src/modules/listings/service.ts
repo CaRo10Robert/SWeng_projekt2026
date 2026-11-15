@@ -22,7 +22,10 @@ import {
   checkPrice,
   COUNTED_STATUSES,
   EDITABLE_STATUSES,
-  EXPIRY_REMINDER_DAYS,
+  AUTO_PAUSE_DELETE_DAYS,
+  lifecycleDates,
+  OWNER_PAUSE_MAX_DAYS,
+  RENEWAL_GRACE_HOURS,
   findProhibitedTerms,
   IMAGE_SIZES,
   LISTING_LIFETIME_DAYS,
@@ -58,8 +61,14 @@ interface ListingRow {
   created_at: string;
   updated_at: string;
   expires_at: string | null;
+  reminder_sent_at?: string | null;
+  paused_reason?: 'owner' | 'auto' | null;
+  status_changed_at?: string;
   thumb_id: string | null;
 }
+
+/** Neue 14-Tage-Frist bei jeder Rückkehr nach „aktiv“ (REQ-LST-013). */
+const RENEW = sql`expires_at = now() + make_interval(days => ${LISTING_LIFETIME_DAYS}), reminder_sent_at = NULL, paused_reason = NULL`;
 
 interface ImageRow {
   id: string;
@@ -87,6 +96,15 @@ export const toCard = (r: ListingRow): ListingCard => ({
   thumbnailUrl: r.thumb_id ? `${mediaUrl(r.thumb_id)}/sm` : null,
   createdAt: r.created_at,
   expiresAt: r.expires_at,
+  ...(() => {
+    const d = lifecycleDates({
+      status: r.status,
+      reminderSentAt: r.reminder_sent_at ? new Date(r.reminder_sent_at) : null,
+      pausedReason: r.paused_reason ?? null,
+      statusChangedAt: new Date(r.status_changed_at ?? r.updated_at),
+    });
+    return { renewBy: d.renewBy?.toISOString() ?? null, autoDeleteAt: d.autoDeleteAt?.toISOString() ?? null };
+  })(),
 });
 
 
@@ -295,10 +313,12 @@ export function createListingsService(deps: ModuleDeps) {
         const current = await loadOwned(auth, id, tx);
         const next = nextStatus(current.status, action);
         if (!next) throw conflict('invalid_transition', 'Diese Aktion ist im aktuellen Zustand nicht möglich.');
-        const extend = action === 'extend' || (action === 'resume' && current.expires_at && current.expires_at < new Date().toISOString());
+        // Erneuern, Reaktivieren und Aufheben der Reservierung starten eine neue Frist (REQ-LST-013); eigene Aktion: keine Benachrichtigung
+        const renew = next === 'active';
         await tx.db.exec(sql`
           UPDATE listings.listing SET status = ${next}, status_changed_at = now(), updated_at = now()
-            ${extend ? sql`, expires_at = now() + make_interval(days => ${LISTING_LIFETIME_DAYS}), reminder_sent_at = NULL` : empty}
+            ${renew ? sql`, ${RENEW}` : empty}
+            ${action === 'pause' ? sql`, paused_reason = 'owner'` : empty}
           WHERE id = ${id}`);
         if (action === 'complete' || action === 'unreserve') {
           await modules.messaging.onListingStatusChanged(tx, id, next);
@@ -385,6 +405,7 @@ export function createListingsService(deps: ModuleDeps) {
     async setStatusFromDeal(tx: Tx, id: string, status: 'active' | 'reserved' | 'completed'): Promise<void> {
       await tx.db.exec(sql`
         UPDATE listings.listing SET status = ${status}, status_changed_at = now(), updated_at = now()
+          ${status === 'active' ? sql`, ${RENEW}` : empty}
         WHERE id = ${id} AND status IN ('active', 'reserved')`);
     },
 
@@ -398,8 +419,7 @@ export function createListingsService(deps: ModuleDeps) {
     },
     async approveFromReview(tx: Tx, id: string) {
       await tx.db.exec(sql`
-        UPDATE listings.listing SET status = 'active', hidden = false, status_changed_at = now(),
-          expires_at = now() + make_interval(days => ${LISTING_LIFETIME_DAYS})
+        UPDATE listings.listing SET status = 'active', hidden = false, status_changed_at = now(), ${RENEW}
         WHERE id = ${id} AND status = 'in_review'`);
       await tx.db.exec(sql`UPDATE listings.listing SET hidden = false WHERE id = ${id}`);
     },
@@ -532,23 +552,63 @@ export function createListingsService(deps: ModuleDeps) {
     // ------------------------------------------------------------ Lebenszyklus (REQ-LST-008)
     async maintenance(): Promise<Record<string, number>> {
       const stats: Record<string, number> = {};
-      const reminders = await db.query<{ id: string; owner_id: string; title: string; expires_at: string }>(sql`
+      const link = (id: string) => `${deps.config.publicUrl}/listings/${id}`;
+      // ---- Erneuerung (REQ-LST-013, Q-32). Bedingte Updates mit RETURNING: idempotent, je Frist genau ein Hinweis.
+      // (a) Tag 14: Erneuerung fällig, die Anzeige bleibt 24 h aktiv. Ausgeblendete Anzeigen: Frist ruht.
+      const due = await db.query<{ id: string; owner_id: string; title: string; reminder_sent_at: string }>(sql`
         UPDATE listings.listing SET reminder_sent_at = now()
-        WHERE status = 'active' AND reminder_sent_at IS NULL
-          AND expires_at < now() + make_interval(days => ${EXPIRY_REMINDER_DAYS})
-        RETURNING id, owner_id, title, expires_at`);
-      for (const r of reminders) {
+        WHERE status = 'active' AND reminder_sent_at IS NULL AND expires_at <= now() AND NOT hidden
+        RETURNING id, owner_id, title, reminder_sent_at`);
+      for (const r of due) {
+        const renewBy = new Date(new Date(r.reminder_sent_at).getTime() + RENEWAL_GRACE_HOURS * 3_600_000).toISOString();
         await modules.notifications.email(undefined, { userId: r.owner_id }, 'listing_expiry', {
           listingTitle: r.title,
-          dateIso: new Date(r.expires_at).toISOString(),
-          link: `${deps.config.publicUrl}/listings/${r.id}`,
+          dateIso: renewBy,
+          link: link(r.id),
         });
-        await modules.notifications.notify(undefined, r.owner_id, 'listing_expiry', { listingId: r.id, listingTitle: r.title });
+        await modules.notifications.notify(undefined, r.owner_id, 'listing_renewal_due', { listingId: r.id, listingTitle: r.title, dueAt: renewBy });
       }
-      stats.reminders = reminders.length;
-      stats.expired = await db.exec(sql`
-        UPDATE listings.listing SET status = 'expired', status_changed_at = now()
-        WHERE status = 'active' AND expires_at < now()`);
+      stats.reminders = due.length;
+      // (b) Tag 15: nicht erneuert → automatisch pausiert (Ausgelaufen = pausiert), nur für den Anbieter sichtbar.
+      //     Ebenso eine eigene Pause nach 90 Tagen und abgelaufene Bestandsanzeigen (Einführung von REQ-LST-013).
+      const autoPaused = await db.query<{ id: string; owner_id: string; title: string }>(sql`
+        UPDATE listings.listing SET status = 'paused', paused_reason = 'auto', status_changed_at = now(), updated_at = now()
+        WHERE (status = 'active' AND reminder_sent_at <= now() - make_interval(hours => ${RENEWAL_GRACE_HOURS}) AND NOT hidden)
+           OR (status = 'paused' AND COALESCE(paused_reason, 'owner') = 'owner'
+               AND status_changed_at < now() - make_interval(days => ${OWNER_PAUSE_MAX_DAYS}))
+           OR status = 'expired'
+        RETURNING id, owner_id, title`);
+      const deleteAt = new Date(Date.now() + AUTO_PAUSE_DELETE_DAYS * 86_400_000).toISOString();
+      for (const r of autoPaused) {
+        await modules.notifications.email(undefined, { userId: r.owner_id }, 'listing_auto_paused', {
+          listingTitle: r.title,
+          dateIso: deleteAt,
+          link: `${deps.config.publicUrl}/me/listings`,
+        });
+        await modules.notifications.notify(undefined, r.owner_id, 'listing_auto_paused', { listingId: r.id, listingTitle: r.title, dueAt: deleteAt });
+      }
+      stats.expired = autoPaused.length;
+      // (c) Tag 17: 2 Tage automatisch pausiert → gelöscht inkl. Bilder. Gesicherte Anzeigen (REQ-LEGAL-008) bleiben.
+      const heldForRenewal = await modules.trust.heldTargetIds('listing');
+      const toDelete = await db.query<{ id: string; owner_id: string; title: string }>(sql`
+        SELECT id, owner_id, title FROM listings.listing
+        WHERE status = 'paused' AND paused_reason = 'auto'
+          AND status_changed_at <= now() - make_interval(days => ${AUTO_PAUSE_DELETE_DAYS})
+          AND id <> ALL(${heldForRenewal}::uuid[])`);
+      for (const r of toDelete) {
+        const deleted = await database.tx(async (tx) => {
+          const still = await tx.db.one(sql`
+            SELECT 1 FROM listings.listing WHERE id = ${r.id} AND status = 'paused' AND paused_reason = 'auto' FOR UPDATE`);
+          if (!still) return false;
+          await softDelete(tx, [r.id]);
+          await modules.messaging.onListingStatusChanged(tx, r.id, 'deleted');
+          await modules.notifications.email(tx, { userId: r.owner_id }, 'listing_deleted', { listingTitle: r.title, link: `${deps.config.publicUrl}/me/listings` });
+          await modules.notifications.notify(tx, r.owner_id, 'listing_deleted', { listingTitle: r.title });
+          return true;
+        });
+        if (deleted) stats.autoDeleted = (stats.autoDeleted ?? 0) + 1;
+      }
+      stats.autoDeleted ??= 0;
       // Reservierungen fallen nach 30 Tagen ohne Abgabe zurück (REQ-LST-008, REQ-PRIV-003): offener Deal wird storniert,
       // der Anbieter erhält einen Hinweis. Gesicherte Anzeigen (REQ-LEGAL-008) bleiben unverändert.
       const heldForFallback = await modules.trust.heldTargetIds('listing');
@@ -561,7 +621,7 @@ export function createListingsService(deps: ModuleDeps) {
         const outcome = await database.tx(async (tx) => {
           // Bedingtes Update macht den Lauf idempotent, auch bei parallelen Wartungsläufen
           const row = await tx.db.one<{ owner_id: string; title: string }>(sql`
-            UPDATE listings.listing SET status = 'active', status_changed_at = now(), updated_at = now()
+            UPDATE listings.listing SET status = 'active', status_changed_at = now(), updated_at = now(), ${RENEW}
             WHERE id = ${id} AND status = 'reserved'
               AND status_changed_at < now() - make_interval(days => ${RESERVATION_FALLBACK_DAYS})
             RETURNING owner_id, title`);
@@ -579,10 +639,7 @@ export function createListingsService(deps: ModuleDeps) {
         await modules.messaging.publishSystemMessages(outcome);
       }
       stats.reservationFallback = fallbacks;
-      // Pausierte Anzeigen laufen nach 90 Tagen Pause ab (REQ-PRIV-003, Zustandsmodell)
-      stats.pausedExpired = await db.exec(sql`
-        UPDATE listings.listing SET status = 'expired', status_changed_at = now()
-        WHERE status = 'paused' AND status_changed_at < now() - interval '90 days'`);
+      // Eigene Pause nach 90 Tagen: oben in (b) als automatische Pause (REQ-LST-013 löst REQ-LST-008 hier ab)
       // Löschfristen: abgelaufen 90 Tage, abgegeben 30 Tage (Zustandsmodell); gesicherte Anzeigen
       // (Verdacht auf Straftat, REQ-LEGAL-008) bleiben bis zur Freigabe erhalten
       const held = await modules.trust.heldTargetIds('listing');

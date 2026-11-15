@@ -81,11 +81,11 @@ describe.skipIf(!integrationAvailable)('Integration notifications (PostgreSQL)',
 
     // Ablauf-Erinnerung: 7 Tage vor Ablauf
     const lamp = await listing(lea, 'Schreibtischlampe');
-    await h.sql(`UPDATE listings.listing SET expires_at = now() + interval '3 days' WHERE id = $1`, [lamp]);
+    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 minute' WHERE id = $1`, [lamp]);
     mark = h.mail.sent.length;
     await h.modules.listings.maintenance();
     await h.jobs.drain();
-    expectMail(mark, 'lea@studmail.hwg-lu.de', /„Schreibtischlampe“ läuft bald ab/);
+    expectMail(mark, 'lea@studmail.hwg-lu.de', /Bitte erneuere deine Anzeige „Schreibtischlampe“/);
 
     // Moderationsentscheidung: Anzeige nach Meldung entfernt, Mail mit Entscheidung und Begründung
     const mod = await h.staff('mod@hwg-lu.de', 'moderator');
@@ -133,7 +133,7 @@ describe.skipIf(!integrationAvailable)('Integration notifications (PostgreSQL)',
     expect(await unread(lea)).toBe(0);
 
     // Ablauf-Erinnerung
-    await h.sql(`UPDATE listings.listing SET expires_at = now() + interval '3 days' WHERE id = $1`, [lamp]);
+    await h.sql(`UPDATE listings.listing SET expires_at = now() - interval '1 minute' WHERE id = $1`, [lamp]);
     await h.modules.listings.maintenance();
     // Moderationsentscheidung: Betroffene und Meldende
     const mod = await h.staff('mod@hwg-lu.de', 'moderator');
@@ -149,7 +149,7 @@ describe.skipIf(!integrationAvailable)('Integration notifications (PostgreSQL)',
     expect(await unread(ben)).toBe(1);
     expect(events.filter((e) => e.type === 'notifications').at(-1)?.unread).toBe(2);
     const all = await list(lea);
-    expect(all.items.map((n) => n.kind)).toEqual(['moderation_notice', 'listing_expiry']);
+    expect(all.items.map((n) => n.kind)).toEqual(['moderation_notice', 'listing_renewal_due']);
     expect(all.items[0]!.data).toMatchObject({ listingId: book, listingTitle: 'Lehrbuch mit Lösungen' });
     expect(all.items[1]!.data).toMatchObject({ listingId: lamp, listingTitle: 'Schreibtischlampe' });
     expect(JSON.stringify(all)).not.toContain('4711');

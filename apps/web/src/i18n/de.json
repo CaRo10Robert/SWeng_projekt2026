@@ -361,7 +361,7 @@
   "home.title": "Kaufen, verkaufen und tauschen – direkt auf dem Campus",
   "language.label": "Sprache",
   "listing.action.complete": "Als abgegeben markieren",
-  "listing.action.extend": "Um 60 Tage verlängern",
+  "listing.action.extend": "Erneuern (14 Tage)",
   "listing.action.pause": "Pausieren",
   "listing.action.reserve": "Als reserviert markieren",
   "listing.action.resume": "Reaktivieren",
@@ -397,7 +397,7 @@
   "listing.owner.deleteText": "„{title}“ wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
   "listing.owner.deleteTitle": "Anzeige löschen?",
   "listing.owner.edit": "Bearbeiten",
-  "listing.owner.expiresOn": "Läuft ab am {date}.",
+  "listing.owner.expiresOn": "Online bis {date}; dann bitte erneuern.",
   "listing.owner.inReview": "Diese Anzeige wird vor der Veröffentlichung von der Moderation geprüft.",
   "listing.owner.manage": "Deine Anzeige verwalten",
   "listing.owner.removed": "Diese Anzeige wurde von der Moderation entfernt.",
@@ -672,5 +672,9 @@
   "notifications.kind.listing_deleted": "„{title}“ wurde gelöscht, weil sie nicht erneuert wurde.",
   "notifications.kind.deal_reserved": "„{title}“ wurde für dich reserviert.",
   "notifications.kind.deal_cancelled": "Die Reservierung von „{title}“ wurde aufgehoben.",
-  "notifications.kind.deal_completed": "„{title}“ wurde als an dich abgegeben markiert."
+  "notifications.kind.deal_completed": "„{title}“ wurde als an dich abgegeben markiert.",
+  "listing.owner.renewBy": "Bitte erneuere die Anzeige bis {date}, sonst wird sie pausiert und 2 Tage später gelöscht.",
+  "listing.owner.autoDeleteAt": "Pausiert, weil sie nicht erneuert wurde. Wird am {date} gelöscht – reaktiviere sie, um sie wieder 14 Tage zu zeigen.",
+  "listing.card.renewBy": "Bis {date} erneuern",
+  "listing.card.autoDeleteAt": "Wird am {date} gelöscht"
 }

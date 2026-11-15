@@ -361,7 +361,7 @@
   "home.title": "Buy, sell and swap – right on campus",
   "language.label": "Language",
   "listing.action.complete": "Mark as handed over",
-  "listing.action.extend": "Extend by 60 days",
+  "listing.action.extend": "Renew (14 days)",
   "listing.action.pause": "Pause",
   "listing.action.reserve": "Mark as reserved",
   "listing.action.resume": "Reactivate",
@@ -397,7 +397,7 @@
   "listing.owner.deleteText": "“{title}” will be permanently deleted. This cannot be undone.",
   "listing.owner.deleteTitle": "Delete listing?",
   "listing.owner.edit": "Edit",
-  "listing.owner.expiresOn": "Expires on {date}.",
+  "listing.owner.expiresOn": "Online until {date}; please renew then.",
   "listing.owner.inReview": "This listing will be reviewed by moderation before it is published.",
   "listing.owner.manage": "Manage your listing",
   "listing.owner.removed": "This listing was removed by moderation.",
@@ -672,5 +672,9 @@
   "notifications.kind.listing_deleted": "“{title}” was deleted because it was not renewed.",
   "notifications.kind.deal_reserved": "“{title}” has been reserved for you.",
   "notifications.kind.deal_cancelled": "The reservation of “{title}” was cancelled.",
-  "notifications.kind.deal_completed": "“{title}” was marked as handed over to you."
+  "notifications.kind.deal_completed": "“{title}” was marked as handed over to you.",
+  "listing.owner.renewBy": "Please renew this listing by {date}, otherwise it will be paused and deleted 2 days later.",
+  "listing.owner.autoDeleteAt": "Paused because it was not renewed. Will be deleted on {date} – reactivate it to show it for another 14 days.",
+  "listing.card.renewBy": "Renew by {date}",
+  "listing.card.autoDeleteAt": "Will be deleted on {date}"
 }
