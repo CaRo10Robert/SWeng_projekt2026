@@ -3,7 +3,7 @@ id: REQ-LST-013
 title: Anzeigen alle 14 Tage erneuern, sonst pausieren und löschen
 type: business-rule
 class: domain
-status: implemented
+status: verified
 owner: team-anzeigen
 risk: medium
 release: R2
@@ -13,9 +13,9 @@ epic: EPIC-02
 source: Auftraggeber (2026-11-13, Q-32)
 use_cases: [UC-11, UC-17]
 depends_on: [REQ-LST-008, REQ-NOTI-008, REQ-PRIV-003]
-version: 1.1
+version: 1.2
 created: 2026-11-13
-last_updated: 2026-11-13
+last_updated: 2026-11-15
 verification: [AT-LST-013, AT-LST-013-2, AT-LST-013-3]
 ---
 
@@ -102,3 +102,4 @@ Szenario: Löschung
 |---|---|---|
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-32): Erneuerung alle 14 Tage, Ausgelaufen = pausiert, Löschung nach 2 Tagen, Benachrichtigung bei jedem Schritt; Freigabe Product Owner |
 | 1.1 | 2026-11-13 | Umgesetzt (B-76): Migration `0007_erneuerung.sql` (`paused_reason`, Übernahme der Bestandsanzeigen), Lebenszyklus-Lauf mit Hinweis, automatischer Pause und Löschung, neue Frist bei jeder Rückkehr nach „aktiv“, Mails „Erneuerung fällig“, „pausiert“, „gelöscht“, Hinweise in Anzeige und „Meine Anzeigen“. Demo-Daten im 14-Tage-Takt, eine Anzeige sofort fällig. AT-LST-013 bis -3 grün. Status implemented; verified mit B-73 (Beenden offener Kaufangebote beim Pausieren) |
+| 1.2 | 2026-11-15 | Beenden offener Kaufangebote beim automatischen Pausieren mit B-73 umgesetzt und in AT-CHAT-009 geprüft; Status → verified |

@@ -55,6 +55,11 @@ export const ROUTES = {
   sendMessage: 'POST /conversations/:id/messages SendMessageBody → 201 Message (idempotent über clientMsgId)',
   markRead: 'POST /conversations/:id/read → 204',
   deal: 'POST /conversations/:id/deal DealActionBody → Deal (nur Anbieter)',
+  createOffer: 'POST /listings/:id/offers CreateOfferBody → 201 OfferResult | 422 offer_not_possible | invalid_amount | 409 listing_unavailable | 403 contact_not_possible (REQ-CHAT-009)',
+  acceptOffer: 'POST /offers/:id/accept → 200 Message | 403 not_your_turn | 409 offer_closed | listing_unavailable',
+  declineOffer: 'POST /offers/:id/decline → 200 Message | 403 not_your_turn | 409 offer_closed',
+  counterOffer: 'POST /offers/:id/counter CounterOfferBody → 201 Message | 403 not_your_turn | 409 offer_closed',
+  withdrawOffer: 'POST /offers/:id/withdraw → 200 Message | 403 (nur Absender) | 409 offer_closed',
   contact: 'POST /conversations/:id/contact ContactActionBody → ContactShare | 403 contact_not_possible | 429 contact_request_limit | 409 invalid_contact_action (REQ-CHAT-010)',
   unread: 'GET /me/unread → UnreadCount',
 

@@ -3,7 +3,7 @@ id: REQ-NOTI-008
 title: Benachrichtigungen in der App mit gelesen und ungelesen
 type: user-story
 class: functional
-status: implemented
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R2
@@ -13,9 +13,9 @@ epic: EPIC-05
 source: Auftraggeber (2026-11-13, Q-31)
 use_cases: [UC-23]
 depends_on: [REQ-NOTI-001, REQ-LEGAL-006, REQ-PRIV-003, REQ-CHAT-011, REQ-LST-013]
-version: 1.2
+version: 1.3
 created: 2026-11-13
-last_updated: 2026-11-13
+last_updated: 2026-11-15
 review_due: 2027-04-23
 verification: [AT-NOTI-008, AT-NOTI-008-2, AT-NOTI-008-3]
 ---
@@ -108,3 +108,4 @@ I: eigene Ansicht, Ereignisse aus vorhandenen Abläufen · N: Arten erweiterbar 
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-31); Freigabe Product Owner |
 | 1.1 | 2026-11-13 | Grundregel „jede nicht selbst ausgelöste Zustandsänderung an Anzeige und Deal“ mit Entscheidungstabelle (Q-32); Arten für Erneuerung, automatische Pause, Löschung und Deal-Schritte; Nachweis AT-NOTI-008-3 |
 | 1.2 | 2026-11-13 | Umgesetzt (B-74): Schema `notifications`, API `GET /me/notifications`, `GET /me/notifications/unread`, `PUT /me/notifications/:id/read`, `POST /me/notifications/read-all`, Echtzeit-Ereignis `notifications`, Seite „Benachrichtigungen“ mit Zähler in der Navigation, Löschung nach 90 Tagen; Auslöser Ablauf, Reservierung, Moderation, Widerspruch und Deal-Schritte. Nachweise AT-NOTI-008 bis -3 grün. Status implemented; verified, sobald die Arten aus REQ-CHAT-009 (B-73) und REQ-LST-013 (B-76) ausgelöst werden |
+| 1.3 | 2026-11-15 | Mit B-73 und B-76 lösen alle Arten aus (Kaufangebot, Gegenangebot, angenommen, abgelehnt, nicht mehr verfügbar, Erneuerung, automatische Pause, Löschung); Status → verified |

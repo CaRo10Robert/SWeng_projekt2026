@@ -1,4 +1,4 @@
-import type { ContactShare, ConversationSummary, Deal, DealActionBody, Message, ServerEvent, SystemCode } from '@campusmarkt/contracts';
+import type { ContactShare, ConversationSummary, Deal, DealActionBody, Message, OfferStatus, ServerEvent, SystemCode } from '@campusmarkt/contracts';
 import type { Tx } from '../../platform/db.js';
 import { AppError, conflict, forbidden, notFound, rateLimited, unprocessable } from '../../platform/errors.js';
 import type { AuthContext } from '../../platform/http/auth.js';
@@ -36,12 +36,41 @@ interface MessageRow {
   conversation_id: string;
   sender_id: string;
   client_msg_id: string;
-  kind: 'text' | 'system';
+  kind: 'text' | 'system' | 'offer';
   body: string;
   created_at: string;
   read_at: string | null;
   system_code: SystemCode | null;
+  /** Aus dem LEFT JOIN auf messaging.offer (nur bei kind = offer) */
+  offer_id?: string | null;
+  offer_sender_id?: string | null;
+  offer_recipient_id?: string | null;
+  offer_amount_cents?: number | null;
+  offer_currency?: string | null;
+  offer_status?: OfferStatus | null;
+  offer_counter?: boolean | null;
 }
+
+interface OfferRow {
+  id: string;
+  conversation_id: string;
+  listing_id: string;
+  message_id: string;
+  sender_id: string;
+  recipient_id: string;
+  amount_cents: number;
+  currency: string;
+  status: OfferStatus;
+  parent_id: string | null;
+}
+
+/** Spalten des Angebots zu einer Nachricht (LEFT JOIN messaging.offer o). */
+const OFFER_COLUMNS = sql`o.id AS offer_id, o.sender_id AS offer_sender_id, o.recipient_id AS offer_recipient_id,
+  o.amount_cents AS offer_amount_cents, o.currency AS offer_currency, o.status AS offer_status, (o.parent_id IS NOT NULL) AS offer_counter`;
+
+const euro = (cents: number) => `${(cents / 100).toFixed(2).replace('.', ',')} €`;
+/** Lesbarer Text der Angebotsnachricht (Vorschau, Export); die Oberfläche zeigt die strukturierten Felder. */
+const offerText = (counter: boolean, cents: number) => `${counter ? 'Gegenangebot' : 'Kaufangebot'}: ${euro(cents)}`;
 
 interface DealRow {
   id: string;
@@ -66,6 +95,18 @@ const toMessage = (m: MessageRow): Message => ({
   readAt: m.read_at,
   safetyHint: m.kind === 'text' && needsSafetyHint(m.body),
   systemCode: m.kind === 'system' ? (m.system_code ?? null) : null,
+  offer:
+    m.kind === 'offer' && m.offer_id
+      ? {
+          id: m.offer_id,
+          senderId: m.offer_sender_id!,
+          recipientId: m.offer_recipient_id!,
+          amountCents: m.offer_amount_cents!,
+          currency: m.offer_currency!.trim(),
+          status: m.offer_status!,
+          counter: !!m.offer_counter,
+        }
+      : null,
 });
 
 const toDeal = (d: DealRow): Deal => ({
@@ -124,7 +165,7 @@ export function createMessagingService(deps: ModuleDeps) {
     senderId: string,
     clientMsgId: string,
     body: string,
-    kind: 'text' | 'system' = 'text',
+    kind: 'text' | 'system' | 'offer' = 'text',
     systemCode: SystemCode | null = null,
   ): Promise<{ message: MessageRow; created: boolean }> {
     const inserted = await tx.db.one<MessageRow>(sql`
@@ -138,7 +179,7 @@ export function createMessagingService(deps: ModuleDeps) {
     }
     await tx.db.exec(sql`UPDATE messaging.conversation SET last_message_at = now() WHERE id = ${conv.id}`);
     const recipient = senderId === conv.buyer_id ? conv.seller_id : conv.buyer_id;
-    if (kind === 'text') {
+    if (kind === 'text' || kind === 'offer') {
       await tx.enqueue(
         NOTIFY_UNREAD,
         { conversationId: conv.id, recipientId: recipient },
@@ -159,6 +200,61 @@ export function createMessagingService(deps: ModuleDeps) {
     const dto = toMessage(message);
     if (created) await publish([counterpartId, auth.userId], { type: 'message', message: dto });
     return dto;
+  }
+
+  /** Eine Nachricht mit Angebot (für Antworten und Echtzeit). */
+  async function loadMessage(id: string, tx?: Tx): Promise<Message> {
+    const row = await (tx?.db ?? db).one<MessageRow>(sql`
+      SELECT m.*, ${OFFER_COLUMNS} FROM messaging.message m LEFT JOIN messaging.offer o ON o.message_id = m.id WHERE m.id = ${id}`);
+    return toMessage(row!);
+  }
+
+  /** Angebotsdaten für Benachrichtigungen (REQ-NOTI-008): nur Verweise, Titel und Betrag. */
+  async function offerData(offer: Pick<OfferRow, 'listing_id' | 'conversation_id' | 'amount_cents' | 'currency'>) {
+    const listing = await modules.listings.summary(offer.listing_id);
+    return {
+      listingId: offer.listing_id,
+      ...(listing ? { listingTitle: listing.title } : {}),
+      conversationId: offer.conversation_id,
+      amountCents: offer.amount_cents,
+      currency: offer.currency.trim(),
+    };
+  }
+
+  /**
+   * Offene Angebote einer Anzeige beenden, weil sie nicht mehr verfügbar ist (REQ-CHAT-009 „nicht mehr verfügbar“).
+   * Die Absender erhalten eine Benachrichtigung, außer in der Konversation, deren Deal den Zustand gerade ändert.
+   */
+  async function closeOffers(tx: Tx, listingId: string, exceptConversationId?: string) {
+    const closed = await tx.db.query<OfferRow>(sql`
+      UPDATE messaging.offer SET status = 'unavailable', decided_at = now()
+      WHERE listing_id = ${listingId} AND status = 'open' RETURNING *`);
+    for (const o of closed) {
+      if (o.conversation_id === exceptConversationId) continue;
+      await modules.notifications.notify(tx, o.sender_id, 'offer_unavailable', await offerData(o));
+      tx.afterCommit(() => publish([o.sender_id, o.recipient_id], { type: 'conversation', conversationId: o.conversation_id }));
+    }
+  }
+
+  /** Neues Angebot in einer Konversation; ersetzt das eigene offene (zurückgezogen) bzw. beantwortet das der Gegenseite. */
+  async function placeOffer(tx: Tx, conv: ConversationRow, senderId: string, amountCents: number, currency: string, clientMsgId: string) {
+    const recipientId = senderId === conv.buyer_id ? conv.seller_id : conv.buyer_id;
+    const open = await tx.db.one<OfferRow>(sql`
+      SELECT * FROM messaging.offer WHERE conversation_id = ${conv.id} AND status = 'open' FOR UPDATE`);
+    const counter = !!open && open.sender_id !== senderId;
+    const { message, created } = await insertMessage(tx, conv, senderId, clientMsgId, offerText(counter, amountCents), 'offer');
+    if (!created) return { message, created };
+    if (open) {
+      await tx.db.exec(sql`
+        UPDATE messaging.offer SET status = ${counter ? 'countered' : 'withdrawn'}, decided_at = now() WHERE id = ${open.id}`);
+    }
+    const offer = (await tx.db.one<OfferRow>(sql`
+      INSERT INTO messaging.offer (conversation_id, listing_id, message_id, sender_id, recipient_id, amount_cents, currency, parent_id)
+      VALUES (${conv.id}, ${conv.listing_id}, ${message.id}, ${senderId}, ${recipientId}, ${amountCents}, ${currency}, ${counter ? open!.id : null})
+      RETURNING *`))!;
+    // Grundregel REQ-NOTI-008: die Gegenseite hat das Angebot nicht selbst ausgelöst
+    await modules.notifications.notify(tx, recipientId, counter ? 'offer_countered' : 'offer_received', await offerData(offer));
+    return { message, created };
   }
 
   /** Neueste Deals mehrerer Konversationen in einer Abfrage, offene zuerst. */
@@ -335,7 +431,8 @@ export function createMessagingService(deps: ModuleDeps) {
         : empty;
       const rows = await db.query<MessageRow>(sql`
         SELECT * FROM (
-          SELECT m.* FROM messaging.message m WHERE m.conversation_id = ${id} ${cursor}
+          SELECT m.*, ${OFFER_COLUMNS} FROM messaging.message m LEFT JOIN messaging.offer o ON o.message_id = m.id
+          WHERE m.conversation_id = ${id} ${cursor}
           ORDER BY m.created_at ${after ? sql`ASC` : sql`DESC`}, m.id LIMIT ${max}
         ) m ORDER BY m.created_at ASC, m.id ASC`);
       return rows.map(toMessage);
@@ -412,6 +509,7 @@ export function createMessagingService(deps: ModuleDeps) {
         }
 
         const { message } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(), SYSTEM_TEXT[systemCode], 'system', systemCode);
+        if (body.action !== 'cancel') await closeOffers(tx, conv.listing_id, conv.id);
         // Grundregel REQ-NOTI-008: der Käufer hat die Änderung nicht selbst ausgelöst
         await modules.notifications.notify(tx, conv.buyer_id, systemCode as 'deal_reserved' | 'deal_completed' | 'deal_cancelled', {
           listingId: conv.listing_id, listingTitle: listing.title, conversationId: conv.id,
@@ -426,6 +524,115 @@ export function createMessagingService(deps: ModuleDeps) {
       return toDeal(result.deal);
     },
 
+    // ------------------------------------------------------------ Kaufangebot (REQ-CHAT-009, B-73)
+    /** „Nehm ich“ (Festpreis, verschenken) oder Preisangebot (VB) aus der Anzeige; startet bei Bedarf die Konversation. */
+    async createOffer(auth: AuthContext, listingId: string, body: { amountCents?: number; clientMsgId: string }) {
+      const listing = await modules.listings.summary(listingId);
+      if (!listing || listing.deleted || !listing.available) throw notFound('Anzeige nicht gefunden');
+      if (listing.ownerId === auth.userId || listing.kind === 'wanted' || listing.priceType === 'swap') {
+        throw unprocessable('offer_not_possible', 'Für diese Anzeige ist kein Kaufangebot möglich.');
+      }
+      if (listing.status !== 'active') throw conflict('listing_unavailable', 'Die Anzeige ist nicht mehr verfügbar.');
+      let amount: number;
+      if (listing.priceType === 'negotiable') {
+        if (body.amountCents === undefined) throw unprocessable('invalid_amount', 'Bitte gib einen Betrag an.');
+        amount = body.amountCents;
+      } else {
+        const fixed = listing.priceType === 'free' ? 0 : (listing.priceCents ?? 0);
+        if (body.amountCents !== undefined && body.amountCents !== fixed) {
+          throw unprocessable('invalid_amount', 'Bei Festpreis gilt der Preis der Anzeige.');
+        }
+        amount = fixed;
+      }
+      if (await modules.trust.isBlockedEither(auth.userId, listing.ownerId)) throw NOT_POSSIBLE();
+      if (!(await modules.identity.isActive(listing.ownerId))) throw NOT_POSSIBLE();
+
+      let conv = await db.one<ConversationRow>(sql`
+        SELECT * FROM messaging.conversation WHERE listing_id = ${listingId} AND buyer_id = ${auth.userId}`);
+      if (!conv) await limit(`chat-conv:${auth.userId}`, NEW_CONVERSATION_RATE);
+      await limit(`chat-msg:${auth.userId}`, MESSAGE_RATE);
+      const isNew = !conv;
+      const result = await database.tx(async (tx) => {
+        conv ??= (await tx.db.one<ConversationRow>(sql`
+          INSERT INTO messaging.conversation (listing_id, buyer_id, seller_id)
+          VALUES (${listingId}, ${auth.userId}, ${listing.ownerId})
+          ON CONFLICT (listing_id, buyer_id) DO UPDATE SET listing_id = EXCLUDED.listing_id
+          RETURNING *`))!;
+        return placeOffer(tx, conv, auth.userId, amount, listing.currency, body.clientMsgId);
+      });
+      const message = await loadMessage(result.message.id);
+      if (isNew) await realtime.publish(listing.ownerId, { type: 'conversation', conversationId: conv!.id });
+      if (result.created) await publish([listing.ownerId, auth.userId], { type: 'message', message });
+      return { conversationId: conv!.id, message };
+    },
+
+    /** Akzeptieren, Ablehnen, Gegenangebot (Gegenseite) oder Zurückziehen (Absender) eines offenen Angebots. */
+    async respondToOffer(
+      auth: AuthContext,
+      offerId: string,
+      action: 'accept' | 'decline' | 'counter' | 'withdraw',
+      counter?: { amountCents: number; clientMsgId: string },
+    ): Promise<Message> {
+      const outcome = await database.tx(async (tx) => {
+        // Feste Sperrreihenfolge gegen Deadlocks: zuerst die Anzeige (Advisory Lock), dann das Angebot. Ein paralleles
+        // Akzeptieren beendet beim Commit alle anderen offenen Angebote der Anzeige (closeOffers).
+        const ref = await tx.db.one<{ listing_id: string }>(sql`SELECT listing_id FROM messaging.offer WHERE id = ${offerId}`);
+        if (ref) await tx.db.exec(sql`SELECT pg_advisory_xact_lock(hashtext(${ref.listing_id}))`);
+        const offer = await tx.db.one<OfferRow>(sql`SELECT * FROM messaging.offer WHERE id = ${offerId} FOR UPDATE`);
+        if (!offer || (offer.sender_id !== auth.userId && offer.recipient_id !== auth.userId)) throw notFound('Angebot nicht gefunden');
+        const conv = (await tx.db.one<ConversationRow>(sql`SELECT * FROM messaging.conversation WHERE id = ${offer.conversation_id}`))!;
+        const counterpartId = offer.sender_id === auth.userId ? offer.recipient_id : offer.sender_id;
+        if (await modules.trust.isBlockedEither(auth.userId, counterpartId)) throw NOT_POSSIBLE();
+        if (offer.status !== 'open') throw conflict('offer_closed', 'Dieses Angebot ist nicht mehr offen.');
+        if (action === 'withdraw') {
+          if (offer.sender_id !== auth.userId) throw forbidden('Nur der Absender kann ein Angebot zurückziehen.');
+        } else if (offer.recipient_id !== auth.userId) {
+          throw new AppError(403, 'not_your_turn', 'Auf dieses Angebot antwortet die Gegenseite.');
+        }
+
+        if (action === 'withdraw' || action === 'decline') {
+          await tx.db.exec(sql`
+            UPDATE messaging.offer SET status = ${action === 'withdraw' ? 'withdrawn' : 'declined'}, decided_at = now() WHERE id = ${offer.id}`);
+          if (action === 'decline') await modules.notifications.notify(tx, offer.sender_id, 'offer_declined', await offerData(offer));
+          return { messageId: offer.message_id, conv, extra: [] as string[] };
+        }
+        if (action === 'counter') {
+          await limit(`chat-msg:${auth.userId}`, MESSAGE_RATE);
+          const placed = await placeOffer(tx, conv, auth.userId, counter!.amountCents, offer.currency.trim(), counter!.clientMsgId);
+          return { messageId: placed.message.id, conv, extra: [offer.message_id] };
+        }
+
+        // Akzeptieren: Deal vereinbart, Anzeige für den Käufer reserviert (REQ-CHAT-011); höchstens ein Deal je Anzeige
+        const listing = await modules.listings.summary(offer.listing_id);
+        const busy = await tx.db.one(sql`SELECT 1 FROM messaging.deal WHERE listing_id = ${offer.listing_id} AND status = 'agreed'`);
+        if (!listing || listing.status !== 'active' || !listing.available || busy) {
+          throw conflict('listing_unavailable', 'Die Anzeige ist nicht mehr verfügbar.');
+        }
+        await tx.db.exec(sql`UPDATE messaging.offer SET status = 'accepted', decided_at = now() WHERE id = ${offer.id}`);
+        const deal = (await tx.db.one<DealRow>(sql`
+          INSERT INTO messaging.deal (conversation_id, listing_id, seller_id, buyer_id, agreed_price_cents, currency, status)
+          VALUES (${conv.id}, ${conv.listing_id}, ${conv.seller_id}, ${conv.buyer_id}, ${offer.amount_cents}, ${offer.currency}, 'agreed')
+          RETURNING *`))!;
+        await modules.listings.setStatusFromDeal(tx, conv.listing_id, 'reserved');
+        const { message: system } = await insertMessage(tx, conv, auth.userId, crypto.randomUUID(), SYSTEM_TEXT.deal_reserved, 'system', 'deal_reserved');
+        await tx.enqueue(DEAL_EVENTS, dealEvent('DealAgreed', deal, () => crypto.randomUUID()));
+        await modules.notifications.notify(tx, offer.sender_id, 'offer_accepted', await offerData(offer));
+        await closeOffers(tx, offer.listing_id);
+        return { messageId: offer.message_id, conv, extra: [system.id] };
+      });
+      const participants = [outcome.conv.buyer_id, outcome.conv.seller_id];
+      for (const id of outcome.extra) await publish(participants, { type: 'message', message: await loadMessage(id) });
+      const message = await loadMessage(outcome.messageId);
+      await publish(participants, { type: 'message', message });
+      await publish(participants, { type: 'conversation', conversationId: outcome.conv.id });
+      return message;
+    },
+
+    /** Anzeige nicht mehr aktiv (pausiert, reserviert, abgegeben, gelöscht, entfernt): offene Angebote beenden. */
+    async closeOffersForListing(tx: Tx, listingId: string, exceptConversationId?: string): Promise<void> {
+      await closeOffers(tx, listingId, exceptConversationId);
+    },
+
     async findConversationId(listingId: string, buyerId: string): Promise<string | null> {
       const row = await db.one<{ id: string }>(sql`
         SELECT id FROM messaging.conversation WHERE listing_id = ${listingId} AND buyer_id = ${buyerId}`);
@@ -434,6 +641,7 @@ export function createMessagingService(deps: ModuleDeps) {
 
     /** Vom Anbieter direkt an der Anzeige geänderter Status hält den Deal konsistent. */
     async onListingStatusChanged(tx: Tx, listingId: string, status: string): Promise<void> {
+      if (status !== 'active') await closeOffers(tx, listingId);
       const target = status === 'completed' ? 'completed' : 'cancelled';
       const deals = await tx.db.query<DealRow>(sql`
         UPDATE messaging.deal SET status = ${target}, updated_at = now()
@@ -613,7 +821,7 @@ export function createMessagingService(deps: ModuleDeps) {
         SELECT c.listing_id FROM messaging.conversation c
         WHERE c.id = ${conversationId}
           AND EXISTS (SELECT 1 FROM messaging.message m WHERE m.conversation_id = c.id
-                      AND m.sender_id <> ${recipientId} AND m.read_at IS NULL AND m.kind = 'text')
+                      AND m.sender_id <> ${recipientId} AND m.read_at IS NULL AND m.kind IN ('text', 'offer'))
           AND NOT EXISTS (SELECT 1 FROM messaging.notification_state s WHERE s.conversation_id = c.id
                       AND s.user_id = ${recipientId} AND s.last_notified_at > now() - make_interval(secs => ${NOTIFY_DELAY_SECONDS}))`);
       if (!pending) return;

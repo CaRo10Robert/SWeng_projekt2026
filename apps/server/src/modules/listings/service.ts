@@ -323,6 +323,8 @@ export function createListingsService(deps: ModuleDeps) {
         if (action === 'complete' || action === 'unreserve') {
           await modules.messaging.onListingStatusChanged(tx, id, next);
         }
+        // Pausieren oder direkt reservieren: offene Kaufangebote sind nicht mehr annehmbar (REQ-CHAT-009)
+        if (action === 'pause' || action === 'reserve') await modules.messaging.closeOffersForListing(tx, id);
       });
       return toDetail((await load(id))!, auth.userId);
     },
@@ -586,6 +588,8 @@ export function createListingsService(deps: ModuleDeps) {
           link: `${deps.config.publicUrl}/me/listings`,
         });
         await modules.notifications.notify(undefined, r.owner_id, 'listing_auto_paused', { listingId: r.id, listingTitle: r.title, dueAt: deleteAt });
+        // Offene Kaufangebote enden mit Benachrichtigung an die Interessenten (REQ-LST-013, REQ-CHAT-009)
+        await database.tx((tx) => modules.messaging.closeOffersForListing(tx, r.id));
       }
       stats.expired = autoPaused.length;
       // (c) Tag 17: 2 Tage automatisch pausiert → gelöscht inkl. Bilder. Gesicherte Anzeigen (REQ-LEGAL-008) bleiben.

@@ -1,4 +1,4 @@
-Integrationstest (`listings.integration.test.ts`) mit vorgestellten Zeitstempeln – Erinnerung, Ablauf, Verlängerung, Löschung, Ablauf pausierter und Rückfall reservierter Anzeigen (offener Deal aufgehoben, Mail und Systemnachricht); ein zweiter Lauf ändert nichts. Seit R2 (REQ-LST-013) prüft der Test nur noch Rückfall der Reservierung und Löschfristen; die Laufzeit aktiver Anzeigen prüft AT-LST-013. |
+Integrationstest (`listings.integration.test.ts`) – je Übergang genau eine Benachrichtigung an den Anbieter, E-Mail nur ohne Abbestellung, keine bei eigener Aktion; das Beenden offener Kaufangebote beim automatischen Pausieren prüft zusätzlich AT-CHAT-009. |
 id: EVIDENCE
 type: verification
 status: in-review

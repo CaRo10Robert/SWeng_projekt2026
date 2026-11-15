@@ -2,6 +2,9 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import {
   ContactActionBody,
+  CounterOfferBody,
+  CreateOfferBody,
+  OfferResult,
   ContactShare,
   ConversationSummary,
   Deal,
@@ -70,6 +73,25 @@ export function messagingRoutes(service: MessagingService, deps: ModuleDeps): Fa
       '/conversations/:id/contact',
       { schema: { tags, params: IdParams, body: ContactActionBody, response: { 200: ContactShare } } },
       async (req) => service.contactAction(requireAuth(req), req.params.id, req.body.action),
+    );
+
+    // Kaufangebot und Gegenangebot (REQ-CHAT-009)
+    app.post(
+      '/listings/:id/offers',
+      { schema: { tags, params: IdParams, body: CreateOfferBody, response: { 201: OfferResult } } },
+      async (req, reply) => reply.status(201).send(await service.createOffer(requireAuth(req), req.params.id, req.body)),
+    );
+    for (const action of ['accept', 'decline', 'withdraw'] as const) {
+      app.post(
+        `/offers/:id/${action}`,
+        { schema: { tags, params: IdParams, response: { 200: Message } } },
+        async (req) => service.respondToOffer(requireAuth(req), req.params.id, action),
+      );
+    }
+    app.post(
+      '/offers/:id/counter',
+      { schema: { tags, params: IdParams, body: CounterOfferBody, response: { 201: Message } } },
+      async (req, reply) => reply.status(201).send(await service.respondToOffer(requireAuth(req), req.params.id, 'counter', req.body)),
     );
 
     app.get('/me/unread', { schema: { tags, response: { 200: UnreadCount } } }, async (req) => ({

@@ -6,6 +6,7 @@ import type {
   Deal,
   DealActionBody,
   Message,
+  OfferResult,
   StartConversationBody,
   StartConversationResult,
   UnreadCount,
@@ -125,5 +126,33 @@ export function useContactAction(conversationId: string) {
       void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
       void qc.invalidateQueries({ queryKey: ['conversations'] });
     },
+  });
+}
+
+// ------------------------------------------------------------ Kaufangebot (REQ-CHAT-009)
+function invalidateOffer(qc: QueryClient, conversationId: string, listingId?: string) {
+  void qc.invalidateQueries({ queryKey: ['messages', conversationId] });
+  void qc.invalidateQueries({ queryKey: ['conversation', conversationId] });
+  void qc.invalidateQueries({ queryKey: ['conversations'] });
+  if (listingId) void qc.invalidateQueries({ queryKey: ['listing', listingId] });
+}
+
+/** „Nehm ich“ (ohne Betrag) oder Preisangebot bei VB (mit Betrag). */
+export function useCreateOffer(listingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { amountCents?: number; clientMsgId: string }) =>
+      api<OfferResult>(`/listings/${listingId}/offers`, { method: 'POST', body }),
+    onSuccess: (res) => invalidateOffer(qc, res.conversationId, listingId),
+  });
+}
+
+/** Akzeptieren, Ablehnen, Zurückziehen oder Gegenangebot. */
+export function useRespondOffer(conversationId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ offerId, action, amountCents, clientMsgId }: { offerId: string; action: 'accept' | 'decline' | 'withdraw' | 'counter'; amountCents?: number; clientMsgId?: string }) =>
+      api<Message>(`/offers/${offerId}/${action}`, { method: 'POST', body: action === 'counter' ? { amountCents, clientMsgId } : undefined }),
+    onSettled: () => invalidateOffer(qc, conversationId),
   });
 }

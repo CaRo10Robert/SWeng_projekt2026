@@ -16,12 +16,36 @@ export const SystemCode = Type.Union([
 ]);
 export type SystemCode = Static<typeof SystemCode>;
 
+/** Zustand eines Kaufangebots (REQ-CHAT-009). */
+export const OfferStatus = Type.Union([
+  Type.Literal('open'),
+  Type.Literal('accepted'),
+  Type.Literal('declined'),
+  Type.Literal('countered'),
+  Type.Literal('withdrawn'),
+  Type.Literal('unavailable'),
+]);
+export type OfferStatus = Static<typeof OfferStatus>;
+
+/** Kaufangebot bzw. Gegenangebot als Teil einer Nachricht (kind = offer). */
+export const OfferView = Type.Object({
+  id: Uuid,
+  senderId: Uuid,
+  recipientId: Uuid,
+  amountCents: Type.Integer({ minimum: 0 }),
+  currency: Type.String(),
+  status: OfferStatus,
+  /** true, wenn es ein Gegenangebot auf ein vorheriges Angebot ist */
+  counter: Type.Boolean(),
+});
+export type OfferView = Static<typeof OfferView>;
+
 export const Message = Type.Object({
   id: Uuid,
   conversationId: Uuid,
   senderId: Uuid,
   clientMsgId: Uuid,
-  kind: Type.Union([Type.Literal('text'), Type.Literal('system')]),
+  kind: Type.Union([Type.Literal('text'), Type.Literal('system'), Type.Literal('offer')]),
   body: Type.String(),
   createdAt: Timestamp,
   readAt: Type.Union([Timestamp, Type.Null()]),
@@ -29,8 +53,26 @@ export const Message = Type.Object({
   safetyHint: Type.Boolean(),
   /** Nur bei kind = system; ältere Systemnachrichten haben keinen Code. */
   systemCode: Type.Optional(Type.Union([SystemCode, Type.Null()])),
+  /** Nur bei kind = offer (REQ-CHAT-009). */
+  offer: Type.Optional(Type.Union([OfferView, Type.Null()])),
 });
 export type Message = Static<typeof Message>;
+
+/** „Nehm ich“ (Festpreis, verschenken) ohne Betrag, Preisangebot bei VB mit Betrag (REQ-CHAT-009). */
+export const CreateOfferBody = Type.Object({
+  amountCents: Type.Optional(Type.Integer({ minimum: 1, maximum: 1_000_000 })),
+  clientMsgId: Uuid,
+});
+export type CreateOfferBody = Static<typeof CreateOfferBody>;
+
+export const CounterOfferBody = Type.Object({
+  amountCents: Type.Integer({ minimum: 0, maximum: 1_000_000 }),
+  clientMsgId: Uuid,
+});
+export type CounterOfferBody = Static<typeof CounterOfferBody>;
+
+export const OfferResult = Type.Object({ conversationId: Uuid, message: Message });
+export type OfferResult = Static<typeof OfferResult>;
 
 export const DealStatus = Type.Union([Type.Literal('agreed'), Type.Literal('completed'), Type.Literal('cancelled')]);
 export type DealStatus = Static<typeof DealStatus>;

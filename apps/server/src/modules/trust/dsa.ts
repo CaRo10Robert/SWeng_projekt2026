@@ -227,7 +227,10 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
 
         const removeContent = body.decision === 'remove' || body.decision === 'ban';
         if (kase.target_type === 'listing') {
-          if (removeContent) await modules.listings.removeByModeration(tx, kase.target_id);
+          if (removeContent) {
+            await modules.listings.removeByModeration(tx, kase.target_id);
+            await modules.messaging.closeOffersForListing(tx, kase.target_id);
+          }
           else {
             await modules.listings.approveFromReview(tx, kase.target_id);
             await modules.listings.setHidden(tx, kase.target_id, false);

@@ -3,15 +3,15 @@ import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import type { ListingAction, ListingDetail, ListingStatus } from '@campusmarkt/contracts';
 import { useMeta } from '../api/auth';
 import { useDeleteListing, useListing, useListingAction, useToggleFavorite } from '../api/listings';
-import { useStartConversation } from '../api/messaging';
+import { useCreateOffer, useStartConversation } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage } from '../api/client';
 import { Dialog } from '../components/Dialog';
 import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, PriceTag, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
-import { Alert, Badge, Button, buttonClass, Card, FormError, Loading, TextArea } from '../components/ui';
-import { conditionLabels, formatDate, formatDateTime, kindLabels, newId, userTypeLabels } from '../lib/format';
+import { Alert, Badge, Button, buttonClass, Card, Field, FormError, Loading, TextArea } from '../components/ui';
+import { conditionLabels, formatDate, formatDateTime, formatMoney, kindLabels, newId, parseEuroToCents, userTypeLabels } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
@@ -68,6 +68,76 @@ function Gallery({ listing }: { listing: ListingDetail }) {
         </ul>
       )}
     </div>
+  );
+}
+
+/**
+ * Kaufangebot (REQ-CHAT-009): „Nehm ich“ bei Festpreis und Verschenken, Preisangebot bei VB. Nur für aktive Angebote
+ * anderer Mitglieder; Tausch und Gesuche laufen über den Chat.
+ */
+function OfferBox({ listing }: { listing: ListingDetail }) {
+  const navigate = useNavigate();
+  const create = useCreateOffer(listing.id);
+  const [confirm, setConfirm] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [clientMsgId, setClientMsgId] = useState(newId);
+  if (listing.isOwner || listing.status !== 'active' || listing.kind !== 'offer' || listing.priceType === 'swap') return null;
+
+  const send = (amountCents?: number) =>
+    create.mutate(
+      { ...(amountCents === undefined ? {} : { amountCents }), clientMsgId },
+      {
+        onSuccess: (res) => void navigate({ to: '/messages/$id', params: { id: res.conversationId } }),
+        onError: () => setClientMsgId(newId()),
+      },
+    );
+  const error = create.isError ? errorMessage(create.error) : null;
+
+  if (listing.priceType === 'negotiable') {
+    const cents = parseEuroToCents(amount);
+    const valid = cents !== null && cents >= 1 && cents <= 1_000_000;
+    const submit = (e: FormEvent) => {
+      e.preventDefault();
+      if (valid) send(cents);
+    };
+    return (
+      <form onSubmit={submit} className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
+        <Field
+          label={t('offer.yourOffer')}
+          inputMode="decimal"
+          required
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          hint={t('offer.yourOfferHint')}
+          error={amount && !valid ? t('offer.invalidAmount') : undefined}
+        />
+        <FormError error={error} />
+        <Button type="submit" className="w-full" busy={create.isPending} disabled={!valid}>
+          {t('offer.send')}
+        </Button>
+      </form>
+    );
+  }
+
+  const price = listing.priceType === 'free' ? t('offer.free') : formatMoney(listing.priceCents ?? 0, listing.currency);
+  return (
+    <>
+      <Button className="w-full" onClick={() => setConfirm(true)}>
+        {t('offer.take')}
+      </Button>
+      <FormError error={error} />
+      <Dialog open={confirm} onClose={() => setConfirm(false)} title={t('offer.takeTitle', { title: listing.title })}>
+        <p>{t('offer.takeText', { price })}</p>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setConfirm(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button busy={create.isPending} onClick={() => send()}>
+            {t('offer.takeConfirm')}
+          </Button>
+        </div>
+      </Dialog>
+    </>
   );
 }
 
@@ -256,6 +326,7 @@ export function ListingPage() {
           <OwnerActions listing={listing} />
         ) : (
           <>
+            <OfferBox listing={listing} />
             <ContactBox listing={listing} />
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" aria-pressed={listing.isFavorite} busy={favorite.isPending} onClick={() => favorite.mutate(!listing.isFavorite)}>

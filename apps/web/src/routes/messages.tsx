@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ConversationSummary, DealStatus, Message, SystemCode } from '@campusmarkt/contracts';
+import type { ConversationSummary, DealStatus, Message, OfferStatus, SystemCode } from '@campusmarkt/contracts';
 import { useMe } from '../api/auth';
-import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages } from '../api/messaging';
+import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages, useRespondOffer } from '../api/messaging';
 import { useSetBlock } from '../api/trust';
 import { ApiError, errorMessage, NetworkError } from '../api/client';
 import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
 import { ContactShare } from '../components/ContactShare';
-import { Alert, Badge, Button, EmptyState, FormError, Loading, PageHeader, cx } from '../components/ui';
-import { formatChatTime, newId } from '../lib/format';
+import { Alert, Badge, Button, EmptyState, Field, FormError, Loading, PageHeader, cx } from '../components/ui';
+import { formatChatTime, formatMoney, newId, parseEuroToCents } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
@@ -136,7 +136,91 @@ function DealActions({ conversation }: { conversation: ConversationSummary }) {
   );
 }
 
-function MessageBubble({ message, mine, onReport }: { message: Message; mine: boolean; onReport: () => void }) {
+const OFFER_STATUS: Record<OfferStatus, MessageKey> = {
+  open: 'offer.status.open',
+  accepted: 'offer.status.accepted',
+  declined: 'offer.status.declined',
+  countered: 'offer.status.countered',
+  withdrawn: 'offer.status.withdrawn',
+  unavailable: 'offer.status.unavailable',
+};
+
+/** Kaufangebot bzw. Gegenangebot als strukturierte Nachricht mit den Aktionen der jeweiligen Seite (REQ-CHAT-009). */
+function OfferCard({ message, meId }: { message: Message; meId: string | undefined }) {
+  const offer = message.offer!;
+  const respond = useRespondOffer(message.conversationId);
+  const [countering, setCountering] = useState(false);
+  const [amount, setAmount] = useState('');
+  const mine = offer.senderId === meId;
+  const myTurn = offer.status === 'open' && offer.recipientId === meId;
+  const cents = parseEuroToCents(amount);
+  const validCounter = cents !== null && cents >= 0 && cents <= 1_000_000;
+  const act = (action: 'accept' | 'decline' | 'withdraw') => respond.mutate({ offerId: offer.id, action });
+  const sendCounter = (e: FormEvent) => {
+    e.preventDefault();
+    if (validCounter) respond.mutate({ offerId: offer.id, action: 'counter', amountCents: cents, clientMsgId: newId() }, { onSuccess: () => setCountering(false) });
+  };
+  const heading = t(offer.counter ? 'offer.counterTitle' : 'offer.title');
+
+  return (
+    <li className={cx('flex flex-col', mine ? 'items-end' : 'items-start')}>
+      <section aria-label={heading} className="w-full max-w-sm space-y-2 rounded-2xl bg-white p-3 text-slate-900 ring-2 ring-brand-700">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="font-semibold">{heading}</h3>
+          <Badge tone={offer.status === 'open' ? 'info' : offer.status === 'accepted' ? 'success' : 'neutral'}>{t(OFFER_STATUS[offer.status])}</Badge>
+        </div>
+        <p className="text-2xl font-bold">{formatMoney(offer.amountCents, offer.currency)}</p>
+        {myTurn && !countering && (
+          <div className="flex flex-wrap gap-2">
+            <Button busy={respond.isPending && respond.variables?.action === 'accept'} onClick={() => act('accept')}>
+              {t('offer.accept')}
+            </Button>
+            <Button variant="secondary" onClick={() => setCountering(true)}>
+              {t('offer.counter')}
+            </Button>
+            <Button variant="ghost" busy={respond.isPending && respond.variables?.action === 'decline'} onClick={() => act('decline')}>
+              {t('offer.decline')}
+            </Button>
+          </div>
+        )}
+        {myTurn && countering && (
+          <form onSubmit={sendCounter} className="space-y-2">
+            <Field
+              label={t('offer.counterAmount')}
+              inputMode="decimal"
+              required
+              autoFocus
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              error={amount && !validCounter ? t('offer.invalidAmount') : undefined}
+            />
+            <div className="flex gap-2">
+              <Button type="submit" busy={respond.isPending} disabled={!validCounter}>
+                {t('offer.counterSend')}
+              </Button>
+              <Button variant="ghost" onClick={() => setCountering(false)}>
+                {t('common.cancel')}
+              </Button>
+            </div>
+          </form>
+        )}
+        {mine && offer.status === 'open' && (
+          <Button variant="ghost" busy={respond.isPending} onClick={() => act('withdraw')}>
+            {t('offer.withdraw')}
+          </Button>
+        )}
+        {myTurn && <p className="text-xs text-slate-600">{t('offer.replyHint')}</p>}
+        <FormError error={respond.isError ? errorMessage(respond.error) : null} />
+      </section>
+      <time dateTime={message.createdAt} className="mt-0.5 text-xs text-slate-600">
+        {formatChatTime(message.createdAt)}
+      </time>
+    </li>
+  );
+}
+
+function MessageBubble({ message, mine, onReport, meId }: { message: Message; mine: boolean; onReport: () => void; meId?: string }) {
+  if (message.kind === 'offer' && message.offer) return <OfferCard message={message} meId={meId} />;
   if (message.kind === 'system') {
     return (
       <li className="my-2 text-center text-xs text-slate-600">
@@ -188,7 +272,7 @@ export function ConversationPage() {
   const list = messages.data ?? [];
   const known = new Set(list.map((m) => m.clientMsgId));
   const visiblePending = pending.filter((p) => !known.has(p.clientMsgId));
-  const unreadFromOther = list.some((m) => m.senderId !== me?.id && !m.readAt && m.kind === 'text');
+  const unreadFromOther = list.some((m) => m.senderId !== me?.id && !m.readAt && m.kind !== 'system');
 
   useEffect(() => {
     if (!unreadFromOther) return;
@@ -282,7 +366,7 @@ export function ConversationPage() {
         {messages.isError && <Alert tone="error">{errorMessage(messages.error)}</Alert>}
         <ol className="space-y-2">
           {list.map((m) => (
-            <MessageBubble key={m.id} message={m} mine={m.senderId === me?.id} onReport={() => setReportId(m.id)} />
+            <MessageBubble key={m.id} message={m} mine={m.senderId === me?.id} meId={me?.id} onReport={() => setReportId(m.id)} />
           ))}
           {visiblePending.map((p) => (
             <li key={p.clientMsgId} className="flex flex-col items-end">

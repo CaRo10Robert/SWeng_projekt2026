@@ -3,7 +3,7 @@ id: REQ-CHAT-009
 title: Kaufangebot und Gegenangebot („Nehm ich“, Preisangebot bei VB)
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-kommunikation
 risk: medium
 release: R2
@@ -13,9 +13,9 @@ epic: EPIC-04
 source: BG-3, Auftraggeber (2026-11-13, Q-31)
 use_cases: [UC-21, UC-12]
 depends_on: [REQ-CHAT-011, REQ-CHAT-001, REQ-NOTI-008]
-version: 4.0
+version: 4.1
 created: 2026-10-20
-last_updated: 2026-11-13
+last_updated: 2026-11-15
 verification: [AT-CHAT-009, AT-CHAT-009-2, AT-CHAT-009-3]
 ---
 
@@ -123,3 +123,4 @@ I: nutzt Konversation, Deal-Kern und Benachrichtigungen, ändert sie nicht · N:
 | 2.0 | 2026-10-23 | Reservierung für eine Person und Deal-Zustände aufgenommen (wie umgesetzt), Akzeptanzkriterien |
 | 3.0 | 2026-10-23 | Review v0.2: R-15/R-21 Deal-Kern nach REQ-CHAT-011 abgespalten (Q-17); wieder reiner Preisvorschlag mit Nutzen („damit …“, R-17) |
 | 4.0 | 2026-11-13 | Change Request des Auftraggebers (Q-31): „Nehm ich“ bei Festpreis und Verschenken, Preisangebot bei VB, Kaufangebot in der Konversation des Anbieters, Akzeptieren reserviert für den Käufer (Deal vereinbart), Gegenangebot in beide Richtungen, Zustandsmodell und Regeln, Benachrichtigung über REQ-NOTI-008. Titel angepasst, MoSCoW C → S, Release R1 → R2, Kano begeisterung → leistung, Risiko low → medium (Fehler- und Missbrauchsfälle ergänzt). Nachweise AT-CHAT-009 und -3 neu, AT-CHAT-009-2 präzisiert. Freigabe Product Owner |
+| 4.1 | 2026-11-15 | Umgesetzt (B-73): Tabelle `messaging.offer` (Migration 0008), Nachrichtenart `offer`, API `POST /listings/:id/offers`, `POST /offers/:id/accept|decline|withdraw|counter`; Akzeptieren unter Sperre je Anzeige (genau ein Deal); offene Angebote enden bei Pause, Reservierung, Abgabe, Löschung, automatischer Pause und Entfernung durch die Moderation. Web: „Nehm ich“, Preisangebot, Angebotskarte im Chat. AT-CHAT-009 bis -3 grün; Status → verified |
