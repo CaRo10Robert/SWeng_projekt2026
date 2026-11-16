@@ -11,6 +11,7 @@ import {
   LoginBody,
   Me,
   MemberProfile,
+  MemberRatings,
   PageQuery,
   PrivacyAckBody,
   RegisterBody,
@@ -155,6 +156,16 @@ export function identityRoutes(service: IdentityService, config: Config, modules
       async (req) => {
         await visibleProfile(requireAuth(req).userId, req.params.id);
         return modules.listings.activeByOwner(req.params.id, req.query);
+      },
+    );
+
+    // Bewertungen im Profil (REQ-ACC-005, REQ-MOD-006): gleiche Sichtbarkeitsregel wie das Profil
+    app.get(
+      '/users/:id/ratings',
+      { schema: { tags, params: IdParams, querystring: PageQuery, response: { 200: MemberRatings } } },
+      async (req) => {
+        await visibleProfile(requireAuth(req).userId, req.params.id);
+        return modules.trust.ratingsFor(req.params.id, req.query);
       },
     );
   };

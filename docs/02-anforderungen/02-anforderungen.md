@@ -158,9 +158,9 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 16 |
+| approved | Konkretisiert (bereit) | 15 |
 | implemented | Umsetzung | 4 |
-| verified | Test | 121 |
+| verified | Test | 122 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
@@ -236,7 +236,7 @@ flowchart LR
 | [REQ-MOD-003](req/REQ-MOD-003.md) | Entscheidungen begründen und unveränderlich protokollieren | constraint | M | basis | high | verified | AT-MOD-003, AT-MOD-003-2 |
 | [REQ-MOD-004](req/REQ-MOD-004.md) | Vorläufiges Ausblenden ab drei Meldungen | functional | S | basis | medium | approved | AT-MOD-004 |
 | [REQ-MOD-005](req/REQ-MOD-005.md) | Mitglieder blockieren | functional | S | leistung | medium | verified | AT-MOD-005 |
-| [REQ-MOD-006](req/REQ-MOD-006.md) | Bewertungen als Käufer und Verkäufer | functional | S | leistung | medium | approved | AT-MOD-006, AT-MOD-006-2, AT-MOD-006-3 |
+| [REQ-MOD-006](req/REQ-MOD-006.md) | Bewertungen als Käufer und Verkäufer | functional | S | leistung | medium | verified | AT-MOD-006, AT-MOD-006-2, AT-MOD-006-3 |
 | [REQ-MOD-007](req/REQ-MOD-007.md) | Rollen vergeben und entziehen | functional | M | n/a | high | verified | AT-MOD-007, AT-MOD-007-2 |
 | [REQ-MOD-008](req/REQ-MOD-008.md) | Whitelist-Domains über eine Oberfläche verwalten | functional | C | n/a | medium | approved | AT-MOD-008 |
 | [REQ-NOTI-001](req/REQ-NOTI-001.md) | Transaktionale E-Mails | functional | M | basis | high | verified | AT-NOTI-001, AT-NOTI-001-2 |

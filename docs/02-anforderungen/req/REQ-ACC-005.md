@@ -13,9 +13,9 @@ epic: EPIC-07
 source: Auftraggeber (2026-11-13, Q-30), Reverse Engineering Kleinanzeigen
 use_cases: [UC-18]
 depends_on: [REQ-ACC-001, REQ-PRIV-002, REQ-MOD-005]
-version: 1.2
+version: 1.3
 created: 2026-11-13
-last_updated: 2026-11-13
+last_updated: 2026-11-16
 verification: [AT-ACC-005, AT-ACC-005-2, AT-ACC-005-3]
 ---
 
@@ -90,3 +90,4 @@ I: nutzt vorhandene Profil- und Anzeigendaten; Bewertungen erscheinen, sobald RE
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-30) |
 | 1.1 | 2026-11-13 | Requirements-Review und Freigabe durch den Product Owner (Definition of Ready: Nachweise und Akzeptanzkriterien vorhanden); Status → approved, Umsetzung als B-69 |
 | 1.2 | 2026-11-13 | Umgesetzt (B-69): `GET /users/:id/profile`, `GET /users/:id/listings` (Keyset-paginiert), Profilseite `/users/:id` mit Links aus Anzeige und Chat, Melden und Blockieren. Nachweis AT-ACC-005-3 an den Fehlerfall „Aufruf ohne Anmeldung“ angeglichen (API 401, Web leitet zur Anmeldung, statt 404). Bewertungen im Profil folgen mit REQ-MOD-006 (B-70). Status → verified |
+| 1.3 | 2026-11-16 | Bewertungsübersicht und -liste im Profil mit REQ-MOD-006 (B-70) ergänzt; E2E `ratings.spec.ts` prüft die Anzeige getrennt nach „als Verkäufer“ und „als Käufer“ |

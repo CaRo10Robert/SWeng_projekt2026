@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ConversationSummary, DealStatus, Message, OfferStatus, SystemCode } from '@campusmarkt/contracts';
+import type { ConversationSummary, DealStatus, Message, OfferStatus, RatingScore, SystemCode } from '@campusmarkt/contracts';
 import { useMe } from '../api/auth';
 import { addMessageToCache, markRead, sendMessage, useConversation, useConversations, useDealAction, useMessages, useRespondOffer } from '../api/messaging';
-import { useSetBlock } from '../api/trust';
+import { useDeleteRating, useRate, useRatingState, useSetBlock } from '../api/trust';
 import { ApiError, errorMessage, NetworkError } from '../api/client';
 import { ErrorView } from '../components/ErrorPages';
 import { ImagePlaceholder, StatusBadge } from '../components/ListingCard';
 import { ReportDialog } from '../components/ReportDialog';
 import { ContactShare } from '../components/ContactShare';
-import { Alert, Badge, Button, EmptyState, Field, FormError, Loading, PageHeader, cx } from '../components/ui';
-import { formatChatTime, formatMoney, newId, parseEuroToCents } from '../lib/format';
+import { Alert, Badge, Button, EmptyState, Field, FormError, Loading, PageHeader, TextArea, cx } from '../components/ui';
+import { formatChatTime, formatDateTime, formatMoney, newId, parseEuroToCents } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
 import { t, type MessageKey } from '../i18n';
 
@@ -106,6 +106,77 @@ interface PendingMessage {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+const SCORE_LABEL: Record<RatingScore, MessageKey> = {
+  positive: 'rating.score.positive',
+  neutral: 'rating.score.neutral',
+  negative: 'rating.score.negative',
+};
+
+/** Bewertung nach abgeschlossenem Deal (REQ-MOD-006): einmal, 14 Tage, verdeckt bis beide bewertet haben. */
+function RatingBox({ dealId, counterpart }: { dealId: string; counterpart: string }) {
+  const { data: state } = useRatingState(dealId);
+  const rate = useRate(dealId);
+  const remove = useDeleteRating(dealId);
+  const [score, setScore] = useState<RatingScore>('positive');
+  const [text, setText] = useState('');
+  if (!state) return null;
+  const roleLabel = t(state.counterpartRole === 'seller' ? 'rating.asSeller' : 'rating.asBuyer');
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    rate.mutate({ score, ...(text.trim() ? { text: text.trim() } : {}) });
+  };
+
+  return (
+    <section aria-labelledby="rating-heading" className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
+      <h2 id="rating-heading" className="font-semibold">
+        {t('rating.title', { name: counterpart, role: roleLabel })}
+      </h2>
+      {state.mine ? (
+        <>
+          <p className="text-sm">
+            {t('rating.mine', { score: t(SCORE_LABEL[state.mine.score]) })} {state.mine.published ? t('rating.published') : t('rating.hidden')}
+          </p>
+          {state.mine.text && <p className="text-sm text-slate-700">„{state.mine.text}“</p>}
+          <Button variant="ghost" busy={remove.isPending} onClick={() => remove.mutate()}>
+            {t('rating.delete')}
+          </Button>
+        </>
+      ) : state.canRate ? (
+        <form onSubmit={submit} className="space-y-2">
+          <fieldset>
+            <legend className="text-sm font-medium">{t('rating.scoreLegend')}</legend>
+            <div className="mt-1 flex flex-wrap gap-3">
+              {(['positive', 'neutral', 'negative'] as const).map((s) => (
+                <label key={s} className="flex items-center gap-1 text-sm">
+                  <input type="radio" name="rating-score" value={s} checked={score === s} onChange={() => setScore(s)} />
+                  {t(SCORE_LABEL[s])}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <TextArea
+            rows={2}
+            label={score === 'negative' ? t('rating.textRequired') : t('rating.textOptional')}
+            value={text}
+            maxLength={280}
+            required={score === 'negative'}
+            minLength={score === 'negative' ? 10 : undefined}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <FormError error={rate.isError ? errorMessage(rate.error) : null} />
+          <Button type="submit" busy={rate.isPending}>
+            {t('rating.submit')}
+          </Button>
+          <p className="text-xs text-slate-600">{t('rating.deadline', { date: formatDateTime(state.deadline) })}</p>
+        </form>
+      ) : (
+        <p className="text-sm text-slate-600">{t('rating.closed')}</p>
+      )}
+      {state.counterpartRated && !state.mine && state.canRate && <p className="text-xs text-slate-600">{t('rating.counterpartRated')}</p>}
+    </section>
+  );
+}
 
 function DealActions({ conversation }: { conversation: ConversationSummary }) {
   const deal = useDealAction(conversation.id);
@@ -360,6 +431,7 @@ export function ConversationPage() {
       </div>
 
       <DealActions conversation={c} />
+      {c.deal?.status === 'completed' && <RatingBox dealId={c.deal.id} counterpart={c.counterpart.displayName} />}
       <ContactShare conversation={c} />
 
       <section aria-label={t('chat.history')} className="max-h-[60vh] min-h-64 overflow-y-auto rounded-xl bg-slate-100 p-3">

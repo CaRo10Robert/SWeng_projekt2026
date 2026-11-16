@@ -3,7 +3,7 @@ id: REQ-MOD-006
 title: Bewertungen als Käufer und Verkäufer
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-vertrauen
 risk: medium
 release: R2
@@ -13,9 +13,9 @@ epic: EPIC-06
 source: Wettbewerbsanalyse, Reverse Engineering Kleinanzeigen §5, Auftraggeber (2026-11-13, Q-30)
 use_cases: [UC-22, UC-18]
 depends_on: [REQ-CHAT-011, REQ-ACC-005]
-version: 2.1
+version: 2.2
 created: 2026-10-20
-last_updated: 2026-11-13
+last_updated: 2026-11-16
 verification: [AT-MOD-006, AT-MOD-006-2, AT-MOD-006-3]
 ---
 
@@ -109,3 +109,4 @@ I: hängt am vorhandenen Deal-Kern und an der Profilansicht (REQ-ACC-005) · N: 
 | 1.2 | 2026-10-23 | Review v0.2: Status nach Review |
 | 2.0 | 2026-11-13 | Change Request des Auftraggebers (Q-30): Titel, Rollen Käufer/Verkäufer, Skala positiv/neutral/negativ, Text Pflicht bei negativ, Frist 14 Tage, Regeln gegen Hochschieben, Übersicht im Profil. Abhängigkeit von REQ-CHAT-009 auf den Deal-Kern REQ-CHAT-011 korrigiert, neu REQ-ACC-005. MoSCoW C → S, Release R1 → R2, Kano begeisterung → leistung. Status zurück auf in-review |
 | 2.1 | 2026-11-13 | Requirements-Review und Freigabe durch den Product Owner (Definition of Ready: Nachweise und Akzeptanzkriterien vorhanden); Status → approved, Umsetzung als B-70; Datenschutz und Moderation der Bewertungen (B-71) mit DSB und security-lead geklärt |
+| 2.2 | 2026-11-16 | Umgesetzt (B-70): Tabelle `trust.rating` (Migration 0009), API `GET|POST|DELETE /deals/:id/rating`, `GET /users/:id/ratings`; Einladung an beide nach Abschluss (App, abbestellbare E-Mail); Bewertungsbox im Chat, Übersicht und Liste im Profil. AT-MOD-006 bis -3 grün; Status → verified. Datenschutz und Moderation der Bewertungen folgen mit B-71 |

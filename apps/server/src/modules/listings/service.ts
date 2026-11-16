@@ -381,6 +381,11 @@ export function createListingsService(deps: ModuleDeps) {
       return toPage(rows, limit, toCard, (r) => [new Date(r.created_at).toISOString(), r.id]);
     },
 
+    /** Wortfilter wie bei Anzeigen, z. B. für Bewertungstexte (REQ-MOD-006). */
+    containsProhibitedTerms(text: string): boolean {
+      return findProhibitedTerms(text).length > 0;
+    },
+
     /** Für Chat und Moderation: Anzeige unabhängig von der Sichtbarkeit. */
     async summary(id: string) {
       const row = await db.one<ListingRow>(sql`SELECT l.*, ${THUMB} FROM listings.listing l WHERE l.id = ${id}`);

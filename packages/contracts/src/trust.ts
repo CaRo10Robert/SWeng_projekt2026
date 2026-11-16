@@ -275,3 +275,58 @@ export const JobOverview = Type.Object({
   ),
 });
 export type JobOverview = Static<typeof JobOverview>;
+
+// ------------------------------------------------------------ Bewertungen (REQ-MOD-006, B-70)
+export const RatingScore = Type.Union([Type.Literal('positive'), Type.Literal('neutral'), Type.Literal('negative')]);
+export type RatingScore = Static<typeof RatingScore>;
+export const RatingRole = Type.Union([Type.Literal('seller'), Type.Literal('buyer')]);
+export type RatingRole = Static<typeof RatingRole>;
+
+/** Text optional, bei negativ Pflicht (10–280 Zeichen; geprüft im Fachmodul). */
+export const RatingBody = Type.Object({
+  score: RatingScore,
+  text: Type.Optional(Type.String({ maxLength: 280 })),
+});
+export type RatingBody = Static<typeof RatingBody>;
+
+/** Stand der Bewertung eines Deals aus Sicht der angemeldeten Person. */
+export const RatingState = Type.Object({
+  dealId: Uuid,
+  /** Rolle, in der das Gegenüber bewertet wird */
+  counterpartRole: RatingRole,
+  deadline: Timestamp,
+  windowOpen: Type.Boolean(),
+  canRate: Type.Boolean(),
+  mine: Type.Union([
+    Type.Object({ score: RatingScore, text: Type.Union([Type.String(), Type.Null()]), createdAt: Timestamp, published: Type.Boolean() }),
+    Type.Null(),
+  ]),
+  /** Das Gegenüber hat bewertet (Inhalt bleibt bis zur Veröffentlichung verdeckt) */
+  counterpartRated: Type.Boolean(),
+});
+export type RatingState = Static<typeof RatingState>;
+
+export const RatingCounts = Type.Object({ positive: Type.Integer(), neutral: Type.Integer(), negative: Type.Integer() });
+export type RatingCounts = Static<typeof RatingCounts>;
+
+export const RatingView = Type.Object({
+  id: Uuid,
+  role: RatingRole,
+  score: RatingScore,
+  text: Type.Union([Type.String(), Type.Null()]),
+  /** Anzeigename der bewertenden Person oder „Ehemaliges Mitglied“ */
+  raterName: Type.String(),
+  raterId: Type.Union([Uuid, Type.Null()]),
+  listingTitle: Type.String(),
+  /** Monat der Übergabe (Zeitpunkt des Abschlusses) */
+  dealCompletedAt: Timestamp,
+});
+export type RatingView = Static<typeof RatingView>;
+
+export const MemberRatings = Type.Object({
+  /** Je Rolle die letzten 24 Monate, je Paar und Rolle nur die neueste Bewertung */
+  summary: Type.Object({ seller: RatingCounts, buyer: RatingCounts }),
+  items: Type.Array(RatingView),
+  nextCursor: Type.Union([Type.String(), Type.Null()]),
+});
+export type MemberRatings = Static<typeof MemberRatings>;

@@ -84,6 +84,11 @@ export const ROUTES = {
   appeals: 'GET /moderation/appeals?status=open|decided → Appeal[] (Rolle moderator/admin)',
   decideAppeal: 'POST /moderation/appeals/:id/decision AppealDecisionBody → 204 | 403 four_eyes | 409 already_decided',
 
+  ratingState: 'GET /deals/:id/rating → RatingState | 404 (kein abgeschlossener Deal der Person, REQ-MOD-006)',
+  rate: 'POST /deals/:id/rating RatingBody → 201 RatingState | 409 already_rated | rating_window_closed | 422 text_required | text_not_allowed',
+  deleteRating: 'DELETE /deals/:id/rating → 204 (vor der Veröffentlichung neu abgebbar, danach nicht)',
+  memberRatings: 'GET /users/:id/ratings?cursor&limit → MemberRatings | 404 profile_not_found',
+
   // admin
   adminUsers: 'GET /admin/users?q= → AdminUser[] (Rolle admin)',
   setRole: 'POST /admin/users/:id/role SetRoleBody → 204',

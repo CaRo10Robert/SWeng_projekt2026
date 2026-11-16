@@ -7,9 +7,13 @@ import {
   canReviewAppeal,
   checkAppeal,
   checkDecision,
+  checkRatingText,
   hashAppealToken,
   hasMinLength,
   newAppealToken,
+  rateeRole,
+  ratingDeadline,
+  ratingPublished,
 } from './domain.js';
 
 describe('Widerspruch nach DSA Art. 20 (REQ-LEGAL-007) – Regeln', () => {
@@ -106,5 +110,37 @@ describe('Einmal-Link für den Widerspruch gesperrter Konten (REQ-LEGAL-007)', (
     expect(a.hash).toBe(hashAppealToken(a.token));
     expect(a.hash).toMatch(/^[0-9a-f]{64}$/);
     expect(a.hash).not.toContain(a.token);
+  });
+});
+
+describe('[AT-MOD-006-3] Bewertungsregeln (REQ-MOD-006) – Entscheidungstabellen', () => {
+  it.each([
+    ['offer', 'owner', 'owner', 'seller'],
+    ['offer', 'owner', 'other', 'buyer'],
+    ['wanted', 'owner', 'owner', 'buyer'],
+    ['wanted', 'owner', 'other', 'seller'],
+  ] as const)('Anzeige %s, Anbieter %s, bewertet wird %s → Rolle %s', (kind, owner, ratee, role) => {
+    expect(rateeRole(kind, owner, ratee)).toBe(role);
+  });
+
+  it.each([
+    ['positive', undefined, { ok: true, text: null }],
+    ['neutral', '   ', { ok: true, text: null }],
+    ['positive', ' Pünktlich ', { ok: true, text: 'Pünktlich' }],
+    ['negative', undefined, { ok: false, code: 'text_required' }],
+    ['negative', 'Zu kurz', { ok: false, code: 'text_required' }],
+    ['negative', 'Nicht erschienen.', { ok: true, text: 'Nicht erschienen.' }],
+    ['positive', 'x'.repeat(281), { ok: false, code: 'text_too_long' }],
+    ['negative', 'x'.repeat(280), { ok: true, text: 'x'.repeat(280) }],
+  ] as const)('%s mit Text %j → %j', (score, text, expected) => {
+    expect(checkRatingText(score, text)).toEqual(expected);
+  });
+
+  it('Frist 14 Tage; sichtbar, wenn beide bewertet haben oder die Frist vorbei ist', () => {
+    const done = new Date('2026-11-01T10:00:00Z');
+    expect(ratingDeadline(done).toISOString()).toBe('2026-11-15T10:00:00.000Z');
+    expect(ratingPublished({ counterpartRated: false, dealCompletedAt: done, now: new Date('2026-11-15T10:00:00Z') })).toBe(false);
+    expect(ratingPublished({ counterpartRated: false, dealCompletedAt: done, now: new Date('2026-11-15T10:00:01Z') })).toBe(true);
+    expect(ratingPublished({ counterpartRated: true, dealCompletedAt: done, now: done })).toBe(true);
   });
 });

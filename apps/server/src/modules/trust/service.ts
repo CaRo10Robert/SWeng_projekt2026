@@ -6,6 +6,7 @@ import type { AuthContext } from '../../platform/http/auth.js';
 import { sql } from '../../platform/sql.js';
 import type { ModuleDeps } from '../shared.js';
 import { createDsa } from './dsa.js';
+import { createRatings } from './ratings.js';
 
 /** REQ-MOD-004: ab 3 Meldungen unterschiedlicher Mitglieder vorläufig ausblenden. */
 export const HIDE_THRESHOLD = 3;
@@ -59,6 +60,7 @@ export function createTrustService(deps: ModuleDeps) {
 
   return {
     ...dsa,
+    ...createRatings(deps),
 
     async report(auth: AuthContext, body: CreateReportBody): Promise<{ id: string }> {
       if (body.reason === 'auto_filter') throw unprocessable('invalid_reason', 'Ungültiger Grund.');

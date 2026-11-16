@@ -257,6 +257,20 @@ export function createMessagingService(deps: ModuleDeps) {
     return { message, created };
   }
 
+  /** Nach dem Abschluss eines Deals laden App und E-Mail beide Seiten zur Bewertung ein (REQ-MOD-006, Erinnerung). */
+  async function inviteRatings(tx: Tx, deal: DealRow) {
+    const listing = await modules.listings.summary(deal.listing_id);
+    for (const userId of [deal.seller_id, deal.buyer_id]) {
+      await modules.notifications.notify(tx, userId, 'rating_possible', {
+        listingId: deal.listing_id, ...(listing ? { listingTitle: listing.title } : {}), conversationId: deal.conversation_id,
+      });
+      await modules.notifications.email(tx, { userId }, 'rating_possible', {
+        listingTitle: listing?.title ?? 'Anzeige',
+        link: `${config.publicUrl}/messages/${deal.conversation_id}`,
+      });
+    }
+  }
+
   /** Neueste Deals mehrerer Konversationen in einer Abfrage, offene zuerst. */
   async function dealsFor(conversationIds: string[]): Promise<Map<string, DealRow>> {
     if (conversationIds.length === 0) return new Map();
@@ -515,6 +529,7 @@ export function createMessagingService(deps: ModuleDeps) {
           listingId: conv.listing_id, listingTitle: listing.title, conversationId: conv.id,
           ...(deal.agreed_price_cents != null ? { amountCents: deal.agreed_price_cents, currency: deal.currency.trim() } : {}),
         });
+        if (deal.status === 'completed') await inviteRatings(tx, deal);
         const eventType = ({ agreed: 'DealAgreed', completed: 'DealCompleted', cancelled: 'DealCancelled' } as const)[deal.status];
         await tx.enqueue(DEAL_EVENTS, dealEvent(eventType, deal, () => crypto.randomUUID()));
         return { deal, message };
@@ -633,6 +648,16 @@ export function createMessagingService(deps: ModuleDeps) {
       await closeOffers(tx, listingId, exceptConversationId);
     },
 
+    /** Schmales API für Bewertungen (REQ-MOD-006): Beteiligte, Anzeige, Status und Zeitpunkt des Abschlusses. */
+    async dealForRating(dealId: string) {
+      const d = await db.one<DealRow & { updated_at: string }>(sql`SELECT * FROM messaging.deal WHERE id = ${dealId}`);
+      if (!d) return null;
+      return {
+        id: d.id, listingId: d.listing_id, conversationId: d.conversation_id, sellerId: d.seller_id, buyerId: d.buyer_id,
+        status: d.status, completedAt: new Date(d.updated_at).toISOString(),
+      };
+    },
+
     async findConversationId(listingId: string, buyerId: string): Promise<string | null> {
       const row = await db.one<{ id: string }>(sql`
         SELECT id FROM messaging.conversation WHERE listing_id = ${listingId} AND buyer_id = ${buyerId}`);
@@ -648,6 +673,7 @@ export function createMessagingService(deps: ModuleDeps) {
         WHERE listing_id = ${listingId} AND status = 'agreed' RETURNING *`);
       for (const deal of deals) {
         await tx.enqueue(DEAL_EVENTS, dealEvent(target === 'completed' ? 'DealCompleted' : 'DealCancelled', deal, () => crypto.randomUUID()));
+        if (target === 'completed') await inviteRatings(tx, deal);
         // Anbieter hat an der Anzeige geändert: der Käufer erfährt es (REQ-NOTI-008)
         await modules.notifications.notify(tx, deal.buyer_id, target === 'completed' ? 'deal_completed' : 'deal_cancelled', {
           listingId, conversationId: deal.conversation_id,

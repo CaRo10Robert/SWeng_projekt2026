@@ -17,6 +17,8 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 - **Kaufangebot und Gegenangebot** (REQ-CHAT-009, B-73, Q-31): „Nehm ich“ bei Festpreis und Verschenken, Preisangebot bei VB; das Angebot erscheint als Karte in der Konversation, die Gegenseite kann akzeptieren, ablehnen, mit einer Nachricht antworten oder ein Gegenangebot senden. Akzeptieren reserviert die Anzeige für den Käufer zum vereinbarten Betrag; andere offene Angebote enden mit Benachrichtigung. Keine Bezahlung über die Plattform. Migration `0008_kaufangebot.sql`.
 
+- **Bewertungen als Käufer und Verkäufer** (REQ-MOD-006, B-70, Q-30): nach abgeschlossenem Deal 14 Tage lang einmal positiv, neutral oder negativ (Text Pflicht bei negativ, Wortfilter); verdeckt, bis beide bewertet haben oder die Frist vorbei ist; Einladung per App und E-Mail; im Profil Übersicht je Rolle (24 Monate, je Paar und Rolle nur die neueste) und Liste. Migration `0009_bewertungen.sql`.
+
 ### Changed (R2)
 - **Anzeigen alle 14 Tage erneuern** (REQ-LST-013, B-76, Q-32): nach 14 Tagen Hinweis (App, E-Mail abbestellbar), 24 h später automatisch pausiert und nur für den Anbieter sichtbar, nach 2 weiteren Tagen gelöscht; Erneuern bzw. Reaktivieren mit einem Klick. Ersetzt die Laufzeit von 60 Tagen. Eine eigene Pause hält bis zu 90 Tage. Migration `0007_erneuerung.sql`: aktive Bestandsanzeigen älter als 14 Tage erhalten sofort den Hinweis, abgelaufene werden automatisch pausiert. **Hinweis für bestehende Installationen:** Nicht erneuerte Anzeigen verschwinden nach 3 Tagen.
 

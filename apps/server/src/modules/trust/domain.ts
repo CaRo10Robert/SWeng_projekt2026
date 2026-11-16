@@ -123,3 +123,37 @@ export function newAppealToken(): { token: string; hash: string } {
 export function hashAppealToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
+
+// ------------------------------------------------------------------ Bewertungen (REQ-MOD-006, B-70)
+/** Bewerten ist bis 14 Tage nach dem Abschluss des Deals möglich; danach werden alle Bewertungen sichtbar. */
+export const RATING_WINDOW_DAYS = 14;
+/** Übersicht im Profil: Bewertungen der letzten 24 Monate. */
+export const RATING_SUMMARY_MONTHS = 24;
+export const RATING_TEXT = { negativeMin: 10, max: 280 };
+
+/**
+ * Rolle der bewerteten Person: Bei einem Angebot ist die Anbieterin Verkäuferin, bei einem Gesuch Käuferin;
+ * das Gegenüber hat die andere Rolle. Verschenken und Tausch zählen wie ein Verkauf.
+ */
+export function rateeRole(listingKind: 'offer' | 'wanted', listingOwnerId: string, rateeId: string): 'seller' | 'buyer' {
+  const ownerRole = listingKind === 'wanted' ? 'buyer' : 'seller';
+  if (rateeId === listingOwnerId) return ownerRole;
+  return ownerRole === 'seller' ? 'buyer' : 'seller';
+}
+
+export type RatingTextCheck = { ok: true; text: string | null } | { ok: false; code: 'text_required' | 'text_too_long' };
+
+/** Text optional bei positiv und neutral, Pflicht bei negativ (10–280 Zeichen); Leerzeichen am Rand zählen nicht. */
+export function checkRatingText(score: 'positive' | 'neutral' | 'negative', text: string | undefined): RatingTextCheck {
+  const trimmed = (text ?? '').trim();
+  if (trimmed.length > RATING_TEXT.max) return { ok: false, code: 'text_too_long' };
+  if (score === 'negative' && trimmed.length < RATING_TEXT.negativeMin) return { ok: false, code: 'text_required' };
+  return { ok: true, text: trimmed || null };
+}
+
+export const ratingDeadline = (dealCompletedAt: Date) => new Date(dealCompletedAt.getTime() + RATING_WINDOW_DAYS * 86_400_000);
+
+/** Sichtbar, sobald beide bewertet haben oder die Frist abgelaufen ist (Schutz vor Racheabwertung). */
+export function ratingPublished(input: { counterpartRated: boolean; dealCompletedAt: Date; now: Date }): boolean {
+  return input.counterpartRated || input.now.getTime() > ratingDeadline(input.dealCompletedAt).getTime();
+}

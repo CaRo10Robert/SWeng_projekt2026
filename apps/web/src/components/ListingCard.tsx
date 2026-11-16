@@ -57,8 +57,8 @@ export function ListingCard({ listing, showStatus }: { listing: Card; showStatus
           </p>
           <p className="text-xs text-slate-600">{formatDate(listing.createdAt)}</p>
           {/* Nur für den Anbieter gesetzt (REQ-LST-013) */}
-          {listing.renewBy && <p className="text-xs font-semibold text-amber-800">{t('listing.card.renewBy', { date: formatDateTime(listing.renewBy) })}</p>}
-          {listing.autoDeleteAt && <p className="text-xs font-semibold text-amber-800">{t('listing.card.autoDeleteAt', { date: formatDateTime(listing.autoDeleteAt) })}</p>}
+          {listing.renewBy && <p className="text-xs font-semibold text-amber-900">{t('listing.card.renewBy', { date: formatDateTime(listing.renewBy) })}</p>}
+          {listing.autoDeleteAt && <p className="text-xs font-semibold text-amber-900">{t('listing.card.autoDeleteAt', { date: formatDateTime(listing.autoDeleteAt) })}</p>}
         </div>
       </Link>
     </li>

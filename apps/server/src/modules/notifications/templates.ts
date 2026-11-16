@@ -16,6 +16,7 @@ export type EmailTemplate =
   | 'listing_expiry'
   | 'listing_auto_paused'
   | 'listing_deleted'
+  | 'rating_possible'
   | 'reservation_expired'
   | 'moderation_decision'
   | 'moderation_report_result'
@@ -43,6 +44,7 @@ export const templateCategory: Record<EmailTemplate, EmailCategory> = {
   listing_expiry: 'listingExpiry',
   listing_auto_paused: 'listingExpiry',
   listing_deleted: 'listingExpiry',
+  rating_possible: 'listingExpiry',
   reservation_expired: 'service',
   moderation_decision: 'service',
   moderation_report_result: 'service',
@@ -216,6 +218,14 @@ const DE: Record<EmailTemplate, (p: Params) => Rendered> = {
     ],
     action: { label: 'Meine Anzeigen', url: p.link! },
   }),
+  rating_possible: (p) => ({
+    subject: `Wie lief die Übergabe von „${p.listingTitle}“?`,
+    paragraphs: [
+      `Hallo ${p.name},`,
+      `die Übergabe von „${p.listingTitle}“ ist abgeschlossen. Du kannst dein Gegenüber jetzt 14 Tage lang bewerten. Die Bewertung wird sichtbar, sobald ihr beide bewertet habt oder die Frist vorbei ist.`,
+    ],
+    action: { label: 'Jetzt bewerten', url: p.link! },
+  }),
   listing_deleted: (p) => ({
     subject: `Deine Anzeige „${p.listingTitle}“ wurde gelöscht`,
     paragraphs: [
@@ -365,6 +375,14 @@ const EN: Record<EmailTemplate, (p: Params) => Rendered> = {
       `your listing “${p.listingTitle}” was not renewed and is now paused. Others can no longer see it. If you reactivate it by ${p.date}, it will be online for another 14 days; otherwise it will be deleted.`,
     ],
     action: { label: 'My listings', url: p.link! },
+  }),
+  rating_possible: (p) => ({
+    subject: `How did the handover of “${p.listingTitle}” go?`,
+    paragraphs: [
+      `Hi ${p.name},`,
+      `the handover of “${p.listingTitle}” is complete. You can now rate the other person for 14 days. The rating becomes visible once you have both rated or the period has ended.`,
+    ],
+    action: { label: 'Rate now', url: p.link! },
   }),
   listing_deleted: (p) => ({
     subject: `Your listing “${p.listingTitle}” has been deleted`,

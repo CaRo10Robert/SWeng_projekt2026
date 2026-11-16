@@ -192,8 +192,9 @@ describe.skipIf(!integrationAvailable)('Integration notifications (PostgreSQL)',
   });
 
   it('[AT-NOTI-008-3] Grundregel: nicht selbst ausgelöste Zustandsänderungen an Deal und Anzeige erzeugen eine Benachrichtigung, eigene nicht', async () => {
+    // Die Einladung zur Bewertung nach Abschluss (REQ-MOD-006) ist keine Zustandsänderung und zählt hier nicht
     const kinds = async (c: Member) =>
-      ((await c.call('GET', '/me/notifications')).data.items as { kind: string; data: Record<string, unknown> }[]);
+      ((await c.call('GET', '/me/notifications')).data.items as { kind: string; data: Record<string, unknown> }[]).filter((n) => n.kind !== 'rating_possible');
     const start = async (title: string) => {
       const id = await listing(lea, title);
       const conv = (await ben.call('POST', '/conversations', { listingId: id, body: 'Noch da?', clientMsgId: randomUUID() })).data

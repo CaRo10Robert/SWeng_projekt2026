@@ -11,6 +11,8 @@ import {
   IdParams,
   ModerationCase,
   ModerationNotice,
+  RatingBody,
+  RatingState,
   TokenAppealBody,
   TokenAppealInfo,
   TokenInfoBody,
@@ -33,6 +35,20 @@ export function createTrustModule(deps: ModuleDeps): Module<TrustApi> {
       { schema: { tags, body: CreateReportBody, response: { 201: Type.Object({ id: Type.String() }) } } },
       async (req, reply) => reply.status(201).send(await service.report(requireAuth(req), req.body)),
     );
+
+    // Bewertungen (REQ-MOD-006): nur Beteiligte eines abgeschlossenen Deals
+    app.get('/deals/:id/rating', { schema: { tags, params: IdParams, response: { 200: RatingState } } }, async (req) =>
+      service.ratingState(requireAuth(req), req.params.id),
+    );
+    app.post(
+      '/deals/:id/rating',
+      { schema: { tags, params: IdParams, body: RatingBody, response: { 201: RatingState } } },
+      async (req, reply) => reply.status(201).send(await service.rate(requireAuth(req), req.params.id, req.body)),
+    );
+    app.delete('/deals/:id/rating', { schema: { tags, params: IdParams } }, async (req, reply) => {
+      await service.deleteRating(requireAuth(req), req.params.id);
+      return reply.status(204).send();
+    });
 
     app.get('/me/blocks', { schema: { tags, response: { 200: Type.Array(BlockedUser) } } }, async (req) =>
       service.blocks(requireAuth(req)),

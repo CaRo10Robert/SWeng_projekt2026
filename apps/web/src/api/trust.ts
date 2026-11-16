@@ -12,8 +12,11 @@ import type {
   DecisionBody,
   EvidenceHoldPage,
   JobOverview,
+  MemberRatings,
   ModerationCase,
   ModerationNotice,
+  RatingBody,
+  RatingState,
   Role,
   TokenAppealInfo,
 } from '@campusmarkt/contracts';
@@ -167,5 +170,35 @@ export function useReleaseHold() {
   return useMutation({
     mutationFn: (id: string) => api<void>(`/admin/evidence-holds/${id}/release`, { method: 'POST' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin', 'evidence-holds'] }),
+  });
+}
+
+// ------------------------------------------------------------ Bewertungen (REQ-MOD-006)
+export const useRatingState = (dealId: string | undefined) =>
+  useQuery({ queryKey: ['rating', dealId], enabled: !!dealId, queryFn: () => api<RatingState>(`/deals/${dealId}/rating`) });
+
+export function useRate(dealId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: RatingBody) => api<RatingState>(`/deals/${dealId}/rating`, { method: 'POST', body }),
+    onSuccess: (state) => qc.setQueryData(['rating', dealId], state),
+  });
+}
+
+export function useDeleteRating(dealId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<void>(`/deals/${dealId}/rating`, { method: 'DELETE' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['rating', dealId] }),
+  });
+}
+
+export function useMemberRatings(userId: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: ['ratings', userId],
+    enabled,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam, signal }) => api<MemberRatings>(`/users/${userId}/ratings${qs({ cursor: pageParam, limit: 10 })}`, { signal }),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
 }
