@@ -3,7 +3,7 @@ id: REQ-UX-011
 title: Erste Schritte für neue Mitglieder
 type: user-story
 class: functional
-status: approved
+status: verified
 owner: team-produkt
 risk: low
 release: R2
@@ -13,9 +13,9 @@ epic: EPIC-07
 source: Auftraggeber (2026-11-13, Q-31)
 use_cases: [UC-04, UC-10, UC-08]
 depends_on: [REQ-ACC-001, REQ-UX-005, REQ-LEGAL-010]
-version: 1.0
+version: 1.1
 created: 2026-11-13
-last_updated: 2026-11-13
+last_updated: 2026-11-18
 verification: [AT-UX-011, AT-UX-011-2]
 ---
 
@@ -80,3 +80,4 @@ I: nutzt vorhandene Seiten · N: Anzahl und Texte der Schritte verhandelbar · V
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-31); Freigabe Product Owner |
+| 1.1 | 2026-11-18 | Umgesetzt (B-75): Spalten `onboarding_*` im Konto (Migration 0011), `GET|POST /me/onboarding`, Bereich auf der Startseite für Mitglieder, „Erste Schritte anzeigen“ in der Hilfe (das Öffnen der Hilfe zählt als „Sicherheitstipps gelesen“). AT-UX-011 und -2 grün; Status → verified |

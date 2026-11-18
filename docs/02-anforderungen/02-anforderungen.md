@@ -158,9 +158,9 @@ flowchart LR
 
 | Status | Stufe (Vorlesung) | Anzahl |
 |---|---|---|
-| approved | Konkretisiert (bereit) | 15 |
+| approved | Konkretisiert (bereit) | 14 |
 | implemented | Umsetzung | 4 |
-| verified | Test | 122 |
+| verified | Test | 123 |
 
 | ID | Titel | Klasse | MoSCoW (R1) | Kano | Risiko | Status | Nachweise |
 |---|---|---|---|---|---|---|---|
@@ -304,6 +304,6 @@ flowchart LR
 | [REQ-UX-008](req/REQ-UX-008.md) | Dunkles Farbschema nach Systemeinstellung, wählbar im Seitenkopf | functional | S | leistung | medium | verified | AT-UX-008, AT-UX-008-2, AT-UX-008-3, AT-UX-008-4 |
 | [REQ-UX-009](req/REQ-UX-009.md) | Vollständige Fehlerseiten für alle Fehlerarten | functional | S | basis | medium | verified | AT-UX-009, AT-UX-009-2, AT-UX-009-3, AT-UX-009-4 |
 | [REQ-UX-010](req/REQ-UX-010.md) | Website-Hygiene – Icons, Manifest, Metadaten, Seitentitel, saubere Konsole | quality | S | basis | low | verified | AT-UX-010, AT-UX-010-2 |
-| [REQ-UX-011](req/REQ-UX-011.md) | Erste Schritte für neue Mitglieder | functional | S | begeisterung | low | approved | AT-UX-011, AT-UX-011-2 |
+| [REQ-UX-011](req/REQ-UX-011.md) | Erste Schritte für neue Mitglieder | functional | S | begeisterung | low | verified | AT-UX-011, AT-UX-011-2 |
 
 <!-- req-index:end -->

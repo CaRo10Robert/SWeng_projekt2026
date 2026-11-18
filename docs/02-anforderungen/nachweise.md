@@ -1,4 +1,4 @@
-Integrationstest (`ratings.integration.test.ts`) und Unit-Test (`trust/domain.test.ts`) – ohne abgeschlossenen Deal und fremder Deal 404, negativ ohne bzw. mit zu kurzem Text 422, Wortfilter 422, doppelt 409; je Paar und Rolle zählt nur die neueste Bewertung; Blockierung verhindert das Bewerten nicht; blockiertes Profil 404. |
+Integrationstest (`identity.integration.test.ts`) – Schritte aus Profil, Anzeigen und gespeichertem Zustand; einmal erreicht bleibt erledigt (auch nach Löschen der Anzeige); Ausblenden kontoweit und Wiedereinblenden; nur eigenes Konto, Gäste 401. |
 id: EVIDENCE
 type: verification
 status: in-review

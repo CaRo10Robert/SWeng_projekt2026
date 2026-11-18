@@ -21,10 +21,13 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 - **Bewertungen in Datenschutz und Moderation** (B-71): Bewertungen sind meldbar und werden mit DSA-Begründung entfernt bzw. nach Widerspruch wiederhergestellt; im Datenexport enthalten; Löschung nach 24 Monaten; bei Kontolöschung erhaltene gelöscht, abgegebene anonymisiert. VVT (V-14 bis V-16), DSFA-Schwellwertanalyse und Übungs-DSFA aktualisiert. Migration `0010_bewertungen_datenschutz.sql`.
 
+- **Erste Schritte für neue Mitglieder** (REQ-UX-011, B-75, Q-31): Bereich auf der Startseite mit „Profil ergänzen“, „Erste Anzeige erstellen“ und „Sicherheitstipps lesen“; einmal erledigt bleibt erledigt; ausblendbar und über die Hilfe wieder aufrufbar; Zustand im Konto, nicht im Browser. Migration `0011_erste_schritte.sql`.
+
 ### Changed (R2)
 - **Anzeigen alle 14 Tage erneuern** (REQ-LST-013, B-76, Q-32): nach 14 Tagen Hinweis (App, E-Mail abbestellbar), 24 h später automatisch pausiert und nur für den Anbieter sichtbar, nach 2 weiteren Tagen gelöscht; Erneuern bzw. Reaktivieren mit einem Klick. Ersetzt die Laufzeit von 60 Tagen. Eine eigene Pause hält bis zu 90 Tage. Migration `0007_erneuerung.sql`: aktive Bestandsanzeigen älter als 14 Tage erhalten sofort den Hinweis, abgelaufene werden automatisch pausiert. **Hinweis für bestehende Installationen:** Nicht erneuerte Anzeigen verschwinden nach 3 Tagen.
 
 ### Fixed
+- E2E-Test AT-LEGAL-002-3 wartet auf den modalen Dialog zu neuen Nutzungsbedingungen statt einmalig zu prüfen (Zeitrennen).
 - E-Mail-Zustellung überbrückt wieder einen Mailserver-Ausfall von 30 min (REQ-NOTI-005, ADR-0005): erster Wiederholungsabstand 120 s statt fest 10 s, einstellbar über `MAIL_RETRY_DELAY_SECONDS`.
 - Bestehende Konten einer deaktivierten Domain können sich wieder anmelden; die Deaktivierung sperrt nur neue Registrierungen (REQ-ARCH-003, REQ-MOD-008).
 

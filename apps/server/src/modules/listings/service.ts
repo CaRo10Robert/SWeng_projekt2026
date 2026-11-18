@@ -381,6 +381,11 @@ export function createListingsService(deps: ModuleDeps) {
       return toPage(rows, limit, toCard, (r) => [new Date(r.created_at).toISOString(), r.id]);
     },
 
+    /** Erste Schritte (REQ-UX-011): hat das Mitglied je eine Anzeige veröffentlicht (gleich welcher Status außer Entwurf)? */
+    async ownerHasListings(ownerId: string): Promise<boolean> {
+      return !!(await db.one(sql`SELECT 1 FROM listings.listing WHERE owner_id = ${ownerId} AND status <> 'draft' LIMIT 1`));
+    },
+
     /** Wortfilter wie bei Anzeigen, z. B. für Bewertungstexte (REQ-MOD-006). */
     containsProhibitedTerms(text: string): boolean {
       return findProhibitedTerms(text).length > 0;

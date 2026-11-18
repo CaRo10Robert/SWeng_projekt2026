@@ -6,6 +6,7 @@ import { Alert, Badge, Loading } from '../components/ui';
 import { formatDate } from '../lib/format';
 import { useDocumentTitle } from '../lib/title';
 import { t, tx, useLocale } from '../i18n';
+import { OnboardingHelpHook } from '../components/Onboarding';
 
 export const legalPageNames: LegalPageName[] = [
   'impressum',
@@ -95,4 +96,9 @@ function ContentPage({ name }: { name: ContentName }) {
 }
 
 export const LegalPage = ({ name }: { name: LegalPageName }) => <ContentPage name={`legal/${name}`} />;
-export const HelpPage = () => <ContentPage name="help/faq" />;
+export const HelpPage = () => (
+  <>
+    <OnboardingHelpHook />
+    <ContentPage name="help/faq" />
+  </>
+);

@@ -100,6 +100,42 @@ describe.skipIf(!integrationAvailable)('Integration identity (PostgreSQL)', () =
     }
   }, 120_000);
 
+  it('[AT-UX-011-2] Erste Schritte: Zustand aus Profil, Anzeigen und gespeichertem Zustand; bleibt erledigt; Ausblenden und Wiedereinblenden; nur eigenes Konto', async () => {
+    const mia = await h.member('mia@studmail.hwg-lu.de');
+    const ben = await h.member('ben@studmail.hwg-lu.de');
+    const state = async (c = mia) => (await c.call('GET', '/me/onboarding')).data;
+    expect(await state()).toEqual({ visible: true, steps: { profile: false, firstListing: false, safetyTips: false } });
+    expect((await h.client().call('GET', '/me/onboarding')).status).toBe(401);
+
+    // Profil ergänzen
+    const meta = (await mia.call('GET', '/meta')).data;
+    await mia.call('PATCH', '/me', { preferredLocationIds: [meta.locations[0].id] });
+    expect((await state()).steps.profile).toBe(true);
+    // Erste Anzeige; bleibt erledigt, auch wenn sie wieder gelöscht wird
+    const listing = await mia.call('POST', '/listings', {
+      kind: 'offer', title: 'Erste Anzeige', description: 'Gut erhalten, Abholung auf dem Campus.', categoryId: meta.categories[0].id,
+      priceType: 'free', condition: 'good', locationIds: [meta.locations[0].id],
+    });
+    expect((await state()).steps.firstListing).toBe(true);
+    await mia.call('DELETE', `/listings/${listing.data.id}`);
+    await mia.call('PATCH', '/me', { preferredLocationIds: [] });
+    expect((await state()).steps).toMatchObject({ profile: true, firstListing: true });
+    // Sicherheitstipps gelesen → alles erledigt, Bereich verschwindet
+    expect((await mia.call('POST', '/me/onboarding', { action: 'tips_seen' })).data).toEqual({
+      visible: false, steps: { profile: true, firstListing: true, safetyTips: true },
+    });
+
+    // Ausblenden wirkt kontoweit (zweite Sitzung), Wiedereinblenden über die Hilfe
+    expect((await ben.call('POST', '/me/onboarding', { action: 'dismiss' })).data.visible).toBe(false);
+    const second = h.client();
+    await second.call('POST', '/auth/login', { email: 'ben@studmail.hwg-lu.de', password: PASSWORD });
+    expect((await second.call('GET', '/me/onboarding')).data.visible).toBe(false);
+    expect((await second.call('POST', '/me/onboarding', { action: 'show' })).data.visible).toBe(true);
+    // Mias Zustand bleibt davon unberührt
+    expect((await state()).steps.safetyTips).toBe(true);
+    expect((await state(ben)).steps.safetyTips).toBe(false);
+  });
+
   describe('Profil anderer Mitglieder (REQ-ACC-005)', () => {
     const offer = async (c: Awaited<ReturnType<Harness['member']>>, title: string) => {
       const meta = (await c.call('GET', '/meta')).data;

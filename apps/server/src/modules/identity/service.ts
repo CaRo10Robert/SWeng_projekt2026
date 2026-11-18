@@ -406,6 +406,34 @@ export function createIdentityService(deps: ModuleDeps) {
       return meOf(db, user);
     },
 
+    /**
+     * Erste Schritte (REQ-UX-011): Zustand im Konto, einmal erreichte Schritte bleiben erledigt. Sichtbar, solange
+     * nicht ausgeblendet und noch ein Schritt offen ist.
+     */
+    async onboarding(userId: string, action?: 'dismiss' | 'show' | 'tips_seen') {
+      if (action === 'dismiss') await db.exec(sql`UPDATE identity."user" SET onboarding_dismissed_at = now() WHERE id = ${userId}`);
+      if (action === 'show') await db.exec(sql`UPDATE identity."user" SET onboarding_dismissed_at = NULL WHERE id = ${userId}`);
+      if (action === 'tips_seen') {
+        await db.exec(sql`UPDATE identity."user" SET onboarding_tips_at = COALESCE(onboarding_tips_at, now()) WHERE id = ${userId}`);
+      }
+      const row = (await db.one<{
+        study_program: string | null; preferred_location_ids: string[]; onboarding_dismissed_at: string | null;
+        onboarding_profile_at: string | null; onboarding_listing_at: string | null; onboarding_tips_at: string | null;
+      }>(sql`SELECT study_program, preferred_location_ids, onboarding_dismissed_at, onboarding_profile_at, onboarding_listing_at,
+               onboarding_tips_at FROM identity."user" WHERE id = ${userId}`))!;
+      const profile = !!row.onboarding_profile_at || !!row.study_program?.trim() || (row.preferred_location_ids ?? []).length > 0;
+      const firstListing = !!row.onboarding_listing_at || (await deps.modules.listings.ownerHasListings(userId));
+      if ((profile && !row.onboarding_profile_at) || (firstListing && !row.onboarding_listing_at)) {
+        await db.exec(sql`
+          UPDATE identity."user" SET
+            onboarding_profile_at = CASE WHEN ${profile} THEN COALESCE(onboarding_profile_at, now()) ELSE onboarding_profile_at END,
+            onboarding_listing_at = CASE WHEN ${firstListing} THEN COALESCE(onboarding_listing_at, now()) ELSE onboarding_listing_at END
+          WHERE id = ${userId}`);
+      }
+      const steps = { profile, firstListing, safetyTips: !!row.onboarding_tips_at };
+      return { visible: !row.onboarding_dismissed_at && !(steps.profile && steps.firstListing && steps.safetyTips), steps };
+    },
+
     async getPublicUsers(ids: string[]): Promise<Map<string, PublicUser>> {
       if (ids.length === 0) return new Map();
       const rows = await db.query<{ id: string; display_name: string; user_type: UserType; created_at: string }>(sql`

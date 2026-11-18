@@ -726,5 +726,18 @@
   "report.titleRating": "Bewertung melden",
   "dsa.target.rating": "Bewertung",
   "rating.report": "Melden",
-  "mod.ratingContext": "Gemeldete Bewertung"
+  "mod.ratingContext": "Gemeldete Bewertung",
+  "onboarding.title": "Erste Schritte",
+  "onboarding.intro": "Willkommen bei CampusMarkt! Mit diesen drei Schritten bist du startklar.",
+  "onboarding.dismiss": "Ausblenden",
+  "onboarding.done": "erledigt",
+  "onboarding.step.profile": "Profil ergänzen",
+  "onboarding.step.profileHint": "Studiengang oder bevorzugte Übergabeorte angeben",
+  "onboarding.step.listing": "Erste Anzeige erstellen",
+  "onboarding.step.listingHint": "Was liegt bei dir herum, das jemand anderes brauchen könnte?",
+  "onboarding.step.tips": "Sicherheitstipps lesen",
+  "onboarding.step.tipsHint": "So handelst du sicher auf dem Campus",
+  "onboarding.allDone": "Alles erledigt – viel Erfolg auf dem CampusMarkt!",
+  "onboarding.showAgain": "Erste Schritte anzeigen",
+  "onboarding.shownAgain": "Die ersten Schritte erscheinen wieder auf der Startseite."
 }

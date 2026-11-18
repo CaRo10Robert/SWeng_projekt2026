@@ -116,3 +116,16 @@ export type AcceptTermsBody = Static<typeof AcceptTermsBody>;
 /** Kenntnisnahme einer neuen Datenschutzerklärung (RV-R-08). */
 export const PrivacyAckBody = Type.Object({ version: Type.String({ minLength: 1, maxLength: 20 }) });
 export type PrivacyAckBody = Static<typeof PrivacyAckBody>;
+
+/** Erste Schritte für neue Mitglieder (REQ-UX-011). */
+export const Onboarding = Type.Object({
+  /** Bereich anzeigen: nicht ausgeblendet und noch nicht alle Schritte erledigt (bzw. „Alles erledigt“ noch nicht geschlossen) */
+  visible: Type.Boolean(),
+  steps: Type.Object({ profile: Type.Boolean(), firstListing: Type.Boolean(), safetyTips: Type.Boolean() }),
+});
+export type Onboarding = Static<typeof Onboarding>;
+
+export const OnboardingActionBody = Type.Object({
+  action: Type.Union([Type.Literal('dismiss'), Type.Literal('show'), Type.Literal('tips_seen')]),
+});
+export type OnboardingActionBody = Static<typeof OnboardingActionBody>;

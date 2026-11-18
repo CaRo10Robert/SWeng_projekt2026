@@ -102,12 +102,20 @@ test('[AT-LEGAL-002-3] Neue Fassung der Datenschutzerklärung: Hinweis mit Link,
   const context = await browser.newContext({ locale: 'de-DE' });
   const page = await context.newPage();
   await keyboardLogin(page, DEMO.tim);
-  // Der Dialog zu den Nutzungsbedingungen liegt darüber; erst schließen
+  // Der Dialog zu den Nutzungsbedingungen liegt darüber und hält den Fokus (modal); Tim hat laut Seed eine ältere
+  // Zustimmung, der Dialog kommt also sicher – auf ihn warten statt einmalig zu prüfen (sonst Zeitrennen)
   const terms = page.getByRole('dialog', { name: 'Neue Nutzungsbedingungen' });
-  if (await terms.isVisible()) await activate(page, terms.getByRole('button', { name: 'Später' }));
+  await expect(terms).toBeVisible();
+  await activate(page, terms.getByRole('button', { name: 'Später' }));
+  await expect(terms).toBeHidden();
   const banner = page.getByRole('region', { name: 'Neue Fassung der Datenschutzerklärung' });
   await expect(banner).toBeVisible();
   await expect(banner.getByRole('link', { name: 'Datenschutzerklärung lesen' })).toHaveAttribute('href', '/datenschutz');
+  // Der Hinweis steht vor dem Seitenkopf: vom Seitenanfang aus per Tab erreichbar (wie gotoTop, ohne Neuladen)
+  await page.locator('body').evaluate((b) => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    b.focus();
+  });
   await activate(page, banner.getByRole('button', { name: 'Zur Kenntnis genommen' }));
   await expect(banner).toBeHidden();
   const me = await (await page.request.get('/api/v1/me')).json();

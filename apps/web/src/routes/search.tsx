@@ -9,6 +9,7 @@ import { Alert, Button, EmptyState, Field, Loading, Select } from '../components
 import { centsToEuroInput, conditionLabels, kindLabels, parseEuroToCents, priceTypeLabels } from '../lib/format';
 import { t, type MessageKey } from '../i18n';
 import { useDocumentTitle } from '../lib/title';
+import { OnboardingPanel } from '../components/Onboarding';
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
 const int = (v: unknown) => {
@@ -82,6 +83,7 @@ export function SearchPage() {
   return (
     <div className="space-y-4">
       <h1 className="sr-only">{t('search.title')}</h1>
+      <OnboardingPanel />
       <form role="search" onSubmit={submit} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex gap-2">
           <div className="flex-1">

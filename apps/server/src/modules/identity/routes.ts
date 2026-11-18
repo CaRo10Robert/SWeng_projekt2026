@@ -12,6 +12,8 @@ import {
   Me,
   MemberProfile,
   MemberRatings,
+  Onboarding,
+  OnboardingActionBody,
   PageQuery,
   PrivacyAckBody,
   RegisterBody,
@@ -124,6 +126,14 @@ export function identityRoutes(service: IdentityService, config: Config, modules
         await service.setRole(actor, req.params.id, req.body.role);
         return reply.status(204).send();
       },
+    );
+
+    // ------------------------------------------------------------ Erste Schritte (REQ-UX-011)
+    app.get('/me/onboarding', { schema: { tags, response: { 200: Onboarding } } }, async (req) =>
+      service.onboarding(requireAuth(req).userId),
+    );
+    app.post('/me/onboarding', { schema: { tags, body: OnboardingActionBody, response: { 200: Onboarding } } }, async (req) =>
+      service.onboarding(requireAuth(req).userId, req.body.action),
     );
 
     // ------------------------------------------------------------ Profil anderer Mitglieder (REQ-ACC-005)

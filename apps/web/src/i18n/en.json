@@ -726,5 +726,18 @@
   "report.titleRating": "Report rating",
   "dsa.target.rating": "Rating",
   "rating.report": "Report",
-  "mod.ratingContext": "Reported rating"
+  "mod.ratingContext": "Reported rating",
+  "onboarding.title": "First steps",
+  "onboarding.intro": "Welcome to CampusMarkt! These three steps get you started.",
+  "onboarding.dismiss": "Hide",
+  "onboarding.done": "done",
+  "onboarding.step.profile": "Complete your profile",
+  "onboarding.step.profileHint": "Add your degree programme or preferred handover locations",
+  "onboarding.step.listing": "Create your first listing",
+  "onboarding.step.listingHint": "What do you have lying around that someone else could use?",
+  "onboarding.step.tips": "Read the safety tips",
+  "onboarding.step.tipsHint": "How to trade safely on campus",
+  "onboarding.allDone": "All done – good luck on CampusMarkt!",
+  "onboarding.showAgain": "Show first steps",
+  "onboarding.shownAgain": "The first steps will appear on the home page again."
 }
