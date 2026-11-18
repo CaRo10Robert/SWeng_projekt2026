@@ -80,12 +80,12 @@ const LABELS: Record<Locale, Labels> = {
   de: {
     locale: 'de-DE',
     measure: {
-      no_action: { listing: 'keine Maßnahme', message: 'keine Maßnahme', user: 'keine Maßnahme' },
-      remove: { listing: 'Anzeige entfernt', message: 'Nachricht entfernt', user: 'Profilinhalt entfernt' },
-      warn: { listing: 'Verwarnung', message: 'Verwarnung', user: 'Verwarnung' },
-      ban: { listing: 'Konto dauerhaft gesperrt', message: 'Konto dauerhaft gesperrt', user: 'Konto dauerhaft gesperrt' },
+      no_action: { listing: 'keine Maßnahme', message: 'keine Maßnahme', user: 'keine Maßnahme', rating: 'keine Maßnahme' },
+      remove: { listing: 'Anzeige entfernt', message: 'Nachricht entfernt', user: 'Profilinhalt entfernt', rating: 'Bewertung entfernt' },
+      warn: { listing: 'Verwarnung', message: 'Verwarnung', user: 'Verwarnung', rating: 'Verwarnung' },
+      ban: { listing: 'Konto dauerhaft gesperrt', message: 'Konto dauerhaft gesperrt', user: 'Konto dauerhaft gesperrt', rating: 'Konto dauerhaft gesperrt' },
     },
-    target: { listing: 'einer Anzeige', message: 'einer Chatnachricht', user: 'einem Profil' },
+    target: { listing: 'einer Anzeige', message: 'einer Chatnachricht', user: 'einem Profil', rating: 'einer Bewertung' },
     rule: {
       community_prohibited_items: 'Community-Regeln, Abschnitt „Verbotene Artikel und Inhalte“',
       community_fair_communication: 'Community-Regeln, Abschnitt „Fair kommunizieren“',
@@ -110,12 +110,12 @@ const LABELS: Record<Locale, Labels> = {
   en: {
     locale: 'en-GB',
     measure: {
-      no_action: { listing: 'no action', message: 'no action', user: 'no action' },
-      remove: { listing: 'listing removed', message: 'message removed', user: 'profile content removed' },
-      warn: { listing: 'warning', message: 'warning', user: 'warning' },
-      ban: { listing: 'account permanently suspended', message: 'account permanently suspended', user: 'account permanently suspended' },
+      no_action: { listing: 'no action', message: 'no action', user: 'no action', rating: 'no action' },
+      remove: { listing: 'listing removed', message: 'message removed', user: 'profile content removed', rating: 'rating removed' },
+      warn: { listing: 'warning', message: 'warning', user: 'warning', rating: 'warning' },
+      ban: { listing: 'account permanently suspended', message: 'account permanently suspended', user: 'account permanently suspended', rating: 'account permanently suspended' },
     },
-    target: { listing: 'a listing', message: 'a chat message', user: 'a profile' },
+    target: { listing: 'a listing', message: 'a chat message', user: 'a profile', rating: 'a rating' },
     rule: {
       community_prohibited_items: 'Community rules, section “Prohibited items and content”',
       community_fair_communication: 'Community rules, section “Communicate fairly”',

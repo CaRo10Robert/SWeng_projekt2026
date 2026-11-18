@@ -16,6 +16,8 @@ export const DELETION_KINDS = [
   'listing_restored',
   'message_removed',
   'message_restored',
+  'rating_removed',
+  'rating_restored',
   'image_deleted',
 ] as const;
 export type DeletionKind = (typeof DELETION_KINDS)[number];

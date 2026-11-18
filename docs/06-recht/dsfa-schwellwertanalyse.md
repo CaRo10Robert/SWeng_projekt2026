@@ -3,9 +3,9 @@ id: LEGAL-DSFA
 type: privacy
 status: approved
 owner: product-owner
-version: 1.2
+version: 1.3
 created: 2026-10-24
-last_updated: 2026-10-26
+last_updated: 2026-11-16
 ---
 
 # Schwellwertanalyse zur Datenschutz-Folgenabschätzung (Art. 35 DSGVO)
@@ -26,7 +26,7 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 
 | Kriterium | Zutreffend? | Begründung |
 |---|---|---|
-| 1. Bewerten oder Einstufen | nein | keine Bewertungsfunktion im MVP (REQ-MOD-006 ist „Could“) |
+| 1. Bewerten oder Einstufen | **teilweise** (neu bewertet 2026-11-16, B-71) | Mitglieder bewerten einander nach einem abgeschlossenen Deal (REQ-MOD-006, R2). Die Plattform bildet daraus keinen Score und trifft keine Entscheidungen; angezeigt werden nur Anzahl je Stufe und die Bewertungen selbst |
 | 2. automatisierte Entscheidung mit Rechtswirkung | nein | Wortfilter setzt nur „in Prüfung“; ein Mensch entscheidet |
 | 3. systematische Überwachung | nein | kein Tracking; Request-Logs ohne IP-Adresse und ohne Query-Werte; Rate-Limit-Zähler nur mit HMAC-Pseudonymen (Schlüssel täglich neu); keine Auswertung von Nutzungsverhalten |
 | 4. vertrauliche oder höchstpersönliche Daten | **ja** (neu bewertet, Review v1.3 RV-R-16) | Chatnachrichten sind private Kommunikation zwischen Mitgliedern; die Moderation liest bei Meldungen Ausschnitte und im Widerspruch Originaltexte entfernter Nachrichten, bei Straftatverdacht wird eine Kopie gesichert |
@@ -38,7 +38,7 @@ Ziel: prüfen, ob für CampusMarkt eine vollständige Datenschutz-Folgenabschät
 
 ## Ergebnis
 
-Zwei Kriterien sind erfüllt bzw. teilweise erfüllt (Nr. 4 und Nr. 7). Nach WP 248 ist ab zwei Kriterien **in der Regel eine DSFA erforderlich**. Ergebnis dieser Analyse: **Eine DSFA ist vor einem Echtbetrieb durchzuführen**, Die Verarbeitung steht nicht auf der Muss-Liste der LfDI RLP (Übungsannahme Q-28).
+Drei Kriterien sind erfüllt bzw. teilweise erfüllt (Nr. 1, Nr. 4 und Nr. 7; Nr. 1 seit den Bewertungen, B-71). Nach WP 248 ist ab zwei Kriterien **in der Regel eine DSFA erforderlich**. Ergebnis dieser Analyse: **Eine DSFA ist vor einem Echtbetrieb durchzuführen**, Die Verarbeitung steht nicht auf der Muss-Liste der LfDI RLP (Übungsannahme Q-28).
 
 Konsequenz: Die DSFA nach Art. 35 Abs. 7 ist als Hausaufgabe mit fiktiven Werten durchgeführt: [Übungs-DSFA](dsfa.md). Sie wird nie im Echtbetrieb genutzt (Q-28).
 
@@ -48,10 +48,17 @@ Schon umgesetzte Abhilfemaßnahmen für die Kriterien 4 und 7:
 - Beweissicherung nur als pseudonymisierte Kopie, höchstens 6 Monate.
 - Begründung und Widerspruch bei jeder Maßnahme (REQ-LEGAL-006/007).
 
+Abhilfemaßnahmen für Kriterium 1 (Bewertungen, REQ-MOD-006):
+- nur nach abgeschlossenem Deal, einmal je Deal und Person; verdeckt, bis beide bewertet haben (Schutz vor Racheabwertung);
+- kein Gesamtscore, keine automatische Folge; Übersicht nur 24 Monate, je Paar und Rolle zählt die neueste Bewertung;
+- Text Pflicht nur bei negativ, Wortfilter; Bewertungen meldbar, Entfernung mit Begründung und Widerspruch nach DSA;
+- Löschung nach 24 Monaten; bei Kontolöschung erhaltene sofort gelöscht, abgegebene ohne Text und Namen;
+- im Datenexport enthalten (abgegebene vollständig, erhaltene nach Veröffentlichung).
+
 ## Neu bewerten, wenn …
 
 - die Bezahlfunktion (EPIC-09) kommt (Finanzdaten),
-- Bewertungen von Mitgliedern eingeführt werden (Kriterium 1),
+- Bewertungen zu einem Score oder zu automatischen Folgen (z. B. Sperren) verdichtet werden (Kriterium 1, 2),
 - weitere Hochschulen angebunden werden (Kriterium 5),
 - SSO mit zusätzlichen Attributen (z. B. Matrikelnummer) genutzt wird.
 

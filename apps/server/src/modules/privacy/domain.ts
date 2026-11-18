@@ -20,6 +20,8 @@ export const RETENTION = {
   noticeMonths: 12,
   /** Benachrichtigungen in der App (REQ-NOTI-008). */
   notificationDays: 90,
+  /** Bewertungen (REQ-MOD-006, B-71): Übersicht und Speicherung 24 Monate. */
+  ratingMonths: 24,
   /** Audit-Log. */
   auditMonths: 24,
   /** Nachweise über Zustimmungen ohne Profilbezug nach der Kontolöschung (Verjährung). */
@@ -35,6 +37,7 @@ export interface RetentionCutoffs {
   pausedListingsBefore: Date;
   noticesBefore: Date;
   notificationsBefore: Date;
+  ratingsBefore: Date;
   auditBefore: Date;
   consentProofsBefore: Date;
 }
@@ -63,6 +66,7 @@ export function retentionCutoffs(now: Date): RetentionCutoffs {
     pausedListingsBefore: daysBefore(RETENTION.pausedListingDays),
     noticesBefore: monthsBefore(now, RETENTION.noticeMonths),
     notificationsBefore: daysBefore(RETENTION.notificationDays),
+    ratingsBefore: monthsBefore(now, RETENTION.ratingMonths),
     auditBefore: monthsBefore(now, RETENTION.auditMonths),
     consentProofsBefore: monthsBefore(now, RETENTION.consentProofYears * 12),
   };

@@ -51,16 +51,24 @@ export function createTrustService(deps: ModuleDeps) {
       if (context.senderId === auth.userId) throw unprocessable('own_content', 'Eigene Inhalte können nicht gemeldet werden.');
       return context.senderId;
     }
+    if (type === 'rating') {
+      // Bewertungen (REQ-MOD-001, B-71): nur veröffentlichte; betroffen ist die bewertende Person
+      const rating = await ratings.ratingForReport(id);
+      if (!rating) throw notFound();
+      if (rating.raterId === auth.userId) throw unprocessable('own_content', 'Eigene Inhalte können nicht gemeldet werden.');
+      return rating.raterId ?? rating.rateeId;
+    }
     if (id === auth.userId) throw unprocessable('own_content', 'Du kannst dich nicht selbst melden.');
     if (!(await modules.identity.getContact(id))) throw notFound();
     return id;
   }
 
-  const dsa = createDsa(deps, { openCase });
+  const ratings = createRatings(deps);
+  const dsa = createDsa(deps, { openCase, ratings });
 
   return {
     ...dsa,
-    ...createRatings(deps),
+    ...ratings,
 
     async report(auth: AuthContext, body: CreateReportBody): Promise<{ id: string }> {
       if (body.reason === 'auto_filter') throw unprocessable('invalid_reason', 'Ungültiger Grund.');
@@ -110,6 +118,7 @@ export function createTrustService(deps: ModuleDeps) {
           SELECT id, reason, details, created_at, reporter_id FROM trust.report WHERE case_id = ${row.id} ORDER BY created_at`);
         let listing: ModerationCase['listing'] = null;
         let messageContext: ModerationCase['messageContext'] = null;
+        const rating = row.target_type === 'rating' ? await ratings.ratingForModeration(row.target_id) : null;
         if (row.target_type === 'listing') {
           const summary = await modules.listings.summary(row.target_id);
           if (summary) {
@@ -143,6 +152,7 @@ export function createTrustService(deps: ModuleDeps) {
           })),
           listing,
           messageContext,
+          rating,
           createdAt: row.created_at,
         });
       }
@@ -199,6 +209,8 @@ export function createTrustService(deps: ModuleDeps) {
       await tx.db.exec(sql`UPDATE trust.appeal SET appellant_id = NULL WHERE appellant_id = ${userId}`);
       // Meldungen bleiben für die Aufbewahrungsfrist erhalten, aber ohne Bezug zur Person
       await tx.db.exec(sql`UPDATE trust.report SET reporter_id = NULL WHERE reporter_id = ${userId}`);
+      // Bewertungen (B-71): erhaltene löschen, abgegebene ohne Bezug zur Person und ohne Text
+      await ratings.deleteRatingsForUser(tx, userId);
     },
 
     async exportForUser(userId: string) {
@@ -215,7 +227,7 @@ export function createTrustService(deps: ModuleDeps) {
       const notices = await db.query(sql`
         SELECT n.kind, n.recipient_role AS role, n.decision_id AS "decisionId", n.created_at AS "createdAt"
         FROM trust.notice n WHERE n.user_id = ${userId}`);
-      return { reports, blocks, appeals, notices };
+      return { reports, blocks, appeals, notices, ratings: await ratings.exportRatingsForUser(userId) };
     },
   };
 }

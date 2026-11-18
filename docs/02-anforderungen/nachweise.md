@@ -29,6 +29,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-ACC-002` | automatisiert | REQ-ACC-002 | Smoke-Test – Löschung beantragen, Anmeldung bricht ab. |
 | `AT-ACC-002-2` | automatisiert | REQ-ACC-002 | Integrationstest – Löschlauf nach Ablauf der Karenz entfernt alle personenbezogenen Daten und anonymisiert fremde Konversationen. |
 | `AT-ACC-003` | automatisiert | REQ-ACC-003 | Smoke-Test „Datenexport (Art. 15/20)“ (bestehend). |
+| `AT-ACC-003-2` | automatisiert | REQ-ACC-003, REQ-MOD-006 | Integrationstest (`ratings.integration.test.ts`) – Datenexport enthält abgegebene Bewertungen vollständig und erhaltene veröffentlichte; noch verdeckte erhaltene nur als Anzahl. |
 | `AT-ACC-004` | automatisiert | REQ-ACC-004 | Smoke-Test – Profilbild hochladen, Metadaten entfernt, Bild für andere Mitglieder sichtbar, Entfernen setzt Platzhalter (neu). |
 | `AT-ACC-005` | automatisiert | REQ-ACC-005 | E2E-Test – Profil aus Anzeige und Konversation öffnen (Maus und Tastatur), Angaben und aktive Anzeigen sichtbar; axe-core ohne `serious`/`critical` (neu, R2). |
 | `AT-ACC-005-2` | automatisiert | REQ-ACC-005 | API-Test – Profilantwort enthält nur die freigegebenen Felder, keine E-Mail-Adresse (neu, R2). |
@@ -138,6 +139,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `CTRL-MUTATION` | Kontrolle | REQ-MAINT-001 | StrykerJS 10.0.0 auf die Geschäftsregeln (`stryker.config.mjs`), Workflow `mutation.yml` montags und auf Anforderung. Score **73,8 %** (Schwelle 60 %) – Kriterium (2) erfüllt; Ausreißer `platform/pseudonym.ts` 45,9 % (datenbanknahe Mutanten) und `listings/domain.ts` 59,3 %. |
 | `AT-MOD-001` | automatisiert | REQ-MOD-001 | Smoke-Test – Mitglied meldet eine Anzeige über die API, der Fall erscheint in der Queue. |
 | `AT-MOD-001-2` | automatisiert | REQ-MOD-001 | Smoke-Test – zweite Meldung desselben Mitglieds ergibt 409, Meldung eigener Inhalte 422. |
+| `AT-MOD-001-3` | automatisiert | REQ-MOD-001, REQ-MOD-006 | Integrationstest (`ratings.integration.test.ts`) – Bewertung melden (eigene 422, unbekannte 404), Moderation sieht den Inhalt, Entfernung mit Begründung an die bewertende Person, entfernte Bewertung zählt nicht; Stattgabe des Widerspruchs (Vier-Augen) stellt sie wieder her. |
 | `AT-MOD-002` | automatisiert | REQ-MOD-002 | Smoke-Test – Moderator sieht Seed-Meldung und Wortfilter-Fall und entscheidet „entfernen“ (bestehend: „Moderations-Queue …“, „Moderationsentscheidung“). |
 | `AT-MOD-002-2` | automatisiert | REQ-MOD-002 | Smoke-Test – Mitglied erhält 403 auf die Queue (bestehend: „Mitglied hat keinen Zugriff auf Moderation“). |
 | `AT-MOD-002-3` | automatisiert | REQ-MOD-002 | Smoke-Test – eine über die API erstellte Meldung ist innerhalb von 10 s in der Queue (neu). |
@@ -199,6 +201,7 @@ Alle Nachweise, auf die Anforderungen in `verification` verweisen (Guideline Kap
 | `AT-PRIV-003` | automatisiert | REQ-PRIV-003 | Integrationstest (`listings.integration.test.ts`) mit vorgestellter Zeit für Anzeigen (abgegeben 30 Tage, abgelaufen 90 Tage, pausiert 90 Tage, reserviert 30 Tage) und Konten (unbestätigt 7 Tage, Löschantrag 14 Tage). |
 | `AT-PRIV-003-2` | automatisiert | REQ-PRIV-003 | Ops-Test `tests/ops/retention-test.mjs` – Datensätze werden per psql zurückdatiert, danach löst die Administration den Löschlauf aus (`POST /admin/demo/run-due-jobs`); geprüft werden Chats (12 Monate nach der letzten Nachricht), Meldungen und Entscheidungen (12 Monate nach Abschluss), Audit-Log (24 Monate), benutzte bzw. abgelaufene Links (7 Tage) und von der Moderation entfernte Anzeigen (12 Monate); jüngere Einträge bleiben. Läuft in CI im Job `compose`. |
 | `AT-PRIV-003-3` | automatisiert | REQ-PRIV-003 | derselbe Ops-Test – Kontolöschung entfernt nur die eigenen Nachrichtentexte (Systemcode `message_deleted`), die Konversation bleibt für das Gegenüber mit „Ehemaliges Mitglied“. |
+| `AT-PRIV-003-4` | automatisiert | REQ-PRIV-003, REQ-MOD-006 | Integrationstest (`ratings.integration.test.ts`) – Bewertungen nach 24 Monaten gelöscht; bei Kontolöschung erhaltene gelöscht, abgegebene ohne Text und Namen weiter gezählt. |
 | `AT-PRIV-004` | automatisiert | REQ-PRIV-004 | Integrationstest (`trust.integration.test.ts`) – Meldung einer Nachricht in einer langen Konversation; der Moderationsfall enthält höchstens 11 Nachrichten; der Zugriff steht im Audit-Log. |
 | `MAN-PRIV-005` | manuell | REQ-PRIV-005 | Verzeichnis der Auftragsverarbeiter mit AV-Verträgen. |
 | `AT-PRIV-006` | automatisiert | REQ-PRIV-006 | neu zu schreiben – Browser-Test protokolliert alle Netzwerkanfragen über Anmelden, Suchen, Anzeige, Chat; keine fremde Domain, nur ein Cookie. |

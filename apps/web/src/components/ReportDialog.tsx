@@ -35,7 +35,7 @@ export function ReportDialog({
     report.mutate({ targetType, targetId, reason, details: details.trim() || undefined });
   };
 
-  const title = { listing: t('report.titleListing'), message: t('report.titleMessage'), user: t('report.titleUser') }[targetType];
+  const title = { listing: t('report.titleListing'), message: t('report.titleMessage'), user: t('report.titleUser'), rating: t('report.titleRating') }[targetType];
 
   return (
     <Dialog open={open} onClose={close} title={title}>

@@ -168,7 +168,7 @@ flowchart LR
 | [REQ-A11Y-002](req/REQ-A11Y-002.md) | Vollständige Tastaturbedienbarkeit der Kernabläufe | quality | M | basis | high | implemented | AT-A11Y-002, AT-A11Y-002-2, MAN-A11Y-002 |
 | [REQ-ACC-001](req/REQ-ACC-001.md) | Profil pflegen | functional | M | basis | low | verified | AT-ACC-001 |
 | [REQ-ACC-002](req/REQ-ACC-002.md) | Konto löschen mit Karenzzeit | functional | M | basis | high | verified | AT-ACC-002, AT-ACC-002-2 |
-| [REQ-ACC-003](req/REQ-ACC-003.md) | Daten exportieren | functional | S | leistung | medium | verified | AT-ACC-003 |
+| [REQ-ACC-003](req/REQ-ACC-003.md) | Daten exportieren | functional | S | leistung | medium | verified | AT-ACC-003, AT-ACC-003-2 |
 | [REQ-ACC-004](req/REQ-ACC-004.md) | Profilbild | functional | S | leistung | medium | approved | AT-ACC-004 |
 | [REQ-ACC-005](req/REQ-ACC-005.md) | Profil anderer Mitglieder ansehen | functional | S | leistung | medium | verified | AT-ACC-005, AT-ACC-005-2, AT-ACC-005-3 |
 | [REQ-ARCH-001](req/REQ-ARCH-001.md) | Bezahlung als späteres Modul hinter einem Port | constraint | M | n/a | high | verified | CTRL-DEPCRUISE, MAN-ARCH-001 |
@@ -231,7 +231,7 @@ flowchart LR
 | [REQ-LST-013](req/REQ-LST-013.md) | Anzeigen alle 14 Tage erneuern, sonst pausieren und löschen | domain | S | leistung | medium | verified | AT-LST-013, AT-LST-013-2, AT-LST-013-3 |
 | [REQ-MAINT-001](req/REQ-MAINT-001.md) | Testabdeckung der Fachlogik | quality | S | n/a | medium | verified | CTRL-COVERAGE, CTRL-MUTATION |
 | [REQ-MAINT-002](req/REQ-MAINT-002.md) | Geprüfte Modulgrenzen | constraint | M | n/a | medium | verified | CTRL-DEPCRUISE |
-| [REQ-MOD-001](req/REQ-MOD-001.md) | Inhalte und Mitglieder melden | functional | M | basis | high | verified | AT-MOD-001, AT-MOD-001-2 |
+| [REQ-MOD-001](req/REQ-MOD-001.md) | Inhalte und Mitglieder melden | functional | M | basis | high | verified | AT-MOD-001, AT-MOD-001-2, AT-MOD-001-3 |
 | [REQ-MOD-002](req/REQ-MOD-002.md) | Moderations-Queue bearbeiten | functional | M | basis | high | verified | AT-MOD-002, AT-MOD-002-2, AT-MOD-002-3 |
 | [REQ-MOD-003](req/REQ-MOD-003.md) | Entscheidungen begründen und unveränderlich protokollieren | constraint | M | basis | high | verified | AT-MOD-003, AT-MOD-003-2 |
 | [REQ-MOD-004](req/REQ-MOD-004.md) | Vorläufiges Ausblenden ab drei Meldungen | functional | S | basis | medium | approved | AT-MOD-004 |
@@ -269,7 +269,7 @@ flowchart LR
 | [REQ-PORT-002](req/REQ-PORT-002.md) | Lauffähig auf x86- und ARM-Rechnern | quality | M | n/a | medium | verified | CTRL-CI-MULTIARCH |
 | [REQ-PRIV-001](req/REQ-PRIV-001.md) | Versionierte Einwilligungen | constraint | M | n/a | medium | verified | AT-PRIV-001, AT-PRIV-001-2 |
 | [REQ-PRIV-002](req/REQ-PRIV-002.md) | Datenminimierung und Schutz der Kontaktdaten | constraint | M | basis | high | verified | AT-PRIV-002, AT-PRIV-002-2 |
-| [REQ-PRIV-003](req/REQ-PRIV-003.md) | Löschkonzept mit Fristen je Datenkategorie | constraint | M | n/a | high | verified | AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3 |
+| [REQ-PRIV-003](req/REQ-PRIV-003.md) | Löschkonzept mit Fristen je Datenkategorie | constraint | M | n/a | high | verified | AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3, AT-PRIV-003-4 |
 | [REQ-PRIV-004](req/REQ-PRIV-004.md) | Moderation sieht nur gemeldeten Chat-Kontext | constraint | M | basis | high | verified | AT-PRIV-004 |
 | [REQ-PRIV-005](req/REQ-PRIV-005.md) | Hosting und Auftragsverarbeiter in der EU | constraint | W | n/a | high | approved | MAN-PRIV-005 |
 | [REQ-PRIV-006](req/REQ-PRIV-006.md) | Kein Tracking, keine Drittanbieter-Ressourcen | constraint | M | basis | medium | verified | AT-PRIV-006, AT-PRIV-006-2 |

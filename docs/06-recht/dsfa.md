@@ -3,9 +3,9 @@ id: DSFA-CAMPUSMARKT
 type: dpia
 status: approved
 owner: product-owner
-version: 1.1
+version: 1.2
 created: 2026-10-25
-last_updated: 2026-10-26
+last_updated: 2026-11-16
 review_due: 2027-10-25
 ---
 
@@ -73,6 +73,7 @@ Ergebnis: Die Verarbeitung ist für den Zweck erforderlich und angemessen.
 | R-7 | **Rückrechnung von Pseudonymen**: IP-Adressen aus Rate-Limit-Schlüsseln werden durch Durchprobieren bestimmt | Vertraulichkeit, Nichtverkettung | mittel × gering → Risiko | HMAC-SHA256 mit zufälligem, täglich rotiertem Schlüssel; Vorgänger nach 1 h gelöscht (ADR-0014); Request-Log ohne IP | gering × gering → kein Risiko |
 | R-8 | **Belästigung über Kontaktdaten** nach der Kontaktfreigabe | Vertraulichkeit | mittel × mittel → Risiko | Freigabe nur beidseitig, jederzeit widerrufbar, Sperrfrist nach Widerruf, Blockieren blendet Adressen aus (REQ-CHAT-010) | gering × mittel → Risiko |
 | R-9 | **Fehlerhafte DAC7-Meldung** (falsche Person, zu viele Daten) | Richtigkeit, Datenminimierung | gering × mittel → Risiko | Auswertung nur aus abgeschlossenen Deals, nur Administration, JSON ohne E-Mail, Audit-Log; Erhebung der Steuerdaten erst bei Erreichen der Schwelle | gering × gering → kein Risiko |
+| R-10 | **Rufschädigung durch Bewertungen** (Racheabwertung, unwahre oder beleidigende Texte, Hochschieben unter Bekannten) | Richtigkeit, Intervenierbarkeit | mittel × mittel → Risiko | nur nach abgeschlossenem Deal, verdeckt bis beide bewertet haben, Text Pflicht bei negativ mit Wortfilter, je Paar und Rolle nur die neueste Bewertung, meldbar mit Entfernung, Begründung und Widerspruch (REQ-MOD-006, B-70/B-71), Löschung nach 24 Monaten | gering |
 
 ## 4. Abhilfemaßnahmen (lit. d)
 

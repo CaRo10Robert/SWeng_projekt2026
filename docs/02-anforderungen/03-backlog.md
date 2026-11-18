@@ -159,6 +159,7 @@ gantt
 - **B-76 umgesetzt (2026-11-13):** Erneuerung alle 14 Tage mit automatischer Pause und Löschung; AT-LST-013 bis -3 grün, Smoke-, Retention- und alle E2E-Tests angepasst. REQ-LST-013 steht auf `implemented` bis B-73.
 - **B-73 umgesetzt (2026-11-15):** Kaufangebot mit „Nehm ich“, Preisangebot und Gegenangebot; AT-CHAT-009 bis -3 grün. Damit sind REQ-CHAT-009, REQ-NOTI-008 und REQ-LST-013 verifiziert.
 - **B-70 umgesetzt (2026-11-16):** Bewertungen nach abgeschlossenem Deal mit Einladung, Verdeckung und Übersicht im Profil; AT-MOD-006 bis -3 grün, REQ-MOD-006 verifiziert.
+- **B-71 umgesetzt (2026-11-16):** Bewertungen meldbar und entfernbar (DSA), im Export, Löschfrist 24 Monate, Kontolöschung; VVT, Schwellwertanalyse und Übungs-DSFA nachgezogen. Nachweise AT-MOD-001-3, AT-ACC-003-2, AT-PRIV-003-4.
 
 **Stand Nachweise R1-Must (2026-11-13):**
 

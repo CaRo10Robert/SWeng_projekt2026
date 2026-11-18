@@ -722,5 +722,9 @@
   "rating.hidden": "Sie bleibt verdeckt, bis ihr beide bewertet habt oder die Frist vorbei ist.",
   "rating.delete": "Bewertung löschen",
   "rating.closed": "Die Frist für die Bewertung ist abgelaufen.",
-  "rating.counterpartRated": "Dein Gegenüber hat bereits bewertet. Den Inhalt siehst du, sobald du auch bewertet hast."
+  "rating.counterpartRated": "Dein Gegenüber hat bereits bewertet. Den Inhalt siehst du, sobald du auch bewertet hast.",
+  "report.titleRating": "Bewertung melden",
+  "dsa.target.rating": "Bewertung",
+  "rating.report": "Melden",
+  "mod.ratingContext": "Gemeldete Bewertung"
 }

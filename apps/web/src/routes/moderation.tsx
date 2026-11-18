@@ -159,6 +159,12 @@ function CaseCard({ c }: { c: ModerationCase }) {
         </div>
       )}
 
+      {c.rating && (
+        <blockquote className="rounded-lg border border-slate-200 p-3 text-sm" aria-label={t('mod.ratingContext')}>
+          <p className="font-semibold">{c.rating.score} · „{c.rating.listingTitle}“</p>
+          {c.rating.text && <p>{c.rating.text}</p>}
+        </blockquote>
+      )}
       {c.messageContext && (
         <ol className="space-y-1 rounded-lg border border-slate-200 p-3 text-sm" aria-label={t('mod.messageContext')}>
           {c.messageContext.map((m) => (

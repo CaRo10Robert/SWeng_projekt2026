@@ -19,6 +19,8 @@ Solange die Version unter 1.0.0 liegt, kann jede Minor-Version inkompatible Änd
 
 - **Bewertungen als Käufer und Verkäufer** (REQ-MOD-006, B-70, Q-30): nach abgeschlossenem Deal 14 Tage lang einmal positiv, neutral oder negativ (Text Pflicht bei negativ, Wortfilter); verdeckt, bis beide bewertet haben oder die Frist vorbei ist; Einladung per App und E-Mail; im Profil Übersicht je Rolle (24 Monate, je Paar und Rolle nur die neueste) und Liste. Migration `0009_bewertungen.sql`.
 
+- **Bewertungen in Datenschutz und Moderation** (B-71): Bewertungen sind meldbar und werden mit DSA-Begründung entfernt bzw. nach Widerspruch wiederhergestellt; im Datenexport enthalten; Löschung nach 24 Monaten; bei Kontolöschung erhaltene gelöscht, abgegebene anonymisiert. VVT (V-14 bis V-16), DSFA-Schwellwertanalyse und Übungs-DSFA aktualisiert. Migration `0010_bewertungen_datenschutz.sql`.
+
 ### Changed (R2)
 - **Anzeigen alle 14 Tage erneuern** (REQ-LST-013, B-76, Q-32): nach 14 Tagen Hinweis (App, E-Mail abbestellbar), 24 h später automatisch pausiert und nur für den Anbieter sichtbar, nach 2 weiteren Tagen gelöscht; Erneuern bzw. Reaktivieren mit einem Klick. Ersetzt die Laufzeit von 60 Tagen. Eine eigene Pause hält bis zu 90 Tage. Migration `0007_erneuerung.sql`: aktive Bestandsanzeigen älter als 14 Tage erhalten sofort den Hinweis, abgelaufene werden automatisch pausiert. **Hinweis für bestehende Installationen:** Nicht erneuerte Anzeigen verschwinden nach 3 Tagen.
 

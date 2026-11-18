@@ -19,7 +19,7 @@ export const decisionConsequences = labels<ModerationDecisionType>({
   ban: 'dsa.consequence.ban',
 });
 
-export const targetLabels = labels<ReportTargetType>({ listing: 'dsa.target.listing', message: 'dsa.target.message', user: 'dsa.target.user' });
+export const targetLabels = labels<ReportTargetType>({ listing: 'dsa.target.listing', message: 'dsa.target.message', user: 'dsa.target.user', rating: 'dsa.target.rating' });
 
 /**
  * Regel mit Fundstelle in Community-Regeln bzw. Nutzungsbedingungen (Angabe 4 der Begründung). Die Anker sind

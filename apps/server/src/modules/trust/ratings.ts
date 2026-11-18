@@ -25,7 +25,7 @@ const FORMER_MEMBER = 'Ehemaliges Mitglied';
 
 /** Sichtbar: nicht gelöscht oder entfernt und veröffentlicht (beide bewertet oder Frist abgelaufen). */
 const VISIBLE = sql`r.deleted_at IS NULL AND r.removed_at IS NULL AND (
-  EXISTS (SELECT 1 FROM trust.rating o WHERE o.deal_id = r.deal_id AND o.rater_id = r.ratee_id)
+  r.published_at IS NOT NULL OR EXISTS (SELECT 1 FROM trust.rating o WHERE o.deal_id = r.deal_id AND o.rater_id = r.ratee_id)
   OR r.deal_completed_at < now() - make_interval(days => ${RATING_WINDOW_DAYS}))`;
 
 /** Bewertungen als Käufer und Verkäufer (REQ-MOD-006, B-70). */
@@ -159,10 +159,62 @@ export function createRatings(deps: ModuleDeps) {
       return { summary, ...page };
     },
 
+    // ------------------------------------------------------------ Moderation und Datenschutz (B-71)
+    /** Für Meldungen (REQ-MOD-001): nur veröffentlichte, nicht entfernte Bewertungen; betroffen ist die bewertende Person. */
+    async ratingForReport(id: string): Promise<{ raterId: string | null; rateeId: string } | null> {
+      const row = await db.one<{ rater_id: string | null; ratee_id: string }>(sql`
+        SELECT r.rater_id, r.ratee_id FROM trust.rating r WHERE r.id = ${id} AND ${VISIBLE}`);
+      return row ? { raterId: row.rater_id, rateeId: row.ratee_id } : null;
+    },
+
+    /** Inhalt einer gemeldeten Bewertung für die Moderation (B-71). */
+    async ratingForModeration(id: string) {
+      const row = await db.one<{ score: string; body: string | null; listing_title: string; removed_at: string | null }>(sql`
+        SELECT score, body, listing_title, removed_at FROM trust.rating WHERE id = ${id}`);
+      return row ? { score: row.score, text: row.body, listingTitle: row.listing_title, removed: !!row.removed_at } : null;
+    },
+
+    /** Entfernt durch die Moderation: zählt nicht mehr; Löschjournal für Wiederherstellungen (ADR-0018). */
+    async removeRatingByModeration(tx: Tx, id: string): Promise<void> {
+      const changed = await tx.db.exec(sql`UPDATE trust.rating SET removed_at = now() WHERE id = ${id} AND removed_at IS NULL`);
+      if (changed) deps.journal.record(tx, 'rating_removed', id);
+    },
+
+    /** Widerspruch stattgegeben (REQ-LEGAL-007): Bewertung zählt wieder. */
+    async restoreRatingByModeration(tx: Tx, id: string): Promise<boolean> {
+      const changed = await tx.db.exec(sql`UPDATE trust.rating SET removed_at = NULL WHERE id = ${id} AND removed_at IS NOT NULL`);
+      if (changed) deps.journal.record(tx, 'rating_restored', id);
+      return changed > 0;
+    },
+
+    /**
+     * Datenexport (Art. 15/20, REQ-ACC-003): abgegebene Bewertungen vollständig, erhaltene nur veröffentlichte – noch
+     * verdeckte bleiben bis zur Veröffentlichung geschützt (Schutz vor Racheabwertung) und werden nur gezählt.
+     */
+    async exportRatingsForUser(userId: string) {
+      const given = await db.query(sql`
+        SELECT r.role AS "counterpartRole", r.score, r.body AS text, r.listing_title AS "listingTitle",
+               r.created_at AS "createdAt", r.deleted_at AS "deletedAt", r.removed_at AS "removedAt"
+        FROM trust.rating r WHERE r.rater_id = ${userId} ORDER BY r.created_at`);
+      const received = await db.query(sql`
+        SELECT r.role, r.score, r.body AS text, r.listing_title AS "listingTitle", r.created_at AS "createdAt"
+        FROM trust.rating r WHERE r.ratee_id = ${userId} AND ${VISIBLE} ORDER BY r.created_at`);
+      const hidden = await db.one<{ n: number }>(sql`
+        SELECT count(*)::int AS n FROM trust.rating r WHERE r.ratee_id = ${userId} AND r.deleted_at IS NULL AND r.removed_at IS NULL
+          AND NOT (${VISIBLE})`);
+      return { given, received, receivedNotYetPublished: hidden?.n ?? 0 };
+    },
+
+    /** Löschlauf (REQ-PRIV-003): Bewertungen älter als 24 Monate. */
+    async purgeExpiredRatings(before: Date): Promise<number> {
+      return db.exec(sql`DELETE FROM trust.rating WHERE created_at < ${before}`);
+    },
+
     /** Kontolöschung (REQ-ACC-002, B-71): erhaltene Bewertungen löschen, abgegebene anonymisieren. */
     async deleteRatingsForUser(tx: Tx, userId: string): Promise<void> {
       await tx.db.exec(sql`DELETE FROM trust.rating WHERE ratee_id = ${userId}`);
-      await tx.db.exec(sql`UPDATE trust.rating SET rater_id = NULL, body = NULL WHERE rater_id = ${userId}`);
+      // Abgegebene zählen weiter, ohne Text und Namen; sichtbar, weil es keine Gegenseite mehr gibt, die schützen müsste
+      await tx.db.exec(sql`UPDATE trust.rating SET rater_id = NULL, body = NULL, published_at = COALESCE(published_at, now()) WHERE rater_id = ${userId}`);
     },
   };
 }

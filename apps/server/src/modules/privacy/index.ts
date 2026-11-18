@@ -71,6 +71,7 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
         ...(await modules.trust.purgeExpired(c)),
         conversations: await modules.messaging.purgeInactiveConversations(c.conversationsBefore, protectedMessages),
         notifications: await modules.notifications.purgeExpired(c.notificationsBefore),
+        ratings: await modules.trust.purgeExpiredRatings(c.ratingsBefore),
         auditLog: await purgeAuditLog(database.db, c.auditBefore),
       };
     },
@@ -104,6 +105,11 @@ export function createPrivacyModule(deps: ModuleDeps): Module<PrivacyApi> {
                 return true;
               case 'message_restored':
                 return modules.messaging.restoreByModeration(tx, entry.id);
+              case 'rating_removed':
+                await modules.trust.removeRatingByModeration(tx, entry.id);
+                return true;
+              case 'rating_restored':
+                return modules.trust.restoreRatingByModeration(tx, entry.id);
               case 'image_deleted':
                 return modules.listings.replayImageDelete(tx, entry.id);
               default:

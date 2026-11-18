@@ -147,4 +147,70 @@ describe.skipIf(!integrationAvailable)('Integration Bewertungen (PostgreSQL)', (
     // Blockiertes Profil: Bewertungen wie das Profil nicht abrufbar
     expect((await lea.call('GET', `/users/${ben.userId}/ratings`)).status).toBe(404);
   });
+it('[AT-MOD-001-3] Bewertung melden; Moderation entfernt sie mit Begründung, sie zählt nicht mehr; Stattgabe des Widerspruchs stellt sie wieder her', async () => {
+    const mod = await h.staff('mod@hwg-lu.de', 'moderator');
+    const mod2 = await h.staff('mod2@hwg-lu.de', 'moderator');
+    const { dealId } = await completedDeal(ben, lea, 'Rucksack');
+    await rate(lea, dealId, 'negative', 'Ben ist ein Betrüger und Lügner.');
+    await rate(ben, dealId, 'positive');
+    const ratingId = (await h.sql(`SELECT id FROM trust.rating WHERE deal_id = $1 AND rater_id = $2`, [dealId, lea.userId]))[0].id as string;
+
+    // Eigene Bewertung nicht meldbar; verdeckte nicht (404); veröffentlichte schon
+    expect((await lea.call('POST', '/reports', { targetType: 'rating', targetId: ratingId, reason: 'other' })).data.code).toBe('own_content');
+    expect((await ben.call('POST', '/reports', { targetType: 'rating', targetId: randomUUID(), reason: 'other' })).status).toBe(404);
+    expect((await ben.call('POST', '/reports', { targetType: 'rating', targetId: ratingId, reason: 'harassment', details: 'Beleidigung' })).status).toBe(201);
+
+    const cases = (await mod.call('GET', '/moderation/cases?status=open')).data as { id: string; targetId: string; targetType: string; subject: { id: string } | null; rating: { text: string } | null }[];
+    const kase = cases.find((c) => c.targetId === ratingId)!;
+    expect(kase).toMatchObject({ targetType: 'rating', subject: { id: lea.userId }, rating: { text: 'Ben ist ein Betrüger und Lügner.' } });
+    expect((await mod.call('POST', `/moderation/cases/${kase.id}/decision`, {
+      decision: 'remove', reason: 'Die Bewertung enthält Beleidigungen ohne sachlichen Bezug zur Übergabe.', ruleRef: 'community_fair_communication',
+    })).status).toBe(204);
+    await h.jobs.drain();
+    expect((await ratings(mia, ben)).summary.seller).toEqual({ positive: 0, neutral: 0, negative: 0 });
+    // Begründung an die Betroffene (DSA Art. 17): Mitteilung und E-Mail
+    const notices = (await lea.call('GET', '/me/notices')).data as { recipientRole: string; decision: { id: string } }[];
+    expect(notices[0]!.recipientRole).toBe('subject');
+    expect(h.mail.to(lea.email).some((m) => m.text.includes('einer Bewertung'))).toBe(true);
+
+    // Widerspruch, Vier-Augen-Entscheidung: Bewertung zählt wieder
+    const appeal = await lea.call('POST', `/moderation/decisions/${notices[0]!.decision.id}/appeal`, { reason: 'Ben hat mich tatsächlich betrogen, ich habe Belege dafür.' });
+    expect(appeal.status).toBe(201);
+    expect((await mod2.call('POST', `/moderation/appeals/${appeal.data.id}/decision`, { outcome: 'reversed', reason: 'Nach Prüfung der Belege ist die Bewertung zulässig.' })).status).toBe(204);
+    expect((await ratings(mia, ben)).summary.seller).toEqual({ positive: 0, neutral: 0, negative: 1 });
+  });
+
+  it('[AT-ACC-003-2] Datenexport enthält abgegebene Bewertungen vollständig und erhaltene veröffentlichte; verdeckte nur gezählt', async () => {
+    const first = await completedDeal(ben, lea, 'Lampe');
+    await rate(lea, first.dealId, 'positive', 'Gern wieder');
+    await rate(ben, first.dealId, 'neutral', 'Etwas spät');
+    const second = await completedDeal(ben, lea, 'Stuhl');
+    await rate(ben, second.dealId, 'positive', 'Noch verdeckt');
+    const exported = (await lea.call('GET', '/me/export')).data as { trust: { ratings: { given: { text: string }[]; received: { text: string }[]; receivedNotYetPublished: number } } };
+    expect(exported.trust.ratings.given.map((r) => r.text)).toEqual(['Gern wieder']);
+    expect(exported.trust.ratings.received.map((r) => r.text)).toEqual(['Etwas spät']);
+    expect(exported.trust.ratings.receivedNotYetPublished).toBe(1);
+    expect(JSON.stringify(exported.trust.ratings)).not.toContain('Noch verdeckt');
+  });
+
+  it('[AT-PRIV-003-4] Bewertungen: Löschung nach 24 Monaten; Kontolöschung löscht erhaltene und anonymisiert abgegebene', async () => {
+    const old = await completedDeal(ben, lea, 'Altes Regal');
+    await rate(lea, old.dealId, 'positive', 'Lange her');
+    await rate(ben, old.dealId, 'positive');
+    await h.sql(`UPDATE trust.rating SET created_at = now() - interval '25 months' WHERE deal_id = $1`, [old.dealId]);
+    await h.privacy.purgeExpired();
+    expect(await h.sql(`SELECT 1 FROM trust.rating WHERE deal_id = $1`, [old.dealId])).toHaveLength(0);
+
+    const deal = await completedDeal(ben, lea, 'Tischlampe');
+    await rate(lea, deal.dealId, 'positive', 'Von Lea');
+    await rate(ben, deal.dealId, 'positive', 'Von Ben');
+    expect((await lea.call('POST', '/me/delete', { password: 'ein-sicheres-testpasswort' })).status).toBeLessThan(300);
+    await h.sql(`UPDATE identity."user" SET deletion_requested_at = now() - interval '15 days' WHERE id = $1`, [lea.userId]);
+    expect(await h.privacy.purgeDueAccounts()).toBe(1);
+    // Erhaltene Bewertungen der gelöschten Person: gelöscht; abgegebene: zählen weiter ohne Text und Namen
+    expect(await h.sql(`SELECT 1 FROM trust.rating WHERE ratee_id = $1`, [lea.userId])).toHaveLength(0);
+    const benRatings = await ratings(mia, ben);
+    expect(benRatings.summary.seller.positive).toBe(1);
+    expect(benRatings.items[0]).toMatchObject({ raterName: 'Ehemaliges Mitglied', text: null, raterId: null });
+  });
 });

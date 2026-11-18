@@ -145,6 +145,7 @@ const SCORE_TEXT: Record<RatingScore, MessageKey> = {
 /** Bewertungen getrennt nach „als Verkäufer“ und „als Käufer“ (REQ-ACC-005, REQ-MOD-006). */
 function MemberRatingsSection({ userId }: { userId: string }) {
   const ratings = useMemberRatings(userId, true);
+  const [reportId, setReportId] = useState<string | null>(null);
   if (ratings.isPending) return <Loading />;
   if (ratings.isError) return <Alert tone="error">{errorMessage(ratings.error)}</Alert>;
   const first = ratings.data.pages[0]!;
@@ -173,6 +174,9 @@ function MemberRatingsSection({ userId }: { userId: string }) {
                 {r.raterName} · „{r.listingTitle}“ · {formatMonthYear(r.dealCompletedAt)}
               </p>
               {r.text && <p className="text-slate-700">{r.text}</p>}
+              <button type="button" className="text-xs text-slate-600 underline" onClick={() => setReportId(r.id)}>
+                {t('rating.report')}
+              </button>
             </li>
           ))}
         </ul>
@@ -184,6 +188,7 @@ function MemberRatingsSection({ userId }: { userId: string }) {
           </Button>
         </div>
       )}
+      <ReportDialog open={!!reportId} onClose={() => setReportId(null)} targetType="rating" targetId={reportId ?? ''} />
     </section>
   );
 }

@@ -3,9 +3,9 @@ id: LEGAL-VVT
 type: privacy
 status: approved
 owner: product-owner
-version: 1.3
+version: 1.4
 created: 2026-10-24
-last_updated: 2026-10-26
+last_updated: 2026-11-16
 ---
 
 # Verzeichnis der Verarbeitungstätigkeiten (Art. 30 DSGVO)
@@ -44,6 +44,9 @@ Rechtsgrundlagen-Kürzel: **e** = Art. 6 Abs. 1 lit. e DSGVO i. V. m. dem Landes
 | V-11 | Steuermeldung DAC7 | Erfüllung des PStTG | Verkäufer über Schwelle | Identität, Anschrift, Geburtsdatum, Steuer-ID, Anzahl und Summe der Verkäufe je Quartal | c (PStTG; Übungsannahme Q-28: Meldepflicht besteht, § 3 greift nicht) | Bundeszentralamt für Steuern | 10 Jahre nach Meldezeitraum (§ 22 PStTG, Übungswert) | REQ-LEGAL-009, [DAC7-Konzept](dac7-konzept.md) |
 | V-12 | Anfragen an die Kontaktstelle | Beantwortung von Anfragen, Meldungen ohne Konto, Behördenanfragen | Anfragende | Name, E-Mail, Inhalt der Anfrage | e, c | zuständige Stelle der Hochschule | 12 Monate nach Abschluss der Anfrage (Übungsannahme Q-28) | REQ-LEGAL-005 |
 | V-13 | Reservierung und Abgabe (Deals) | Reservierung bzw. Abgabe an genau eine Person, Grundlage der DAC7-Auswertung | Anbieter, Interessenten | Anzeige, beide Konten, vereinbarter Preis, Zeitpunkte, Status | e | beide Beteiligten; Administration (DAC7-Auswertung) | mit der Konversation bzw. dem Konto; DAC7-relevante Angaben im Echtbetrieb vor Löschung sichern (offener Punkt) | REQ-CHAT-011, REQ-LEGAL-009 |
+| V-14 | Bewertungen als Käufer und Verkäufer | Vertrauen vor einer Absprache (Reputation nach abgeschlossenem Deal) | Mitglieder mit abgeschlossenem Deal | Bewertung (positiv/neutral/negativ), optionaler Text, Rolle, Kopie des Anzeigentitels, Zeitpunkt des Abschlusses, Autor | e | andere Mitglieder (erst nach Veröffentlichung); Moderation bei Meldung | 24 Monate; erhaltene bei Kontolöschung sofort, abgegebene werden anonymisiert (ohne Text und Namen) | REQ-MOD-006, B-70, B-71, Q-30 |
+| V-15 | Benachrichtigungen in der App | Hinweis auf Kaufangebote, Antworten, Abläufe und Moderation | Mitglieder | Art, Verweis (Anzeige, Konversation), Anzeigentitel, Betrag, Zeitpunkt, gelesen/ungelesen – keine Chatinhalte | e | nur das Mitglied selbst | 90 Tage; bei Kontolöschung sofort | REQ-NOTI-008, B-74 |
+| V-16 | Kaufangebote | verbindliche Preisabsprache vor der Reservierung | Anbieter, Interessenten | Betrag, Zustand (offen, angenommen, abgelehnt …), Zeitpunkte, Verweis auf Konversation und Anzeige | e | Gegenüber | mit der Konversation (V-4) | REQ-CHAT-009, B-73 |
 
 ## Besondere Kategorien und Minderjährige
 

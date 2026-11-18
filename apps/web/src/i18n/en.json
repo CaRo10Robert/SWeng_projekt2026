@@ -722,5 +722,9 @@
   "rating.hidden": "It stays hidden until you have both rated or the period has ended.",
   "rating.delete": "Delete rating",
   "rating.closed": "The rating period has ended.",
-  "rating.counterpartRated": "The other person has already rated. You will see it once you have rated too."
+  "rating.counterpartRated": "The other person has already rated. You will see it once you have rated too.",
+  "report.titleRating": "Report rating",
+  "dsa.target.rating": "Rating",
+  "rating.report": "Report",
+  "mod.ratingContext": "Reported rating"
 }

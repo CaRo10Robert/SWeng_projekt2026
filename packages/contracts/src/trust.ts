@@ -4,7 +4,7 @@ import { Role, UserType } from './identity.js';
 import { ListingCard } from './listings.js';
 import { Message } from './messaging.js';
 
-export const ReportTargetType = Type.Union([Type.Literal('listing'), Type.Literal('message'), Type.Literal('user')]);
+export const ReportTargetType = Type.Union([Type.Literal('listing'), Type.Literal('message'), Type.Literal('user'), Type.Literal('rating')]);
 export type ReportTargetType = Static<typeof ReportTargetType>;
 
 export const ReportReason = Type.Union([
@@ -55,6 +55,13 @@ export const ModerationCase = Type.Object({
   listing: Type.Union([Type.Composite([ListingCard, Type.Object({ description: Type.String() })]), Type.Null()]),
   /** Gemeldete Nachricht ± 5 (REQ-PRIV-004). Nur bei targetType = message. */
   messageContext: Type.Union([Type.Array(Message), Type.Null()]),
+  /** Gemeldete Bewertung (B-71). Nur bei targetType = rating. */
+  rating: Type.Optional(
+    Type.Union([
+      Type.Object({ score: Type.String(), text: Type.Union([Type.String(), Type.Null()]), listingTitle: Type.String(), removed: Type.Boolean() }),
+      Type.Null(),
+    ]),
+  ),
   createdAt: Timestamp,
 });
 export type ModerationCase = Static<typeof ModerationCase>;

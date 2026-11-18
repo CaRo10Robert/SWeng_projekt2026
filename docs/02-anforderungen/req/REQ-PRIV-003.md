@@ -14,10 +14,10 @@ kano: n/a
 epic: EPIC-07
 source: DSGVO Art. 5, 17
 use_cases: [UC-01, UC-05]
-version: 2.5
+version: 2.6
 created: 2026-10-20
-last_updated: 2026-11-13
-verification: [AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3]
+last_updated: 2026-11-16
+verification: [AT-PRIV-003, AT-PRIV-003-2, AT-PRIV-003-3, AT-PRIV-003-4]
 ---
 
 # REQ-PRIV-003 Löschkonzept mit Fristen je Datenkategorie
@@ -32,8 +32,10 @@ Das System muss personenbezogene Daten nach festen Fristen automatisch löschen.
 | Eigene Nachrichtentexte bei Kontolöschung | mit dem Konto; die Konversation bleibt für das Gegenüber erhalten, der Absender erscheint als „Ehemaliges Mitglied“ (UC-05) |
 | Chatnachrichten (sonst) | 12 Monate nach der letzten Nachricht der Konversation (Q-7) |
 | Zustimmungen zur Kontaktfreigabe (REQ-CHAT-010) | mit der Konversation bzw. mit dem Konto |
-| Anzeigen und Bilder | sofort bei Löschung durch das Mitglied; 30 Tage nach „abgegeben“; 90 Tage nach Ablauf |
-| Pausierte Anzeigen | laufen nach **90 Tagen** Pause ab und folgen dann der Frist für abgelaufene Anzeigen |
+| Anzeigen und Bilder | sofort bei Löschung durch das Mitglied; 30 Tage nach „abgegeben“; **2 Tage nach automatischer Pause** (nicht erneuert, REQ-LST-013) |
+| Bewertungen (REQ-MOD-006) | **24 Monate** nach Abgabe; bei Kontolöschung erhaltene sofort, abgegebene ohne Text und Namen (zählen weiter) |
+| Benachrichtigungen in der App (REQ-NOTI-008) | **90 Tage**; bei Kontolöschung sofort |
+| Selbst pausierte Anzeigen | nach **90 Tagen** Pause automatisch pausiert und 2 Tage später gelöscht (REQ-LST-013) |
 | Reservierte Anzeigen | nach **30 Tagen** ohne Abgabe zurück auf „aktiv“ mit Hinweis an den Anbieter (danach normaler Ablauf) |
 | Von der Moderation entfernte Anzeigen | 12 Monate nach der Entscheidung (Nachweis gegenüber Betroffenen) |
 | Hochgeladene, nie einer Anzeige zugeordnete Bilder | 24 Stunden |
@@ -93,3 +95,4 @@ Speicherbegrenzung (DSGVO Art. 5) und Recht auf Löschung (Art. 17); Privacy by 
 | 2.3 | 2026-10-26 | Guideline-Review: GL-09 Löschjournal auf ADR-0019 verwiesen |
 | 2.4 | 2026-11-07 | Rückfall reservierter Anzeigen umgesetzt; AT-PRIV-003 als Integrationstest grün (Testbericht 2026-11-07); Status → verified |
 | 2.5 | 2026-11-13 | Hinweis Q-32: Ab R2 werden automatisch pausierte Anzeigen 2 Tage nach der Pause gelöscht (REQ-LST-013) statt 90 Tage nach Ablauf |
+| 2.6 | 2026-11-16 | B-71: Löschfristen für Bewertungen (24 Monate; Kontolöschung: erhaltene sofort, abgegebene anonymisiert) und Benachrichtigungen in der App (90 Tage, REQ-NOTI-008); Nachweis AT-PRIV-003-4 |

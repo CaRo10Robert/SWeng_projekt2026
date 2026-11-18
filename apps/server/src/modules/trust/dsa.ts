@@ -79,6 +79,11 @@ const DECISION_WITH_CASE = sql`
 
 export interface DsaDeps {
   openCase(tx: Tx, targetType: ReportTargetType, targetId: string, subjectUserId: string | null): Promise<{ id: string }>;
+  /** Bewertungen (B-71): entfernen und wiederherstellen */
+  ratings: {
+    removeRatingByModeration(tx: Tx, id: string): Promise<void>;
+    restoreRatingByModeration(tx: Tx, id: string): Promise<boolean>;
+  };
 }
 
 export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
@@ -237,6 +242,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
           }
         }
         if (kase.target_type === 'message' && removeContent) await modules.messaging.removeByModeration(tx, kase.target_id);
+        if (kase.target_type === 'rating' && removeContent) await internal.ratings.removeRatingByModeration(tx, kase.target_id);
         if (body.decision === 'ban' && kase.subject_user_id) {
           await modules.identity.suspend(tx, kase.subject_user_id, `Moderationsentscheidung ${caseId}`);
           await modules.listings.setOwnerSuspended(tx, kase.subject_user_id, true);
@@ -554,6 +560,7 @@ export function createDsa(deps: ModuleDeps, internal: DsaDeps) {
             let restored = true;
             if (row.target_type === 'listing' && removed) restored = await modules.listings.restoreByModeration(tx, row.target_id);
             if (row.target_type === 'message' && removed) restored = await modules.messaging.restoreByModeration(tx, row.target_id);
+            if (row.target_type === 'rating' && removed) restored = await internal.ratings.restoreRatingByModeration(tx, row.target_id);
             // Nichts melden, was nicht stimmt (RV-C-03): Inhalt nicht mehr vorhanden → Konflikt, nichts wird gespeichert
             if (!restored) {
               throw conflict('restore_impossible', 'Der Inhalt ist nicht mehr vorhanden und kann nicht wiederhergestellt werden. Bitte stattdessen zurückweisen und das begründen.');
