@@ -73,11 +73,11 @@ Szenario: Überspringen und wieder aufrufen
 I: nutzt vorhandene Seiten · N: Anzahl und Texte der Schritte verhandelbar · V: schneller Einstieg · E: klein · S: wenige Tage · T: automatisierbar.
 
 ## Nachweis
-- `AT-UX-011`: E2E-Test – neues Mitglied sieht nach der Bestätigung „Erste Schritte“, erledigt die drei Schritte per Tastatur, der Bereich verschwindet; Ausblenden wirkt auch in einer zweiten Sitzung; Wiederaufruf über die Hilfe; axe-core ohne `serious`/`critical`; keine neuen Einträge im Browser-Speicher.
+- `AT-UX-011`: E2E-Test (`onboarding.spec.ts`) – neues Mitglied sieht nach der Bestätigung „Erste Schritte“; Profil ergänzen und Sicherheitstipps per Tastatur, die erste Anzeige als Testvorbereitung über die API (das Anzeigenformular per Tastatur prüft AT-A11Y-002); danach verschwindet der Bereich; Ausblenden wirkt auch in einer zweiten Sitzung; Wiederaufruf über die Hilfe; axe-core ohne `serious`/`critical`; keine neuen Einträge im Browser-Speicher.
 - `AT-UX-011-2`: Integrationstest – Zustand der Schritte wird aus Profil, Anzeigen und gespeichertem Zustand abgeleitet; Ausblenden und Wiedereinblenden; nur das eigene Konto.
 
 ## Änderungshistorie
 | Version | Datum | Änderung |
 |---|---|---|
 | 1.0 | 2026-11-13 | Erstfassung auf Wunsch des Auftraggebers (Q-31); Freigabe Product Owner |
-| 1.1 | 2026-11-18 | Umgesetzt (B-75): Spalten `onboarding_*` im Konto (Migration 0011), `GET|POST /me/onboarding`, Bereich auf der Startseite für Mitglieder, „Erste Schritte anzeigen“ in der Hilfe (das Öffnen der Hilfe zählt als „Sicherheitstipps gelesen“). AT-UX-011 und -2 grün; Status → verified |
+| 1.1 | 2026-11-18 | Umgesetzt (B-75): Spalten `onboarding_*` im Konto (Migration 0011), `GET` und `POST /me/onboarding`, Bereich auf der Startseite für Mitglieder, „Erste Schritte anzeigen“ in der Hilfe (das Öffnen der Hilfe zählt als „Sicherheitstipps gelesen“). AT-UX-011 und -2 grün; Status → verified |
